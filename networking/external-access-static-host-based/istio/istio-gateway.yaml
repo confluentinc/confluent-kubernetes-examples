@@ -1,0 +1,23 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: confluent-gw
+  namespace: confluent
+spec:
+  selector:
+    istio: ingressgateway # use istio's default ingress gateway
+  servers:
+  - hosts:
+    # "confluent/" tells the ingress gateway
+    #   to look for services in the confluent namespace
+    - confluent/kafka.$DOMAIN
+    - confluent/b0.$DOMAIN
+    - confluent/b1.$DOMAIN
+    - confluent/b2.$DOMAIN
+    port:
+      name: tls-kafka
+      number: 443
+      protocol: TLS
+    tls:
+      # Important! Kafka brokers require TLS passthrough
+      mode: PASSTHROUGH

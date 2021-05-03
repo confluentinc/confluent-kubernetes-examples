@@ -1,0 +1,42 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-with-sni
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+spec:
+  tls:
+    - hosts:
+        - rbakhshi0.platformops.dev.gcp.devel.cpdev.cloud
+        - rbakhshi1.platformops.dev.gcp.devel.cpdev.cloud
+        - rbakhshi2.platformops.dev.gcp.devel.cpdev.cloud
+        - rbakhshi.platformops.dev.gcp.devel.cpdev.cloud
+  rules:
+    - host: rbakhshi0.platformops.dev.gcp.devel.cpdev.cloud
+      http:
+        paths:
+          - backend:
+              serviceName: kafka-0-internal
+              servicePort: 9092
+    - host: rbakhshi1.platformops.dev.gcp.devel.cpdev.cloud
+      http:
+        paths:
+          - backend:
+              serviceName: kafka-1-internal
+              servicePort: 9092
+    - host: rbakhshi2.platformops.dev.gcp.devel.cpdev.cloud
+      http:
+        paths:
+          - backend:
+              serviceName: kafka-2-internal
+              servicePort: 9092
+    - host: rbakhshi.platformops.dev.gcp.devel.cpdev.cloud
+      http:
+        paths:
+          - backend:
+              serviceName: kafka-bootstrap
+              servicePort: 9092

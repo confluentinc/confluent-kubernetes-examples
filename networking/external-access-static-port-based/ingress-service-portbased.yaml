@@ -1,0 +1,28 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-without-sni
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: myoperator2.<Kubernetes cluster domain>
+      http:
+        paths:
+          - path:
+            backend:
+              serviceName: kafka-0-internal
+              servicePort: 9092
+          - path:
+            backend:
+              serviceName: kafka-1-internal
+              servicePort: 9092
+          - path:
+            backend:
+              serviceName: kafka-2-internal
+              servicePort: 9092
+          - path:
+            backend:
+              serviceName: kafka-bootstrap
+              servicePort: 9092

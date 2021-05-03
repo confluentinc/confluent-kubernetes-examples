@@ -1,0 +1,95 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  name: confluent-istiocontrolplane
+  namespace: istio-system
+spec:
+  profile: default
+  meshConfig:
+   enableAutoMtls: true
+   enableTracing: true
+   enablePrometheusMerge: true
+   h2UpgradePolicy: DO_NOT_UPGRADE
+   defaultConfig:
+     tracing:
+       sampling: 1
+  values:
+    cni:
+      excludeNamespaces:
+       - istio-system
+       - kube-system
+      logLevel: info
+    pilot:
+      keepaliveMaxServerConnectionAge: 30m 
+      enableProtocolSniffingForInbound: true
+      enableProtocolSniffingForOutbound: true
+    global:
+      proxy:
+        privileged: true # to install tcpdump
+        holdApplicationUntilProxyStarts: true
+    gateways:
+      istio-ingressgateway:
+        autoscaleEnabled: true
+        type: LoadBalancer
+        name: istio-ingressgateway
+        zvpn: {}
+        env: {}
+        secretVolumes:
+        - name: ingressgateway-certs
+          secretName: istio-ingressgateway-certs
+          mountPath: /etc/istio/ingressgateway-certs
+        - name: ingressgateway-ca-certs
+          secretName: istio-ingressgateway-ca-certs
+          mountPath: /etc/istio/ingressgateway-ca-certs    
+        # Confluent ports added as an example.
+        # This tutorial only actually uses sni routing.
+        ports:
+        - port: 15021
+          targetPort: 15021
+          name: status-port
+          protocol: TCP
+        - port: 8088
+          targetPort: 8088
+          name: ksqldb-port
+          protocol: TCP
+        - port: 9092
+          targetPort: 9092
+          name: kafka-port
+          protocol: TCP
+        - port: 8081
+          targetPort: 8081
+          name: registry-port
+          protocol: TCP
+        - port: 80
+          targetPort: 8080
+          name: http2
+          protocol: TCP
+        - port: 443
+          targetPort: 8443
+          name: https
+          protocol: TCP
+        - port: 15012
+          targetPort: 15012
+          name: tcp-istiod
+          protocol: TCP
+        # This is the port where sni routing happens.
+        - port: 15443
+          targetPort: 15443
+          name: tls
+          protocol: TCP
+  components:
+    cni:
+      enabled: true
+    pilot: 
+      k8s:
+       env:
+       - name: TERMINATION_DRAIN_DURATION_SECONDS
+         value: "30"
+    egressGateways:
+    - name: istio-egressgateway
+      enabled: true
+      namespace: istio-system
+    ingressGateways:
+    - name: istio-ingressgateway
+      enabled: true
+      namespace: istio-system

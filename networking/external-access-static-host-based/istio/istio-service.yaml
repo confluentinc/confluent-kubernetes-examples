@@ -1,0 +1,92 @@
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: kafka-bootstrap-vs
+  namespace: confluent
+spec:
+  hosts:
+    - kafka.$DOMAIN
+  gateways: 
+  - confluent-gw
+  tls:
+  - match:
+    - port: 443
+      sniHosts:
+      - kafka.$DOMAIN
+      gateways:
+        - confluent-gw
+    route:
+    - destination:
+        host: kafka.confluent.svc.cluster.local
+        port:
+          number: 9092
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: kafka-b0-vs
+  namespace: confluent
+spec:
+  hosts:
+    - b0.$DOMAIN
+  gateways: 
+  - confluent-gw
+  tls:
+  - match:
+    - port: 443
+      sniHosts:
+      - b0.$DOMAIN
+      gateways:
+        - confluent-gw
+    route:
+    - destination:
+        host: kafka-0-internal.confluent.svc.cluster.local
+        port:
+          number: 9092
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: kafka-b1-vs
+  namespace: confluent
+spec:
+  hosts:
+    - b1.$DOMAIN
+  gateways: 
+  - confluent-gw
+  tls:
+  - match:
+    - port: 443
+      sniHosts:
+      - b1.$DOMAIN
+      gateways:
+        - confluent-gw
+    route:
+    - destination:
+        host: kafka-1-internal.confluent.svc.cluster.local
+        port:
+          number: 9092
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: kafka-b2-vs
+  namespace: confluent
+spec:
+  hosts:
+    - b2.$DOMAIN
+  gateways: 
+  - confluent-gw
+  tls:
+  - match:
+    - port: 443
+      sniHosts:
+      - b2.$DOMAIN
+      gateways:
+        - confluent-gw
+    route:
+    - destination:
+        host: kafka-2-internal.confluent.svc.cluster.local
+        port:
+          number: 9092
