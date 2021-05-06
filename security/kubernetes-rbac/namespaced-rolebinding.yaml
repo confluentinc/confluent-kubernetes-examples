@@ -1,0 +1,122 @@
+# Change the namespace to your namespace
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: confluent-operator
+  namespace: confluent
+rules:
+- apiGroups:
+  - cluster.confluent.com
+  resources:
+  - zookeeperclusters
+  - zookeeperclusters/status
+  - zookeeperclusters/scale
+  - zookeeperclusters/finalizers
+  - kafkaclusters
+  - kafkaclusters/status
+  - kafkaclusters/scale
+  - kafkaclusters/finalizers
+  verbs:
+  - '*'
+- apiGroups:
+  - operator.confluent.cloud
+  resources:
+  - physicalstatefulclusters
+  - physicalstatefulclusters/scale
+  - physicalstatefulclusters/status
+  - physicalstatefulclusters/finalizers
+  verbs:
+  - '*'
+- apiGroups:
+  - platform.confluent.io
+  resources:
+  - '*'
+  verbs:
+  - '*'
+- apiGroups:
+  - policy
+  resources:
+  - poddisruptionbudgets
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - route.openshift.io
+  resources:
+  - routes
+  - routes/custom-host
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - apps
+  resources:
+  - statefulsets
+  - statefulsets/scale
+  - statefulsets/status
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - events
+  - persistentvolumeclaims
+  - secrets
+  - secrets/finalizers
+  - pods
+  - pods/exec
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  - ingresses/status
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+---
+# Change the service account subject to one that exists in your namespace
+# Change the namespace to your namespace
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: confluent-operator
+  namespace: confluent
+subjects:
+- kind: ServiceAccount
+  name: confluent-for-kubernetes # customize as required
+  namespace: confluent # customize as required
+roleRef:
+  kind: Role
+  name: confluent-operator
+  apiGroup: rbac.authorization.k8s.io
