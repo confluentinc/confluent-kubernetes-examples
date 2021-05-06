@@ -10,7 +10,7 @@ Clone this repo to get the files needed for each workflow:
 
 ::
 
-  git clone git@github.com:confluentinc/operator-earlyaccess.git
+  git clone git@github.com:confluentinc/confluent-kubernetes-examples.git
 
 Pre-requisites for each scenario workflow:
 
