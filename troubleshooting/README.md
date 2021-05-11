@@ -24,7 +24,7 @@ If all the pods require manual deletion (NOT RECOMMENDED) then run the following
 
 where `<cr-type>` can be one of the following: `kafka/zookeeper/schemaregistry/ksqldb/connect/controlcenter`
 
-Note: If a pod is already in `crashloopback` state, then the Confluent Operator will not honor the changes until pod goes back to the running state. You can also use `--force --grace-period=0` with the above command.
+`Note:` If a pod is already in `crashloopback` state, then the Confluent Operator will not honor the changes until pod goes back to the running state. You can also use `--force --grace-period=0` with the above command.
 Please use caution when deleting Kafka pod as it will trigger data loss.
 </li>
 <li> 
@@ -83,12 +83,23 @@ operator-7gffem   internal-connect-1           DELETING   8itASw0_S6qDfdl72b7Uyg
 operator-7gffem   internal-connect-2           DELETING   8itASw0_S6qDfdl72b7Uyg   User:connect     DeveloperWrite   operator-7gffem/default   7d19h
 ```
 
-    for rb in $(kubectl n <namespace> get cfrb | grep "DELETING" | awk '{print $1}'); do kubectl -n <namespace>  patch cfrb $rb -p '{"metadata":{"finalizers":[]}}' --type=merge; done
+    for rb in $(kubectl n <namespace> get cfrb --no-headers | grep "DELETING" | awk '{print $1}'); do kubectl -n <namespace>  patch cfrb $rb -p '{"metadata":{"finalizers":[]}}' --type=merge; done
 
 If you are trying to remove the finalizer for all the `ConfluentRolebindings` resources in a namespace (no matter their status; for example, when the namespace stuck in terminating state and need to clean up all the `ConfluentRolebindings`), then run the following command: 
 
-    for rb in $(kubectl -n <namespace> get cfrb -ojsonpath='{.items[*].metadata.name}'); do kubectl -n <namespace>  patch cfrb $rb -p '{"metadata":{"finalizers":[]}}' --type=merge; done
+    for rb in $(kubectl -n <namespace> get cfrb --no-headers -ojsonpath='{.items[*].metadata.name}'); do kubectl -n <namespace>  patch cfrb $rb -p '{"metadata":{"finalizers":[]}}' --type=merge; done
 
 Add your namespace in `<namespace>` when running the above command.
+</li>
+<li>
+
+For a Kafka CR API, two different listeners can’t share the same TLS secret reference. If configured, it will impact the volume mount path and `statefulset` will fail. Always use global TLS if you need to share TLS configuration.
+</li>
+<li>
+
+KafkaTopic deletion (`kubectl delete kafkatopic <topic-name>`) uses Kubernetes finalizer feature to remove topic from the destination Kafka cluster through Kafka Rest API. If finalizer fails to delete because of network issue or unavailable of kafka clusters (deleted), the kubectl delete commands will hang. In this scenario patch the `kafkatopic` with following commands.
+
+    kubectl -n <namespace> patch kafkatopic <topic-name> -p '{"metadata":{"finalizers":[]}}' --type=merge
+
 </li>
 </ol>
