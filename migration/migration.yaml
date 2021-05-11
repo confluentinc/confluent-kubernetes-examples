@@ -6,9 +6,8 @@ metadata:
   name: migration
   namespace: confluent
 spec:
-  # Specify the init container image and version tag that corresponds to your Confluent Platform
-  # version. In this example, Confluent Platform 6.0.2 is being used. 
-  initContainerImage: confluentinc/cp-init-container-operator:v6.0.2.0
+  # This version of init-container is required for migration.
+  initContainerImage: confluentinc/cp-init-container-operator:6.1.1.0
   zookeeper:
     enabled: false
     name: zookeeper
