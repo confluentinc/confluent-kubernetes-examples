@@ -14,17 +14,16 @@ usage: ./pv-resize.sh -c <cluster-name> -t <cluster-type> -n <namespace> -s <siz
 ```
 
 ## Create keystore.jks
-
 ```bash
 ./create-keystore.sh
 Usage: ./create-keystore.sh <fullchain_pem_file> <private_key> <jks_password>
 ```
 
-
 ## Create truststore.jks
-
 ```bash
+./create-truststore.sh
 Usage: ./create-truststore.sh <CA_pem_file_to_add_in_truststore or Fullchain_pem_file> and <jksPassword>
         CA_pem_file_to_add_in_truststore: CA certificate
         Fullchain_pem_file: Includes CA & Certificate of server or client to trust
 ```
+
