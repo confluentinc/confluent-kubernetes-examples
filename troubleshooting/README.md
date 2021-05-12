@@ -97,7 +97,7 @@ For a Kafka CR API, two different listeners can’t share the same TLS secret re
 </li>
 <li>
 
-KafkaTopic deletion (`kubectl delete kafkatopic <topic-name>`) uses Kubernetes finalizer feature to remove topic from the destination Kafka cluster through Kafka Rest API. If finalizer fails to delete because of network issue or unavailable of kafka clusters (deleted), the kubectl delete commands will hang. In this scenario patch the `kafkatopic` with following commands.
+KafkaTopic deletion (`kubectl delete kafkatopic <topic-name>`) uses Kubernetes finalizer feature to remove topic from the destination Kafka cluster through Kafka Rest API. If finalizer fails to delete because of network issue or unavailable of kafka clusters (deleted), the kubectl delete command will hang. In this scenario patch the `kafkatopic` with following commands that will remove the topic resource.
 
     kubectl -n <namespace> patch kafkatopic <topic-name> -p '{"metadata":{"finalizers":[]}}' --type=merge
 
