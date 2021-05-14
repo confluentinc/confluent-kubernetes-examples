@@ -34,8 +34,8 @@ spec:
       externalAccess:
         type: staticForHostBasedRouting
         staticForHostBasedRouting:
-          domain: platformops.dev.gcp.devel.cpdev.cloud
-          brokerPrefix: rbakhshi
+          domain: my.domain
+          brokerPrefix: mybrokerprefix
           port: 443
       tls:
         enabled: true
