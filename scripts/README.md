@@ -7,7 +7,7 @@
 usage: ./pv-resize.sh -c <cluster-name> -t <cluster-type> -n <namespace> -s <size_in_Gi>
    
   -c | --cluster-name    : name of the cluster to resize the PV
-  -t | --cluster-type    : confluent platform type, supported value: kafka ksqldb controlcenter zookeeper
+  -t | --cluster-type    : confluent platform component, supported value: kafka ksqldb controlcenter zookeeper
   -n | --namespace       : kubernetes namespace where cluster is running
   -s | --size            : new PV size in Gi
   -h | --help            : Usage command
@@ -19,7 +19,7 @@ usage: ./pv-resize.sh -c <cluster-name> -t <cluster-type> -n <namespace> -s <siz
 usage: ./sts-recreate.sh -c <cluster-name> -t <cluster-type> -n <namespace>
 
   -c | --cluster-name    : name of the cluster to recycle statefulset
-  -t | --cluster-type    : confluent platform type, supported value: kafka ksqldb controlcenter zookeeper schemaregistry connect
+  -t | --cluster-type    : confluent platform component, supported value: kafka ksqldb controlcenter zookeeper schemaregistry connect
   -n | --namespace       : kubernetes namespace where cluster is running
   -h | --help            : Usage command
 ```

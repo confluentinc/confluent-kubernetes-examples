@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -C -e -o pipefail
 ##
-## Only run this script if you want to recreate statefulset: forbidden issue, revision problems, etc
-## This script delete the statefuset with cascading false (orphan) and forces the operator to recreate
-## once all the pods are recycled.
+## Only run this script if you want to recreate the statefulset: to deal with forbidden issues,
+## revision problems, etc
+## This script deletes the statefuset with cascading false (orphaning the pods) and forces
+## the operator to recreate the statefulset once all the pods are recycled.
 ##
 
 red=$(tput setaf 1)
@@ -58,7 +59,7 @@ usage() {
     echo "usage: ./sts-recreate.sh -c <cluster-name> -t <cluster-type> -n <namespace>"
     echo "   ";
     echo "  -c | --cluster-name    : name of the cluster to recycle statefulset";
-    echo "  -t | --cluster-type    : confluent platform type, supported value: ${components_types[*]}";
+    echo "  -t | --cluster-type    : confluent platform component, supported value: ${components_types[*]}";
     echo "  -n | --namespace       : kubernetes namespace where cluster is running";
     echo "  -h | --help            : Usage command";
 }
