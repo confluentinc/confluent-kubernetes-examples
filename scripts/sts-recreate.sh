@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -C -e -o pipefail
 ##
-## Only run this script if you want to recreate the statefulset: to deal with forbidden issues,
+## Only run this script if you want to recycle existing statefulset: to deal with forbidden issues,
 ## revision problems, etc
 ## This script deletes the statefuset with cascading false (orphaning the pods) and forces
 ## the operator to recreate the statefulset once all the pods are recycled.
