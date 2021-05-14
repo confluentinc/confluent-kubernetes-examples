@@ -57,7 +57,7 @@ resize() {
       echo "#### Used by: ${POD}"
       echo "#########################"
       read -p "Press enter to continue${reset}"
-      # flag to indicate to udpate the CR with new size
+      # flag to indicate to update the CR with new size
       updated=true
       # deleting this sts allows the pods to be selectively deleted
       kubectl delete sts "${CLUSTER_NAME}" --cascade=false -n "$NAMESPACE"
@@ -94,7 +94,7 @@ usage() {
     echo "usage: ./pv-resize.sh -c <cluster-name> -t <cluster-type> -n <namespace> -s <size_in_Gi>"
     echo "   ";
     echo "  -c | --cluster-name    : name of the cluster to resize the PV";
-    echo "  -t | --cluster-type    : confluent platform type, supported value: ${components_types[*]}";
+    echo "  -t | --cluster-type    : confluent platform component, supported value: ${components_types[*]}";
     echo "  -n | --namespace       : kubernetes namespace where cluster is running";
     echo "  -s | --size            : new PV size in Gi";
     echo "  -h | --help            : Usage command";

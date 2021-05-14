@@ -71,16 +71,16 @@ Example
 
 ```yaml
 $ kubectl get cfrb
-NAMESPACE         NAME                         STATUS     KAFKACLUSTERID           PRINCIPAL        ROLE             KAFKARESTCLASS            AGE
-operator-7gffem   c3-connect-operator-7gffem   DELETING   8itASw0_S6qDfdl72b7Uyg   User:c3          SystemAdmin      operator-7gffem/default   7d19h
-operator-7gffem   c3-ksql-operator-7gffem      DELETING   8itASw0_S6qDfdl72b7Uyg   User:c3          ResourceOwner    operator-7gffem/default   7d19h
-operator-7gffem   c3-operator-7gffem           DELETING   8itASw0_S6qDfdl72b7Uyg   User:c3          ClusterAdmin     operator-7gffem/default   7d19h
-operator-7gffem   c3-sr-operator-7gffem        DELETING   8itASw0_S6qDfdl72b7Uyg   User:c3          SystemAdmin      operator-7gffem/default   7d19h
-operator-7gffem   connect-operator-7gffem-0    DELETING   8itASw0_S6qDfdl72b7Uyg   User:connect     SystemAdmin      operator-7gffem/default   7d19h
-operator-7gffem   connect-operator-7gffem-1    DELETING   8itASw0_S6qDfdl72b7Uyg   User:connect     SystemAdmin      operator-7gffem/default   7d19h
-operator-7gffem   internal-connect-0           DELETING   8itASw0_S6qDfdl72b7Uyg   User:connect     SecurityAdmin    operator-7gffem/default   7d19h
-operator-7gffem   internal-connect-1           DELETING   8itASw0_S6qDfdl72b7Uyg   User:connect     ResourceOwner    operator-7gffem/default   7d19h
-operator-7gffem   internal-connect-2           DELETING   8itASw0_S6qDfdl72b7Uyg   User:connect     DeveloperWrite   operator-7gffem/default   7d19h
+ NAME                        STATUS     KAFKACLUSTERID           PRINCIPAL        ROLE             KAFKARESTCLASS            AGE
+c3-connect-operator-7gffem   DELETING   8itASw0_S6qDfdl72b7Uyg   User:c3          SystemAdmin      operator-7gffem/default   7d19h
+c3-ksql-operator-7gffem      DELETING   8itASw0_S6qDfdl72b7Uyg   User:c3          ResourceOwner    operator-7gffem/default   7d19h
+c3-operator-7gffem           DELETING   8itASw0_S6qDfdl72b7Uyg   User:c3          ClusterAdmin     operator-7gffem/default   7d19h
+c3-sr-operator-7gffem        DELETING   8itASw0_S6qDfdl72b7Uyg   User:c3          SystemAdmin      operator-7gffem/default   7d19h
+connect-operator-7gffem-0    DELETING   8itASw0_S6qDfdl72b7Uyg   User:connect     SystemAdmin      operator-7gffem/default   7d19h
+connect-operator-7gffem-1    DELETING   8itASw0_S6qDfdl72b7Uyg   User:connect     SystemAdmin      operator-7gffem/default   7d19h
+internal-connect-0           DELETING   8itASw0_S6qDfdl72b7Uyg   User:connect     SecurityAdmin    operator-7gffem/default   7d19h
+internal-connect-1           DELETING   8itASw0_S6qDfdl72b7Uyg   User:connect     ResourceOwner    operator-7gffem/default   7d19h
+internal-connect-2           DELETING   8itASw0_S6qDfdl72b7Uyg   User:connect     DeveloperWrite   operator-7gffem/default   7d19h
 ```
 
     for rb in $(kubectl n <namespace> get cfrb --no-headers | grep "DELETING" | awk '{print $1}'); do kubectl -n <namespace>  patch cfrb $rb -p '{"metadata":{"finalizers":[]}}' --type=merge; done
