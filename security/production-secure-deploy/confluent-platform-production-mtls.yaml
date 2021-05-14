@@ -50,7 +50,7 @@ spec:
       externalAccess:
         type: loadBalancer
         loadBalancer:
-          domain: platformops.dev.gcp.devel.cpdev.cloud
+          domain: my.domain
           brokerPrefix: rb
           bootstrapPrefix: rb
   authorization:
@@ -73,7 +73,7 @@ spec:
       externalAccess:
         type: loadBalancer
         loadBalancer:
-          domain: platformops.dev.gcp.devel.cpdev.cloud
+          domain: my.domain
           prefix: rb-mds
       provider:
         type: ldap
@@ -123,7 +123,7 @@ spec:
   externalAccess:
     type: loadBalancer
     loadBalancer:
-      domain: platformops.dev.gcp.devel.cpdev.cloud
+      domain: my.domain
       prefix: rb-connect
   authorization:
     type: rbac
@@ -162,7 +162,7 @@ spec:
   externalAccess:
     type: loadBalancer
     loadBalancer:
-      domain: platformops.dev.gcp.devel.cpdev.cloud
+      domain: my.domain
       prefix: rb-sr
   authorization:
     type: rbac
@@ -202,7 +202,7 @@ spec:
   externalAccess:
     type: loadBalancer
     loadBalancer:
-      domain: platformops.dev.gcp.devel.cpdev.cloud
+      domain: my.domain
       prefix: rb-ksql
   tls:
     secretRef: tls-ksqldb
@@ -248,7 +248,7 @@ spec:
   externalAccess:
     type: loadBalancer
     loadBalancer:
-      domain: platformops.dev.gcp.devel.cpdev.cloud
+      domain: my.domain
       prefix: rb-c3
   tls:
     secretRef: tls-controlcenter
