@@ -18,7 +18,7 @@ usage: ./pv-resize.sh -c <cluster-name> -t <cluster-type> -n <namespace> -s <siz
 ```bash
 usage: ./sts-recreate.sh -c <cluster-name> -t <cluster-type> -n <namespace>
 
-  -c | --cluster-name    : name of the cluster to resize the PV
+  -c | --cluster-name    : name of the cluster to recycle statefulset
   -t | --cluster-type    : confluent platform type, supported value: kafka ksqldb controlcenter zookeeper schemaregistry connect
   -n | --namespace       : kubernetes namespace where cluster is running
   -h | --help            : Usage command

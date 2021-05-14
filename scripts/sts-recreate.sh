@@ -57,7 +57,7 @@ components_types=(kafka ksqldb controlcenter zookeeper schemaregistry connect)
 usage() {
     echo "usage: ./sts-recreate.sh -c <cluster-name> -t <cluster-type> -n <namespace>"
     echo "   ";
-    echo "  -c | --cluster-name    : name of the cluster to resize the PV";
+    echo "  -c | --cluster-name    : name of the cluster to recycle statefulset";
     echo "  -t | --cluster-type    : confluent platform type, supported value: ${components_types[*]}";
     echo "  -n | --namespace       : kubernetes namespace where cluster is running";
     echo "  -h | --help            : Usage command";
@@ -78,7 +78,7 @@ parse_args() {
 
     set -- "${args[@]}"
     if [[ ! -z ${help} ]]; then usage; exit 1; fi
-    if [[ -z ${name} ]]; then usage; die "==> Please provide cluster name to recreate statefulset"; fi
+    if [[ -z ${name} ]]; then usage; die "==> Please provide cluster name to recycle statefulset"; fi
     if [[ ! "${components_types[*]}" =~ ${type} ]]; then die "Please provide cluster type, supported value: ${components_types[*]}"; fi
     if [[ -z ${namespace} ]]; then usage; die "==> Please provide namespace where cluster is running"; fi
 
