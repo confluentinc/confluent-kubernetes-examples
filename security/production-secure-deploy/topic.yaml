@@ -6,7 +6,7 @@ metadata:
 spec:
   replicas: 1
   partitionCount: 1
-  kafkaRestRef:
+  kafkaRest:
     authentication:
       type: bearer
       bearer:
