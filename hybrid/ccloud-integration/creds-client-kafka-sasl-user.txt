@@ -1,2 +1,2 @@
-username=<username>
-password=<api-key>
+username=<api-key>
+password=<api-secret>
