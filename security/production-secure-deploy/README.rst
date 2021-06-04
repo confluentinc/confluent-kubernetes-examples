@@ -306,7 +306,7 @@ After updating the list of users, you'll update the Kubernetes secret.
       --from-file=plain.txt=$TUTORIAL_HOME/creds-client-kafka-sasl-user.txt \
       --from-file=basic.txt=$TUTORIAL_HOME/creds-control-center-users.txt \
       --from-file=ldap.txt=$TUTORIAL_HOME/ldap.txt \ 
-      --save-config --dry-run=client -oyaml | k apply -f -
+      --save-config --dry-run=client -oyaml | kubectl apply -f -
 
 In this above CLI command, you are generating the YAML for the secret, and applying it as an update to the existing secret ``credential``.
 
