@@ -1,16 +1,4 @@
 apiVersion: platform.confluent.io/v1beta1
-kind: KafkaRestClass
-metadata:
-  name: default
-  namespace: source
-spec:
-  kafkaRest:
-    authentication:
-      type: basic
-      basic:
-        secretRef: credential
----
-apiVersion: platform.confluent.io/v1beta1
 kind: KafkaTopic
 metadata:
   name: topic-in-source
