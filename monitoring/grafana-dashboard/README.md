@@ -25,7 +25,7 @@ These instructions were last verified with:
 
 ## Install Grafana
 
-    helm install grafana grafana/grafana --namespace default
+    helm upgrade --install grafana grafana/grafana --namespace default
 
 ## Open Grafana in your Browser
 
