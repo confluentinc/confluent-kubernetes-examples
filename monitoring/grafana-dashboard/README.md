@@ -14,6 +14,7 @@ These instructions were last verified with:
 
 ## Install Prometheus
     helm repo add stable https://charts.helm.sh/stable
+    helm repo add grafana https://grafana.github.io/helm-charts
     
     helm repo update
 
@@ -24,7 +25,7 @@ These instructions were last verified with:
 
 ## Install Grafana
 
-    helm install grafana stable/grafana --namespace default
+    helm install grafana grafana/grafana --namespace default
 
 ## Open Grafana in your Browser
 
