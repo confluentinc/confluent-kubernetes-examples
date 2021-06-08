@@ -64,17 +64,19 @@ RBAC.
 
      helm upgrade --install -f $TUTORIAL_HOME/../../assets/openldap/ldaps-rbac.yaml test-ldap $TUTORIAL_HOME/../../assets/openldap --namespace confluent
 
+Note that it is assumed that your Kubernetes cluster has a ``confluent`` namespace available, otherwise you can create it by running ``kubectl create namespace confluent``. 
+
 #. Validate that OpenLDAP is running:  
    
    ::
 
-     kubectl get pods
+     kubectl get pods -n confluent
 
 #. Log in to the LDAP pod:
 
    ::
 
-     kubectl exec -it ldap-0 -- bash
+     kubectl -n confluent exec -it ldap-0 -- bash
 
 #. Run the LDAP search command:
 
@@ -266,7 +268,7 @@ then the internal domain names will be:
 ::
   
   # Create Certificate Authority
-  cfssl gencert -initca $TUTORIAL_HOME/../../assets/certs/ca-csr.json | cfssljson -bare $TUTORIAL_HOME/../../assets/certs/generated/ca -
+  mkdir $TUTORIAL_HOME/../../assets/certs/generated && cfssl gencert -initca $TUTORIAL_HOME/../../assets/certs/ca-csr.json | cfssljson -bare $TUTORIAL_HOME/../../assets/certs/generated/ca -
 
 ::
 
@@ -304,7 +306,7 @@ After updating the list of users, you'll update the Kubernetes secret.
       --from-file=plain.txt=$TUTORIAL_HOME/creds-client-kafka-sasl-user.txt \
       --from-file=basic.txt=$TUTORIAL_HOME/creds-control-center-users.txt \
       --from-file=ldap.txt=$TUTORIAL_HOME/ldap.txt \ 
-      --save-config --dry-run=client -oyaml | k apply -f -
+      --save-config --dry-run=client -oyaml | kubectl apply -f -
 
 In this above CLI command, you are generating the YAML for the secret, and applying it as an update to the existing secret ``credential``.
 

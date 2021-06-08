@@ -69,7 +69,7 @@ secret, and then tell Confluent For Kubernetes where to find the configuration.
 In this tutorial, you will deploy a secure Zookeeper, Kafka and Control Center,
 and the rest of Confluent Platform components as shown below:
 
-.. figure:: ../images/confluent-platform-security-deployment.png
+.. figure:: ../../images/20210428-Security_Architecture.png
    :width: 200px
    
 To support the above deployment scenario, you need to provide the following

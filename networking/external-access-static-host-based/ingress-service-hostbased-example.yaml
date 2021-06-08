@@ -11,30 +11,30 @@ metadata:
 spec:
   tls:
     - hosts:
-        - rbakhshi0.platformops.dev.gcp.devel.cpdev.cloud
-        - rbakhshi1.platformops.dev.gcp.devel.cpdev.cloud
-        - rbakhshi2.platformops.dev.gcp.devel.cpdev.cloud
-        - rbakhshi.platformops.dev.gcp.devel.cpdev.cloud
+        - mybrokerprefix0.my.domain
+        - mybrokerprefix1.my.domain
+        - mybrokerprefix2.my.domain
+        - mybrokerprefix.my.domain
   rules:
-    - host: rbakhshi0.platformops.dev.gcp.devel.cpdev.cloud
+    - host: mybrokerprefix0.my.domain
       http:
         paths:
           - backend:
               serviceName: kafka-0-internal
               servicePort: 9092
-    - host: rbakhshi1.platformops.dev.gcp.devel.cpdev.cloud
+    - host: mybrokerprefix1.my.domain
       http:
         paths:
           - backend:
               serviceName: kafka-1-internal
               servicePort: 9092
-    - host: rbakhshi2.platformops.dev.gcp.devel.cpdev.cloud
+    - host: mybrokerprefix2.my.domain
       http:
         paths:
           - backend:
               serviceName: kafka-2-internal
               servicePort: 9092
-    - host: rbakhshi.platformops.dev.gcp.devel.cpdev.cloud
+    - host: mybrokerprefix.my.domain
       http:
         paths:
           - backend:
