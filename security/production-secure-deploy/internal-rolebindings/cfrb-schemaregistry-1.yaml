@@ -1,4 +1,4 @@
-# rolebinding `internal-schemaregistry-1` gives user `sr` the `ResourceOwner` role
+# rolebinding `schemaregistry-1` gives user `sr` the `ResourceOwner` role
 # for the following resources:
 # - topic `_confluent-license`
 # - topic `_schemas_schemaregistry_confluent`
@@ -6,7 +6,8 @@
 apiVersion: platform.confluent.io/v1beta1
 kind: ConfluentRolebinding
 metadata:
-  name: internal-schemaregistry-1
+  name: schemaregistry-1
+  namespace: confluent
 spec:
   principal:
     type: user

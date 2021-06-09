@@ -1,19 +1,24 @@
-# rolebinding `internal-connect-2` gives user `connect` the role 
-# `DeveloperWrite` for topics prefixed with `_confluent-monitoring`
+# rolebinding `connect-1` gives user `connect` the role 
+# `ResourceOwner` for: 
+# - consumer group named `prod.connect`
+# - topics prefixed with `prod.connect-`
 apiVersion: platform.confluent.io/v1beta1
 kind: ConfluentRolebinding
 metadata:
-  name: internal-connect-2
+  name: connect-1
   namespace: confluent
 spec:
   principal:
     name: connect
     type: user
   resourcePatterns:
-  - name: _confluent-monitoring
+  - name: prod.connect
+    patternType: LITERAL
+    resourceType: Group
+  - name: prod.connect-
     patternType: PREFIXED
     resourceType: Topic
-  role: DeveloperWrite
+  role: ResourceOwner
   ## if use other kafkaRestClass except for default, need to configure accordingly
   #kafkaRestClassRef:
   # name: default
