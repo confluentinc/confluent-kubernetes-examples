@@ -81,7 +81,7 @@ rules:
   - secrets
   - secrets/finalizers
   - pods
-  - pods/exec # only requires with CFK 2.0.0
+  - pods/exec # This is only required with CFK 2.0.0, CFK 2.0.1+ does not require this
   - services
   verbs:
   - get
