@@ -79,7 +79,7 @@ rules:
   - secrets
   - secrets/finalizers
   - pods
-  - pods/exec
+  - pods/exec # only requires with CFK 2.0.0
   - services
   verbs:
   - get
@@ -102,6 +102,12 @@ rules:
   - update
   - patch
   - delete
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1

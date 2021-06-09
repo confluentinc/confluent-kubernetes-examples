@@ -81,7 +81,7 @@ rules:
   - secrets
   - secrets/finalizers
   - pods
-  - pods/exec
+  - pods/exec # only requires with CFK 2.0.0
   - services
   verbs:
   - get
@@ -104,6 +104,12 @@ rules:
   - update
   - patch
   - delete
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
 ---
 # Change the service account subject to one that exists in your namespace
 # Change the namespace to your namespace
