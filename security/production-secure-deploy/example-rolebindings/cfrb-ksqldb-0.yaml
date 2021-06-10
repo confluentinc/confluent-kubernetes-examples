@@ -6,9 +6,9 @@ metadata:
   name: ksqldb-0
   namespace: confluent
 spec:
-  # Cluster id is .<ksql_cluster_name>_
+  # Cluster id is <namespace>..<ksql_cluster_name>_
   clustersScopeByIds:
-    ksqlClusterId: .ksqldb_ 
+    ksqlClusterId: confluent.ksqldb_ 
   principal:
     name: ksql
     type: user

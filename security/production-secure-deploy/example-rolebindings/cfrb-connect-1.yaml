@@ -19,6 +19,3 @@ spec:
     patternType: PREFIXED
     resourceType: Topic
   role: ResourceOwner
-  ## if use other kafkaRestClass except for default, need to configure accordingly
-  #kafkaRestClassRef:
-  # name: default

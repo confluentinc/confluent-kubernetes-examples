@@ -1,5 +1,5 @@
 # rolebinding `ksqldb-1` gives user `ksql` the role 
-# `ResourceOwner` for all topics named with the prefix `_confluent-ksql-operator.ksqldb_`
+# `ResourceOwner` for all topics named with the prefix `app1_`
 apiVersion: platform.confluent.io/v1beta1
 kind: ConfluentRolebinding
 metadata:
@@ -10,8 +10,8 @@ spec:
     name: ksql
     type: user
   resourcePatterns:
-  # The topics prefix is: #_confluent-ksql-<namespace>.<ksql_cluster_name>_
-  - name: _confluent-ksql-confluent.ksqldb_
+  # The topics prefix is: `app1_`
+  - name: app1_
     patternType: PREFIXED
     resourceType: Topic
   role: ResourceOwner
