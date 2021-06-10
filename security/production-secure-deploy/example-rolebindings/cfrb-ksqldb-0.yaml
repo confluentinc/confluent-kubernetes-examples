@@ -1,0 +1,19 @@
+# rolebinding `ksqldb-0` gives user `ksql` the role 
+# `ResourceOwner` for the cluster named `ksql-cluster`
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: ksqldb-0
+  namespace: confluent
+spec:
+  # Cluster id is <namespace>..<ksql_cluster_name>_
+  clustersScopeByIds:
+    ksqlClusterId: confluent.ksqldb_ 
+  principal:
+    name: ksql
+    type: user
+  resourcePatterns:
+  - name: ksql-cluster
+    patternType: LITERAL
+    resourceType: KsqlCluster
+  role: ResourceOwner
