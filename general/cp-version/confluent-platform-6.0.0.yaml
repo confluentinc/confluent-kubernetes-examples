@@ -39,7 +39,19 @@ spec:
   dependencies:
     kafka:
       bootstrapEndpoint: kafka:9071
-
+---
+apiVersion: platform.confluent.io/v1beta1
+# Confluent Replicator is built as a connector, and so will use the `Connect` CRD.
+kind: Connect
+metadata:
+  name: replicator
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    # Use the `cp-enterprise-replicator-operator` Docker image, that contains the Replicator jars
+    application: confluentinc/cp-enterprise-replicator-operator:6.0.0.0
+    init: confluentinc/cp-init-container-operator:6.0.0.0
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: KsqlDB

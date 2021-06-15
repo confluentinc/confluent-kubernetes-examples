@@ -2,6 +2,7 @@ apiVersion: platform.confluent.io/v1beta1
 kind: Zookeeper
 metadata:
   name: zookeeper
+  namespace: confluent
 spec:
   replicas: 3
   image:
@@ -14,6 +15,7 @@ apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
 metadata:
   name: kafka
+  namespace: confluent
 spec:
   replicas: 3
   image:
@@ -25,7 +27,7 @@ apiVersion: platform.confluent.io/v1beta1
 kind: Connect
 metadata:
   name: connect
-  namespace: operator
+  namespace: confluent
 spec:
   replicas: 2
   image:
@@ -33,9 +35,23 @@ spec:
     init: confluentinc/confluent-init-container:2.0.0
 ---
 apiVersion: platform.confluent.io/v1beta1
+# Confluent Replicator is built as a connector, and so will use the `Connect` CRD.
+kind: Connect
+metadata:
+  name: replicator
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    # Use the `cp-enterprise-replicator-operator` Docker image, that contains the Replicator jars
+    application: confluentinc/cp-enterprise-replicator-operator:6.1.1.0
+    init: confluentinc/cp-init-container-operator:6.1.1.0
+---
+apiVersion: platform.confluent.io/v1beta1
 kind: KsqlDB
 metadata:
   name: ksqldb
+  namespace: confluent
 spec:
   replicas: 2
   image:
@@ -47,6 +63,7 @@ apiVersion: platform.confluent.io/v1beta1
 kind: ControlCenter
 metadata:
   name: controlcenter
+  namespace: confluent
 spec:
   replicas: 1
   image:
@@ -55,18 +72,19 @@ spec:
   dataVolumeCapacity: 10Gi
   dependencies:
     schemaRegistry:
-      url: http://schemaregistry.operator.svc.cluster.local:8081
+      url: http://schemaregistry.confluent.svc.cluster.local:8081
     ksqldb:
     - name: ksql-dev
-      url: http://ksqldb.operator.svc.cluster.local:8088
+      url: http://ksqldb.confluent.svc.cluster.local:8088
     connect:
     - name: connect-dev
-      url:  http://connect.operator.svc.cluster.local:8083
+      url:  http://connect.confluent.svc.cluster.local:8083
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: SchemaRegistry
 metadata:
   name: schemaregistry
+  namespace: confluent
 spec:
   replicas: 2
   image:
