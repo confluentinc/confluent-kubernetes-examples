@@ -55,7 +55,6 @@ spec:
     type: rbac
     superUsers:
     - User:kafka
-    - User:ANONYMOUS
   services:
     mds:
       tls:
