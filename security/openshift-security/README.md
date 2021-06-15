@@ -1,5 +1,10 @@
 # Security considerations for Red Hat Openshift
 
+Set the tutorial directory for this tutorial under the directory you downloaded
+the tutorial files:
+   
+export TUTORIAL_HOME=<Tutorial directory>/openshift-security
+
 ## Pod Security
 
 CFK, by default, configures the Pod Security Context to run as non-root with a UID and GUID `1001`.
@@ -22,12 +27,21 @@ helm install cfk-operator confluentinc/confluent-for-kubernetes \
 --set podSecurity.enabled=false
 ```
 
-In every Confluent component CustomResource, add:
+In every Confluent component CustomResource, add `podSecurityContext`:
 
 ```
+vi $TUTORIAL_HOME/confluent-platform-with-defaultSCC.yaml
+...
 spec:
   podTemplate:
     podSecurityContext: {} # Disable the custom pod security context, to use the default
+...
+```
+
+Deploy Confluent Platform CRs with the `podSecurityContext`:
+
+```
+kubectl apply -f $TUTORIAL_HOME/confluent-platform-with-defaultSCC.yaml
 ```
 
 ## Advanced: Install Confluent for Kubernetes with custom SCC policy
