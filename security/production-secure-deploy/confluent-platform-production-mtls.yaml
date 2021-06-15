@@ -58,13 +58,6 @@ spec:
     superUsers:
     - User:kafka
   services:
-    restProxy:
-      enabled: true
-      mds:
-        authentication:
-          type: bearer
-          bearer:
-            secretRef: mds-client
     mds:
       tls:
         enabled: true
@@ -77,22 +70,22 @@ spec:
           prefix: rb-mds
       provider:
         type: ldap
-      ldap:
-        address: ldap://ldap.confluent.svc.cluster.local:389
-        authentication:
-          type: simple
-          simple:
-            secretRef: credential
-        configurations:
-          groupNameAttribute: cn
-          groupObjectClass: group
-          groupMemberAttribute: member
-          groupMemberAttributePattern: CN=(.*),DC=test,DC=com
-          groupSearchBase: dc=test,dc=com
-          userNameAttribute: cn
-          userMemberOfAttributePattern: CN=(.*),DC=test,DC=com
-          userObjectClass: organizationalRole
-          userSearchBase: dc=test,dc=com
+        ldap:
+          address: ldap://ldap.confluent.svc.cluster.local:389
+          authentication:
+            type: simple
+            simple:
+              secretRef: credential
+          configurations:
+            groupNameAttribute: cn
+            groupObjectClass: group
+            groupMemberAttribute: member
+            groupMemberAttributePattern: CN=(.*),DC=test,DC=com
+            groupSearchBase: dc=test,dc=com
+            userNameAttribute: cn
+            userMemberOfAttributePattern: CN=(.*),DC=test,DC=com
+            userObjectClass: organizationalRole
+            userSearchBase: dc=test,dc=com
   dependencies:
     kafkaRest:
       authentication:

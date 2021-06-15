@@ -55,15 +55,7 @@ spec:
     type: rbac
     superUsers:
     - User:kafka
-    - User:ANONYMOUS
   services:
-    restProxy:
-      enabled: true
-      mds:
-        authentication:
-          type: bearer
-          bearer:
-            secretRef: mds-client
     mds:
       tls:
         enabled: true
@@ -74,23 +66,30 @@ spec:
         loadBalancer:
           domain: my.domain
           prefix: rb-mds
-      ldap:
-        address: ldap://ldap.confluent.svc.cluster.local:389
-        authentication:
-          type: simple
-          simple:
-            secretRef: credential
-        configurations:
-          groupNameAttribute: cn
-          groupObjectClass: group
-          groupMemberAttribute: member
-          groupMemberAttributePattern: CN=(.*),DC=test,DC=com
-          groupSearchBase: dc=test,dc=com
-          userNameAttribute: cn
-          userMemberOfAttributePattern: CN=(.*),DC=test,DC=com
-          userObjectClass: organizationalRole
-          userSearchBase: dc=test,dc=com
+      provider: 
+        type: ldap
+        ldap:
+          address: ldap://ldap.confluent.svc.cluster.local:389
+          authentication:
+            type: simple
+            simple:
+              secretRef: credential
+          configurations:
+            groupNameAttribute: cn
+            groupObjectClass: group
+            groupMemberAttribute: member
+            groupMemberAttributePattern: CN=(.*),DC=test,DC=com
+            groupSearchBase: dc=test,dc=com
+            userNameAttribute: cn
+            userMemberOfAttributePattern: CN=(.*),DC=test,DC=com
+            userObjectClass: organizationalRole
+            userSearchBase: dc=test,dc=com
   dependencies:
+    kafkaRest:
+      authentication:
+        type: bearer
+        bearer:
+          secretRef: mds-client
     zookeeper:
       endpoint: zookeeper.confluent.svc.cluster.local:2182
       authentication:
@@ -272,3 +271,15 @@ spec:
       url: https://schemaregistry.confluent.svc.cluster.local:8081
       tls:
         enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: default
+  namespace: confluent
+spec:
+  kafkaRest:
+    authentication:
+      type: bearer
+      bearer:
+        secretRef: rest-credential
