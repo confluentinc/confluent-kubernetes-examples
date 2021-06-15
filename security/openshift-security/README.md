@@ -23,8 +23,8 @@ To install Confluent for Kubernees:
 ```
 # Disable the custom pod security context, use the default context
 
-helm install cfk-operator confluentinc/confluent-for-kubernetes \ 
---set podSecurity.enabled=false
+helm upgrade --install cfk-operator confluentinc/confluent-for-kubernetes \ 
+--set podSecurity.enabled=false --namespace confluent
 ```
 
 In every Confluent component CustomResource, add `podSecurityContext`:
@@ -97,4 +97,3 @@ oc adm policy add-scc-to-user <scc_name> -z <serviceaccount_running_CP> -n <name
 oc adm policy add-scc-to-user confluent-operator -z default -n confluent
 
 ```
-

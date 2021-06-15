@@ -89,17 +89,17 @@ spec:
   dataVolumeCapacity: 10Gi
   dependencies:
     schemaRegistry:
-      url: https://schemaregistry.operator.svc.cluster.local:8081
+      url: https://schemaregistry.confluent.svc.cluster.local:8081
       tls:
         enabled: true
     ksqldb:
     - name: ksql-dev
-      url: https://ksqldb.operator.svc.cluster.local:8088
+      url: https://ksqldb.confluent.svc.cluster.local:8088
       tls:
         enabled: true
     connect:
     - name: connect-dev
-      url:  https://connect.operator.svc.cluster.local:8083
+      url:  https://connect.confluent.svc.cluster.local:8083
       tls:
         enabled: true
   podTemplate:
