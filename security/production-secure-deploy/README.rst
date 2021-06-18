@@ -339,7 +339,7 @@ then the internal domain names will be:
   # Validate server certificate and SANs
   openssl x509 -in $TUTORIAL_HOME/../../assets/certs/generated/server.pem -text -noout
 
-Return to `step 1 <#provide-component-tls-certificates>` now you've created your certificates  
+Return to `step 1 <#provide-component-tls-certificates>`_ now you've created your certificates  
 
 =====================================
 Appendix: Update authentication users
