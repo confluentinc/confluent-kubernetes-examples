@@ -269,6 +269,10 @@ Tear down
 
 ::
 
+  kubectl delete confluentrolebinding --all --namespace confluent
+  
+::
+
   kubectl delete -f $TUTORIAL_HOME/confluent-platform-production.yaml --namespace confluent
 
 ::
@@ -360,7 +364,7 @@ After updating the list of users, you'll update the Kubernetes secret.
       --from-file=digest.txt=$TUTORIAL_HOME/creds-kafka-zookeeper-credentials.txt \
       --from-file=plain.txt=$TUTORIAL_HOME/creds-client-kafka-sasl-user.txt \
       --from-file=basic.txt=$TUTORIAL_HOME/creds-control-center-users.txt \
-      --from-file=ldap.txt=$TUTORIAL_HOME/ldap.txt \ 
+      --from-file=ldap.txt=$TUTORIAL_HOME/ldap.txt \
       --save-config --dry-run=client -oyaml | kubectl apply -f -
 
 In this above CLI command, you are generating the YAML for the secret, and applying it as an update to the existing secret ``credential``.
