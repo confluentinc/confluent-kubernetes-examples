@@ -251,7 +251,38 @@ through a local port forwarding like below:
 
 The ``testadmin`` user (``testadmin`` password) has the ``SystemAdmin`` role granted and will have access to the
 cluster and broker information.
-  
+
+=========
+Tear down
+=========
+
+::
+
+  kubectl delete -f $TUTORIAL_HOME/confluent-platform-production.yaml
+
+::
+
+  kubectl delete secret rest-credential ksqldb-mds-client sr-mds-client connect-mds-client c3-mds-client mds-client
+
+::
+
+  kubectl delete secret mds-token
+
+::
+
+  kubectl delete secret credential
+
+::
+
+ kubectl delete secret tls-group1
+
+::
+
+  helm delete test-ldap
+
+::
+
+  helm delete operator
 
 ======================================
 Appendix: Create your own certificates
