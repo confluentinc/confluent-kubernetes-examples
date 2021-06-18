@@ -36,18 +36,20 @@ Deploy Confluent for Kubernetes
 
      helm repo add confluentinc https://packages.confluent.io/helm
 
+Note that it is assumed that your Kubernetes cluster has a ``confluent`` namespace available, otherwise you can create it by running ``kubectl create namespace confluent``. 
+
 
 #. Install Confluent For Kubernetes using Helm:
 
    ::
 
-     helm upgrade --install operator confluentinc/confluent-for-kubernetes
+     helm upgrade --install operator confluentinc/confluent-for-kubernetes --namespace confluent
   
 #. Check that the Confluent For Kubernetes pod comes up and is running:
 
    ::
      
-     kubectl get pods
+     kubectl get pods --namespace confluent
 
 ===============
 Deploy OpenLDAP
@@ -64,19 +66,17 @@ RBAC.
 
      helm upgrade --install -f $TUTORIAL_HOME/../../assets/openldap/ldaps-rbac.yaml test-ldap $TUTORIAL_HOME/../../assets/openldap --namespace confluent
 
-Note that it is assumed that your Kubernetes cluster has a ``confluent`` namespace available, otherwise you can create it by running ``kubectl create namespace confluent``. 
-
 #. Validate that OpenLDAP is running:  
    
    ::
 
-     kubectl get pods -n confluent
+     kubectl get pods --namespace confluent
 
 #. Log in to the LDAP pod:
 
    ::
 
-     kubectl -n confluent exec -it ldap-0 -- bash
+     kubectl --namespace confluent exec -it ldap-0 -- bash
 
 #. Run the LDAP search command:
 
@@ -110,8 +110,10 @@ credentials:
 * RBAC principal credentials
   
 You can either provide your own certificates, or generate test certificates. Follow instructions
-in the below "Appendix: Create your own certificates" section to see how to generate certificates
+in the below `Appendix: Create your own certificates <production-secure-deploy#appendix-create-your-own-certificates>`_ section to see how to generate certificates
 and set the appropriate SANs. 
+
+
 
 Provide component TLS certificates
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
