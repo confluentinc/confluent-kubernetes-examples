@@ -115,7 +115,7 @@ and set the appropriate SANs.
 
 
 
-Provide operator TLS certificates for self generating
+Provide operator CA TLS certificates for self generating
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Use the provided CA certs: 
 
