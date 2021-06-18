@@ -341,7 +341,7 @@ then the internal domain names will be:
   openssl x509 -in $TUTORIAL_HOME/../../assets/certs/generated/ca.pem -text -noout
 
 
-Return to `step 1 <#provide-component-tls-certificates>`_ now you've created your certificates  
+Return to `step 1 <#provide-operator-ca-tls-certificates-for-self-generating>`_ now you've created your certificates  
 
 =====================================
 Appendix: Update authentication users
