@@ -110,7 +110,7 @@ credentials:
 * RBAC principal credentials
   
 You can either provide your own certificates, or generate test certificates. Follow instructions
-in the below `Appendix: Create your own certificates <production-secure-deploy#appendix-create-your-own-certificates>`_ section to see how to generate certificates
+in the below `Appendix: Create your own certificates <#appendix-create-your-own-certificates>`_ section to see how to generate certificates
 and set the appropriate SANs. 
 
 
