@@ -116,7 +116,7 @@ and set the appropriate SANs.
 
 
 Provide operator CA TLS certificates for self generating
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Use the provided CA certs: 
 
 ::
@@ -126,7 +126,7 @@ Use the provided CA certs:
       --key=$TUTORIAL_HOME/ca-key.pem \
       --namespace confluent
 
-OR use the self created CA certs: 
+**OR use the self created CA certs**: 
 
 ::
    
@@ -285,7 +285,7 @@ Tear down
 
 ::
 
-  kubectl delete secret rest-credential ksqldb-mds-client sr-mds-client connect-mds-client c3-mds-client mds-client --namespace confluent
+  kubectl delete secret rest-credential ksqldb-mds-client sr-mds-client connect-mds-client c3-mds-client mds-client ca-pair-sslcerts --namespace confluent
 
 ::
 
