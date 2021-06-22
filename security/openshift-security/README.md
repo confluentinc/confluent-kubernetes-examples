@@ -103,6 +103,7 @@ oc adm policy add-scc-to-user confluent-operator -z confluent-operator -n conflu
 ```
 
 Associate the SCC policy to the service account that runs Confluent Platform components:
+
 ```
 ## This is the format of the command
 oc adm policy add-scc-to-user <scc_name> -z <serviceaccount_running_CP> -n <namespace>
@@ -129,7 +130,7 @@ Deploy the CFK Operator to the `confluent-operator` namespace
 ```
 # Tell the CFK Operator to manage CRs in `confluent` and `confluent-test` namespace
 helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes \
---set podSecurity.enabled=false --set namespaceList="{confluent, confluent-test}" \
+--set podSecurity.enabled=false --set namespaceList="{confluent,confluent-test}" \
 --namespace confluent-operator
 ```
 

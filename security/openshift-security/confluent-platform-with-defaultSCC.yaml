@@ -28,6 +28,10 @@ spec:
     enabled: true
   podTemplate:
     podSecurityContext: {}
+    resources:
+      requests:
+        cpu: "1"
+        memory: "4Gi"
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: Connect
@@ -41,6 +45,10 @@ spec:
     init: confluentinc/cp-init-container-operator:6.1.1.0
   podTemplate:
     podSecurityContext: {}
+    resources:
+      requests:
+        cpu: "1"
+        memory: "4Gi"
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: KsqlDB
@@ -78,6 +86,15 @@ spec:
       url:  https://connect.confluent.svc.cluster.local:8083
   podTemplate:
     podSecurityContext: {}
+    resources:
+      requests:
+        cpu: "1"
+        memory: "4Gi"
+    probe:
+      liveness:
+        periodSeconds: 10
+        failureThreshold: 5
+        timeoutSeconds: 500
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: SchemaRegistry
