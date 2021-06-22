@@ -30,7 +30,7 @@ spec:
     podSecurityContext: {}
     resources:
       requests:
-        cpu: "1000m"
+        cpu: "1"
         memory: "4Gi"
 ---
 apiVersion: platform.confluent.io/v1beta1

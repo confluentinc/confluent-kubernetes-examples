@@ -1,10 +1,5 @@
 # Security considerations for Red Hat Openshift
 
-Set the tutorial directory for this tutorial under the directory you downloaded
-the tutorial files:
-   
-export TUTORIAL_HOME=<Tutorial directory>/openshift-security
-
 ## Pod Security
 
 CFK, by default, configures the Pod Security Context to run as non-root with a UID and GUID `1001`.
@@ -16,9 +11,16 @@ You've got two options to align with the Security Context Constraint (SCC) needs
 1) Recommended: Deploy with default SCC policy
 2) Advanced: Deploy with a custom SCC policy
 
+Set the tutorial directory for this tutorial under the directory you downloaded
+the tutorial files:
+
+```   
+export TUTORIAL_HOME=<Tutorial directory>/openshift-security
+```
+
 ## Recommended: Install Confluent for Kubernetes using default SCC policy
 
-To install Confluent for Kubernees:
+Install Confluent for Kubernetes using the default SCC:
 
 ```
 # Disable the custom pod security context, use the default context
@@ -49,6 +51,8 @@ kubectl apply -f $TUTORIAL_HOME/confluent-platform-with-defaultSCC.yaml
 In this advanced option, you can define a custom SCC policy and configure Confluent for Kubernetes
 to use that.
 
+Install Confluent for Kubernetes using a custom SCC:
+
 ```
 # In the CFK Operator Helm chart, there is a section in the values.yaml to define pod security:
 podSecurity:
@@ -63,9 +67,11 @@ helm install cfk-operator confluentinc/confluent-for-kubernetes \
 --set podSecurity.enabled=true 
 --set podSecurity.securityContext.fsGroup=1004
 --set podSecurity.securityContext.runAsUser=1004
+```
 
-# Set a custom SCC in Red Hat OpenShift
+Set a custom SCC in Red Hat OpenShift:
 
+```
 ## View the custom policy and the ID ranges allowed
 vi $TUTORIAL_HOME/scc.yaml
 ...
@@ -85,15 +91,51 @@ runAsUser:
 
 ## Set the SCC policy for the CFK Operator pod
 oc apply -f $TUTORIAL_HOME/scc.yaml
+```
 
-## Associate the SCC policy to the service account that runs CFK Operator
+Associate the SCC policy to the service account that runs CFK Operator:
+
+```
+## This is the format of the command
 oc adm policy add-scc-to-user <scc_name> -z <serviceaccount_running_CFK> -n <namespace>
-### For example:
+## For example
 oc adm policy add-scc-to-user confluent-operator -z confluent-operator -n confluent
+```
 
-## Associate the SCC policy to the service account that runs Confluent Platform components
+Associate the SCC policy to the service account that runs Confluent Platform components:
+
+```
+## This is the format of the command
 oc adm policy add-scc-to-user <scc_name> -z <serviceaccount_running_CP> -n <namespace>
-### For example:
+## For example
 oc adm policy add-scc-to-user confluent-operator -z default -n confluent
+```
 
+## Associating with Namespaces
+
+In this scenario, you'll deploy the Confluent for Kubernetes (CFK) Operator in one namespace, 
+and have it create & manage Confluent Platform Custom Resources (CRs) in other specified
+namespaces.
+
+Create three namespaces; one for the CFK Operator, and two for Confluent Platform CRs:
+
+```
+oc create ns confluent-operator
+oc create ns confluent
+oc create ns confluent-test
+```
+
+Deploy the CFK Operator to the `confluent-operator` namespace
+
+```
+# Tell the CFK Operator to manage CRs in `confluent` and `confluent-test` namespace
+helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes \
+--set podSecurity.enabled=false --set namespaceList="{confluent,confluent-test}" \
+--namespace confluent-operator
+```
+
+Deploy Confluent Platform CRs to the `confluent` namespace
+
+```
+oc apply -f $TUTORIAL_HOME/confluent-platform-with-defaultSCC.yaml
 ```
