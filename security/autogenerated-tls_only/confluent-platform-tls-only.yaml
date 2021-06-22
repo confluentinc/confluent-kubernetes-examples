@@ -39,7 +39,9 @@ spec:
         # configuration specified above will be used for this listener.
   metricReporter:
     enabled: true
-    bootstrapEndpoint: kafka:9092
+    bootstrapEndpoint: kafka:9071
+    tls:
+      enabled: true
   dependencies:
     zookeeper:
       endpoint: zookeeper.confluent.svc.cluster.local:2182

@@ -153,7 +153,7 @@ Check that the ``elastic-0`` topic was created and that messages are being produ
 ```
 kubectl delete -f $TUTORIAL_HOME/secure-producer-app-data.yaml -n confluent
 
-kubectl delete -f $TUTORIAL_HOME/confluent-platform-secure.yaml -n confluent
+kubectl delete -f $TUTORIAL_HOME/confluent-platform-tls-only.yaml -n confluent
 
 kubectl delete secret kafka-client-config-secure -n confluent
 
