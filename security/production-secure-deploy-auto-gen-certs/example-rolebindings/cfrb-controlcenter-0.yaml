@@ -1,0 +1,11 @@
+# rolebinding `controlcenter-0` gives user `c3` the role `SystemAdmin`
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: controlcenter-0
+  namespace: confluent
+spec:
+  principal:
+    name: c3
+    type: user
+  role: SystemAdmin
