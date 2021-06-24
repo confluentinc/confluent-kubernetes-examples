@@ -5,6 +5,9 @@ In this scenario workflow, you'll set up Confluent Platform component clusters
 with the Kubernetes LoadBalancer service type to enable external clients to
 access Confluent Platform, including Kafka and other components.
 
+Before continuing with the scenario, ensure that you have set up the
+`prerequisites </README.md#prerequisites>`_.
+
 To complete this tutorial, you'll follow these steps:
 
 #. Set up the Kubernetes cluster for this tutorial.

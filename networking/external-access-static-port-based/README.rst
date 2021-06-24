@@ -3,7 +3,10 @@ Deploy Confluent Platform with Static Port-based Routing
 
 In this scenario workflow, you'll set up Confluent Platform component clusters
 with the static port-based routing to enable external clients to access Kafka.
- 
+
+Before continuing with the scenario, ensure that you have set up the
+`prerequisites </README.md#prerequisites>`_.
+
 To complete this tutorial, you'll follow these steps:
 
 #. Set up the Kubernetes cluster for this tutorial.

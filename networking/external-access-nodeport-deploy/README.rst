@@ -9,6 +9,9 @@ With the NodePort services, Kubernetes will allocate a port on all nodes of the
 Kubernetes cluster and will make sure that all traffic to this port is routed to
 the pods.
 
+Before continuing with the scenario, ensure that you have set up the
+`prerequisites </README.md#prerequisites>`_.
+
 To complete this scenario, you'll follow these steps:
 
 #. Set up the Kubernetes cluster.
@@ -31,7 +34,7 @@ Set up a Kubernetes cluster for this tutorial.
 
 #. Get the Kubernetes cluster domain name. 
 
-   In this document, $NPHOST will be used to denote the following node port
+   In this document, ``$NPHOST`` will be used to denote the following node port
    hostname, with ``myoperator2`` hard-coded for this tutorial.
 
    ::

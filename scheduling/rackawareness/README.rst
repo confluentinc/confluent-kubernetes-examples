@@ -8,6 +8,9 @@ Each Kafka broker will be configured with it's broker.rack setting to the corres
 
 Read more about Kafka rack awareness: `Confluent Docs <https://docs.confluent.io/platform/current/kafka/post-deployment.html#balancing-replicas-across-racks>`__.
 
+Before continuing with the scenario, ensure that you have set up the
+`prerequisites </README.md#prerequisites>`_.
+
 ==================================
 Set the current tutorial directory
 ==================================

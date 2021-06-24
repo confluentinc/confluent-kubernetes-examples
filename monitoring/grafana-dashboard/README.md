@@ -1,10 +1,16 @@
 # Monitoring
 
-All Confluent Platform (CP) components deployed through the Confluent Operator expose metrics that can be scraped by
-Prometheus. This folder contains an example Grafana metrics dashboard for all components include Confluent Operator. For
-production environments, you may need to modify the example dashboard to meet your needs. Follow best practices for
-managing your Prometheus and Grafana deployments. Completing the following instructions will help you understand what the example
-dashboard can display for you.
+All Confluent Platform (CP) components deployed through Confluent for
+Kubernetes expose metrics that can be scraped by Prometheus. This folder
+contains an example Grafana metrics dashboard for all components included with
+Confluent for Kubernetes. For production environments, you may need to modify
+the example dashboard to meet your needs. Follow best practices for managing
+your Prometheus and Grafana deployments. Completing the following instructions
+will help you understand what the example dashboard can display for you.
+
+Before continuing with these instructions, you will need to install Confluent
+for Kubernetes. You may wish to start with the
+[Quickstart Scenario](/quickstart-deploy/README.rst).
 
 These instructions were last verified with:
 

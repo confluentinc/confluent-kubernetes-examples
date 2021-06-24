@@ -5,9 +5,13 @@ In this scenario workflow, you'll set up Confluent Platform component clusters
 with the static host-based routing to enable external clients to access
 Kafka.
 
-This tutorial assumes your local machine has a Java Runtime Environment (JRE) and ``kafka-console-producer`` installed. The command line producer 
-tool comes with `Confluent Platform <https://docs.confluent.io/platform/current/installation/installing_cp/zip-tar.html#manual-install-using-zip-and-tar-archives>`__ TARball 
+This tutorial assumes your local machine has a Java Runtime Environment (JRE)
+and ``kafka-console-producer`` installed. The command line producer tool is
+included in the `Confluent Platform <https://docs.confluent.io/platform/current/installation/installing_cp/zip-tar.html#manual-install-using-zip-and-tar-archives>`__ tarball 
 under the ``bin/`` directory.
+
+Before continuing with the scenario, ensure that you have set up the
+`prerequisites </README.md#prerequisites>`_.
  
 To complete this tutorial, you'll follow these steps:
 
