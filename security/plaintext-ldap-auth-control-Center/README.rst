@@ -50,13 +50,13 @@ Deploy Confluent for Kubernetes
 
    ::
 
-     helm upgrade --install operator confluentinc/confluent-for-kubernetes
+     helm upgrade --install operator confluentinc/confluent-for-kubernetes --namespace=confluent
   
 #. Check that the Confluent For Kubernetes pod comes up and is running:
 
    ::
      
-     kubectl get pods
+     kubectl get pods --namespace=confluent
 
 ===============
 Deploy OpenLDAP
@@ -79,13 +79,13 @@ Note that it is assumed that your Kubernetes cluster has a ``confluent`` namespa
    
    ::
 
-     kubectl get pods -n confluent
+     kubectl get pods --namespace=confluent
 
 #. Log in to the LDAP pod:
 
    ::
 
-     kubectl -n confluent exec -it ldap-0 -- bash
+     kubectl --namespace=confluent exec -it ldap-0 -- bash
 
 #. Run the LDAP search command:
 
@@ -145,19 +145,19 @@ Deploy Confluent Platform
 
 ::
 
-  kubectl apply -f $TUTORIAL_HOME/confluent-platform.yaml
+  kubectl apply -f $TUTORIAL_HOME/confluent-platform.yaml --namespace=confluent
 
 #. Check that all Confluent Platform resources are deployed:
 
    ::
    
-     kubectl get confluent
+     kubectl get confluent --namespace=confluent
 
 #. Get the status of any component. For example, to check Kafka:
 
    ::
    
-     kubectl describe kafka
+     kubectl describe kafka --namespace=confluent
 
 ========
 Validate
@@ -193,7 +193,7 @@ Deploy the producer app:
 
 ::
    
-  kubectl apply -f $TUTORIAL_HOME/producer-app-data.yaml
+  kubectl apply -f $TUTORIAL_HOME/producer-app-data.yaml --namespace=confluent
 
 Validate in Control Center
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -204,7 +204,7 @@ Use Control Center to monitor the Confluent Platform, and see the created topic 
 
    ::
 
-     kubectl port-forward controlcenter-0 9021:9021
+     kubectl port-forward controlcenter-0 9021:9021 --namespace=confluent
 
 #. Browse to Control Center:
 
@@ -225,13 +225,27 @@ Shut down Confluent Platform and the data:
 
 ::
 
-  kubectl delete -f $TUTORIAL_HOME/producer-app-data.yaml
+  kubectl delete -f $TUTORIAL_HOME/producer-app-data.yaml --namespace=confluent
 
 ::
 
-  kubectl delete -f $TUTORIAL_HOME/confluent-platform.yaml
+  kubectl delete -f $TUTORIAL_HOME/confluent-platform.yaml --namespace=confluent
 
 ::
 
-  helm delete operator
-  
+  helm delete operator --namespace=confluent
+
+::
+
+  helm delete test-ldap --namespace=confluent
+
+::
+
+  kubectl delete pvc ldap-config-ldap-0 --namespace=confluent
+
+::
+
+  kubectl delete pvc ldap-data-ldap-0 --namespace=confluent
+
+::
+

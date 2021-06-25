@@ -91,6 +91,7 @@ ldifs:
     objectClass: inetOrgPerson
     objectClass: posixAccount
     objectClass: shadowAccount
+    objectClass: organizationalRole ##  maybe remove 
     uid: controlcenterAdmin
     sn: Sheen
     givenName: ControlCenterAdmin
