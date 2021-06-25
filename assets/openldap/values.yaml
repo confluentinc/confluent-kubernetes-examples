@@ -72,3 +72,38 @@ ldifs:
     objectClass: simpleSecurityObject
     objectClass: organizationalRole
     cn: testadmin
+  08_c3-groupou.ldif: |-
+    dn: ou=groups,dc=test,dc=com
+    objectClass: organizationalUnit
+    ou: Groups
+  09_c3-usersou.ldif: |-
+    dn: ou=users,dc=test,dc=com
+    objectClass: organizationalUnit
+    ou: Users
+  10_kafkadevelopersgroup.ldif: |-
+    dn: cn=KafkaDevelopers,ou=groups,dc=test,dc=com
+    objectClass: top
+    objectClass: posixGroup
+    cn: KafkaDevelopers
+    gidNumber: 5000
+  11_controlcenteradmin.ldif: |-
+    dn: cn=controlcenterAdmin,ou=users,dc=test,dc=com
+    objectClass: inetOrgPerson
+    objectClass: posixAccount
+    objectClass: shadowAccount
+    uid: controlcenterAdmin
+    sn: Sheen
+    givenName: ControlCenterAdmin
+    cn: controlcenterAdmin
+    displayName: ControlCenterAdmin Sheen
+    uidNumber: 10017
+    gidNumber: 5000
+    userPassword: controlcenterAdmin
+    gecos: controlcenterAdmin
+    loginShell: /bin/bash
+    homeDirectory: /home/controlcenterAdmin
+  12_addcontrolcenteradmin.ldif: |-
+    dn: cn=KafkaDevelopers,ou=groups,dc=test,dc=com
+    changetype: modify
+    add: memberuid
+    memberuid: cn=controlcenterAdmin,ou=users,dc=test,dc=com
