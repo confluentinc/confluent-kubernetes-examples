@@ -16,7 +16,7 @@ priority: 10
 requiredDropCapabilities:
   - MKNOD
 runAsUser:
-   # Here, the allowed user ID is configured to be between 1001 and 1005
+   # Here, the allowed user ID is configured to be between 1000 and 1005
   type: MustRunAsRange
   uidRangeMin: 1000
   uidRangeMax: 1005
