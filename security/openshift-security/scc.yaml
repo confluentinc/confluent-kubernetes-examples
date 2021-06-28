@@ -18,7 +18,7 @@ requiredDropCapabilities:
 runAsUser:
    # Here, the allowed user ID is configured to be between 1001 and 1005
   type: MustRunAsRange
-  uidRangeMin: 1001
+  uidRangeMin: 1000
   uidRangeMax: 1005
 seLinuxContext:
   type: MustRunAs
