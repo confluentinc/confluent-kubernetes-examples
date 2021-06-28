@@ -15,57 +15,58 @@ env:
   LDAP_READONLY_USER_USERNAME: "mds"
   LDAP_READONLY_USER_PASSWORD: "Developer!"
 
+# Adding integer before ldif name to allow sequence order.
 ldifs:
-  kafka.ldif: |-
+  00_kafka.ldif: |-
     dn: cn=kafka,{{ LDAP_BASE_DN }}
     userPassword: kafka-secret
     description: kafka user
     objectClass: simpleSecurityObject
     objectClass: organizationalRole
     cn: kafka
-  erp.ldif: |-
+  01_erp.ldif: |-
     dn: cn=erp,{{ LDAP_BASE_DN }}
     userPassword: erp-secret
     description: erp user
     objectClass: simpleSecurityObject
     objectClass: organizationalRole
     cn: erp
-  sr.ldif: |-
+  02_sr.ldif: |-
     dn: cn=sr,{{ LDAP_BASE_DN }}
     userPassword: sr-secret
     description: schema registry user
     objectClass: simpleSecurityObject
     objectClass: organizationalRole
     cn: sr
-  c3.ldif: |-
+  03_c3.ldif: |-
     dn: cn=c3,{{ LDAP_BASE_DN }}
     userPassword: c3-secret
     description: control center user
     objectClass: simpleSecurityObject
     objectClass: organizationalRole
     cn: c3
-  ksql.ldif: |-
+  04_ksql.ldif: |-
     dn: cn=ksql,{{ LDAP_BASE_DN }}
     userPassword: ksql-secret
     description: ksql user
     objectClass: simpleSecurityObject
     objectClass: organizationalRole
     cn: ksql
-  connect.ldif: |-
+  05_connect.ldif: |-
     dn: cn=connect,{{ LDAP_BASE_DN }}
     userPassword: connect-secret
     description: connect user
     objectClass: simpleSecurityObject
     objectClass: organizationalRole
     cn: connect
-  replicator.ldif: |-
+  06_replicator.ldif: |-
     dn: cn=replicator,{{ LDAP_BASE_DN }}
     userPassword: replicator-secret
     description: replicator user
     objectClass: simpleSecurityObject
     objectClass: organizationalRole
     cn: replicator
-  c3-test.ldif: |-
+  07_c3-test.ldif: |-
     dn: cn=testadmin,{{ LDAP_BASE_DN }}
     userPassword: testadmin
     description: testadmin user
