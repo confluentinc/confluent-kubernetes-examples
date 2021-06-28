@@ -108,8 +108,29 @@ ldifs:
     gecos: alice
     loginShell: /bin/bash
     homeDirectory: /home/alice
-  12_addgroup.ldif:  |-
-    dn: cn=c3users,ou=groups,{{ LDAP_BASE_DN }}
+  12_james.ldif:  |-
+    dn: cn=james,ou=users,{{ LDAP_BASE_DN }}
+    objectClass: inetOrgPerson
+    objectClass: posixAccount
+    objectClass: shadowAccount
+    uid: james
+    sn: LookingGlass
+    givenName: James
+    cn: james
+    displayName: James Logan
+    uidNumber: 10009
+    gidNumber: 5000
+    userPassword: james-secret
+    gecos: james
+    loginShell: /bin/bash
+    homeDirectory: /home/james
+  13_addgroup.ldif:  |-
+    dn: cn=readonlyusers,ou=groups,{{ LDAP_BASE_DN }}
     changetype: modify
     add: memberuid
     memberuid: cn=alice,ou=users,{{ LDAP_BASE_DN }}
+
+    dn: cn=c3users,ou=groups,{{ LDAP_BASE_DN }}
+    changetype: modify
+    add: memberuid
+    memberuid: cn=james,ou=users,{{ LDAP_BASE_DN }}

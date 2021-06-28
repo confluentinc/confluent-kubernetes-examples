@@ -5,7 +5,7 @@ In this workflow scenario, you'll set up a simple non-secure (no TLS) with Contr
 
 The goal for this scenario is for you to:
 
-* Configure LDAP server for Control Center authentication
+* Configure LDAP server for Control Center authentication (no RBAC).
 * Quickly set up the complete Confluent Platform on the Kubernetes.
 * Configure a producer to generate sample data.
 
@@ -111,7 +111,7 @@ tutorial, you will configure all components in a single file and deploy all
 components with one ``kubectl apply`` command.
 
 The entire Confluent Platform is configured in one configuration file:
-``$TUTORIAL_HOME/confluent-platform.yaml``
+``$TUTORIAL_HOME/confluent-platform-ccc-ldap.yamll``
 
 In this configuration file, there is a custom Resource configuration spec for
 each Confluent Platform component - replicas, image to use, resource
@@ -145,7 +145,7 @@ Deploy Confluent Platform
 
 ::
 
-  kubectl apply -f $TUTORIAL_HOME/confluent-platform.yaml --namespace=confluent
+  kubectl apply -f $TUTORIAL_HOME/confluent-platform-ccc-ldap.yaml --namespace=confluent
 
 #. Check that all Confluent Platform resources are deployed:
 
@@ -213,7 +213,10 @@ Use Control Center to monitor the Confluent Platform, and see the created topic 
      http://localhost:9021
 
 
-     ADD USER NAME AUTH FOR LDAP
+#. Users: 
+
+Full Control: Username:Jame Password:james-sceret
+Restricted Control: Username:alice Password:alice-sceret
 
 #. Check that the ``elastic-0`` topic was created and that messages are being produced to the topic.
 
@@ -229,7 +232,7 @@ Shut down Confluent Platform and the data:
 
 ::
 
-  kubectl delete -f $TUTORIAL_HOME/confluent-platform.yaml --namespace=confluent
+  kubectl delete -f $TUTORIAL_HOME/confluent-platform-ccc-ldap.yamll --namespace=confluent
 
 ::
 
