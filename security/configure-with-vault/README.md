@@ -13,6 +13,7 @@ the tutorial files:
 $ export TUTORIAL_HOME=<This_Git_repository_directory>/security/configure-with-vault
 ```
 
+
 ## Configure Hashicorp Vault
 
 Note: Hashicorp Vault is a third party software product that is not supported or distributed by Confluent. In this scenario, you will deploy and configure Hashicorp Vault in a way to support this scenario. There are multiple ways to configure and use Hashicorp Vault - follow their product docs for that information.
@@ -38,6 +39,31 @@ NAME                                    READY   STATUS    RESTARTS   AGE
 vault-0                                 1/1     Running   0          23s
 vault-agent-injector-85b7b88795-q5vcp   1/1     Running   0          24s
 ```
+
+
+### Initialize Vault authentication
+
+Open an interactive shell session in the Vault container:
+
+```
+$ kubectl exec -it vault-0 --namespace hashicorp -- /bin/sh
+```
+
+Instruct Vault to treat Kubernetes as a trusted identity provider for authentication to Vault:
+
+```
+/ $ vault auth enable kubernetes
+```
+
+Configure Vault to know how to connect to the Kubernetes API (the API of the very same Kubernetes cluster where Vault is deployed) to authenticate requests made to Vault by a principal whose identity is tied to Kubernetes, such as a Kubernetes Service Account.
+
+```
+/ $ vault write auth/kubernetes/config \
+    token_reviewer_jwt="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
+    kubernetes_host="https://$KUBERNETES_PORT_443_TCP_ADDR:443" \
+    kubernetes_ca_cert=@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+```
+
 
 ### Configure Vault Policy
 
@@ -66,34 +92,34 @@ $ kubectl exec -it vault-0 --namespace hashicorp -- /bin/sh
 / $ vault write sys/policy/app policy=@/tmp/app-policy.hcl
 ```
 
-### Configure Vault permissions
-
-Open an interactive shell session in the Vault container:
-
-```
-$ kubectl exec -it vault-0 --namespace hashicorp -- /bin/sh
-```
-
-Instruct Vault to treat Kubernetes as a trusted identity provider for authentication to Vault:
+Then, grant the `confluent-sa` Service Account access to all secrets stored in path `/secret` 
+by binding it to the above policy. We’ll create the Service Account in the following step 
+when we prepare to deploy Confluent Platform, but we can perform the policy binding now 
+while we’re still in the Vault shell:
 
 ```
-/ $ vault auth enable kubernetes
+vault write auth/kubernetes/role/confluent-operator \
+    bound_service_account_names=confluent-sa \
+    bound_service_account_namespaces=confluent \
+    policies=app \
+    ttl=24h
 ```
 
-Configure Vault to know how to connect to the Kubernetes API (the API of the very same Kubernetes cluster where Vault is deployed) to authenticate requests made to Vault by a principal whose identity is tied to Kubernetes, such as a Kubernetes Service Account.
+
+## Deploy Confluent for Kubernetes
+
 
 ```
-/ $ vault write auth/kubernetes/config \
-    token_reviewer_jwt="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
-    kubernetes_host="https://$KUBERNETES_PORT_443_TCP_ADDR:443" \
-    kubernetes_ca_cert=@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+kubectl create namespace confluent
+kubectl create serviceaccount confluent-sa --namespace confluent
 ```
 
-Create role name `confluent-operator` to map k8s namespace confluent for the given default service account to use Vault policy `app`:
+```
+helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes
+```
 
-```
-vault write auth/kubernetes/role/confluent-operator bound_service_account_names=default \ bound_service_account_namespaces=confluent policies=app ttl=1h
-```
+The `confluent-sa` Service Account will be associated with our deployment of Confluent Platform, 
+enabling it to access the secrets that we stored in Vault.
 
 
 ## Write credentials in Vault
@@ -115,6 +141,8 @@ as desired.
 
 ```
 $ kubectl --namespace hashicorp cp $TUTORIAL_HOME/credentials vault-0:/tmp
+$ kubectl --namespace hashicorp cp $TUTORIAL_HOME/../../assets/certs/mds-publickey.txt vault-0:/tmp/credentials/rbac/
+$ kubectl --namespace hashicorp cp $TUTORIAL_HOME/../../assets/certs/mds-tokenkeypair.txt vault-0:/tmp/credentials/rbac/
 ```
 
 Open an interactive shell session in the Vault container:
@@ -142,6 +170,18 @@ cat /tmp/credentials/kafka-server/digest-jaas.conf | base64 | vault kv put /secr
 cat /tmp/credentials/license.txt | base64 | vault kv put /secret/license.txt license=-
 vault kv put secret/jksPassword.txt password=jksPassword=mystorepassword
 ```
+
+```
+cat /tmp/credentials/rbac/mdsPublicKey.pem | base64 | vault kv put /secret/mdsPublicKey.pem mdspublickey=-
+cat /tmp/credentials/rbac/mdsTokenKeyPair.pem | base64 | vault kv put /secret/mdsTokenKeyPair.pem mdstokenkeypair=-
+cat /tmp/credentials/rbac/ldap.txt | base64 | vault kv put /secret/ldap.txt ldapsimple=-
+cat /tmp/credentials/rbac/mds-client-connect.txt | base64 | vault kv put /secret/connect/bearer.txt bearer=-
+cat /tmp/credentials/rbac/mds-client-controlcenter.txt | base64 | vault kv put /secret/controlcenter/bearer.txt bearer=-
+cat /tmp/credentials/rbac/mds-client-kafka-rest.txt | base64 | vault kv put /secret/kafka/bearer.txt bearer=-
+cat /tmp/credentials/rbac/mds-client-ksql.txt | base64 | vault kv put /secret/ksqldb/bearer.txt bearer=-
+cat /tmp/credentials/rbac/mds-client-schemaregistry.txt | base64 | vault kv put /secret/schemaregistry/bearer.txt bearer=-
+```
+
 
 ## Write certificate stores in Vault
 
@@ -211,7 +251,7 @@ cat /tmp/jks/truststore.jks | base64 | vault kv put /secret/truststore.jks trust
 ## Deploy Confluent Platform (without RBAC)
 
 Read the main scenario example documentation to understand the concepts:
-https://github.com/confluentinc/confluent-kubernetes-examples/tree/master/security/production-secure-deploy
+https://github.com/confluentinc/confluent-kubernetes-examples/tree/master/security/secure-authn-encrypt-deploy
 
 Deploy Confluent Platform, using pod annotations to configure each component 
 to use credentials and certificate stores injected by Vault:
@@ -225,15 +265,127 @@ to use credentials and certificate stores injected by Vault:
 kubectl apply -f $TUTORIAL_HOME/confluent-platform-norbac-vault.yaml --namespace confluent
 ```
 
+Looking at `$TUTORIAL_HOME/confluent-platform-norbac-vault.yaml` for each CP component 
+CustomResource (CR), these are the configuration snippets that are relevant to this 
+scenario:
+
+```
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+spec:
+  ...
+  podTemplate:
+    serviceAccountName: confluent-sa
+    ...
+```
+
+The above CR snippet binds Kafka to the service account `confluent-sa`, which is the service account that is 
+authorized to read credentials from Vault.
+
+```
+podTemplate:
+    ...
+    annotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/agent-inject-status: update
+      vault.hashicorp.com/preserve-secret-case: "true"
+      vault.hashicorp.com/agent-inject-secret-jksPassword.txt: secret/jksPassword.txt
+      vault.hashicorp.com/agent-inject-template-jksPassword.txt: |
+        {{- with secret "secret/jksPassword.txt" -}}
+        {{ .Data.data.password }}
+        {{- end }}
+      ...
+      vault.hashicorp.com/role: confluent-operator
+```
+
+The above annotations will trigger all the magic that will result in the Vault secrets 
+being written to an in-memory filesystem dynamically mounted to the Confluent Platform 
+component worker container. The format of the files will match what’s required by 
+Confluent Platform.
+
+
 ## Deploy Confluent Platform (with RBAC)
 
 Read the main scenario example documentation to understand the concepts:
 https://github.com/confluentinc/confluent-kubernetes-examples/tree/master/security/production-secure-deploy
 
-There's two differences when using Directory path in container mechanism:
+Note: You'll need to use Kubernetes secrets for the KafkaRestClass authentication and MDS 
+dependency authentication. Confluent for Kubernetes 2.0.x does not support using 
+directory path in container for this specific credential.
 
-- You'll need to create a KafkaRetstClass with a Kubernetes secret for the credentials.
-  Confluent for Kubernetes 2.0.x does not support using directory path in container for 
-  this specific credential
-- You'll need to apply the required rolebindings for each component. 
+Create a KafkaRestClass object with a user that has cluster access to create rolebindings 
+for Confluent Platform RBAC. In this scenario, that is user `kafka`:
+
+```
+kubectl -n confluent create secret generic rest-credential \
+  --from-file=bearer.txt=$TUTORIAL_HOME/credentials/rbac/kafkarestclass/bearer.txt
+
+kubectl -n confluent apply -f $TUTORIAL_HOME/rbac/kafka-rest.yaml
+```
+
+### Deploy OpenLDAP
+
+This repo includes a Helm chart for [OpenLdap](https://github.com/osixia/docker-openldap). 
+The chart `values.yaml` includes the set of principal definitions that Confluent Platform 
+needs for RBAC.
+
+Deploy OpenLdap:
+
+```
+helm upgrade --install -f $TUTORIAL_HOME/../../assets/openldap/ldaps-rbac.yaml test-ldap $TUTORIAL_HOME/../../assets/openldap --namespace confluent
+```
+
+Validate that OpenLDAP is running:  
+
+```
+kubectl get pods -n confluent
+```
+
+### Deploy Confluent Platform
+
+```
+kubectl apply -f $TUTORIAL_HOME/rbac/confluent-platform-withrbac-vault.yaml --namespace confluent
+```
+
+## Tear Down
+
+```
+kubectl delete -f $TUTORIAL_HOME/confluent-platform-norbac-vault.yaml -n confluent
+
+kubectl delete -f $TUTORIAL_HOME/rbac/confluent-platform-withrbac-vault.yaml -n confluent
+
+helm delete confluent-operator -n confluent
+
+helm delete vault -n hashicorp
+
+```
+
+## Appendix: Troubleshooting
+
+In this scenario, for each Confluent Platform component pod, there will be multiple containers included:
+
+- CP component container (for example `connect`)
+- Vault agent (`vault-agent`)
+- CP component init container (`config-init-container`)
+- Vault agent init container (`vault-agent-init`)
+
+To get logs for debugging, you'll need to specify the container name. For example, to get 
+`connect` pod containerlogs:
+
+```
+kubectl logs connect-0 -c vault-agent-init
+kubectl logs connect-0 -c connect
+kubectl logs connect-0 -c vault-agent
+```
+
+If your pod is stuck in the init container state, then it might help to de-deploy the CP component:
+
+```
+kubectl delete -f component.yaml
+
+kubectl apply -f component.yaml
+```
+
 
