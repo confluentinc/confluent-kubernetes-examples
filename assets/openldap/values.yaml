@@ -17,81 +17,102 @@ env:
 
 ldifs:
   kafka.ldif: |-
-    dn: cn=kafka,dc=test,dc=com
+    dn: cn=kafka,{{ LDAP_BASE_DN }}
     userPassword: kafka-secret
     description: kafka user
     objectClass: simpleSecurityObject
     objectClass: organizationalRole
     cn: kafka
   erp.ldif: |-
-    dn: cn=erp,dc=test,dc=com
+    dn: cn=erp,{{ LDAP_BASE_DN }}
     userPassword: erp-secret
     description: erp user
     objectClass: simpleSecurityObject
     objectClass: organizationalRole
     cn: erp
   sr.ldif: |-
-    dn: cn=sr,dc=test,dc=com
+    dn: cn=sr,{{ LDAP_BASE_DN }}
     userPassword: sr-secret
     description: schema registry user
     objectClass: simpleSecurityObject
     objectClass: organizationalRole
     cn: sr
   c3.ldif: |-
-    dn: cn=c3,dc=test,dc=com
+    dn: cn=c3,{{ LDAP_BASE_DN }}
     userPassword: c3-secret
     description: control center user
     objectClass: simpleSecurityObject
     objectClass: organizationalRole
     cn: c3
   ksql.ldif: |-
-    dn: cn=ksql,dc=test,dc=com
+    dn: cn=ksql,{{ LDAP_BASE_DN }}
     userPassword: ksql-secret
     description: ksql user
     objectClass: simpleSecurityObject
     objectClass: organizationalRole
     cn: ksql
   connect.ldif: |-
-    dn: cn=connect,dc=test,dc=com
+    dn: cn=connect,{{ LDAP_BASE_DN }}
     userPassword: connect-secret
     description: connect user
     objectClass: simpleSecurityObject
     objectClass: organizationalRole
     cn: connect
   replicator.ldif: |-
-    dn: cn=replicator,dc=test,dc=com
+    dn: cn=replicator,{{ LDAP_BASE_DN }}
     userPassword: replicator-secret
     description: replicator user
     objectClass: simpleSecurityObject
     objectClass: organizationalRole
     cn: replicator
   c3-test.ldif: |-
-    dn: cn=testadmin,dc=test,dc=com
+    dn: cn=testadmin,{{ LDAP_BASE_DN }}
     userPassword: testadmin
     description: testadmin user
     objectClass: simpleSecurityObject
     objectClass: organizationalRole
     cn: testadmin
   08_c3-groupou.ldif: |-
-    dn: ou=groups,dc=test,dc=com
-    objectClass: organizationalUnit
-    ou: Groups
-  09_c3-usersou.ldif: |-
-    dn: ou=users,dc=test,dc=com
+    dn: ou=users,{{ LDAP_BASE_DN }}
     objectClass: organizationalUnit
     ou: Users
-  10_kafkadevelopersgroup.ldif: |-
-    dn: cn=KafkaDevelopers,ou=groups,dc=test,dc=com
+
+    dn: ou=groups,{{ LDAP_BASE_DN }}
+    objectClass: organizationalUnit
+    ou: Groups
+  09_c3usersgroup.ldif: |-
+    dn: cn=c3users,ou=groups,{{ LDAP_BASE_DN }}
     objectClass: top
     objectClass: posixGroup
-    cn: KafkaDevelopers
+    cn: c3users
     gidNumber: 5000
-  11_controlcenteradmin.ldif: |-
-    dn: cn=controlcenterAdmin,ou=users,dc=test,dc=com
+  10_readonlyusersgroup.ldif: |-
+    dn: cn=readonlyusers,ou=groups,{{ LDAP_BASE_DN }}
+    objectClass: top
+    objectClass: posixGroup
+    cn: readonlyusers
+    gidNumber: 5000
+  11_alice.ldif:  |-
+    dn: cn=alice,ou=users,{{ LDAP_BASE_DN }}
     objectClass: inetOrgPerson
     objectClass: posixAccount
     objectClass: shadowAccount
-    objectClass: organizationalRole ##  maybe remove 
+    uid: alice
+    sn: LookingGlass
+    givenName: Alice
+    cn: alice
+    displayName: Alice LookingGlass
+    uidNumber: 10000
+    gidNumber: 5000
+    userPassword: alice-secret
+    gecos: alice
+    loginShell: /bin/bash
+    homeDirectory: /home/alice
+  12_controlcenterAdmin.ldif:  |-
+    dn: cn=controlcenterAdmin,ou=users,{{ LDAP_BASE_DN }}
+    objectClass: inetOrgPerson
+    objectClass: posixAccount
+    objectClass: shadowAccount
     uid: controlcenterAdmin
     sn: Sheen
     givenName: ControlCenterAdmin
@@ -100,11 +121,13 @@ ldifs:
     uidNumber: 10017
     gidNumber: 5000
     userPassword: controlcenterAdmin
-    gecos: controlcenterAdmin
-    loginShell: /bin/bash
-    homeDirectory: /home/controlcenterAdmin
-  12_addcontrolcenteradmin.ldif: |-
-    dn: cn=KafkaDevelopers,ou=groups,dc=test,dc=com
+  12_addgroup.ldif:  |-
+    dn: cn=c3users,ou=groups,{{ LDAP_BASE_DN }}
     changetype: modify
     add: memberuid
-    memberuid: cn=controlcenterAdmin,ou=users,dc=test,dc=com
+    memberuid: cn=12_controlcenterAdmin,ou=users,{{ LDAP_BASE_DN }}
+
+    dn: cn=readonlyusers,ou=groups,{{ LDAP_BASE_DN }}
+    changetype: modify
+    add: memberuid
+    memberuid: cn=alice,ou=users,{{ LDAP_BASE_DN }}

@@ -59,6 +59,11 @@ metadata:
   name: controlcenter
   namespace: confluent
 spec:
+  license:
+    globalLicense: true
+  configOverrides:
+    log4j: 
+      - log4j.rootLogger=DEBUG, stdout
   replicas: 1
   image:
     application: confluentinc/cp-enterprise-control-center-operator:6.1.0.0
@@ -67,26 +72,28 @@ spec:
   authentication:
     type: ldap
     ldap:
-      roles: [KafkaDevelopers]
+      roles: [c3users,readonlyusers]
+      restrictedRoles: [readonlyusers]
       property:
         useLdaps : "false"
+        debug: "true"
         contextFactory: "com.sun.jndi.ldap.LdapCtxFactory"
         hostname: "ldap.confluent.svc.cluster.local"
         port: "389"
-        bindDn: "cn=mds,dc=test,dc=com"
-        bindPassword: "Developer!"
+        bindDn: "cn=admin,dc=test,dc=com"
+        bindPassword: "confluentrox"
         authenticationMethod: "simple"
-        forceBindingLogin: "true"
+        forceBindingLogin: "false"
         userBaseDn: "ou=users,dc=test,dc=com"
-        userObjectClass: "inetOrgPerson" # maybe
-        userRdnAttribute: "sAMAccountName"
-        userIdAttribute: "sAMAccountName"
+        userObjectClass: "inetOrgPerson" 
+        userRdnAttribute: "uid"
+        userIdAttribute: "cn"
         roleBaseDn: "ou=groups,dc=test,dc=com"
         roleNameAttribute: "cn"
-        roleMemberAttribute: "member"
-        roleObjectClass: "organizationalRole" # maybe 
+        roleMemberAttribute: "memberUid"
+        roleObjectClass: "posixGroup" 
         userPasswordAttribute: "userPassword"
-        roleObjectClass: "group" # maybe 
+
   dependencies:
     schemaRegistry:
       url: http://schemaregistry.confluent.svc.cluster.local:8081
