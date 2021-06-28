@@ -215,7 +215,7 @@ Use Control Center to monitor the Confluent Platform, and see the created topic 
 
 #. Users: 
 
-Full Control: Username:Jame Password:james-sceret
+Full Control: Username:Jame Password:james-sceret  
 Restricted Control: Username:alice Password:alice-sceret
 
 #. Check that the ``elastic-0`` topic was created and that messages are being produced to the topic.
