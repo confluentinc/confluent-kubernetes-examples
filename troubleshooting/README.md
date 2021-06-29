@@ -162,3 +162,13 @@ spec:
       tls:
         enabled: true
 ```
+
+### Operation cannot be fulfilled, object has been modified Warning
+ 
+You can ignore the following `Warning` as the Confluent Operator will automatically rework to apply the changes. 
+In most scenarios, these are benign and will go away (no more logs). 
+If you keep seeing the same type of `Warning` repeatedly, you should create a support ticket for further investigation.
+
+``` 
+Operation cannot be fulfilled xxxx, the object has been modified please apply your changes to the latest version and try again.
+```
