@@ -28,7 +28,7 @@ Running a Vault server in development is automatically initialized and unsealed.
 $ kubectl create ns hashicorp
 
 $ helm repo add hashicorp https://helm.releases.hashicorp.com
-$ helm upgrade --install vault --set='server.dev.enabled=true' hashicorp/vault --namespace hashicorp
+$ helm upgrade --install vault --set='server.dev.enabled=true' hashicorp/vault -n hashicorp
 ```
 
 Once installed, you should see two pods:
@@ -46,7 +46,7 @@ vault-agent-injector-85b7b88795-q5vcp   1/1     Running   0          24s
 Open an interactive shell session in the Vault container:
 
 ```
-$ kubectl exec -it vault-0 --namespace hashicorp -- /bin/sh
+$ kubectl exec -it vault-0 -n hashicorp -- /bin/sh
 ```
 
 Instruct Vault to treat Kubernetes as a trusted identity provider for authentication to Vault:
@@ -81,13 +81,13 @@ Copy the app policy file to the Vault pod:
 
 ```
 ## Coopy the file to the /tmp location on the Vault pod disk
-$ kubectl --namespace hashicorp cp $TUTORIAL_HOME/app-policy.hcl vault-0:/tmp
+$ kubectl -n hashicorp cp $TUTORIAL_HOME/app-policy.hcl vault-0:/tmp
 ```
 
 Open an interactive shell session in the Vault container and apply the policy:
 
 ```
-$ kubectl exec -it vault-0 --namespace hashicorp -- /bin/sh
+$ kubectl exec -it vault-0 -n hashicorp -- /bin/sh
 
 / $ vault write sys/policy/app policy=@/tmp/app-policy.hcl
 ```
@@ -111,7 +111,7 @@ vault write auth/kubernetes/role/confluent-operator \
 
 ```
 kubectl create namespace confluent
-kubectl create serviceaccount confluent-sa --namespace confluent
+kubectl create serviceaccount confluent-sa -n confluent
 ```
 
 ```
@@ -140,15 +140,15 @@ this scenario example, you'll use `/tmp` as the parent directory. You can change
 as desired.
 
 ```
-$ kubectl --namespace hashicorp cp $TUTORIAL_HOME/credentials vault-0:/tmp
-$ kubectl --namespace hashicorp cp $TUTORIAL_HOME/../../assets/certs/mds-publickey.txt vault-0:/tmp/credentials/rbac/
-$ kubectl --namespace hashicorp cp $TUTORIAL_HOME/../../assets/certs/mds-tokenkeypair.txt vault-0:/tmp/credentials/rbac/
+$ kubectl -n hashicorp cp $TUTORIAL_HOME/credentials vault-0:/tmp
+$ kubectl -n hashicorp cp $TUTORIAL_HOME/../../assets/certs/mds-publickey.txt vault-0:/tmp/credentials/rbac/
+$ kubectl -n hashicorp cp $TUTORIAL_HOME/../../assets/certs/mds-tokenkeypair.txt vault-0:/tmp/credentials/rbac/
 ```
 
 Open an interactive shell session in the Vault container:
 
 ```
-$ kubectl exec -it vault-0 --namespace hashicorp -- /bin/sh
+$ kubectl exec -it vault-0 -n hashicorp -- /bin/sh
 ```
 
 Write the credentials to Vault:
@@ -230,13 +230,13 @@ this scenario example, you'll use `/tmp` as the parent directory. You can change
 as desired.
 
 ```
-$ kubectl --namespace hashicorp cp $TUTORIAL_HOME/jks vault-0:/tmp
+$ kubectl -n hashicorp cp $TUTORIAL_HOME/jks vault-0:/tmp
 ```
 
 Open an interactive shell session in the Vault container:
 
 ```
-$ kubectl exec -it vault-0 --namespace hashicorp -- /bin/sh
+$ kubectl exec -it vault-0 -n hashicorp -- /bin/sh
 ```
 
 Write the certificate stores to Vault:
@@ -262,7 +262,7 @@ to use credentials and certificate stores injected by Vault:
 - License configured for all CP component (not using the Operator license)
 
 ```
-kubectl apply -f $TUTORIAL_HOME/confluent-platform-norbac-vault.yaml --namespace confluent
+kubectl apply -f $TUTORIAL_HOME/confluent-platform-norbac-vault.yaml -n confluent
 ```
 
 Looking at `$TUTORIAL_HOME/confluent-platform-norbac-vault.yaml` for each CP component 
@@ -314,9 +314,11 @@ https://github.com/confluentinc/confluent-kubernetes-examples/tree/master/securi
 Note: There are two differences from the above scenario, when using "Directory in path container":
 
 - You'll need to use Kubernetes secrets for the KafkaRestClass authentication. Confluent for Kubernetes 
-2.0.x does not support using directory path in container for this specific credential.
-- You'll need to specify the RBAC rolebindings for the CP components. These will not be created 
-automatically.
+2.0.x does not support using directory path in container for this specific credential. Instructions foe
+how to do this are immediately below.
+- You'll need to apply the RBAC rolebindings for the CP components. These will not be created 
+automatically. You'll do this by applying the CustomResources defined in 
+`$TUTORIAL_HOME/rbac/internal-rolebinding.yaml`, in a later step in this scenario workflow.
 
 Create a KafkaRestClass object with a user that has cluster access to create rolebindings 
 for Confluent Platform RBAC. In this scenario, that is user `kafka`:
@@ -337,7 +339,7 @@ needs for RBAC.
 Deploy OpenLdap:
 
 ```
-helm upgrade --install -f $TUTORIAL_HOME/../../assets/openldap/ldaps-rbac.yaml test-ldap $TUTORIAL_HOME/../../assets/openldap --namespace confluent
+helm upgrade --install -f $TUTORIAL_HOME/../../assets/openldap/ldaps-rbac.yaml test-ldap $TUTORIAL_HOME/../../assets/openldap -n confluent
 ```
 
 Validate that OpenLDAP is running:  
@@ -351,28 +353,41 @@ kubectl get pods -n confluent
 Deploy Zookeeper and Kafka first:
 
 ```
-kubectl apply -f $TUTORIAL_HOME/rbac/zk_kafka.yaml --namespace confluent
+kubectl apply -f $TUTORIAL_HOME/rbac/zk_kafka.yaml -n confluent
 ```
 
 Create the RBAC Rolebindings needed for the CP components:
 
 ```
-kubectl apply -f $TUTORIAL_HOME/rbac/internal-rolebinding.yaml --namespace confluent
+kubectl apply -f $TUTORIAL_HOME/rbac/internal-rolebinding.yaml -n confluent
 ```
 
 Deploy the CP components:
 
 ```
-kubectl apply -f $TUTORIAL_HOME/rbac/cp_component.yaml --namespace confluent
+kubectl apply -f $TUTORIAL_HOME/rbac/cp_component.yaml -n confluent
 ```
 
 
 ## Tear Down
 
+This set of commands will remove all Kubernetes objects that you created in this scenario. This
+will in turn delete the Confluent Platform and Confluent for Kubernetes deployment.
+
 ```
 kubectl delete -f $TUTORIAL_HOME/confluent-platform-norbac-vault.yaml -n confluent
 
-kubectl delete -f $TUTORIAL_HOME/rbac/confluent-platform-withrbac-vault.yaml -n confluent
+kubectl delete -f $TUTORIAL_HOME/rbac/cp_component.yaml -n confluent
+
+kubectl delete -f $TUTORIAL_HOME/rbac/internal-rolebinding.yaml -n confluent
+
+kubectl delete -f $TUTORIAL_HOME/rbac/kafka-rest.yaml -n confluent
+
+kubectl delete -f $TUTORIAL_HOME/rbac/rbac/zk_kafka.yaml -n confluent
+
+kubectl delete secret rest-credential -n confluent
+
+helm delete test-ldap -n confluent
 
 helm delete confluent-operator -n confluent
 
@@ -398,7 +413,7 @@ kubectl logs connect-0 -c connect
 kubectl logs connect-0 -c vault-agent
 ```
 
-If your pod is stuck in the init container state, then it might help to de-deploy the CP component:
+If your pod is stuck in the init container state, then it might help to re-deploy the CP component:
 
 ```
 kubectl delete -f component.yaml
