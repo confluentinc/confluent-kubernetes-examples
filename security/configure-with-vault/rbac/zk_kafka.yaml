@@ -1,0 +1,207 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Zookeeper
+metadata:
+  name: zookeeper
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-zookeeper-operator:6.1.1.0
+    init: confluentinc/cp-init-container-operator:6.1.1.0
+  dataVolumeCapacity: 10Gi
+  logVolumeCapacity: 10Gi
+  authentication:
+    type: digest
+    jaasConfigPassThrough:
+      directoryPathInContainer: /vault/secrets/jaas
+  tls:
+    directoryPathInContainer: /vault/secrets
+  podTemplate:
+    serviceAccountName: confluent-sa
+    annotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/agent-inject-status: update
+      vault.hashicorp.com/preserve-secret-case: "true"
+      vault.hashicorp.com/agent-inject-secret-jksPassword.txt: secret/jksPassword.txt
+      vault.hashicorp.com/agent-inject-template-jksPassword.txt: |
+        {{- with secret "secret/jksPassword.txt" -}}
+        {{ .Data.data.password }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-keystore.jks: secret/keystore.jks
+      vault.hashicorp.com/agent-inject-template-keystore.jks: |
+        {{- with secret "secret/keystore.jks" -}}
+        {{ .Data.data.keystore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-truststore.jks: secret/truststore.jks
+      vault.hashicorp.com/agent-inject-template-truststore.jks: |
+        {{- with secret "secret/truststore.jks" -}}
+        {{ .Data.data.truststore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-zk-server-digest: secret/zookeeper/digest-jaas.conf
+      vault.hashicorp.com/secret-volume-path-zk-server-digest: /vault/secrets/jaas
+      vault.hashicorp.com/agent-inject-file-zk-server-digest: digest-jaas.conf
+      vault.hashicorp.com/agent-inject-template-zk-server-digest: |
+        {{- with secret "secret/zookeeper/digest-jaas.conf" -}}
+        {{ .Data.data.digest | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/role: confluent-operator
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server-operator:6.1.1.0
+    init: confluentinc/cp-init-container-operator:6.1.1.0
+  dataVolumeCapacity: 10Gi
+  tls:
+    directoryPathInContainer: /vault/secrets
+  license:
+    directoryPathInContainer: /vault/secrets
+  authorization:
+    type: rbac
+    superUsers:
+    - User:kafka
+  services:
+    mds:
+      tls:
+        enabled: true
+      tokenKeyPair:
+        directoryPathInContainer: /vault/secrets
+      provider:
+        type: ldap
+        ldap:
+          address: ldap://ldap.confluent.svc.cluster.local:389
+          authentication:
+            type: simple
+            simple:
+              directoryPathInContainer: /vault/secrets
+          configurations:
+            groupNameAttribute: cn
+            groupObjectClass: group
+            groupMemberAttribute: member
+            groupMemberAttributePattern: CN=(.*),DC=test,DC=com
+            groupSearchBase: dc=test,dc=com
+            userNameAttribute: cn
+            userMemberOfAttributePattern: CN=(.*),DC=test,DC=com
+            userObjectClass: organizationalRole
+            userSearchBase: dc=test,dc=com
+  podTemplate:
+    serviceAccountName: confluent-sa
+    annotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/agent-inject-status: update
+      vault.hashicorp.com/preserve-secret-case: "true"
+      vault.hashicorp.com/agent-inject-secret-jksPassword.txt: secret/jksPassword.txt
+      vault.hashicorp.com/agent-inject-template-jksPassword.txt: |
+        {{- with secret "secret/jksPassword.txt" -}}
+        {{ .Data.data.password }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-keystore.jks: secret/keystore.jks
+      vault.hashicorp.com/agent-inject-template-keystore.jks: |
+        {{- with secret "secret/keystore.jks" -}}
+        {{ .Data.data.keystore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-truststore.jks: secret/truststore.jks
+      vault.hashicorp.com/agent-inject-template-truststore.jks: |
+        {{- with secret "secret/truststore.jks" -}}
+        {{ .Data.data.truststore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-kafka-sasl-plain: secret/kafka-server/plain-jaas.conf
+      vault.hashicorp.com/secret-volume-path-kafka-sasl-plain: /vault/secrets/jaas
+      vault.hashicorp.com/agent-inject-file-kafka-sasl-plain: plain-jaas.conf #must be with this name
+      vault.hashicorp.com/agent-inject-template-kafka-sasl-plain: |
+        {{- with secret "secret/kafka-server/plain-jaas.conf" -}}
+        {{ .Data.data.plainjaas | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-kafka-apikeys: secret/kafka-server/apikeys.json
+      vault.hashicorp.com/secret-volume-path-kafka-apikeys: /vault/secrets/jaas
+      vault.hashicorp.com/agent-inject-file-kafka-apikeys: apikeys.json #must be with this name
+      vault.hashicorp.com/agent-inject-template-kafka-apikeys: |
+        {{- with secret "secret/kafka-server/apikeys.json" -}}
+        {{ .Data.data.apikeys | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-zk-digest: secret/kafka-server/digest-jaas.conf
+      vault.hashicorp.com/secret-volume-path-zk-digest: /vault/secrets/jaas
+      vault.hashicorp.com/agent-inject-file-zk-digest: digest-jaas.conf #must be with this name
+      vault.hashicorp.com/agent-inject-template-zk-digest: |
+        {{- with secret "secret/kafka-server/digest-jaas.conf" -}}
+        {{ .Data.data.digestjaas | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-kafka-client-sasl-plain: secret/kafka-client/plain-jaas.conf
+      vault.hashicorp.com/secret-volume-path-kafka-client-sasl-plain: /vault/secrets/client
+      vault.hashicorp.com/agent-inject-file-kafka-client-sasl-plain: plain-jaas.conf #must be with this name
+      vault.hashicorp.com/agent-inject-template-kafka-client-sasl-plain: |
+        {{- with secret "secret/kafka-client/plain-jaas.conf" -}}
+        {{ .Data.data.plainjaas | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-license: secret/license.txt
+      vault.hashicorp.com/agent-inject-file-license: license.txt
+      vault.hashicorp.com/agent-inject-template-license: |
+        {{- with secret "secret/license.txt" -}}
+        {{ .Data.data.license | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-mds-publickey: secret/mdsPublicKey.pem
+      vault.hashicorp.com/agent-inject-file-mds-publickey: mdsPublicKey.pem # must be with this name
+      vault.hashicorp.com/agent-inject-template-mds-publickey: |
+        {{- with secret "secret/mdsPublicKey.pem" -}}
+        {{ .Data.data.mdspublickey | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-mds-tokenkeypair: secret/mdsTokenKeyPair.pem
+      vault.hashicorp.com/agent-inject-file-mds-tokenkeypair: mdsTokenKeyPair.pem # must be with this name
+      vault.hashicorp.com/agent-inject-template-mds-tokenkeypair: |
+        {{- with secret "secret/mdsTokenKeyPair.pem" -}}
+        {{ .Data.data.mdstokenkeypair | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-ldap-simple: secret/ldap.txt
+      vault.hashicorp.com/agent-inject-file-ldap-simple: ldap.txt # must be with this name
+      vault.hashicorp.com/agent-inject-template-ldap-simple: |
+        {{- with secret "secret/ldap.txt" -}}
+        {{ .Data.data.ldapsimple | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-kafka-rest-bearer: secret/kafka/bearer.txt
+      vault.hashicorp.com/agent-inject-file-kafka-rest-bearer: bearer.txt # must be with this name
+      vault.hashicorp.com/agent-inject-template-kafka-rest-bearer: |
+        {{- with secret "secret/kafka/bearer.txt" -}}
+        {{ .Data.data.bearer | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/role: confluent-operator
+  listeners:
+    external:
+      authentication:
+        type: plain
+        jaasConfigPassThrough:
+          directoryPathInContainer: /vault/secrets/jaas
+      tls:
+        enabled: true
+    internal:
+      authentication:
+        type: plain
+        jaasConfigPassThrough:
+          directoryPathInContainer: /vault/secrets/jaas
+      tls:
+        enabled: true
+  metricReporter:
+    enabled: true
+    bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+    authentication:
+      type: plain
+      jaasConfigPassThrough:
+        directoryPathInContainer: /vault/secrets/client
+    tls:
+      enabled: true
+  dependencies:
+    zookeeper:
+      endpoint: zookeeper.confluent.svc.cluster.local:2182
+      authentication:
+        type: digest
+        jaasConfigPassThrough:
+          directoryPathInContainer: /vault/secrets/jaas
+      tls:
+        enabled: true
+    kafkaRest:
+      authentication:
+        type: bearer
+        bearer:
+          directoryPathInContainer: /vault/secrets

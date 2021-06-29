@@ -311,9 +311,12 @@ Confluent Platform.
 Read the main scenario example documentation to understand the concepts:
 https://github.com/confluentinc/confluent-kubernetes-examples/tree/master/security/production-secure-deploy
 
-Note: You'll need to use Kubernetes secrets for the KafkaRestClass authentication and MDS 
-dependency authentication. Confluent for Kubernetes 2.0.x does not support using 
-directory path in container for this specific credential.
+Note: There are two differences from the above scenario, when using "Directory in path container":
+
+- You'll need to use Kubernetes secrets for the KafkaRestClass authentication. Confluent for Kubernetes 
+2.0.x does not support using directory path in container for this specific credential.
+- You'll need to specify the RBAC rolebindings for the CP components. These will not be created 
+automatically.
 
 Create a KafkaRestClass object with a user that has cluster access to create rolebindings 
 for Confluent Platform RBAC. In this scenario, that is user `kafka`:
@@ -345,9 +348,24 @@ kubectl get pods -n confluent
 
 ### Deploy Confluent Platform
 
+Deploy Zookeeper and Kafka first:
+
 ```
-kubectl apply -f $TUTORIAL_HOME/rbac/confluent-platform-withrbac-vault.yaml --namespace confluent
+kubectl apply -f $TUTORIAL_HOME/rbac/zk_kafka.yaml --namespace confluent
 ```
+
+Create the RBAC Rolebindings needed for the CP components:
+
+```
+kubectl apply -f $TUTORIAL_HOME/rbac/internal-rolebinding.yaml --namespace confluent
+```
+
+Deploy the CP components:
+
+```
+kubectl apply -f $TUTORIAL_HOME/rbac/cp_component.yaml --namespace confluent
+```
+
 
 ## Tear Down
 
