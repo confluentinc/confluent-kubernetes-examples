@@ -83,9 +83,9 @@ fsGroup:
       max: 1005
 ...
 runAsUser:
-   # Configure allowed user ID to be between 1001 and 1005
+   # Configure allowed user ID to be between 1000 and 1005
   type: MustRunAsRange
-  uidRangeMin: 1001
+  uidRangeMin: 1000
   uidRangeMax: 1005
 ...
 

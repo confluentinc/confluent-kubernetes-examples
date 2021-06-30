@@ -1,0 +1,598 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Zookeeper
+metadata:
+  name: zookeeper
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-zookeeper-operator:6.1.1.0
+    init: confluentinc/cp-init-container-operator:6.1.1.0
+  dataVolumeCapacity: 10Gi
+  logVolumeCapacity: 10Gi
+  authentication:
+    type: digest
+    jaasConfigPassThrough:
+      directoryPathInContainer: /vault/secrets/jaas
+  tls:
+    directoryPathInContainer: /vault/secrets
+  podTemplate:
+    serviceAccountName: confluent-sa
+    annotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/agent-inject-status: update
+      vault.hashicorp.com/preserve-secret-case: "true"
+      vault.hashicorp.com/agent-inject-secret-jksPassword.txt: secret/jksPassword.txt
+      vault.hashicorp.com/agent-inject-template-jksPassword.txt: |
+        {{- with secret "secret/jksPassword.txt" -}}
+        {{ .Data.data.password }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-keystore.jks: secret/keystore.jks
+      vault.hashicorp.com/agent-inject-template-keystore.jks: |
+        {{- with secret "secret/keystore.jks" -}}
+        {{ .Data.data.keystore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-truststore.jks: secret/truststore.jks
+      vault.hashicorp.com/agent-inject-template-truststore.jks: |
+        {{- with secret "secret/truststore.jks" -}}
+        {{ .Data.data.truststore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-zk-server-digest: secret/zookeeper/digest-jaas.conf
+      vault.hashicorp.com/secret-volume-path-zk-server-digest: /vault/secrets/jaas
+      vault.hashicorp.com/agent-inject-file-zk-server-digest: digest-jaas.conf
+      vault.hashicorp.com/agent-inject-template-zk-server-digest: |
+        {{- with secret "secret/zookeeper/digest-jaas.conf" -}}
+        {{ .Data.data.digest | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/role: confluent-operator
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server-operator:6.1.1.0
+    init: confluentinc/cp-init-container-operator:6.1.1.0
+  dataVolumeCapacity: 10Gi
+  tls:
+    directoryPathInContainer: /vault/secrets
+  license:
+    directoryPathInContainer: /vault/secrets
+  podTemplate:
+    serviceAccountName: confluent-sa
+    annotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/agent-inject-status: update
+      vault.hashicorp.com/preserve-secret-case: "true"
+      vault.hashicorp.com/agent-inject-secret-jksPassword.txt: secret/jksPassword.txt
+      vault.hashicorp.com/agent-inject-template-jksPassword.txt: |
+        {{- with secret "secret/jksPassword.txt" -}}
+        {{ .Data.data.password }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-keystore.jks: secret/keystore.jks
+      vault.hashicorp.com/agent-inject-template-keystore.jks: |
+        {{- with secret "secret/keystore.jks" -}}
+        {{ .Data.data.keystore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-truststore.jks: secret/truststore.jks
+      vault.hashicorp.com/agent-inject-template-truststore.jks: |
+        {{- with secret "secret/truststore.jks" -}}
+        {{ .Data.data.truststore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-kafka-sasl-plain: secret/kafka-server/plain-jaas.conf
+      vault.hashicorp.com/secret-volume-path-kafka-sasl-plain: /vault/secrets/jaas
+      vault.hashicorp.com/agent-inject-file-kafka-sasl-plain: plain-jaas.conf
+      vault.hashicorp.com/agent-inject-template-kafka-sasl-plain: |
+        {{- with secret "secret/kafka-server/plain-jaas.conf" -}}
+        {{ .Data.data.plainjaas | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-kafka-apikeys: secret/kafka-server/apikeys.json
+      vault.hashicorp.com/secret-volume-path-kafka-apikeys: /vault/secrets/jaas
+      vault.hashicorp.com/agent-inject-file-kafka-apikeys: apikeys.json
+      vault.hashicorp.com/agent-inject-template-kafka-apikeys: |
+        {{- with secret "secret/kafka-server/apikeys.json" -}}
+        {{ .Data.data.apikeys | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-zk-digest: secret/kafka-server/digest-jaas.conf
+      vault.hashicorp.com/secret-volume-path-zk-digest: /vault/secrets/jaas
+      vault.hashicorp.com/agent-inject-file-zk-digest: digest-jaas.conf
+      vault.hashicorp.com/agent-inject-template-zk-digest: |
+        {{- with secret "secret/kafka-server/digest-jaas.conf" -}}
+        {{ .Data.data.digestjaas | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-kafka-client-sasl-plain: secret/kafka-client/plain-jaas.conf
+      vault.hashicorp.com/secret-volume-path-kafka-client-sasl-plain: /vault/secrets/client
+      vault.hashicorp.com/agent-inject-file-kafka-client-sasl-plain: plain-jaas.conf
+      vault.hashicorp.com/agent-inject-template-kafka-client-sasl-plain: |
+        {{- with secret "secret/kafka-client/plain-jaas.conf" -}}
+        {{ .Data.data.plainjaas | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-license: secret/license.txt
+      vault.hashicorp.com/agent-inject-file-license: license.txt
+      vault.hashicorp.com/agent-inject-template-license: |
+        {{- with secret "secret/license.txt" -}}
+        {{ .Data.data.license | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/role: confluent-operator
+  listeners:
+    external:
+      authentication:
+        type: plain
+        jaasConfigPassThrough:
+          directoryPathInContainer: /vault/secrets/jaas
+      tls:
+        enabled: true
+    internal:
+      authentication:
+        type: plain
+        jaasConfigPassThrough:
+          directoryPathInContainer: /vault/secrets/jaas
+      tls:
+        enabled: true
+  metricReporter:
+    enabled: true
+    bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+    authentication:
+      type: plain
+      jaasConfigPassThrough:
+        directoryPathInContainer: /vault/secrets/client
+    tls:
+      enabled: true
+  dependencies:
+    zookeeper:
+      endpoint: zookeeper.confluent.svc.cluster.local:2182
+      authentication:
+        type: digest
+        jaasConfigPassThrough:
+          directoryPathInContainer: /vault/secrets/jaas
+      tls:
+        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+spec:
+  replicas: 2
+  image:
+    application: confluentinc/cp-server-connect-operator:6.1.1.0
+    init: confluentinc/cp-init-container-operator:6.1.1.0
+  authentication:
+    type: basic
+    basic:
+      directoryPathInContainer: /vault/secrets
+  tls:
+    directoryPathInContainer: /vault/secrets
+  license:
+    directoryPathInContainer: /vault/secrets
+  podTemplate:
+    serviceAccountName: confluent-sa
+    annotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/agent-inject-status: update
+      vault.hashicorp.com/preserve-secret-case: "true"
+      vault.hashicorp.com/agent-inject-secret-jksPassword.txt: secret/jksPassword.txt
+      vault.hashicorp.com/agent-inject-template-jksPassword.txt: |
+        {{- with secret "secret/jksPassword.txt" -}}
+        {{ .Data.data.password }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-keystore.jks: secret/keystore.jks
+      vault.hashicorp.com/agent-inject-template-keystore.jks: |
+        {{- with secret "secret/keystore.jks" -}}
+        {{ .Data.data.keystore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-truststore.jks: secret/truststore.jks
+      vault.hashicorp.com/agent-inject-template-truststore.jks: |
+        {{- with secret "secret/truststore.jks" -}}
+        {{ .Data.data.truststore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-connect-basic: secret/connect/basic.txt
+      vault.hashicorp.com/secret-volume-path-connect-basic: /vault/secrets
+      vault.hashicorp.com/agent-inject-file-connect-basic: basic.txt # this are mandatory names
+      vault.hashicorp.com/agent-inject-template-connect-basic: |
+        {{- with secret "secret/connect/basic.txt" -}}
+        {{ .Data.data.basic | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-schemaregistry-client-basic: secret/schemaregistry-client/basic.txt
+      vault.hashicorp.com/secret-volume-path-schemaregistry-client-basic: /vault/secrets/schemaregistry
+      vault.hashicorp.com/agent-inject-file-schemaregistry-client-basic: basic.txt # this are mandatory names
+      vault.hashicorp.com/agent-inject-template-schemaregistry-client-basic: |
+        {{- with secret "secret/schemaregistry-client/basic.txt" -}}
+        {{ .Data.data.basic | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-kafka-client-sasl-plain: secret/kafka-client/plain-jaas.conf
+      vault.hashicorp.com/secret-volume-path-kafka-client-sasl-plain: /vault/secrets/jaas
+      vault.hashicorp.com/agent-inject-file-kafka-client-sasl-plain: plain-jaas.conf # this are mandatory names
+      vault.hashicorp.com/agent-inject-template-kafka-client-sasl-plain: |
+        {{- with secret "secret/kafka-client/plain-jaas.conf" -}}
+        {{ .Data.data.plainjaas | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-license: secret/license.txt
+      vault.hashicorp.com/agent-inject-file-license: license.txt # this are mandatory names
+      vault.hashicorp.com/agent-inject-template-license: |
+        {{- with secret "secret/license.txt" -}}
+        {{ .Data.data.license | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/role: confluent-operator
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: plain
+        jaasConfigPassThrough:
+          directoryPathInContainer: /vault/secrets/jaas
+      tls:
+        enabled: true
+    schemaRegistry:
+      url: https://schemaregistry.confluent.svc.cluster.local:8081
+      authentication:
+        type: basic
+        basic:
+          directoryPathInContainer: /vault/secrets/schemaregistry
+      tls:
+        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KsqlDB
+metadata:
+  name: ksqldb
+spec:
+  replicas: 2
+  image:
+    application: confluentinc/cp-ksqldb-server-operator:6.1.1.0
+    init: confluentinc/cp-init-container-operator:6.1.1.0
+  dataVolumeCapacity: 10Gi
+  authentication:
+    type: basic
+    basic:
+      directoryPathInContainer: /vault/secrets
+  tls:
+    directoryPathInContainer: /vault/secrets
+  license:
+    directoryPathInContainer: /vault/secrets
+  podTemplate:
+    serviceAccountName: confluent-sa
+    annotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/agent-inject-status: update
+      vault.hashicorp.com/preserve-secret-case: "true"
+      vault.hashicorp.com/agent-inject-secret-jksPassword.txt: secret/jksPassword.txt
+      vault.hashicorp.com/agent-inject-template-jksPassword.txt: |
+        {{- with secret "secret/jksPassword.txt" -}}
+        {{ .Data.data.password }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-keystore.jks: secret/keystore.jks
+      vault.hashicorp.com/agent-inject-template-keystore.jks: |
+        {{- with secret "secret/keystore.jks" -}}
+        {{ .Data.data.keystore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-truststore.jks: secret/truststore.jks
+      vault.hashicorp.com/agent-inject-template-truststore.jks: |
+        {{- with secret "secret/truststore.jks" -}}
+        {{ .Data.data.truststore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-ksqldb.txt: secret/ksqldb/basic.txt
+      vault.hashicorp.com/secret-volume-path-ksqldb.txt: /vault/secrets
+      vault.hashicorp.com/agent-inject-file-ksqldb.txt: basic.txt # this are mandatory names
+      vault.hashicorp.com/agent-inject-template-ksqldb.txt: |
+        {{- with secret "secret/ksqldb/basic.txt" -}}
+        {{ .Data.data.basic | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-kafka-client-sasl-plain: secret/kafka-client/plain-jaas.conf
+      vault.hashicorp.com/secret-volume-path-kafka-client-sasl-plain: /vault/secrets/jaas
+      vault.hashicorp.com/agent-inject-file-kafka-client-sasl-plain: plain-jaas.conf # this are mandatory names
+      vault.hashicorp.com/agent-inject-template-kafka-client-sasl-plain: |
+        {{- with secret "secret/kafka-client/plain-jaas.conf" -}}
+        {{ .Data.data.plainjaas | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-schemaregistry-client-basic: secret/schemaregistry-client/basic.txt
+      vault.hashicorp.com/secret-volume-path-schemaregistry-client-basic: /vault/secrets/schemaregistry
+      vault.hashicorp.com/agent-inject-file-schemaregistry-client-basic: basic.txt # this are mandatory names
+      vault.hashicorp.com/agent-inject-template-schemaregistry-client-basic: |
+        {{- with secret "secret/schemaregistry-client/basic.txt" -}}
+        {{ .Data.data.basic | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-license: secret/license.txt
+      vault.hashicorp.com/agent-inject-file-license: license.txt # this are mandatory names
+      vault.hashicorp.com/agent-inject-template-license: |
+        {{- with secret "secret/license.txt" -}}
+        {{ .Data.data.license | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/role: confluent-operator
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: plain
+        jaasConfigPassThrough:
+          directoryPathInContainer: /vault/secrets/jaas
+      tls:
+        enabled: true
+    schemaRegistry:
+      url: https://schemaregistry.confluent.svc.cluster.local:8081
+      authentication:
+        type: basic
+        basic:
+          directoryPathInContainer: /vault/secrets/schemaregistry
+      tls:
+        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+spec:
+  replicas: 2
+  image:
+    application: confluentinc/cp-schema-registry-operator:6.1.1.0
+    init: confluentinc/cp-init-container-operator:6.1.1.0
+  authentication:
+    type: basic
+    basic:
+      directoryPathInContainer: /vault/secrets
+  tls:
+    directoryPathInContainer: /vault/secrets
+  license:
+    directoryPathInContainer: /vault/secrets
+  podTemplate:
+    serviceAccountName: confluent-sa
+    annotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/agent-inject-status: update
+      vault.hashicorp.com/preserve-secret-case: "true"
+      vault.hashicorp.com/agent-inject-secret-jksPassword.txt: secret/jksPassword.txt
+      vault.hashicorp.com/agent-inject-template-jksPassword.txt: |
+        {{- with secret "secret/jksPassword.txt" -}}
+        {{ .Data.data.password }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-keystore.jks: secret/keystore.jks
+      vault.hashicorp.com/agent-inject-template-keystore.jks: |
+        {{- with secret "secret/keystore.jks" -}}
+        {{ .Data.data.keystore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-truststore.jks: secret/truststore.jks
+      vault.hashicorp.com/agent-inject-template-truststore.jks: |
+        {{- with secret "secret/truststore.jks" -}}
+        {{ .Data.data.truststore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-schemaregistry-basic: secret/schemaregistry/basic.txt
+      vault.hashicorp.com/secret-volume-path-schemaregistry-basic: /vault/secrets
+      vault.hashicorp.com/agent-inject-file-schemaregistry-basic: basic.txt # this are mandatory names
+      vault.hashicorp.com/agent-inject-template-schemaregistry-basic: |
+        {{- with secret "secret/schemaregistry/basic.txt" -}}
+        {{ .Data.data.basic | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-kafka-client-sasl-plain: secret/kafka-client/plain-jaas.conf
+      vault.hashicorp.com/secret-volume-path-kafka-client-sasl-plain: /vault/secrets/jaas
+      vault.hashicorp.com/agent-inject-file-kafka-client-sasl-plain: plain-jaas.conf # this are mandatory names
+      vault.hashicorp.com/agent-inject-template-kafka-client-sasl-plain: |
+        {{- with secret "secret/kafka-client/plain-jaas.conf" -}}
+        {{ .Data.data.plainjaas | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-license: secret/license.txt
+      vault.hashicorp.com/agent-inject-file-license: license.txt # this are mandatory names
+      vault.hashicorp.com/agent-inject-template-license: |
+        {{- with secret "secret/license.txt" -}}
+        {{ .Data.data.license | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/role: confluent-operator
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: plain
+        jaasConfigPassThrough:
+          directoryPathInContainer: /vault/secrets/jaas
+      tls:
+        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-control-center-operator:6.1.1.0
+    init: confluentinc/cp-init-container-operator:6.1.1.0
+  dataVolumeCapacity: 10Gi
+  authentication:
+    type: basic
+    basic:
+      directoryPathInContainer: /vault/secrets
+  tls:
+    directoryPathInContainer: /vault/secrets
+  license:
+    directoryPathInContainer: /vault/secrets
+  podTemplate:
+    serviceAccountName: confluent-sa
+    annotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/agent-inject-status: update
+      vault.hashicorp.com/preserve-secret-case: "true"
+      vault.hashicorp.com/agent-inject-secret-jksPassword.txt: secret/jksPassword.txt
+      vault.hashicorp.com/agent-inject-template-jksPassword.txt: |
+        {{- with secret "secret/jksPassword.txt" -}}
+        {{ .Data.data.password }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-keystore.jks: secret/keystore.jks
+      vault.hashicorp.com/agent-inject-template-keystore.jks: |
+        {{- with secret "secret/keystore.jks" -}}
+        {{ .Data.data.keystore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-truststore.jks: secret/truststore.jks
+      vault.hashicorp.com/agent-inject-template-truststore.jks: |
+        {{- with secret "secret/truststore.jks" -}}
+        {{ .Data.data.truststore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-c3basic: secret/controlcenter/basic.txt
+      vault.hashicorp.com/secret-volume-path-c3basic: /vault/secrets
+      vault.hashicorp.com/agent-inject-file-c3basic: basic.txt # this are mandatory names
+      vault.hashicorp.com/agent-inject-template-c3basic: |
+        {{- with secret "secret/controlcenter/basic.txt" -}}
+        {{ .Data.data.basic | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-ksql-client-basic: secret/ksqldb-client/basic.txt
+      vault.hashicorp.com/secret-volume-path-ksql-client-basic: /vault/secrets/ksqldb
+      vault.hashicorp.com/agent-inject-file-ksql-client-basic: basic.txt # this are mandatory names
+      vault.hashicorp.com/agent-inject-template-ksql-client-basic: |
+        {{- with secret "secret/ksqldb-client/basic.txt" -}}
+        {{ .Data.data.basic | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-connect-client-basic: secret/connect-client/basic.txt
+      vault.hashicorp.com/secret-volume-path-connect-client-basic: /vault/secrets/connect
+      vault.hashicorp.com/agent-inject-file-connect-client-basic: basic.txt # this are mandatory names
+      vault.hashicorp.com/agent-inject-template-connect-client-basic: |
+        {{- with secret "secret/connect-client/basic.txt" -}}
+        {{ .Data.data.basic | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-schemaregistry-client-basic: secret/schemaregistry-client/basic.txt
+      vault.hashicorp.com/secret-volume-path-schemaregistry-client-basic: /vault/secrets/schemaregistry
+      vault.hashicorp.com/agent-inject-file-schemaregistry-client-basic: basic.txt # this are mandatory names
+      vault.hashicorp.com/agent-inject-template-schemaregistry-client-basic: |
+        {{- with secret "secret/schemaregistry-client/basic.txt" -}}
+        {{ .Data.data.basic | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-kafka-client-sasl-plain: secret/kafka-client/plain-jaas.conf
+      vault.hashicorp.com/secret-volume-path-kafka-client-sasl-plain: /vault/secrets/jaas
+      vault.hashicorp.com/agent-inject-file-kafka-client-sasl-plain: plain-jaas.conf # this are mandatory names
+      vault.hashicorp.com/agent-inject-template-kafka-client-sasl-plain: |
+        {{- with secret "secret/kafka-client/plain-jaas.conf" -}}
+        {{ .Data.data.plainjaas | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-license: secret/license.txt
+      vault.hashicorp.com/agent-inject-file-license: license.txt
+      vault.hashicorp.com/agent-inject-template-license: |
+        {{- with secret "secret/license.txt" -}}
+        {{ .Data.data.license | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/role: confluent-operator
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: plain
+        jaasConfigPassThrough:
+          directoryPathInContainer: /vault/secrets/jaas
+      tls:
+        enabled: true
+    schemaRegistry:
+      url: https://schemaregistry.confluent.svc.cluster.local:8081
+      authentication:
+        type: basic
+        basic:
+          directoryPathInContainer: /vault/secrets/schemaregistry
+      tls:
+        enabled: true
+    ksqldb:
+    - name: ksql-dev
+      url: https://ksqldb-dev.confluent.svc.cluster.local:8088
+      tls:
+        enabled: true
+    connect:
+    - name: connect-dev
+      url:  https://connect-dev.confluent.svc.cluster.local:8083
+      tls:
+        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KsqlDB
+metadata:
+  name: ksqldb-dev
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-ksqldb-server-operator:6.1.1.0
+    init: confluentinc/cp-init-container-operator:6.1.1.0
+  dataVolumeCapacity: 10Gi
+  tls:
+    directoryPathInContainer: /vault/secrets
+  podTemplate:
+    serviceAccountName: confluent-sa
+    annotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/agent-inject-status: update
+      vault.hashicorp.com/preserve-secret-case: "true"
+      vault.hashicorp.com/agent-inject-secret-jksPassword.txt: secret/jksPassword.txt
+      vault.hashicorp.com/agent-inject-template-jksPassword.txt: |
+        {{- with secret "secret/jksPassword.txt" -}}
+        {{ .Data.data.password }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-keystore.jks: secret/keystore.jks
+      vault.hashicorp.com/agent-inject-template-keystore.jks: |
+        {{- with secret "secret/keystore.jks" -}}
+        {{ .Data.data.keystore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-truststore.jks: secret/truststore.jks
+      vault.hashicorp.com/agent-inject-template-truststore.jks: |
+        {{- with secret "secret/truststore.jks" -}}
+        {{ .Data.data.truststore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-kafka-client-sasl-plain: secret/kafka-client/plain-jaas.conf
+      vault.hashicorp.com/secret-volume-path-kafka-client-sasl-plain: /vault/secrets/jaas
+      vault.hashicorp.com/agent-inject-file-kafka-client-sasl-plain: plain-jaas.conf # this are mandatory names
+      vault.hashicorp.com/agent-inject-template-kafka-client-sasl-plain: |
+        {{- with secret "secret/kafka-client/plain-jaas.conf" -}}
+        {{ .Data.data.plainjaas | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/role: confluent-operator
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: plain
+        jaasConfigPassThrough:
+          directoryPathInContainer: /vault/secrets/jaas
+      tls:
+        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect-dev
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-server-connect-operator:6.1.1.0
+    init: confluentinc/cp-init-container-operator:6.1.1.0
+  tls:
+    directoryPathInContainer: /vault/secrets
+  podTemplate:
+    serviceAccountName: confluent-sa
+    annotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/agent-inject-status: update
+      vault.hashicorp.com/preserve-secret-case: "true"
+      vault.hashicorp.com/agent-inject-secret-jksPassword.txt: secret/jksPassword.txt
+      vault.hashicorp.com/agent-inject-template-jksPassword.txt: |
+        {{- with secret "secret/jksPassword.txt" -}}
+        {{ .Data.data.password }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-keystore.jks: secret/keystore.jks
+      vault.hashicorp.com/agent-inject-template-keystore.jks: |
+        {{- with secret "secret/keystore.jks" -}}
+        {{ .Data.data.keystore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-truststore.jks: secret/truststore.jks
+      vault.hashicorp.com/agent-inject-template-truststore.jks: |
+        {{- with secret "secret/truststore.jks" -}}
+        {{ .Data.data.truststore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-kafka-client-sasl-plain: secret/kafka-client/plain-jaas.conf
+      vault.hashicorp.com/secret-volume-path-kafka-client-sasl-plain: /vault/secrets/jaas
+      vault.hashicorp.com/agent-inject-file-kafka-client-sasl-plain: plain-jaas.conf # this are mandatory names
+      vault.hashicorp.com/agent-inject-template-kafka-client-sasl-plain: |
+        {{- with secret "secret/kafka-client/plain-jaas.conf" -}}
+        {{ .Data.data.plainjaas | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/role: confluent-operator
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: plain
+        jaasConfigPassThrough:
+          directoryPathInContainer: /vault/secrets/jaas
+      tls:
+        enabled: true
