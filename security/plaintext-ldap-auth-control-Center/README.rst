@@ -14,9 +14,9 @@ To complete this scenario, you'll follow these steps:
 
 #. Set the current tutorial directory.
 
-#. Deploy LDAP server
-
 #. Deploy Confluent For Kubernetes.
+
+#. Deploy LDAP server
 
 #. Deploy Confluent Platform.
 
