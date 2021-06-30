@@ -49,27 +49,15 @@ kubectl apply -f $TUTORIAL_HOME/confluent-platform-with-defaultSCC.yaml
 ## Advanced: Install Confluent for Kubernetes with custom SCC policy
 
 In this advanced option, you can define a custom SCC policy and configure Confluent for Kubernetes
-to use that.
+to use that. You'll follow these steps to do this:
 
-Install Confluent for Kubernetes using a custom SCC:
+1) Define a custom SCC policy
+2) Associate the SCC policy to the service accounts used by Confluent for Kubernetes and Confluent Platform
+3) Install Confluent for Kubernetes using the custom SCC
 
-```
-# In the CFK Operator Helm chart, there is a section in the values.yaml to define pod security:
-podSecurity:
-  enabled: true
-  securityContext:
-    fsGroup: 1001
-    runAsUser: 1001
-    runAsNonRoot: true
+### 1) Define a custom SCC policy 
 
-# For example, to use the group id `1004` and user id `1004`
-helm install cfk-operator confluentinc/confluent-for-kubernetes \ 
---set podSecurity.enabled=true 
---set podSecurity.securityContext.fsGroup=1004
---set podSecurity.securityContext.runAsUser=1004
-```
-
-Set a custom SCC in Red Hat OpenShift:
+Set a custom SCC in Red Hat OpenShift
 
 ```
 ## View the custom policy and the ID ranges allowed
@@ -93,6 +81,8 @@ runAsUser:
 oc apply -f $TUTORIAL_HOME/scc.yaml
 ```
 
+### 2) Associate the SCC policy to the service accounts
+
 Associate the SCC policy to the service account that runs CFK Operator:
 
 ```
@@ -110,6 +100,27 @@ oc adm policy add-scc-to-user <scc_name> -z <serviceaccount_running_CP> -n <name
 ## For example
 oc adm policy add-scc-to-user confluent-operator -z default -n confluent
 ```
+
+### 3) Install Confluent for Kubernetes using the custom SCC
+
+Install Confluent for Kubernetes:
+
+```
+# In the CFK Operator Helm chart, there is a section in the values.yaml to define pod security:
+podSecurity:
+  enabled: true
+  securityContext:
+    fsGroup: 1001
+    runAsUser: 1001
+    runAsNonRoot: true
+
+# For example, to use the group id `1004` and user id `1004`
+helm install cfk-operator confluentinc/confluent-for-kubernetes \ 
+--set podSecurity.enabled=true 
+--set podSecurity.securityContext.fsGroup=1004
+--set podSecurity.securityContext.runAsUser=1004
+```
+
 
 ## Associating with Namespaces
 
