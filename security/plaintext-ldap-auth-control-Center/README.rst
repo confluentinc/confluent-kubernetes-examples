@@ -1,7 +1,7 @@
 Deploy Confluent Platform
 =========================
 
-In this workflow scenario, you'll set up a simple non-secure (no TLS) with Control Center LDAP authentication Confluent Platform, consisting of all components.
+In this workflow scenario, you'll set up Control Center with LDAP based authentication to monitor and connect to a Confluent Platform with no security.
 
 The goal for this scenario is for you to:
 
@@ -252,4 +252,3 @@ Shut down Confluent Platform and the data:
   kubectl delete pvc ldap-data-ldap-0 --namespace=confluent
 
 ::
-
