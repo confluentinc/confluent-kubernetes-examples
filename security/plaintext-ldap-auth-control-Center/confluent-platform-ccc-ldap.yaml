@@ -1,0 +1,116 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Zookeeper
+metadata:
+  name: zookeeper
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-zookeeper-operator:6.1.0.0
+    init: confluentinc/cp-init-container-operator:6.1.0.0
+  dataVolumeCapacity: 10Gi
+  logVolumeCapacity: 10Gi
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server-operator:6.1.0.0
+    init: confluentinc/cp-init-container-operator:6.1.0.0
+  dataVolumeCapacity: 10Gi
+  metricReporter:
+    enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-server-connect-operator:6.1.0.0
+    init: confluentinc/cp-init-container-operator:6.1.0.0
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka:9071
+
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KsqlDB
+metadata:
+  name: ksqldb
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-ksqldb-server-operator:6.1.0.0
+    init: confluentinc/cp-init-container-operator:6.1.0.0
+  dataVolumeCapacity: 10Gi
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter
+  namespace: confluent
+spec:
+  license:
+    globalLicense: true
+  configOverrides:
+    log4j: 
+      - log4j.rootLogger=DEBUG, stdout
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-control-center-operator:6.1.0.0
+    init: confluentinc/cp-init-container-operator:6.1.0.0
+  dataVolumeCapacity: 10Gi
+  authentication:
+    type: ldap
+    ldap:
+      roles: [c3users,readonlyusers]
+      restrictedRoles: [readonlyusers]
+      property:
+        useLdaps : "false"
+        debug: "true"
+        contextFactory: "com.sun.jndi.ldap.LdapCtxFactory"
+        hostname: "ldap.confluent.svc.cluster.local"
+        port: "389"
+        bindDn: "cn=admin,dc=test,dc=com"
+        bindPassword: "confluentrox"
+        authenticationMethod: "simple"
+        forceBindingLogin: "false"
+        userBaseDn: "ou=users,dc=test,dc=com"
+        userObjectClass: "inetOrgPerson" 
+        userRdnAttribute: "uid"
+        userIdAttribute: "cn"
+        roleBaseDn: "ou=groups,dc=test,dc=com"
+        roleNameAttribute: "cn"
+        roleMemberAttribute: "memberUid"
+        roleObjectClass: "posixGroup" 
+        userPasswordAttribute: "userPassword"
+
+  dependencies:
+    schemaRegistry:
+      url: http://schemaregistry.confluent.svc.cluster.local:8081
+    ksqldb:
+    - name: ksqldb
+      url: http://ksqldb.confluent.svc.cluster.local:8088
+    connect:
+    - name: connect
+      url: http://connect.confluent.svc.cluster.local:8083
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-schema-registry-operator:6.1.0.0
+    init: confluentinc/cp-init-container-operator:6.1.0.0
