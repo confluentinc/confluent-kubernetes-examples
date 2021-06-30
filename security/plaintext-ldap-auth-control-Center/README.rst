@@ -215,7 +215,7 @@ Use Control Center to monitor the Confluent Platform, and see the created topic 
 
 #. Users: 
 
-    Full Control: Username:james Password:-secret  
+    Full Control: Username:james Password:james-secret  
 
     Restricted Control: Username:alice Password:alice-secret
 
