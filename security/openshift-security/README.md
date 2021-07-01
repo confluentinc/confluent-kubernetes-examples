@@ -114,13 +114,29 @@ podSecurity:
     runAsUser: 1001
     runAsNonRoot: true
 
-# For example, to use the group id `1004` and user id `1004`
+# For example, to use the group id `1001` and user id `1001`
 helm install cfk-operator confluentinc/confluent-for-kubernetes \ 
 --set podSecurity.enabled=true 
---set podSecurity.securityContext.fsGroup=1004
---set podSecurity.securityContext.runAsUser=1004
+--set podSecurity.securityContext.fsGroup=1001
+--set podSecurity.securityContext.runAsUser=1001
 ```
 
+Deploy Confluent Platform CRs with the custom `podSecurityContext` set:
+
+```
+kubectl apply -f $TUTORIAL_HOME/confluent-platform-with-customSCC.yaml
+
+# Here, the `podSecurityContext` is set tiwht the groupid and userid to use
+vi $TUTORIAL_HOME/confluent-platform-with-customSCC.yaml
+...
+spec:
+  ...
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1001
+      runAsUser: 1001
+      runAsNonRoot: true
+```
 
 ## Associating with Namespaces
 
