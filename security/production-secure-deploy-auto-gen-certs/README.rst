@@ -13,7 +13,8 @@ Confluent recommends these security mechanisms for a production deployment:
 
 - Enable TLS for network encryption - both internal (between CP components) and external (Clients to CP components)
 
-In this deployment scenario, we will set this up, choosing SASL/Plain for authentication, using user provided CA certificate, CFK will auto generate the components certificates for you.
+In this deployment scenario, we'll choose SASL/Plain for authentication and configure TLS encryption using CFK auto-generated component certificates.
+You'll need to provide a certificate authority certificate for CFK to auto-generate the component certificates.
 
 ==================================
 Set the current tutorial directory
@@ -103,7 +104,7 @@ secret, and then tell Confluent For Kubernetes where to find the configuration.
 To support the above deployment scenario, you need to provide the following
 credentials:
 
-* CA private key and TLS Certificates
+* Certificate authority - private key and certificate
 
 * Authentication credentials for Zookeeper, Kafka, Control Center, remaining CP components
 
