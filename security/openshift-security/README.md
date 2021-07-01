@@ -89,7 +89,7 @@ Associate the SCC policy to the service account that runs CFK Operator:
 ## This is the format of the command
 oc adm policy add-scc-to-user <scc_name> -z <serviceaccount_running_CFK> -n <namespace>
 ## For example
-oc adm policy add-scc-to-user confluent-operator -z confluent-operator -n confluent
+oc adm policy add-scc-to-user confluent-operator -z confluent-for-kubernetes -n confluent
 ```
 
 Associate the SCC policy to the service account that runs Confluent Platform components:
@@ -116,17 +116,17 @@ podSecurity:
 
 # For example, to use the group id `1001` and user id `1001`
 helm install cfk-operator confluentinc/confluent-for-kubernetes \ 
---set podSecurity.enabled=true 
---set podSecurity.securityContext.fsGroup=1001
---set podSecurity.securityContext.runAsUser=1001
+--set podSecurity.enabled=true \
+--set podSecurity.securityContext.fsGroup=1001 \
+--set podSecurity.securityContext.runAsUser=1001 
 ```
 
 Deploy Confluent Platform CRs with the custom `podSecurityContext` set:
 
 ```
-kubectl apply -f $TUTORIAL_HOME/confluent-platform-with-customSCC.yaml
+oc apply -f $TUTORIAL_HOME/confluent-platform-with-customSCC.yaml
 
-# Here, the `podSecurityContext` is set tiwht the groupid and userid to use
+# Here, the `podSecurityContext` is set with the groupid and userid to use
 vi $TUTORIAL_HOME/confluent-platform-with-customSCC.yaml
 ...
 spec:
