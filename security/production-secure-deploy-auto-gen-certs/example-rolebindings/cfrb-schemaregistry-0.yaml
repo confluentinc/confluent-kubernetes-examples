@@ -1,0 +1,17 @@
+# rolebinding `schemaregistry-0` gives user `sr` the role 
+# `SecurityAdmin` for cluster `schemaregistry` in namespace `confluent`
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: schemaregistry-0
+  namespace: confluent
+spec:
+  # The Schema Registry cluster is named `schemaregistry` and is deployed in the 
+  # namespace `confluent`
+  # The Schema Registry cluster id naming pattern is: id_<sr-cluster-name>_<namespace>
+  clustersScopeByIds:
+    schemaRegistryClusterId: id_schemaregistry_confluent
+  principal:
+    name: sr
+    type: user
+  role: SecurityAdmin
