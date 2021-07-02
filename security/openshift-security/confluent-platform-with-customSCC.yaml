@@ -1,4 +1,4 @@
-# In this example, 
+# Here, for all CRs, we set the groupid to 1001 and userid to 1001
 apiVersion: platform.confluent.io/v1beta1
 kind: Zookeeper
 metadata:
@@ -85,8 +85,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-enterprise-control-center-operator:6.1.1.0
-    init: confluentinc/cp-init-container-operator:6.1.1.0
+    application: confluentinc/cp-enterprise-control-center:6.2.0
+    init: confluentinc/confluent-init-container:2.0.0
   dataVolumeCapacity: 10Gi
   dependencies:
     schemaRegistry:
@@ -120,8 +120,8 @@ metadata:
 spec:
   replicas: 2
   image:
-    application: confluentinc/cp-schema-registry-operator:6.1.1.0
-    init: confluentinc/cp-init-container-operator:6.1.1.0
+    application: confluentinc/cp-schema-registry:6.2.0
+    init: confluentinc/confluent-init-container:2.0.0
   podTemplate:
     podSecurityContext:
       fsGroup: 1001
