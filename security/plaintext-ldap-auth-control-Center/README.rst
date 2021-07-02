@@ -1,24 +1,22 @@
 Deploy Confluent Platform
 =========================
 
-In this workflow scenario, you'll set up a simple non-secure (no authn, authz or
-encryption) Confluent Platform, consisting of all components.
+In this workflow scenario, you'll set up Control Center with LDAP based authentication to monitor and connect to a Confluent Platform with no security.
 
 The goal for this scenario is for you to:
 
+* Configure LDAP server for Control Center authentication (no RBAC).
 * Quickly set up the complete Confluent Platform on the Kubernetes.
 * Configure a producer to generate sample data.
 
-Watch the walkthrough: `Quickstart Demonstration <https://youtu.be/qepFNPhrL08>`_
-
-Before continuing with the scenario, ensure that you have set up the
-`prerequisites </README.md#prerequisites>`_.
 
 To complete this scenario, you'll follow these steps:
 
 #. Set the current tutorial directory.
 
 #. Deploy Confluent For Kubernetes.
+
+#. Deploy LDAP server
 
 #. Deploy Confluent Platform.
 
@@ -35,7 +33,7 @@ the tutorial files:
 
 ::
    
-  export TUTORIAL_HOME=<Tutorial directory>/quickstart-deploy
+  export TUTORIAL_HOME=<Tutorial directory>/plaintext-ldap-auth-control-Center
 
 ===============================
 Deploy Confluent for Kubernetes
@@ -52,13 +50,55 @@ Deploy Confluent for Kubernetes
 
    ::
 
-     helm upgrade --install operator confluentinc/confluent-for-kubernetes
+     helm upgrade --install operator confluentinc/confluent-for-kubernetes --namespace=confluent
   
 #. Check that the Confluent For Kubernetes pod comes up and is running:
 
    ::
      
-     kubectl get pods
+     kubectl get pods --namespace=confluent
+
+===============
+Deploy OpenLDAP
+===============
+
+This repo includes a Helm chart for `OpenLdap
+<https://github.com/osixia/docker-openldap>`__. The chart ``values.yaml``
+includes the set of principal definitions that Confluent Platform needs for
+RBAC.
+
+#. Deploy OpenLdap
+
+   ::
+
+     helm upgrade --install -f $TUTORIAL_HOME/../../assets/openldap/ldaps-rbac.yaml test-ldap $TUTORIAL_HOME/../../assets/openldap --namespace confluent
+
+Note that it is assumed that your Kubernetes cluster has a ``confluent`` namespace available, otherwise you can create it by running ``kubectl create namespace confluent``. 
+
+#. Validate that OpenLDAP is running:  
+   
+   ::
+
+     kubectl get pods --namespace=confluent
+
+#. Log in to the LDAP pod:
+
+   ::
+
+     kubectl --namespace=confluent exec -it ldap-0 -- bash
+
+#. Run the LDAP search command:
+
+   ::
+
+     ldapsearch -LLL -x -H ldap://ldap.confluent.svc.cluster.local:389 -b 'dc=test,dc=com' -D "cn=mds,dc=test,dc=com" -w 'Developer!'
+
+#. Exit out of the LDAP pod:
+
+   ::
+   
+     exit 
+
 
 ========================================
 Review Confluent Platform configurations
@@ -71,7 +111,7 @@ tutorial, you will configure all components in a single file and deploy all
 components with one ``kubectl apply`` command.
 
 The entire Confluent Platform is configured in one configuration file:
-``$TUTORIAL_HOME/confluent-platform.yaml``
+``$TUTORIAL_HOME/confluent-platform-ccc-ldap.yamll``
 
 In this configuration file, there is a custom Resource configuration spec for
 each Confluent Platform component - replicas, image to use, resource
@@ -105,19 +145,19 @@ Deploy Confluent Platform
 
 ::
 
-  kubectl apply -f $TUTORIAL_HOME/confluent-platform.yaml
+  kubectl apply -f $TUTORIAL_HOME/confluent-platform-ccc-ldap.yaml --namespace=confluent
 
 #. Check that all Confluent Platform resources are deployed:
 
    ::
    
-     kubectl get confluent
+     kubectl get confluent --namespace=confluent
 
 #. Get the status of any component. For example, to check Kafka:
 
    ::
    
-     kubectl describe kafka
+     kubectl describe kafka --namespace=confluent
 
 ========
 Validate
@@ -153,7 +193,7 @@ Deploy the producer app:
 
 ::
    
-  kubectl apply -f $TUTORIAL_HOME/producer-app-data.yaml
+  kubectl apply -f $TUTORIAL_HOME/producer-app-data.yaml --namespace=confluent
 
 Validate in Control Center
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -164,13 +204,20 @@ Use Control Center to monitor the Confluent Platform, and see the created topic 
 
    ::
 
-     kubectl port-forward controlcenter-0 9021:9021
+     kubectl port-forward controlcenter-0 9021:9021 --namespace=confluent
 
 #. Browse to Control Center:
 
    ::
    
      http://localhost:9021
+
+
+#. Users: 
+
+    Full Control: Username:james Password:james-secret  
+
+    Restricted Control: Username:alice Password:alice-secret
 
 #. Check that the ``elastic-0`` topic was created and that messages are being produced to the topic.
 
@@ -182,13 +229,26 @@ Shut down Confluent Platform and the data:
 
 ::
 
-  kubectl delete -f $TUTORIAL_HOME/producer-app-data.yaml
+  kubectl delete -f $TUTORIAL_HOME/producer-app-data.yaml --namespace=confluent
 
 ::
 
-  kubectl delete -f $TUTORIAL_HOME/confluent-platform.yaml
+  kubectl delete -f $TUTORIAL_HOME/confluent-platform-ccc-ldap.yaml --namespace=confluent
 
 ::
 
-  helm delete operator
-  
+  helm delete operator --namespace=confluent
+
+::
+
+  helm delete test-ldap --namespace=confluent
+
+::
+
+  kubectl delete pvc ldap-config-ldap-0 --namespace=confluent
+
+::
+
+  kubectl delete pvc ldap-data-ldap-0 --namespace=confluent
+
+::

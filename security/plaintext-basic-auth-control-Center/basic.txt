@@ -1,0 +1,2 @@
+c3admin: password1,Administrators
+c3restricted: password2,Restricted

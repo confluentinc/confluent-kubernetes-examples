@@ -7,6 +7,9 @@ monitor multiple Connect and ksqlDB clusters.
 The Confluent Platform components will communicate via internal listeners with
 the TLS encryption and mTLS authentication.
 
+Before continuing with the scenario, ensure that you have set up the
+`prerequisites </README.md#prerequisites>`_.
+
 To complete this scenario, you'll follow these steps:
 
 #. Set the current tutorial directory.

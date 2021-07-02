@@ -3,6 +3,9 @@
 In this workflow scenario, you'll set up a Confluent Platform cluster with
 full TLS network encryption, using auto-generated certs.
 
+Before continuing with the scenario, ensure that you have set up the
+[prerequisites](/README.md#prerequisites).
+
 ## Set the current tutorial directory
 
 Set the tutorial directory under the directory you downloaded this Github repo:
