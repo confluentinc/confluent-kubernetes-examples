@@ -1,3 +1,4 @@
+# Here, for all CRs, we set the groupid to 1001 and userid to 1001
 apiVersion: platform.confluent.io/v1beta1
 kind: Zookeeper
 metadata:
@@ -11,7 +12,10 @@ spec:
   dataVolumeCapacity: 10Gi
   logVolumeCapacity: 10Gi
   podTemplate:
-    podSecurityContext: {}
+    podSecurityContext:
+      fsGroup: 1001
+      runAsUser: 1001
+      runAsNonRoot: true
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
@@ -27,7 +31,10 @@ spec:
   metricReporter:
     enabled: true
   podTemplate:
-    podSecurityContext: {}
+    podSecurityContext:
+      fsGroup: 1001
+      runAsUser: 1001
+      runAsNonRoot: true
     resources:
       requests:
         cpu: "1"
@@ -44,7 +51,10 @@ spec:
     application: confluentinc/cp-server-connect:6.2.0
     init: confluentinc/confluent-init-container:2.0.0
   podTemplate:
-    podSecurityContext: {}
+    podSecurityContext:
+      fsGroup: 1001
+      runAsUser: 1001
+      runAsNonRoot: true
     resources:
       requests:
         cpu: "1"
@@ -62,7 +72,10 @@ spec:
     init: confluentinc/confluent-init-container:2.0.0
   dataVolumeCapacity: 10Gi
   podTemplate:
-    podSecurityContext: {}
+    podSecurityContext:
+      fsGroup: 1001
+      runAsUser: 1001
+      runAsNonRoot: true
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: ControlCenter
@@ -85,7 +98,10 @@ spec:
     - name: connect
       url:  https://connect.confluent.svc.cluster.local:8083
   podTemplate:
-    podSecurityContext: {}
+    podSecurityContext:
+      fsGroup: 1001
+      runAsUser: 1001
+      runAsNonRoot: true
     resources:
       requests:
         cpu: "1"
@@ -107,4 +123,7 @@ spec:
     application: confluentinc/cp-schema-registry:6.2.0
     init: confluentinc/confluent-init-container:2.0.0
   podTemplate:
-    podSecurityContext: {}
+    podSecurityContext:
+      fsGroup: 1001
+      runAsUser: 1001
+      runAsNonRoot: true
