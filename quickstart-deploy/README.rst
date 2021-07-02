@@ -11,6 +11,9 @@ The goal for this scenario is for you to:
 
 Watch the walkthrough: `Quickstart Demonstration <https://youtu.be/qepFNPhrL08>`_
 
+Before continuing with the scenario, ensure that you have set up the
+`prerequisites </README.md#prerequisites>`_.
+
 To complete this scenario, you'll follow these steps:
 
 #. Set the current tutorial directory.

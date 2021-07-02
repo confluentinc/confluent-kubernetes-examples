@@ -6,6 +6,9 @@ SASL PLAIN authentication, no authorization, and inter-component TLS.
 
 Watch the walkthrough: `Secure Deploy Demonstration <https://youtu.be/gC28r-qLbAs>`_
 
+Before continuing with the scenario, ensure that you have set up the
+`prerequisites </README.md#prerequisites>`_.
+
 To complete this scenario, you'll follow these steps:
 
 #. Set the current tutorial directory.

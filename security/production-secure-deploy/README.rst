@@ -15,6 +15,9 @@ Confluent recommends these security mechanisms for a production deployment:
 
 In this deployment scenario, we will set this up, choosing SASL/Plain for authentication, using user provided custom certificates.
 
+Before continuing with the scenario, ensure that you have set up the
+`prerequisites </README.md#prerequisites>`_.
+
 ==================================
 Set the current tutorial directory
 ==================================

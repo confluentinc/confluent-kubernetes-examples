@@ -11,6 +11,9 @@ You've got two options to align with the Security Context Constraint (SCC) needs
 1) Recommended: Deploy with default SCC policy
 2) Advanced: Deploy with a custom SCC policy
 
+Before continuing with the scenario, ensure that you have set up the
+[prerequisites](/README.md#prerequisites).
+
 Set the tutorial directory for this tutorial under the directory you downloaded
 the tutorial files:
 
