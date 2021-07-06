@@ -4,6 +4,13 @@ Deploy Confluent Platform
 In this workflow scenario, you'll set up Connect with basic authentication.  
 You will use Control Center to monitor and connect to a Confluent Platform.
 
+NOTE: Control Center does not support basic authentication to the Connect Cluster and you will not be able to connect to it via the UI. 
+You might see log entries in the Operator pod:
+
+```
+{"level":"error","ts":1625598328.1007278,"logger":"controlcenter","caller":"controller/controller.go:244","msg":"apply failed","name":"controlcenter","namespace":"confluent","error":"name connect, basic authentication integration with connect cluster is not supported yet"}
+```
+
 The goal for this scenario is for you to:
 
 * Configure basic authentication for Connect authentication (no RBAC).
@@ -68,6 +75,10 @@ Create Basic authentication secret
    --from-file=basic.txt=$TUTORIAL_HOME/basic.txt \
    --namespace confluent
 
+
+ kubectl create secret generic basicsecret \
+   --from-file=basic.txt=$TUTORIAL_HOME/basic.txt \
+   --namespace confluent
 
 ========================================
 Review Confluent Platform configurations
@@ -164,6 +175,19 @@ Deploy the producer app:
    
   kubectl apply -f $TUTORIAL_HOME/producer-app-data.yaml --namespace=confluent
 
+
+Validate authentication with Connect
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+```
+kubectl --namespace=confluent exec -it connect-0 -- curl -u thisismyusername:thisismypass http://0.0.0.0:8083
+```
+
+The above should return something like this: 
+```
+{"version":"6.1.0-ce","commit":"958ad0f3c7030f1c","kafka_cluster_id":"SjW1_kcORW-nSsU2Yy1R1Q"}
+```
+
 Validate in Control Center
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -208,6 +232,7 @@ Shut down Confluent Platform and the data:
 ::
 
   helm delete secret basicsecret --namespace=confluent
+  helm delete secret basicsecret-c3 --namespace=confluent
 
 ::
 

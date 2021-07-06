@@ -1,1 +1,1 @@
-thisismyusername:thisismypass
+thisismyusername: thisismypass

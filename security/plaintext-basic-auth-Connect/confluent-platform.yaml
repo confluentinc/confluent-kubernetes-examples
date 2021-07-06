@@ -80,7 +80,7 @@ spec:
       authentication:
         type: basic
         basic:
-          secretRef: basicsecret
+          secretRef: basicsecret-c3
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: SchemaRegistry
