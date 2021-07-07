@@ -5,11 +5,8 @@ In this workflow scenario, you'll set up Connect with basic authentication.
 You will use Control Center to monitor and connect to a Confluent Platform.
 
 NOTE: Control Center does not support basic authentication to the Connect Cluster and you will not be able to connect to it via the UI. 
-You might see log entries in the Operator pod:
 
-```
-{"level":"error","ts":1625598328.1007278,"logger":"controlcenter","caller":"controller/controller.go:244","msg":"apply failed","name":"controlcenter","namespace":"confluent","error":"name connect, basic authentication integration with connect cluster is not supported yet"}
-```
+
 
 The goal for this scenario is for you to:
 
@@ -75,10 +72,6 @@ Create Basic authentication secret
    --from-file=basic.txt=$TUTORIAL_HOME/basic.txt \
    --namespace confluent
 
-
- kubectl create secret generic basicsecret-c3 \
-   --from-file=basic.txt=$TUTORIAL_HOME/basic-c3.txt \
-   --namespace confluent
 
 ========================================
 Review Confluent Platform configurations
@@ -232,7 +225,6 @@ Shut down Confluent Platform and the data:
 ::
 
   helm delete secret basicsecret --namespace=confluent
-  helm delete secret basicsecret-c3 --namespace=confluent
 
 ::
 
