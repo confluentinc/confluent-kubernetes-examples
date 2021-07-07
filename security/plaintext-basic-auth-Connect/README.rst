@@ -76,8 +76,8 @@ Create Basic authentication secret
    --namespace confluent
 
 
- kubectl create secret generic basicsecret \
-   --from-file=basic.txt=$TUTORIAL_HOME/basic.txt \
+ kubectl create secret generic basicsecret-c3 \
+   --from-file=basic.txt=$TUTORIAL_HOME/basic-c3.txt \
    --namespace confluent
 
 ========================================
