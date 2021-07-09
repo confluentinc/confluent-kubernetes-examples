@@ -173,10 +173,10 @@ You should start seeing messages flowing into the destination topic.
 
 ####  Tear down 
 
-
+```
 kubectl --namespace destination delete -f $TUTORIAL_HOME/components-destination.yaml           
 kubectl --namespace destination delete secrets cloud-plain kafka-tls 
-
+```
 
 
 
@@ -194,12 +194,13 @@ kubectl --namespace destination delete secrets cloud-plain kafka-tls
 
 
 ##################################### 
-
+```
 CONSIDER FOR LATER
-######################################
+```
+#####################################
 
 
-### Produce data to topic in source cluster
+##### Produce data to topic in source cluster
 
 Create the kafka.properties file in $TUTORIAL_HOME. Add the above endpoint and the credentials as follows:
 
@@ -212,7 +213,7 @@ ssl.truststore.location=/mnt/sslcerts/kafka-tls/truststore.p12
 ssl.truststore.password=mystorepassword
 ```
 
-# Create a configuration secret for client applications to use
+##### Create a configuration secret for client applications to use
 kubectl create secret generic kafka-client-config-secure \
   --from-file=$TUTORIAL_HOME/kafka.properties -n destination
 ```
