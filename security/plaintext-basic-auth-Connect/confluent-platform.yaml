@@ -33,6 +33,10 @@ metadata:
   namespace: confluent
 spec:
   replicas: 1
+  authentication:
+    type: basic
+    basic:
+      secretRef: basicsecret
   image:
     application: confluentinc/cp-server-connect-operator:6.1.0.0
     init: confluentinc/cp-init-container-operator:6.1.0.0
@@ -64,24 +68,13 @@ spec:
     application: confluentinc/cp-enterprise-control-center-operator:6.1.0.0
     init: confluentinc/cp-init-container-operator:6.1.0.0
   dataVolumeCapacity: 10Gi
-  authentication:
-    type: basic
-    basic:
-      roles:
-       - Administrators
-       - Restricted
-      restrictedRoles:
-       - Restricted
-      secretRef: basicsecret
   dependencies:
     schemaRegistry:
       url: http://schemaregistry.confluent.svc.cluster.local:8081
     ksqldb:
     - name: ksqldb
       url: http://ksqldb.confluent.svc.cluster.local:8088
-    connect:
-    - name: connect
-      url: http://connect.confluent.svc.cluster.local:8083
+
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: SchemaRegistry
