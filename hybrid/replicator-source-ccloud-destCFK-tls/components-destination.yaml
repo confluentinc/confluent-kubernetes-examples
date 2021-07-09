@@ -1,0 +1,164 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Zookeeper
+metadata:
+  name: zookeeper
+  namespace: destination
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-zookeeper-operator:6.1.1.0
+    init: confluentinc/cp-init-container-operator:6.1.1.0
+  dataVolumeCapacity: 10Gi
+  logVolumeCapacity: 10Gi
+  # Configure to have TLS encryption, and use auto-generated server certs
+  tls:
+    secretRef: kafka-tls
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: destination
+spec:
+  configOverrides:
+    server:
+      - auto.create.topics.enable=true
+  replicas: 3
+  # Configure to have TLS encryption, and use auto-generated server certs
+  tls:
+    secretRef: kafka-tls
+  listeners:
+    internal:
+      tls:
+        enabled: true
+        secretRef: kafka-tls
+    external:
+      tls:
+        enabled: true
+        secretRef: kafka-tls
+  image:
+    application: confluentinc/cp-server-operator:6.1.1.0
+    init: confluentinc/cp-init-container-operator:6.1.1.0
+  dataVolumeCapacity: 10Gi
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+  namespace: destination
+spec:
+  replicas: 1
+  # Configure to have TLS encryption, and use auto-generated server certs
+  tls:
+    secretRef: kafka-tls
+  image:
+    application: confluentinc/cp-schema-registry-operator:6.1.1.0
+    init: confluentinc/cp-init-container-operator:6.1.1.0
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.destination.svc.cluster.local:9071
+      tls:
+        enabled: true
+        secretRef: kafka-tls
+---
+apiVersion: platform.confluent.io/v1beta1
+# Confluent Replicator is built as a connector, and so will use the `Connect` CRD.
+kind: Connect
+metadata:
+  name: replicator
+  namespace: destination
+spec:
+  replicas: 2
+  # Configure to have TLS encryption, and use auto-generated server certs
+  tls:
+    secretRef: kafka-tls
+  image:
+    # Use the `cp-enterprise-replicator-operator` Docker image, that contains the Replicator jars
+    application: confluentinc/cp-enterprise-replicator-operator:6.1.1.0
+    init: confluentinc/cp-init-container-operator:6.1.1.0
+  podTemplate:
+    envVars:
+      # The  Confluent Replicator Monitoring Extension allows for detailed metrics from Replicator tasks to be 
+      # collected using an exposed REST API.
+      # You'll need to update the version string in replicate-test-extension-<version>.jar based on what 
+      # CP version you are using
+      - name: CLASSPATH
+        value: /usr/share/java/kafka-connect-replicator/replicator-rest-extension-6.1.1.jar
+  configOverrides:
+    # When the Connect distributed cluster hosting Replicator has a REST endpoint with SSL encryption 
+    # enabled, you must configure security properties for the SSL keystore and truststore used by the 
+    # Replicator monitoring extension to communicate with other Connect nodes in the cluster.
+    # `/mnt/sslcerts/truststore.jks` is the truststore location when auto-genarated certs are used.
+    jvm:
+      - -Djavax.net.ssl.trustStore=/mnt/sslcerts/kafka-tls/truststore.p12
+      - -Djavax.net.ssl.trustStorePassword=mystorepassword
+      - -Djavax.net.ssl.truststoreType="PKCS12"
+    server:
+      # To activate the monitoring extension, configure this property
+      - rest.extension.classes=io.confluent.connect.replicator.monitoring.ReplicatorMonitoringExtension
+      # This specifies that Replicator is the Connector configured
+      - confluent.topic.consumer.ssl.keystore.type=PKCS12
+      - confluent.topic.consumer.ssl.truststore.location=/mnt/sslcerts/kafka-tls/truststore.p12
+      - confluent.topic.consumer.ssl.truststore.type=PKCS12
+      - confluent.topic.producer.ssl.keystore.type=PKCS12
+      - confluent.topic.producer.ssl.truststore.location=/mnt/sslcerts/kafka-tls/truststore.p12
+      - confluent.topic.producer.ssl.truststore.type=PKCS12
+      - confluent.topic.ssl.keystore.type=PKCS12
+      - confluent.topic.ssl.truststore.location=/mnt/sslcerts/kafka-tls/truststore.p12
+      - confluent.topic.ssl.truststore.type=PKCS12
+      - connector.class=io.confluent.connect.replicator.ReplicatorSourceConnector
+      - ssl.keystore.type=PKCS12
+      - ssl.truststore.type=PKCS12
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.destination.svc.cluster.local:9071
+      tls:
+        enabled: true
+        secretRef: kafka-tls
+    interceptor:
+      enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter
+  namespace: destination
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-control-center-operator:6.1.1.0
+    init: confluentinc/cp-init-container-operator:6.1.1.0
+  dataVolumeCapacity: 10Gi
+  tls:
+    secretRef: kafka-tls
+  # Here, Control Center is deployed in the destination cluster. Hence, you'll need 
+  # to specify the source Kafka cluster to be additionally monitored.
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.destination.svc.cluster.local:9071
+      tls:
+        enabled: true
+        secretRef: kafka-tls 
+    schemaRegistry:
+      url: https://schemaregistry.destination.svc.cluster.local:8081
+      tls:
+        enabled: true
+        secretRef: kafka-tls
+    # Control Center is configured to monitor Replicator 
+    connect:
+      - name: replicator
+        url: https://replicator.destination.svc.cluster.local:8083
+        tls:
+          enabled: true
+          secretRef: kafka-tls
+  monitoringKafkaClusters:
+    - name: source
+      bootstrapEndpoint: <ccloud-endpoint:9092>
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: cloud-plain
+      tls:
+        enabled: true
+        ignoreTrustStoreConfig: true 

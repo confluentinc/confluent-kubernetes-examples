@@ -4,7 +4,12 @@
     "*.my.domain",
     "*.confluent.svc.cluster.local",
     "*.zookeeper.confluent.svc.cluster.local",
-    "*.kafka.confluent.svc.cluster.local"
+    "*.kafka.confluent.svc.cluster.local",
+    "*.my.domain",
+    "*.destination.svc.cluster.local",
+    "*.zookeeper.destination.svc.cluster.local",
+    "*.kafka.destination.svc.cluster.local",
+    "*.replicator.destination.svc.cluster.local"
   ],
   "key": {
     "algo": "rsa",
