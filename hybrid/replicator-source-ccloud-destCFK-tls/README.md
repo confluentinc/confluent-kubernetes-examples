@@ -1,5 +1,7 @@
 # Replicator
 
+In this tutorial you will set a CFK destination cluster with replicator using Confluent Cloud as a source topic. 
+
 ## Set up Pre-requisites
 
 Set the tutorial directory for this tutorial under the directory you downloaded
@@ -15,6 +17,7 @@ Create namespace,  for the destination cluster.
 kubectl create ns destination
 ```
 
+Deploy CFK: 
 
 ```
 helm upgrade --install confluent-operator \
@@ -22,24 +25,24 @@ helm upgrade --install confluent-operator \
   --namespace destination
 ```
 
-
 ## Prep the Confluent Cloud user password and endpoint
 
 Search and replace the following: 
 
 ```
-<ccloud-key>
+<ccloud-key> - with your Confluent Cloud Key
 
 
-<ccloud-pass>
+<ccloud-pass> - with your Confluent Cloud pass
 
 
-<ccloud-endpoint:9092>
+<ccloud-endpoint:9092> - with your Confluent Cloud Cluster endpoint
 ```
 
 ## Deploy destination cluster, including Replicator
 
 Create TLS secrets (included in the ca and server pem are the 2 letsencrypt ccloud certs):  
+
 ```
 kubectl create secret generic kafka-tls \
 --from-file=fullchain.pem=$TUTORIAL_HOME/certs/server.pem \
@@ -47,13 +50,17 @@ kubectl create secret generic kafka-tls \
 --from-file=privkey.pem=$TUTORIAL_HOME/certs/server-key.pem \
 --namespace destination
 ```
+
 Create secret with ccloud user/pass for Control Center:  
+
 ```
 kubectl create secret generic cloud-plain \
 --from-file=plain.txt=$TUTORIAL_HOME/creds-client-kafka-sasl-user.txt \
 --namespace destination
 ```
+
 Deploy destination cluster:  
+
 ```
 kubectl apply -f $TUTORIAL_HOME/components-destination.yaml
 ```
@@ -61,25 +68,40 @@ kubectl apply -f $TUTORIAL_HOME/components-destination.yaml
 In `$TUTORIAL_HOME/components-destination.yaml`, note that the `Connect` CRD is used to define a 
 custom resource for Confluent Replicator.
 
-## Create topic in source cluster
+###### Produce data to topic in source cluster
+
+Create the kafka.properties file in $TUTORIAL_HOME. Add the above endpoint and the credentials as follows:
 
 ```
- kafka-topics --bootstrap-server <ccloud-endpoint:9092> \
---command-config  ~/kafkaexample/ccloud-team/client.properties \
---create \
---partitions 3 \
---replication-factor 3 \
---topic topic-in-source
+bootstrap.servers=<ccloud-endpoint:9092>
+security.protocol=SASL_SSL
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="<ccloud-key>" password="<ccloud-pass>";
+ssl.endpoint.identification.algorithm=https
+sasl.mechanism=PLAIN
+```
+
+There is no need for TLS here as it's part of the image. 
+
+
+##### Create a configuration secret for client applications to use
+
+```
+kubectl create secret generic kafka-client-config-secure \
+  --from-file=$TUTORIAL_HOME/kafka.properties -n destination
+```
+
+##### Create a topic named `topic-in-source`  
+```
+kubectl --namespace destination apply -f $TUTORIAL_HOME/cloudtopic.yaml
 ```
 
 
-## Produce messages to source topic in source cluster
+Deploy a producer application that produces messages to the topic `topic-in-source`:
 
 ```
-seq 1000  | kafka-console-producer --broker-list  <ccloud-endpoint:9092> \
---producer.config  ~/kafkaexample/ccloud-team/client.properties \
---topic topic-in-source
+kubectl --namespace destination apply -f $TUTORIAL_HOME/cloudproducer.yaml
 ```
+
 
 ## Configure Replicator in destination cluster
 
@@ -164,13 +186,6 @@ Open Confluent Control Center.
 ## Validate that it works
 
 Open Control center, select destination cluster, topic `${topic}_replica` where $topic is the name of the approved topic (whitelist). 
-
-```
-seq 1000  | kafka-console-producer --broker-list  <ccloud-endpoint:9092> \
---producer.config  ~/kafkaexample/ccloud-team/client.properties \
---topic moshe-topic-in-source
-```
-
 You should start seeing messages flowing into the destination topic. 
 
 ####  Tear down 
@@ -178,54 +193,10 @@ You should start seeing messages flowing into the destination topic.
 ```
 kubectl --namespace destination delete -f $TUTORIAL_HOME/components-destination.yaml           
 kubectl --namespace destination delete secrets cloud-plain kafka-tls 
-helm -n destination delete confluent-operator
+kubectl --namespace destination delete -f $TUTORIAL_HOME/cloudtopic.yaml
+kubectl --namespace destination delete -f $TUTORIAL_HOME/cloudproducer.yaml
+helm --namespace destination delete confluent-operator
 ```
-
-
-
-
-##################################### 
-```
-CONSIDER FOR LATER
-```
-#####################################
-
-
-##### Produce data to topic in source cluster
-
-Create the kafka.properties file in $TUTORIAL_HOME. Add the above endpoint and the credentials as follows:
-
-```
-bootstrap.servers=kafka.source.svc.cluster.local:9071
-sasl.jaas.config= org.apache.kafka.common.security.plain.PlainLoginModule required username="<ccloud-key>" password="<ccloud-pass>";
-sasl.mechanism=PLAIN
-security.protocol=SASL_SSL
-```
-
-There is no need for TLS here as it's part of the image. 
-
-
-##### Create a configuration secret for client applications to use
-kubectl create secret generic kafka-client-config-secure \
-  --from-file=$TUTORIAL_HOME/kafka.properties -n destination
-```
-
-##### Create a topic 
-```
-kubectl apply -f $TUTORIAL_HOME/cloudtopiccreation.yaml
-```
-
-
-Deploy a producer application that produces messages to the topic `topic-in-source`:
-
-```
-kubectl apply -f $TUTORIAL_HOME/cloudproducer.yaml
-```
-
-
-
-
-
 
 
 
@@ -280,8 +251,6 @@ then the internal domain names will be:
   openssl x509 -in $TUTORIAL_HOME/../../assets/certs/generated/server.pem -text -noout
 ```
 
-
-
 At this point you need to include the letsencrypt root certificates in the CA and server pem files.
 
 The block to copy paste is located in the hybrid/replicator-source-ccloud-destCFK-tls/certs/cloudchain.pem file. 
@@ -294,10 +263,6 @@ cat $TUTORIAL_HOME/../../assets/certs/generated/server.pem $TUTORIAL_HOME/certs/
 ```
 
 Use the above files when creating the secret. 
-
-
-Return to `step 1 <#provide-component-tls-certificates>`_ now you've created your certificates  
-
 
 
 
