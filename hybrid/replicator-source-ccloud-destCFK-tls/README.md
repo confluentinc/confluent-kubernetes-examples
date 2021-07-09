@@ -29,16 +29,12 @@ Search and replace the following:
 
 ```
 <ccloud-key>
-  hybrid/replicator-source-ccloud-destCFK-tls/creds-client-kafka-sasl-user.txt:
-  hybrid/replicator-source-ccloud-destCFK-tls/README.md
+
 
 <ccloud-pass>
-  hybrid/replicator-source-ccloud-destCFK-tls/creds-client-kafka-sasl-user.txt
-  hybrid/replicator-source-ccloud-destCFK-tls/README.md
+
 
 <ccloud-endpoint:9092>
-  hybrid/replicator-source-ccloud-destCFK-tls/README.md
-  hybrid/replicator-source-ccloud-destCFK-tls/components-destination.yaml
 ```
 
 ## Deploy source and destination clusters, including Replicator
@@ -104,30 +100,34 @@ cat <<EOF > replicator.json
  "name": "replicator",
  "config": {
      "connector.class":  "io.confluent.connect.replicator.ReplicatorSourceConnector",
-     "src.kafka.sasl.jaas.config": "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"<ccloud-key>\" password=\"<ccloud-pass>\";",
      "confluent.license": "",
      "confluent.topic.replication.factor": "3",
      "confluent.topic.security.protocol": "SSL",
      "confluent.topic.ssl.truststore.location":"/mnt/sslcerts/kafka-tls/truststore.p12",
      "confluent.topic.ssl.truststore.password":"mystorepassword",
-     "confluent.topic.ssl.truststore.type": "PKCS12",
+     "confluent.topic.bootstrap.servers": "kafka.destination.svc.cluster.local:9071",
      "dest.kafka.bootstrap.servers": "kafka.destination.svc.cluster.local:9071",
      "dest.kafka.security.protocol": "SSL",
-     "dest.kafka.ssl.keystore.type": "PKCS12",
      "dest.kafka.ssl.truststore.location": "/mnt/sslcerts/kafka-tls/truststore.p12",
      "dest.kafka.ssl.truststore.password": "mystorepassword",
-     "dest.kafka.ssl.truststore.type": "PKCS12",
      "key.converter": "io.confluent.connect.replicator.util.ByteArrayConverter",
+     "src.consumer.confluent.monitoring.interceptor.bootstrap.servers": "<ccloud-endpoint:9092>",
+     "src.consumer.confluent.monitoring.interceptor.sasl.jaas.config": "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"<ccloud-key>\" password=\"<ccloud-pass>\";",
+     "src.consumer.confluent.monitoring.interceptor.sasl.mechanism": "PLAIN",
+     "src.consumer.confluent.monitoring.interceptor.security.protocol": "SASL_SSL",
+     "src.consumer.confluent.monitoring.interceptor.ssl.truststore.location": "/mnt/sslcerts/kafka-tls/truststore.p12",
+     "src.consumer.confluent.monitoring.interceptor.ssl.truststore.password": "mystorepassword",
+     "src.consumer.group.id": "replicator",
+     "src.consumer.interceptor.classes": "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor",
      "src.kafka.bootstrap.servers": "<ccloud-endpoint:9092>",
+     "src.kafka.sasl.jaas.config": "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"<ccloud-key>\" password=\"<ccloud-pass>\";",
      "src.kafka.sasl.mechanism": "PLAIN",
      "src.kafka.security.protocol": "SASL_SSL",
-     "src.kafka.ssl.keystore.type": "PKCS12",
      "src.kafka.ssl.truststore.location": "/mnt/sslcerts/kafka-tls/truststore.p12",
      "src.kafka.ssl.truststore.password": "mystorepassword",
-     "src.kafka.ssl.truststore.type": "PKCS12",
      "tasks.max": "4",
+     "topic.rename.format": "\${topic}_replica",
      "topic.whitelist": "moshe-topic-in-source",
-      "topic.rename.format": "\${topic}_replica",
      "value.converter": "io.confluent.connect.replicator.util.ByteArrayConverter"
    }
  }
@@ -152,7 +152,9 @@ curl -XGET -H "Content-Type: application/json" https://localhost:8083/connectors
 curl -XDELETE -H "Content-Type: application/json" https://localhost:8083/connectors/replicator -k
 ```
 
-### View in Control Center
+### View in Control Center  
+
+
 ```
   kubectl port-forward controlcenter-0 9021:9021
 ```
@@ -176,6 +178,7 @@ You should start seeing messages flowing into the destination topic.
 ```
 kubectl --namespace destination delete -f $TUTORIAL_HOME/components-destination.yaml           
 kubectl --namespace destination delete secrets cloud-plain kafka-tls 
+helm -n destination delete confluent-operator
 ```
 
 

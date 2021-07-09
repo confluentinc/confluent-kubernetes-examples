@@ -93,23 +93,11 @@ spec:
     jvm:
       - -Djavax.net.ssl.trustStore=/mnt/sslcerts/kafka-tls/truststore.p12
       - -Djavax.net.ssl.trustStorePassword=mystorepassword
-      - -Djavax.net.ssl.truststoreType="PKCS12"
     server:
       # To activate the monitoring extension, configure this property
       - rest.extension.classes=io.confluent.connect.replicator.monitoring.ReplicatorMonitoringExtension
       # This specifies that Replicator is the Connector configured
-      - confluent.topic.consumer.ssl.keystore.type=PKCS12
-      - confluent.topic.consumer.ssl.truststore.location=/mnt/sslcerts/kafka-tls/truststore.p12
-      - confluent.topic.consumer.ssl.truststore.type=PKCS12
-      - confluent.topic.producer.ssl.keystore.type=PKCS12
-      - confluent.topic.producer.ssl.truststore.location=/mnt/sslcerts/kafka-tls/truststore.p12
-      - confluent.topic.producer.ssl.truststore.type=PKCS12
-      - confluent.topic.ssl.keystore.type=PKCS12
-      - confluent.topic.ssl.truststore.location=/mnt/sslcerts/kafka-tls/truststore.p12
-      - confluent.topic.ssl.truststore.type=PKCS12
       - connector.class=io.confluent.connect.replicator.ReplicatorSourceConnector
-      - ssl.keystore.type=PKCS12
-      - ssl.truststore.type=PKCS12
   dependencies:
     kafka:
       bootstrapEndpoint: kafka.destination.svc.cluster.local:9071
