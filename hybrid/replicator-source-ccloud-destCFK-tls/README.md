@@ -37,29 +37,29 @@ Search and replace the following:
 <ccloud-endpoint:9092>
 ```
 
-## Deploy source and destination clusters, including Replicator
+## Deploy destination cluster, including Replicator
 
-
-Deploy destination cluster:  
-
+Create TLS secrets (included in the ca and server pem are the 2 letsencrypt ccloud certs):  
 ```
 kubectl create secret generic kafka-tls \
 --from-file=fullchain.pem=$TUTORIAL_HOME/certs/server.pem \
 --from-file=cacerts.pem=$TUTORIAL_HOME/certs/ca.pem \
 --from-file=privkey.pem=$TUTORIAL_HOME/certs/server-key.pem \
 --namespace destination
-
+```
+Create secret with ccloud user/pass for Control Center:  
+```
 kubectl create secret generic cloud-plain \
 --from-file=plain.txt=$TUTORIAL_HOME/creds-client-kafka-sasl-user.txt \
 --namespace destination
-
+```
+Deploy destination cluster:  
+```
 kubectl apply -f $TUTORIAL_HOME/components-destination.yaml
-
 ```
 
 In `$TUTORIAL_HOME/components-destination.yaml`, note that the `Connect` CRD is used to define a 
 custom resource for Confluent Replicator.
-
 
 ## Create topic in source cluster
 
