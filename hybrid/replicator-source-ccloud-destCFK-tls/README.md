@@ -27,6 +27,7 @@ helm upgrade --install confluent-operator \
 
 Search and replace the following: 
 
+```
 <ccloud-key>
   hybrid/replicator-source-ccloud-destCFK-tls/creds-client-kafka-sasl-user.txt:
   hybrid/replicator-source-ccloud-destCFK-tls/README.md
@@ -38,7 +39,7 @@ Search and replace the following:
 <ccloud-endpoint:9092>
   hybrid/replicator-source-ccloud-destCFK-tls/README.md
   hybrid/replicator-source-ccloud-destCFK-tls/components-destination.yaml
-
+```
 
 ## Deploy source and destination clusters, including Replicator
 
