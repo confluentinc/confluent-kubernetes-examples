@@ -54,7 +54,7 @@ for rb in $(kubectl -n <namespace> get cfrb --no-headers -ojsonpath='{.items[*].
 
 Add your namespace in <namespace> when running the above command.
 
-### Delete KafkaTopic if stuck in DELETING state
+### Delete KafkaTopic if stuck in DELETING/DELETE_REQUESTED state
    
 KafkaTopic deletion (`kubectl delete kafkatopic <topic-name>`) uses Kubernetes finalizer feature to remove topic from the destination Kafka cluster through Kafka Rest API. If finalizer fails to delete because of network issue or unavailable of kafka clusters (deleted), the kubectl delete command will hang. In this scenario patch the `kafkatopic` with following commands that will remove the topic resource.
 
