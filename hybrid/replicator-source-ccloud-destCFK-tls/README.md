@@ -69,7 +69,7 @@ custom resource for Confluent Replicator.
 --create \
 --partitions 3 \
 --replication-factor 3 \
---topic moshe-topic-in-source
+--topic topic-in-source
 ```
 
 
@@ -78,7 +78,7 @@ custom resource for Confluent Replicator.
 ```
 seq 1000  | kafka-console-producer --broker-list  <ccloud-endpoint:9092> \
 --producer.config  ~/kafkaexample/ccloud-team/client.properties \
---topic moshe-topic-in-source
+--topic topic-in-source
 ```
 
 ## Configure Replicator in destination cluster
@@ -127,7 +127,7 @@ cat <<EOF > replicator.json
      "src.kafka.ssl.truststore.password": "mystorepassword",
      "tasks.max": "4",
      "topic.rename.format": "\${topic}_replica",
-     "topic.whitelist": "moshe-topic-in-source",
+     "topic.whitelist": "topic-in-source",
      "value.converter": "io.confluent.connect.replicator.util.ByteArrayConverter"
    }
  }
@@ -180,6 +180,53 @@ kubectl --namespace destination delete -f $TUTORIAL_HOME/components-destination.
 kubectl --namespace destination delete secrets cloud-plain kafka-tls 
 helm -n destination delete confluent-operator
 ```
+
+
+
+
+##################################### 
+```
+CONSIDER FOR LATER
+```
+#####################################
+
+
+##### Produce data to topic in source cluster
+
+Create the kafka.properties file in $TUTORIAL_HOME. Add the above endpoint and the credentials as follows:
+
+```
+bootstrap.servers=kafka.source.svc.cluster.local:9071
+sasl.jaas.config= org.apache.kafka.common.security.plain.PlainLoginModule required username="<ccloud-key>" password="<ccloud-pass>";
+sasl.mechanism=PLAIN
+security.protocol=SASL_SSL
+```
+
+There is no need for TLS here as it's part of the image. 
+
+
+##### Create a configuration secret for client applications to use
+kubectl create secret generic kafka-client-config-secure \
+  --from-file=$TUTORIAL_HOME/kafka.properties -n destination
+```
+
+##### Create a topic 
+```
+kubectl apply -f $TUTORIAL_HOME/cloudtopiccreation.yaml
+```
+
+
+Deploy a producer application that produces messages to the topic `topic-in-source`:
+
+```
+kubectl apply -f $TUTORIAL_HOME/cloudproducer.yaml
+```
+
+
+
+
+
+
 
 
 #### Appendix: Create your own certificates
@@ -263,37 +310,4 @@ Return to `step 1 <#provide-component-tls-certificates>`_ now you've created you
 
 
 
-
-
-
-##################################### 
-```
-CONSIDER FOR LATER
-```
-#####################################
-
-
-##### Produce data to topic in source cluster
-
-Create the kafka.properties file in $TUTORIAL_HOME. Add the above endpoint and the credentials as follows:
-
-```
-bootstrap.servers=kafka.source.svc.cluster.local:9071
-sasl.jaas.config= org.apache.kafka.common.security.plain.PlainLoginModule required username="<ccloud-key>" password="<ccloud-pass>";
-sasl.mechanism=PLAIN
-security.protocol=SASL_SSL
-ssl.truststore.location=/mnt/sslcerts/kafka-tls/truststore.p12
-ssl.truststore.password=mystorepassword
-```
-
-##### Create a configuration secret for client applications to use
-kubectl create secret generic kafka-client-config-secure \
-  --from-file=$TUTORIAL_HOME/kafka.properties -n destination
-```
-
-Deploy a producer application that produces messages to the topic `topic-in-source`:
-
-```
-kubectl apply -f $TUTORIAL_HOME/secure-producer-app-data.yaml
-```
 

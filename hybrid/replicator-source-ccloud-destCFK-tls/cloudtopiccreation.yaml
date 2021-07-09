@@ -1,0 +1,47 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: createtopic
+  namespace: destination
+spec:
+  serviceName: createtopic
+  podManagementPolicy: Parallel
+  replicas: 1
+  selector:
+    matchLabels:
+      app: createtopic
+  template:
+    metadata:
+      labels:
+        app: createtopic
+    spec:
+      containers:
+      - name: createtopic
+        image: confluentinc/cp-kafka:latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          kafka-topics --bootstrap-server <ccloud-endpoint:9092> \
+            --command-config  /mnt/kafka.properties \
+            --create \
+            --partitions 3 \
+            --replication-factor 3 \
+            --topic topic-in-source \
+            --if-not-exists
+        volumeMounts:
+        - name: kafka-properties
+          mountPath: /mnt
+      volumes:
+        - name: kafka-properties # Create secret with name `kafka-client-config` with client configurations
+          secret:
+            secretName: kafka-client-config-secure
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: createtopic
+  namespace: destination
+spec:
+  clusterIP: None
