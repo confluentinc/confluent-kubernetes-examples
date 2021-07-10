@@ -68,7 +68,7 @@ kubectl apply -f $TUTORIAL_HOME/components-destination.yaml
 In `$TUTORIAL_HOME/components-destination.yaml`, note that the `Connect` CRD is used to define a 
 custom resource for Confluent Replicator.
 
-###### Produce data to topic in source cluster
+## Produce data to topic in source cluster
 
 Create the kafka.properties file in $TUTORIAL_HOME. Add the above endpoint and the credentials as follows:
 
@@ -83,25 +83,24 @@ sasl.mechanism=PLAIN
 There is no need for TLS here as it's part of the image. 
 
 
-##### Create a configuration secret for client applications to use
+### Create a configuration secret for client applications to use
 
 ```
 kubectl create secret generic kafka-client-config-secure \
   --from-file=$TUTORIAL_HOME/kafka.properties -n destination
 ```
 
-##### Create a topic named `topic-in-source`  
+### Create a topic named `topic-in-source`  
 ```
 kubectl --namespace destination apply -f $TUTORIAL_HOME/cloudtopic.yaml
 ```
 
 
-Deploy a producer application that produces messages to the topic `topic-in-source`:
+### Deploy a producer application that produces messages to the topic `topic-in-source`:
 
 ```
 kubectl --namespace destination apply -f $TUTORIAL_HOME/cloudproducer.yaml
 ```
-
 
 ## Configure Replicator in destination cluster
 
@@ -114,7 +113,7 @@ You'll then interact with it through the REST API, to set the configuration.
 kubectl -n destination exec -it replicator-0 -- bash
 ```
 
-##### Define the configuration as a file in the pod
+#### Define the configuration as a file in the pod
 
 ```
 cat <<EOF > replicator.json
@@ -156,19 +155,19 @@ cat <<EOF > replicator.json
 EOF
 ``` 
 
-##### Instantiate the Replicator Connector instance through the REST interface
+#### Instantiate the Replicator Connector instance through the REST interface
 
 ```
 curl -XPOST -H "Content-Type: application/json" --data @replicator.json https://localhost:8083/connectors -k
 ```
-##### Check the status of the Replicator Connector instance
+#### Check the status of the Replicator Connector instance
 ```
 curl -XGET -H "Content-Type: application/json" https://localhost:8083/connectors -k
 
 curl -XGET -H "Content-Type: application/json" https://localhost:8083/connectors/replicator/status -k
 ```
 
-##### To delete the connector: 
+#### To delete the connector: 
 
 ```
 curl -XDELETE -H "Content-Type: application/json" https://localhost:8083/connectors/replicator -k
@@ -176,19 +175,18 @@ curl -XDELETE -H "Content-Type: application/json" https://localhost:8083/connect
 
 ### View in Control Center  
 
-
 ```
   kubectl port-forward controlcenter-0 9021:9021
 ```
 Open Confluent Control Center.
 
 
-## Validate that it works
+### Validate that it works
 
 Open Control center, select destination cluster, topic `${topic}_replica` where $topic is the name of the approved topic (whitelist). 
 You should start seeing messages flowing into the destination topic. 
 
-####  Tear down 
+##  Tear down 
 
 ```
 kubectl --namespace destination delete -f $TUTORIAL_HOME/components-destination.yaml           
@@ -199,44 +197,41 @@ helm --namespace destination delete confluent-operator
 ```
 
 
-
 #### Appendix: Create your own certificates
-
 
 When testing, it's often helpful to generate your own certificates to validate the architecture and deployment.
 
 You'll want both these to be represented in the certificate SAN:
-
+```
 - external domain names
 - internal Kubernetes domain names
-
+```
 The internal Kubernetes domain name depends on the namespace you deploy to. If you deploy to `confluent` namespace, 
 then the internal domain names will be: 
 
+```
 - *.kafka.destination.svc.cluster.local
 - *.zookeeper.destination.svc.cluster.local
 - *.replicator.destination.svc.cluster.local
 - *.destination.svc.cluster.local
+```
 
-
-::
-
-####  Install libraries on Mac OS
+##### Install libraries on Mac OS
 ```
   brew install cfssl
 ```
-#### Create Certificate Authority
+##### Create Certificate Authority
   
 ```
   mkdir $TUTORIAL_HOME/../../assets/certs/generated && cfssl gencert -initca $TUTORIAL_HOME/../../assets/certs/ca-csr.json | cfssljson -bare $TUTORIAL_HOME/../../assets/certs/generated/ca -
 ```
 
-#### Validate Certificate Authority
+##### Validate Certificate Authority
 
 ```
   openssl x509 -in $TUTORIAL_HOME/../../assets/certs/generated/ca.pem -text -noout
 ```
-####  Create server certificates with the appropriate SANs (SANs listed in server-domain.json)
+##### Create server certificates with the appropriate SANs (SANs listed in server-domain.json)
 
 ```
   cfssl gencert -ca=$TUTORIAL_HOME/../../assets/certs/generated/ca.pem \
@@ -245,7 +240,7 @@ then the internal domain names will be:
   -profile=server $TUTORIAL_HOME/../../assets/certs/server-domain.json | cfssljson -bare $TUTORIAL_HOME/../../assets/certs/generated/server
 ```
 
-#### Validate server certificate and SANs
+##### Validate server certificate and SANs
 
 ```  
   openssl x509 -in $TUTORIAL_HOME/../../assets/certs/generated/server.pem -text -noout
