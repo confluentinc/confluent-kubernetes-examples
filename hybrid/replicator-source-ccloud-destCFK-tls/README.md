@@ -39,6 +39,13 @@ Search and replace the following:
 <ccloud-endpoint:9092> - with your Confluent Cloud Cluster endpoint
 ```
 
+You can use a commands like these, or just use the editor. 
+```
+sed -i '' -e 's/<ccloud-key>/mylongkeyhere/g' $(find $TUTORIAL_HOME -type f -not -path "$TUTORIAL_HOME/certs/*")
+sed -i '' -e 's/<ccloud-pass>/mylongpasshere/g' $(find $TUTORIAL_HOME -type f -not -path "$TUTORIAL_HOME/certs/*")
+sed -i '' -e 's/<ccloud-endpoint:9092>/somedomainhere.aws.confluent.cloud:9092/g' $(find $TUTORIAL_HOME -type f -not -path "$TUTORIAL_HOME/certs/*")
+```
+
 ## Deploy destination cluster, including Replicator
 
 Create TLS secrets (included in the ca and server pem are the 2 letsencrypt ccloud certs):  
