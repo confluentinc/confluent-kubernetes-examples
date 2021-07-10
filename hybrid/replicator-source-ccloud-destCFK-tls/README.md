@@ -1,6 +1,6 @@
 # Replicator
 
-In this tutorial you will set a CFK destination cluster with replicator using Confluent Cloud as a source topic. 
+In this tutorial you will set a CFK destination cluster with replicator encrypted by TLS using Confluent Cloud as a source topic. 
 
 ## Set up Pre-requisites
 
