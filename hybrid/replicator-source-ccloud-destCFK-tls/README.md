@@ -69,7 +69,7 @@ kubectl create secret generic cloud-plain \
 Deploy destination cluster:  
 
 ```
-kubectl apply -f $TUTORIAL_HOME/components-destination.yaml
+kubectl apply -f $TUTORIAL_HOME/components-destination.yaml --namespace destination
 ```
 
 In `$TUTORIAL_HOME/components-destination.yaml`, note that the `Connect` CRD is used to define a 
@@ -94,7 +94,7 @@ There is no need for TLS here as it's part of the image.
 
 ```
 kubectl create secret generic kafka-client-config-secure \
-  --from-file=$TUTORIAL_HOME/kafka.properties -n destination
+  --from-file=$TUTORIAL_HOME/kafka.properties --namespace destination
 ```
 
 ### Create a topic named `topic-in-source`  
@@ -117,7 +117,7 @@ You'll then interact with it through the REST API, to set the configuration.
 ### SSH into the `replicator-0` pod
 
 ```
-kubectl -n destination exec -it replicator-0 -- bash
+kubectl --namespace destination exec -it replicator-0 -- bash
 ```
 
 #### Define the configuration as a file in the pod
@@ -183,7 +183,7 @@ curl -XDELETE -H "Content-Type: application/json" https://localhost:8083/connect
 ### View in Control Center  
 
 ```
-  kubectl port-forward controlcenter-0 9021:9021
+  kubectl port-forward controlcenter-0 9021:9021 --namespace destination
 ```
 Open Confluent Control Center.
 
@@ -197,7 +197,7 @@ You should start seeing messages flowing into the destination topic.
 
 ```
 kubectl --namespace destination delete -f $TUTORIAL_HOME/components-destination.yaml           
-kubectl --namespace destination delete secrets cloud-plain kafka-tls 
+kubectl --namespace destination delete secrets cloud-plain kafka-tls kafka-client-config-secure
 kubectl --namespace destination delete -f $TUTORIAL_HOME/cloudtopic.yaml
 kubectl --namespace destination delete -f $TUTORIAL_HOME/cloudproducer.yaml
 helm --namespace destination delete confluent-operator
