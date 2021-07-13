@@ -1,0 +1,19 @@
+{
+  "CN": "zookeeper",
+  "hosts": [
+    "zookeeper",
+    "zookeeper.confluent.svc.cluster.local",
+    "*.zookeeper.confluent.svc.cluster.local"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "Universe",
+      "ST": "Pangea",
+      "L": "Earth"
+    }
+  ]
+}

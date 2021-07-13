@@ -1,0 +1,16 @@
+{
+  "CN": "TestCA",
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "Universe",
+      "L": "Earth",
+      "O": "Acme",
+      "ST": "Pangea",
+      "OU": "MyOrg"
+    }
+  ]
+}

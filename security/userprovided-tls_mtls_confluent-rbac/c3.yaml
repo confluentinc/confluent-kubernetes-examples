@@ -1,0 +1,94 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-schema-registry:6.2.0
+    init: confluentinc/confluent-init-container:2.0.0
+  tls:
+    secretRef: tls-schemaregistry
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      domain: mydomain.example
+      prefix: sr
+  authorization:
+    type: rbac
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: mtls
+      tls:
+        enabled: true
+    mds:
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tokenKeyPair:
+        secretRef: mds-token
+      authentication:
+        type: bearer
+        bearer:
+          secretRef: sr-mds-client
+      tls:
+        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter
+  namespace: confluent
+spec:
+  replicas: 1
+  podTemplate:
+    probe:
+      liveness:
+        periodSeconds: 10
+        failureThreshold: 5
+        timeoutSeconds: 500
+  image:
+    application: confluentinc/cp-enterprise-control-center:6.2.0
+    init: confluentinc/confluent-init-container:2.0.0
+  dataVolumeCapacity: 10Gi
+  authorization:
+    type: rbac
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      domain: mydomain.example
+      prefix: controlcenter
+  tls:
+    secretRef: tls-controlcenter
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: mtls
+      tls:
+        enabled: true
+    mds:
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tokenKeyPair:
+        secretRef: mds-token
+      authentication:
+        type: bearer
+        bearer:
+          secretRef: c3-mds-client
+      tls:
+        enabled: true
+    connect:
+      - name: connect
+        url:  https://connect.confluent.svc.cluster.local:8083
+        tls:
+          enabled: true
+    ksqldb:
+      - name: ksqldb
+        url:  https://ksqldb.confluent.svc.cluster.local:8088
+        tls:
+          enabled: true
+    schemaRegistry:
+      url: https://schemaregistry.confluent.svc.cluster.local:8081
+      tls:
+        enabled: true
