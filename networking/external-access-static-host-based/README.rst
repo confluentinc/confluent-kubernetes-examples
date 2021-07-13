@@ -313,6 +313,9 @@ Create DNS records for Kafka brokers using the ingress controller load balancer 
    b0.$DOMAIN             The ``EXTERNAL-IP`` value of the ingress load balancer service
    b1.$DOMAIN             The ``EXTERNAL-IP`` value of the ingress load balancer service
    b2.$DOMAIN             The ``EXTERNAL-IP`` value of the ingress load balancer service
+   connect.$DOMAIN        The ``EXTERNAL-IP`` value of the ingress load balancer service
+   ksqldb.$DOMAIN         The ``EXTERNAL-IP`` value of the ingress load balancer service
+   controlcenter.$DOMAIN  The ``EXTERNAL-IP`` value of the ingress load balancer service
    ====================== ===============================================================
   
 ========
