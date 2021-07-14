@@ -1,0 +1,20 @@
+{
+  "CN": "kafka",
+  "hosts": [
+    "kafka",
+    "*.my.domain",
+    "kafka.confluent.svc.cluster.local",
+    "*.kafka.confluent.svc.cluster.local"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "Universe",
+      "ST": "Pangea",
+      "L": "Earth"
+    }
+  ]
+}
