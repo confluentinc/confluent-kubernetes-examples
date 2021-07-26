@@ -41,6 +41,22 @@ spec:
         enabled: true
 ---
 apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+  namespace: confluent
+spec:
+  replicas: 2
+  image:
+    application: confluentinc/cp-server-connect-operator:6.1.0.0
+    init: confluentinc/cp-init-container-operator:6.1.0.0
+  tls:
+    secretRef: tls-group1
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka:9071
+---
+apiVersion: platform.confluent.io/v1beta1
 kind: ControlCenter
 metadata:
   name: controlcenter
@@ -56,3 +72,37 @@ spec:
   dependencies:
     kafka:
       bootstrapEndpoint: kafka:9071
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-schema-registry-operator:6.1.0.0
+    init: confluentinc/cp-init-container-operator:6.1.0.0
+  tls:
+    secretRef: tls-group1
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka:9071
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KsqlDB
+metadata:
+  name: ksqldb
+  namespace: confluent
+spec:
+  replicas: 2
+  image:
+    application: confluentinc/cp-ksqldb-server-operator:6.1.0.0
+    init: confluentinc/cp-init-container-operator:6.1.0.0s
+  dataVolumeCapacity: 10Gi
+  tls:
+    secretRef: tls-group1
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka:9071
+---
