@@ -159,7 +159,7 @@ Configure Confluent Platform
 
 You install Confluent Platform components as custom resources (CRs). 
 
-In this tutorial, you will configure Zookeeper, Kafka, and Control Center in a
+In this tutorial, you will configure Zookeeper, Kafka, Connect, ksqldb and Control Center in a
 single file and deploy the components with one ``kubectl apply`` command.
 
 The CR configuration file contains a custom resource specification for each
@@ -220,9 +220,12 @@ Deploy Confluent Platform
    
      kubectl describe kafka
 
-================================
-Create a Kafka bootstrap service
-================================
+=========================
+Create bootstrap services
+=========================
+
+Kafka bootstrap
+^^^^^^^^^^^^^^^
 
 When using staticForHostBasedRouting as externalAccess type, the bootstrap
 endpoint is not configured to access Kafka. 
@@ -237,6 +240,14 @@ Create the Kafka bootstrap service to access Kafka:
 ::
 
   kubectl apply -f $TUTORIAL_HOME/kafka-bootstrap-service.yaml
+
+Other component bootstrap
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+::
+
+  kubectl apply -f $TUTORIAL_HOME/connect-bootstrap-service.yaml
+  kubectl apply -f $TUTORIAL_HOME/ksqldb-bootstrap-service.yaml
 
 =====================================
 Deploy Ingress Controller and Ingress
@@ -313,6 +324,9 @@ Create DNS records for Kafka brokers using the ingress controller load balancer 
    b0.$DOMAIN             The ``EXTERNAL-IP`` value of the ingress load balancer service
    b1.$DOMAIN             The ``EXTERNAL-IP`` value of the ingress load balancer service
    b2.$DOMAIN             The ``EXTERNAL-IP`` value of the ingress load balancer service
+   connect.$DOMAIN        The ``EXTERNAL-IP`` value of the ingress load balancer service
+   ksqldb.$DOMAIN         The ``EXTERNAL-IP`` value of the ingress load balancer service
+   controlcenter.$DOMAIN  The ``EXTERNAL-IP`` value of the ingress load balancer service
    ====================== ===============================================================
   
 ========
