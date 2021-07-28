@@ -1,0 +1,50 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter
+  namespace: destination
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-control-center-operator:6.1.0.0
+    init: confluentinc/cp-init-container-operator:6.1.0.0
+  dataVolumeCapacity: 10Gi
+  authentication:
+    type: basic
+    basic:
+      secretRef: control-center-user
+  configOverrides:
+    server:
+      - confluent.metrics.topic.max.message.bytes=8388608  
+  dependencies:
+    kafka:
+      bootstrapEndpoint: <destination-ccloud-endpoint:9092>
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: destination-cloud-plain
+      tls:
+        enabled: true
+        ignoreTrustStoreConfig: true 
+    schemaRegistry:
+      url: <destination-cloudSR_url>
+      authentication:
+        type: basic
+        basic:
+          secretRef: destination-cloud-sr-access
+    connect:
+    - name: connect-dev
+      url:  http://replicator.destination.svc.cluster.local:8083
+  monitoringKafkaClusters:
+    - name: source
+      bootstrapEndpoint: <source-ccloud-endpoint:9092> 
+      authentication:
+        type: plain
+        jaasConfig:
+          # This secret requires a key `plain.txt`, with value being a text file with
+          # the username & password of the principal that authenticates to Kafka.
+          secretRef: source-cloud-plain
+      tls:
+        enabled: true
+        ignoreTrustStoreConfig: true 
