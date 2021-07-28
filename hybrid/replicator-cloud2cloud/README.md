@@ -47,7 +47,6 @@ Search and replace the following:
 <destination-ccloud-pass> - with your destination Confluent Cloud pass
 <destination-ccloud-endpoint:9092> - with your destination Confluent Cloud Cluster endpoint
 
-
 <source-ccloud-key> - with your source Confluent Cloud Key
 <source-ccloud-pass> - with your source Confluent Cloud pass
 <source-ccloud-endpoint:9092> - with your source Confluent Cloud Cluster endpoint
@@ -66,9 +65,9 @@ sed -i '' -e 's/<destination-ccloud-endpoint:9092>/somedomainhere.aws.confluent.
 
 ## Create Secrets 
 
-Create a Kubernetes secret object for the **destination** Confluent Cloud Kafka access.
-This secret object contains file based properties. These files are in the format that each respective Confluent component requires for authentication
-credentials.
+Create a Kubernetes secret object for the **destination** Confluent Cloud Kafka access.  
+This secret object contains file based properties.  
+These files are in the format that each respective Confluent component requires for authentication credentials.
 
 ```
   kubectl create secret generic destination-cloud-plain \
@@ -118,7 +117,8 @@ kubectl get pods --namespace destination
 
 ## Produce data to topic in source cluster
 
-Create the source-kafka.properties file in $TUTORIAL_HOME. Add the above endpoint and the credentials as follows:
+Create the `source-kafka.properties` file in `$TUTORIAL_HOME`.  
+Add the above endpoint and the credentials as follows:
 
 ```
 bootstrap.servers=<source-ccloud-endpoint:9092> 
@@ -160,8 +160,8 @@ kubectl --namespace destination apply -f $TUTORIAL_HOME/cloudproducer.yaml
 
 ## Configure Replicator in destination cluster
 
-Confluent Replicator requires the configuration to be provided as a file in the running Docker container.
-You'll then interact with it through the REST API, to set the configuration.
+Confluent Replicator requires the configuration to be provided as a file in the running Docker container.  
+You'll then interact with it through the REST API, to set the configuration.  
 
 ### SSH into the `replicator-0` pod
 
@@ -229,15 +229,17 @@ curl -XDELETE -H "Content-Type: application/json" http://localhost:8083/connecto
 
 ```
 kubectl port-forward controlcenter-0 9021:9021 --namespace destination
-```
-Open Confluent Control Center: http://0.0.0.0:9021/
-Log in with user `admin` and password `Developer1`.  
+```  
+
+Open Confluent Control Center: http://0.0.0.0:9021/  
+Log in with user `admin` and password `Developer1`.    
 
 
 ### Validate that it works
 
-Open Control center, select destination cluster, topic `${topic}_replica` where $topic is the name of the approved topic (whitelist). 
+Open Control center, select destination cluster, topic `${topic}_replica` where $topic is the name of the approved topic (whitelist).   
 You should start seeing messages flowing into the destination topic. 
+You can check the replicator tab as well as the connect tab.  
 
 ##  Tear down 
 
