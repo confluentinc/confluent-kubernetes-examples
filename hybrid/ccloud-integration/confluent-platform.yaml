@@ -31,7 +31,7 @@ spec:
 apiVersion: platform.confluent.io/v1beta1
 kind: KsqlDB
 metadata:
-  name: ksqldb-tls
+  name: ksqldb
   namespace: confluent
 spec:
   replicas: 1
@@ -59,6 +59,7 @@ spec:
         type: basic
         basic:
           secretRef: cloud-sr-access
+
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: ControlCenter
@@ -98,9 +99,7 @@ spec:
           secretRef: cloud-sr-access
     ksqldb:
     - name: ksql-dev
-      url: https://ksqldb.confluent.svc.cluster.local:8088
-      tls:
-        enabled: true
+      url: http://ksqldb.confluent.svc.cluster.local:8088
     connect:
     - name: connect-dev
       url:  https://connect.confluent.svc.cluster.local:8083
