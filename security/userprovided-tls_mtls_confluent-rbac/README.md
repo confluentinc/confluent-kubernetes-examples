@@ -258,12 +258,22 @@ https://localhost:9021
 The `testadmin` user (`testadmin` password) has the `SystemAdmin` role granted and will have access to the
 cluster and broker information.
 
+### Validate component REST Access
+
+You should be able to access the REST endpoint over the external domain name.
+
+Use curl to access ksqldb cluster status. Provide the certificates you created to authenticate:
+
+```
+curl -sX GET "https://ksqldb.mydomain.example:443/clusterStatus" -v --cacert $TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem --key $TUTORIAL_HOME/../../assets/certs/component-certs/generated/ksqldb-server-key.pem --cert $TUTORIAL_HOME/../../assets/certs/component-certs/generated/ksqldb-server.pem
+```
+
 ## Tear down
 
 ```
 kubectl delete confluentrolebinding --all --namespace confluent
   
-kubectl delete -f $TUTORIAL_HOME/confluent-platform-production.yaml --namespace confluent
+kubectl delete -f $TUTORIAL_HOME/confluent-platform-mtls-rbac.yaml --namespace confluent
 
 kubectl delete secret rest-credential ksqldb-mds-client sr-mds-client connect-mds-client c3-mds-client mds-client --namespace confluent
 
@@ -293,129 +303,60 @@ kubectl get pods --namespace confluent
 kubectl logs <pod-name> --namespace confluent
 ```
 
-### Issues with Zookeeper certificates
+### Issues with Confluent component certificates
 
-The following errors appear in the logs when the certificates are wrong - the wrong certificate authority was specified in this case.
+The following errors appear in the logs when their is an issue with certificates, either server or certificate authority are wrong. in case you see these errors, 
+check that:
+
+- the certificate authority (CA) is valid
+- the server certificates are valid
+- the CA and server certificates are specified correctly in the Kubernetes Secrets
 
 ```
 [WARN] 2021-07-13 14:51:50,042 [QuorumConnectionThread-[myid=0]-1] org.apache.zookeeper.server.quorum.QuorumCnxManager initiateConnection - Cannot open channel to 1 at election address zookeeper-1.zookeeper.confluent.svc.cluster.local/10.124.3.10:3888
 javax.net.ssl.SSLHandshakeException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
 	at java.base/sun.security.ssl.Alert.createSSLException(Alert.java:131)
 	at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:349)
-	at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:292)
-	at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:287)
-	at java.base/sun.security.ssl.CertificateMessage$T12CertificateConsumer.checkServerCerts(CertificateMessage.java:654)
-	at java.base/sun.security.ssl.CertificateMessage$T12CertificateConsumer.onCertificate(CertificateMessage.java:473)
-	at java.base/sun.security.ssl.CertificateMessage$T12CertificateConsumer.consume(CertificateMessage.java:369)
-	at java.base/sun.security.ssl.SSLHandshake.consume(SSLHandshake.java:392)
-	at java.base/sun.security.ssl.HandshakeContext.dispatch(HandshakeContext.java:443)
-	at java.base/sun.security.ssl.HandshakeContext.dispatch(HandshakeContext.java:421)
-	at java.base/sun.security.ssl.TransportContext.dispatch(TransportContext.java:182)
-	at java.base/sun.security.ssl.SSLTransport.decode(SSLTransport.java:171)
-	at java.base/sun.security.ssl.SSLSocketImpl.decode(SSLSocketImpl.java:1418)
-	at java.base/sun.security.ssl.SSLSocketImpl.readHandshakeRecord(SSLSocketImpl.java:1324)
-	at java.base/sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:440)
-	at java.base/sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:411)
-	at org.apache.zookeeper.server.quorum.QuorumCnxManager.initiateConnection(QuorumCnxManager.java:366)
-	at org.apache.zookeeper.server.quorum.QuorumCnxManager$QuorumConnectionReqThread.run(QuorumCnxManager.java:436)
-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  ...
 	at java.base/java.lang.Thread.run(Thread.java:829)
 Caused by: sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
 	at java.base/sun.security.validator.PKIXValidator.doBuild(PKIXValidator.java:439)
-	at java.base/sun.security.validator.PKIXValidator.engineValidate(PKIXValidator.java:306)
-	at java.base/sun.security.validator.Validator.validate(Validator.java:264)
-	at java.base/sun.security.ssl.X509TrustManagerImpl.validate(X509TrustManagerImpl.java:313)
-	at java.base/sun.security.ssl.X509TrustManagerImpl.checkTrusted(X509TrustManagerImpl.java:222)
-	at java.base/sun.security.ssl.X509TrustManagerImpl.checkServerTrusted(X509TrustManagerImpl.java:129)
-	at org.apache.zookeeper.common.ZKTrustManager.checkServerTrusted(ZKTrustManager.java:80)
+	...
 	at java.base/sun.security.ssl.CertificateMessage$T12CertificateConsumer.checkServerCerts(CertificateMessage.java:638)
 	... 16 more
 Caused by: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
 	at java.base/sun.security.provider.certpath.SunCertPathBuilder.build(SunCertPathBuilder.java:141)
-	at java.base/sun.security.provider.certpath.SunCertPathBuilder.engineBuild(SunCertPathBuilder.java:126)
-	at java.base/java.security.cert.CertPathBuilder.build(CertPathBuilder.java:297)
-	at java.base/sun.security.validator.PKIXValidator.doBuild(PKIXValidator.java:434)
+	...
 	... 23 more
 ```
-
-The following occur when the wrong certificate authority private key was used to generate the 
-server certificates.
 
 ```
 [WARN] 2021-07-13 15:12:28,978 [QuorumConnectionThread-[myid=0]-3] org.apache.zookeeper.server.quorum.QuorumCnxManager initiateConnection - Cannot open channel to 1 at election address zookeeper-1.zookeeper.confluent.svc.cluster.local/10.124.0.23:3888
 java.net.ConnectException: Connection refused (Connection refused)
 	at java.base/java.net.PlainSocketImpl.socketConnect(Native Method)
-	at java.base/java.net.AbstractPlainSocketImpl.doConnect(AbstractPlainSocketImpl.java:399)
-	at java.base/java.net.AbstractPlainSocketImpl.connectToAddress(AbstractPlainSocketImpl.java:242)
-	at java.base/java.net.AbstractPlainSocketImpl.connect(AbstractPlainSocketImpl.java:224)
-	at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:392)
-	at java.base/java.net.Socket.connect(Socket.java:609)
-	at java.base/sun.security.ssl.SSLSocketImpl.connect(SSLSocketImpl.java:289)
-	at org.apache.zookeeper.server.quorum.QuorumCnxManager.initiateConnection(QuorumCnxManager.java:365)
-	at org.apache.zookeeper.server.quorum.QuorumCnxManager$QuorumConnectionReqThread.run(QuorumCnxManager.java:436)
-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+  ...
 	at java.base/java.lang.Thread.run(Thread.java:829)
 [WARN] 2021-07-13 15:12:29,004 [QuorumConnectionThread-[myid=0]-2] org.apache.zookeeper.server.quorum.QuorumCnxManager initiateConnection - Cannot open channel to 2 at election address zookeeper-2.zookeeper.confluent.svc.cluster.local/10.124.4.12:3888
 javax.net.ssl.SSLHandshakeException: PKIX path validation failed: java.security.cert.CertPathValidatorException: signature check failed
 	at java.base/sun.security.ssl.Alert.createSSLException(Alert.java:131)
-	at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:349)
-	at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:292)
-	at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:287)
-	at java.base/sun.security.ssl.CertificateMessage$T12CertificateConsumer.checkServerCerts(CertificateMessage.java:654)
-	at java.base/sun.security.ssl.CertificateMessage$T12CertificateConsumer.onCertificate(CertificateMessage.java:473)
-	at java.base/sun.security.ssl.CertificateMessage$T12CertificateConsumer.consume(CertificateMessage.java:369)
-	at java.base/sun.security.ssl.SSLHandshake.consume(SSLHandshake.java:392)
-	at java.base/sun.security.ssl.HandshakeContext.dispatch(HandshakeContext.java:443)
-	at java.base/sun.security.ssl.HandshakeContext.dispatch(HandshakeContext.java:421)
-	at java.base/sun.security.ssl.TransportContext.dispatch(TransportContext.java:182)
-	at java.base/sun.security.ssl.SSLTransport.decode(SSLTransport.java:171)
-	at java.base/sun.security.ssl.SSLSocketImpl.decode(SSLSocketImpl.java:1418)
-	at java.base/sun.security.ssl.SSLSocketImpl.readHandshakeRecord(SSLSocketImpl.java:1324)
-	at java.base/sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:440)
-	at java.base/sun.security.ssl.SSLSocketImpl.startHandshake(SSLSocketImpl.java:411)
-	at org.apache.zookeeper.server.quorum.QuorumCnxManager.initiateConnection(QuorumCnxManager.java:366)
-	at org.apache.zookeeper.server.quorum.QuorumCnxManager$QuorumConnectionReqThread.run(QuorumCnxManager.java:436)
-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1128)
-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:628)
+	...
 	at java.base/java.lang.Thread.run(Thread.java:829)
 Caused by: sun.security.validator.ValidatorException: PKIX path validation failed: java.security.cert.CertPathValidatorException: signature check failed
 	at java.base/sun.security.validator.PKIXValidator.doValidate(PKIXValidator.java:369)
-	at java.base/sun.security.validator.PKIXValidator.engineValidate(PKIXValidator.java:263)
-	at java.base/sun.security.validator.Validator.validate(Validator.java:264)
-	at java.base/sun.security.ssl.X509TrustManagerImpl.validate(X509TrustManagerImpl.java:313)
-	at java.base/sun.security.ssl.X509TrustManagerImpl.checkTrusted(X509TrustManagerImpl.java:222)
-	at java.base/sun.security.ssl.X509TrustManagerImpl.checkServerTrusted(X509TrustManagerImpl.java:129)
-	at org.apache.zookeeper.common.ZKTrustManager.checkServerTrusted(ZKTrustManager.java:80)
+	...
 	at java.base/sun.security.ssl.CertificateMessage$T12CertificateConsumer.checkServerCerts(CertificateMessage.java:638)
 	... 16 more
 Caused by: java.security.cert.CertPathValidatorException: signature check failed
 	at java.base/sun.security.provider.certpath.PKIXMasterCertPathValidator.validate(PKIXMasterCertPathValidator.java:135)
-	at java.base/sun.security.provider.certpath.PKIXCertPathValidator.validate(PKIXCertPathValidator.java:224)
-	at java.base/sun.security.provider.certpath.PKIXCertPathValidator.validate(PKIXCertPathValidator.java:144)
-	at java.base/sun.security.provider.certpath.PKIXCertPathValidator.engineValidate(PKIXCertPathValidator.java:83)
-	at java.base/java.security.cert.CertPathValidator.validate(CertPathValidator.java:309)
+	...
 	at java.base/sun.security.validator.PKIXValidator.doValidate(PKIXValidator.java:364)
 	... 23 more
 Caused by: java.security.SignatureException: Signature does not match.
 	at java.base/sun.security.x509.X509CertImpl.verify(X509CertImpl.java:422)
-	at java.base/sun.security.provider.certpath.BasicChecker.verifySignature(BasicChecker.java:166)
-	at java.base/sun.security.provider.certpath.BasicChecker.check(BasicChecker.java:147)
-	at java.base/sun.security.provider.certpath.PKIXMasterCertPathValidator.validate(PKIXMasterCertPathValidator.java:125)
-	... 28 more
+	...
 ```
 
-The following occurs in Zookeeper pod logs ...
-
-```
-[ERROR] 2021-07-13 15:23:29,091 [nioEventLoopGroup-7-2] org.apache.zookeeper.server.NettyServerCnxnFactory operationComplete - Unsuccessful handshake with session 0x0
-[ERROR] 2021-07-13 15:23:39,091 [nioEventLoopGroup-7-1] org.apache.zookeeper.server.NettyServerCnxnFactory operationComplete - Unsuccessful handshake with session 0x0
-[ERROR] 2021-07-13 15:23:49,091 [nioEventLoopGroup-7-2] org.apache.zookeeper.server.NettyServerCnxnFactory operationComplete - Unsuccessful handshake with session 0x0
-[ERROR] 2021-07-13 15:23:59,090 [nioEventLoopGroup-7-1] org.apache.zookeeper.server.NettyServerCnxnFactory operationComplete - Unsuccessful handshake with session 0x0
-```
-
-The following occurs in Kafka pod logs ...
+The following error indicates that the certificate SAN does not have the required host names:
 
 ```
 [ERROR] 2021-07-13 16:00:35,474 [nioEventLoopGroup-2-1] org.apache.zookeeper.common.ZKTrustManager performHostVerification - Failed to verify host address: 10.124.3.12
