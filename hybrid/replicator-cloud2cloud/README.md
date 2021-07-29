@@ -1,8 +1,12 @@
 # Replicator
 
-In this tutorial you will set a CFK Connect worker with Confluent Replicator and Monitoring Extension using Confluent Cloud as a source and destination.  
-The Confluent Replicator Monitoring Extension allows for detailed metrics from Replicator tasks to be collected using an exposed REST API.  
-You will also set Control Center bootstrapping the destination cluster and monitoring the source cluster, you will be able to view both via the UI.  
+In this workflow scenario you will be able to replicate data from one source Confluent Cloud cluster to a destination Confluent Cloud cluster, using Confluent Replicator.  
+You'll be able to monitor the end to end architecture through a single view in Confluent Control Center -> the source cluster, destination cluster, and the replication service.  
+The Confluent Replicator Monitoring Extension allows for detailed metrics from Replicator tasks to be collected using an exposed REST API. 
+
+You will set the following components:
+ - Connect worker with Confluent Replicator and Monitoring Extension using Confluent Cloud as a source and destination.  
+ - Control Center bootstrapping the destination Confluent Cloud cluster and monitoring the source Confluent Cloud cluster, you will be able to view both via the UI.  
 
 ## Set up Pre-requisites
 
