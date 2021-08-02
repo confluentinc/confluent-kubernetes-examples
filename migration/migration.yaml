@@ -18,7 +18,6 @@ spec:
     name: kafka
     namespace: confluent
     release: kafka
-    zookeeperEndpoint: zookeeper.confluent.svc.cluster.local:2181
   controlcenter:
     enabled: false
     name: controlcenter
