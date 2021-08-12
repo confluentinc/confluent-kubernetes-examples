@@ -150,7 +150,7 @@ Warning  KeyInSecretRefIssue  kafka/kafka  required key [ldap.txt] missing in se
 
 ## Create the ACLs for each component
 
-You`ll see that Schema Registry, Connect, ksqlDB, COntrol Center - all fail to come up. This is because 
+You`ll see that Schema Registry, Connect, ksqlDB, Control Center - all fail to come up. This is because 
 the Kafka ACLs that let these components create, read and write to their required topics have not been 
 created.
 
@@ -167,7 +167,7 @@ and either connect over the internal or external Kubernetes network.
 Open an interactive shell session in the Kafka broker container:
 
 ```
-k exec kafka-0 -it bash
+kubectl -n confluent exec -it kafka-0 -- bash
 ```
 
 Create the client configuration to connect to the Kafka cluster over
@@ -310,7 +310,7 @@ Set up port forwarding to Control Center web UI from local machine:
 kubectl port-forward controlcenter-0 9021:9021 --namespace confluent
 ```
 
-Browse to Control Center. You will log in as the `administrator` user, with `Developer1` password.
+Browse to Control Center.
 
 ```
 https://localhost:9021
