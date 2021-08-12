@@ -69,7 +69,7 @@ credentials:
 Set the tutorial directory for this tutorial under the directory you downloaded the tutorial files:
 
 ```
-export TUTORIAL_HOME=<Tutorial directory>/security/userprovided-tls_mtls_confluent_rbac
+export TUTORIAL_HOME=<Tutorial directory>/security/userprovided-tls_mtls_kafka-acls
 ```
 
 In this step, you will create secrets for each Confluent component TLS certificates.
