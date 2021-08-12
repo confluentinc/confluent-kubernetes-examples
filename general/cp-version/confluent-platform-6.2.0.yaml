@@ -10,6 +10,11 @@ spec:
     init: confluentinc/confluent-init-container:2.0.0
   dataVolumeCapacity: 10Gi
   logVolumeCapacity: 10Gi
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
@@ -22,6 +27,11 @@ spec:
     application: confluentinc/cp-server:6.2.0
     init: confluentinc/confluent-init-container:2.0.0
   dataVolumeCapacity: 10Gi
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: Connect
@@ -33,6 +43,11 @@ spec:
   image:
     application: confluentinc/cp-server-connect:6.2.0
     init: confluentinc/confluent-init-container:2.0.0
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true  
 ---
 apiVersion: platform.confluent.io/v1beta1
 # Confluent Replicator is built as a connector, and so will use the `Connect` CRD.
@@ -45,6 +60,11 @@ spec:
   image:
     application: confluentinc/cp-enterprise-replicator:6.2.0
     init: confluentinc/confluent-init-container:2.0.0
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true  
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: KsqlDB
@@ -57,6 +77,11 @@ spec:
     application: confluentinc/cp-ksqldb-server:6.2.0
     init: confluentinc/confluent-init-container:2.0.0
   dataVolumeCapacity: 10Gi
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: ControlCenter
@@ -69,6 +94,11 @@ spec:
     application: confluentinc/cp-enterprise-control-center:6.2.0
     init: confluentinc/confluent-init-container:2.0.0
   dataVolumeCapacity: 10Gi
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true
   dependencies:
     schemaRegistry:
       url: http://schemaregistry.confluent.svc.cluster.local:8081
@@ -89,3 +119,9 @@ spec:
   image:
     application: confluentinc/cp-schema-registry:6.2.0
     init: confluentinc/confluent-init-container:2.0.0
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true  
+    
