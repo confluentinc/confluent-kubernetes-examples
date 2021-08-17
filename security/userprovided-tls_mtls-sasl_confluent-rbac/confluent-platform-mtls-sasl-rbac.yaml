@@ -50,7 +50,7 @@ spec:
       externalAccess:
         type: loadBalancer
         loadBalancer:
-          domain: mydomain.example
+          domain: cfk-demo.app
           brokerPrefix: kafka
           bootstrapPrefix: kafka
   authorization:
@@ -109,7 +109,7 @@ spec:
   externalAccess:
     type: loadBalancer
     loadBalancer:
-      domain: mydomain.example
+      domain: cfk-demo.app
       prefix: connect
   authorization:
     type: rbac
@@ -146,7 +146,7 @@ spec:
   externalAccess:
     type: loadBalancer
     loadBalancer:
-      domain: mydomain.example
+      domain: cfk-demo.app
       prefix: sr
   authorization:
     type: rbac
@@ -184,7 +184,7 @@ spec:
   externalAccess:
     type: loadBalancer
     loadBalancer:
-      domain: mydomain.example
+      domain: cfk-demo.app
       prefix: ksql
   tls:
     secretRef: tls-ksqldb
@@ -228,7 +228,7 @@ spec:
   externalAccess:
     type: loadBalancer
     loadBalancer:
-      domain: mydomain.example
+      domain: cfk-demo.app
       prefix: controlcenter
   tls:
     secretRef: tls-controlcenter
