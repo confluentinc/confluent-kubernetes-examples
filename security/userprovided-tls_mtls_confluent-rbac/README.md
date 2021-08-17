@@ -12,7 +12,7 @@ Before continuing with the scenario, ensure that you have set up the [prerequisi
 Set the tutorial directory for this tutorial under the directory you downloaded the tutorial files:
 
 ```
-export TUTORIAL_HOME=<Tutorial directory>/security/userprovided-tls_mtls_confluent_rbac
+export TUTORIAL_HOME=<Tutorial directory>/security/userprovided-tls_mtls_confluent-rbac
 ```
   
 ## Deploy Confluent for Kubernetes
