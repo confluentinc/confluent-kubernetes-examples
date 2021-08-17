@@ -3,7 +3,7 @@
 In this workflow scenario, you'll set up a Confluent Platform cluster with the following security:
 - Full TLS network encryption with user provided certificates
 - mTLS authentication
-- Kafka ACLs authorization
+- Confluent RBAC authorization
 
 Before continuing with the scenario, ensure that you have set up the [prerequisites](https://github.com/confluentinc/confluent-kubernetes-examples/blob/master/README.md#prerequisites).
 
