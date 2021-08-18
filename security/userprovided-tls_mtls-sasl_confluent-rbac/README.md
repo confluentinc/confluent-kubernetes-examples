@@ -146,7 +146,7 @@ format that each respective Confluent component requires for authentication
 credentials.
 
 ```   
-kubectl create secret generic credential \  
+kubectl create secret generic credential \
   --from-file=plain-users.json=$TUTORIAL_HOME/creds-kafka-sasl-users.json \
   --from-file=ldap.txt=$TUTORIAL_HOME/ldap.txt \
   --namespace confluent
@@ -194,7 +194,7 @@ kubectl create secret generic rest-credential \
 Deploy Confluent Platform:
 
 ```
-kubectl apply -f $TUTORIAL_HOME/confluent-platform-mtls-rbac.yaml --namespace confluent
+kubectl apply -f $TUTORIAL_HOME/confluent-platform-mtls-sasl-rbac.yaml --namespace confluent
 ```
 
 Check that all Confluent Platform resources are deployed:

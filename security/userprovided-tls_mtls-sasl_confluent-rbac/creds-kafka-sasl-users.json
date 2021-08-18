@@ -1,3 +1,4 @@
 {
-  "kafka_client": "kafka_client-secret"
+  "kafka_client": "kafka_client-secret",
+  "devuser": "dev-password"
 }

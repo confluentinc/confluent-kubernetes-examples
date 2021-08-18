@@ -219,6 +219,10 @@ spec:
         periodSeconds: 10
         failureThreshold: 5
         timeoutSeconds: 500
+    resources:
+      requests:
+        memory: "8Gi"
+        cpu: "2000m"
   image:
     application: confluentinc/cp-enterprise-control-center:6.2.0
     init: confluentinc/confluent-init-container:2.0.0
