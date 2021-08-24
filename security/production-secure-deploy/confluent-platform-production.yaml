@@ -15,7 +15,7 @@ spec:
     jaasConfig:
       secretRef: credential
   tls:
-    secretRef: tls-group1
+    secretRef: tls-group2
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: Kafka

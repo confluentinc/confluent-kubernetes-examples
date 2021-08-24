@@ -124,9 +124,17 @@ Provide component TLS certificates
 ::
    
     kubectl create secret generic tls-group1 \
-      --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/generated/server.pem \
-      --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/generated/ca.pem \
-      --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/generated/server-key.pem \
+      --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/generated/kafka-server.pem \
+      --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/generated/cacerts.pem \
+      --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/generated/kafka-server-key.pem \
+      --namespace confluent
+
+::
+   
+    kubectl create secret generic tls-group2 \
+      --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/generated/zookeeper-server.pem \
+      --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/generated/cacerts.pem \
+      --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/generated/zookeeper-server-key.pem \
       --namespace confluent
 
 
