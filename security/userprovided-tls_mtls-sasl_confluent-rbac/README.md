@@ -268,7 +268,7 @@ curl -sX GET "https://ksqldb.mydomain.example:443/clusterStatus" -v --cacert $TU
 ```
 kubectl delete confluentrolebinding --all --namespace confluent
   
-kubectl delete -f $TUTORIAL_HOME/confluent-platform-mtls-rbac.yaml --namespace confluent
+kubectl delete -f $TUTORIAL_HOME/confluent-platform-mtls-sasl-rbac.yaml --namespace confluent
 
 kubectl delete secret rest-credential ksqldb-mds-client sr-mds-client connect-mds-client c3-mds-client mds-client --namespace confluent
 
