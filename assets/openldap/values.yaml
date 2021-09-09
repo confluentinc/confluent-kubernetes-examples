@@ -136,3 +136,10 @@ ldifs:
     changetype: modify
     add: memberuid
     memberuid: cn=james,ou=users,{{ LDAP_BASE_DN }}
+  14_kafka-dev.ldif: |-
+    dn: cn=devuser,{{ LDAP_BASE_DN }}
+    userPassword: dev-password
+    description: Developer user
+    objectClass: simpleSecurityObject
+    objectClass: organizationalRole
+    cn: devuser
