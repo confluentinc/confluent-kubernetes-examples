@@ -2,7 +2,8 @@
 
 In this workflow scenario, you'll set up a Confluent Platform cluster with the following security:
 - Full TLS network encryption with user provided certificates
-- mTLS authentication
+- mTLS authentication for internal Kafka listeners
+- SASL/Plain authentication for external Kafka listener
 - Confluent RBAC authorization
 
 Before continuing with the scenario, ensure that you have set up the [prerequisites](https://github.com/confluentinc/confluent-kubernetes-examples/blob/master/README.md#prerequisites).
@@ -138,7 +139,7 @@ kubectl create secret generic tls-ksqldb \
 
 ### Provide authentication credentials
 
-Create a Kubernetes secret object for Zookeeper, Kafka, and Control Center.
+Create a Kubernetes secret object for Kafka.
 
 This secret object contains file based properties. These files are in the
 format that each respective Confluent component requires for authentication
@@ -146,16 +147,10 @@ credentials.
 
 ```   
 kubectl create secret generic credential \
-  --from-file=digest-users.json=$TUTORIAL_HOME/creds-zookeeper-sasl-digest-users.json \
-  --from-file=digest.txt=$TUTORIAL_HOME/creds-kafka-zookeeper-credentials.txt \
-  --from-file=basic.txt=$TUTORIAL_HOME/creds-control-center-users.txt \
+  --from-file=plain-users.json=$TUTORIAL_HOME/creds-kafka-sasl-users.json \
   --from-file=ldap.txt=$TUTORIAL_HOME/ldap.txt \
   --namespace confluent
 ```
-
-In this tutorial, we use one credential for authenticating all client and
-server communication to Kafka brokers. In production scenarios, you'll want
-to specify different credentials for each of them.
 
 ### Provide RBAC principal credentials
 
@@ -199,7 +194,7 @@ kubectl create secret generic rest-credential \
 Deploy Confluent Platform:
 
 ```
-kubectl apply -f $TUTORIAL_HOME/confluent-platform-mtls-rbac.yaml --namespace confluent
+kubectl apply -f $TUTORIAL_HOME/confluent-platform-mtls-sasl-rbac.yaml --namespace confluent
 ```
 
 Check that all Confluent Platform resources are deployed:
@@ -273,7 +268,7 @@ curl -sX GET "https://ksqldb.mydomain.example:443/clusterStatus" -v --cacert $TU
 ```
 kubectl delete confluentrolebinding --all --namespace confluent
   
-kubectl delete -f $TUTORIAL_HOME/confluent-platform-mtls-rbac.yaml --namespace confluent
+kubectl delete -f $TUTORIAL_HOME/confluent-platform-mtls-sasl-rbac.yaml --namespace confluent
 
 kubectl delete secret rest-credential ksqldb-mds-client sr-mds-client connect-mds-client c3-mds-client mds-client --namespace confluent
 
