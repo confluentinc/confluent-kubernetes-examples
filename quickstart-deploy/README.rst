@@ -106,6 +106,12 @@ Deploy Confluent Platform
    ::
 
      kubectl apply -f $TUTORIAL_HOME/confluent-platform.yaml
+   
+     ## Note: If you are deploying a single node dev cluster, then use this yaml file:
+     
+     ::
+     kubectl apply -f $TUTORIAL_HOME/confluent-platform-singlenode.yaml
+     
 
 #. Check that all Confluent Platform resources are deployed:
 
