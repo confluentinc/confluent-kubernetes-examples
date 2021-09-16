@@ -4,13 +4,17 @@ metadata:
   name: zookeeper
   namespace: confluent
 spec:
-  replicas: 3
+  replicas: 1
   image:
     application: confluentinc/cp-zookeeper:6.2.0
     init: confluentinc/confluent-init-container:2.0.0
   dataVolumeCapacity: 10Gi
   logVolumeCapacity: 10Gi
   podTemplate:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
     podSecurityContext:
       fsGroup: 1000
       runAsUser: 1000
@@ -22,12 +26,27 @@ metadata:
   name: kafka
   namespace: confluent
 spec:
-  replicas: 3
+  replicas: 1
   image:
     application: confluentinc/cp-server:6.2.0
     init: confluentinc/confluent-init-container:2.0.0
   dataVolumeCapacity: 10Gi
+  configOverrides:
+    server:
+      - "confluent.license.topic.replication.factor=1"
+      - "confluent.tier.metadata.replication.factor=1"
+      - "confluent.metadata.topic.replication.factor=1"
+      - "confluent.balancer.topic.replication.factor=1"
+      - "confluent.security.event.logger.exporter.kafka.topic.replicas=1"
+      - "event.logger.exporter.kafka.topic.replicas=1"
+      - "offsets.topic.replication.factor=1"
+      - "confluent.cluster.link.enable=true"
+      - "password.encoder.secret=secret"
   podTemplate:
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi
     podSecurityContext:
       fsGroup: 1000
       runAsUser: 1000
@@ -39,28 +58,25 @@ metadata:
   name: connect
   namespace: confluent
 spec:
-  replicas: 2
+  replicas: 1
   image:
     application: confluentinc/cp-server-connect:6.2.0
     init: confluentinc/confluent-init-container:2.0.0
+  configOverrides:
+    server:
+      - config.storage.replication.factor=1
+      - offset.storage.replication.factor=1
+      - status.storage.replication.factor=1
   podTemplate:
-    podSecurityContext:
-      fsGroup: 1000
-      runAsUser: 1000
-      runAsNonRoot: true  
----
-apiVersion: platform.confluent.io/v1beta1
-# Confluent Replicator is built as a connector, and so will use the `Connect` CRD.
-kind: Connect
-metadata:
-  name: replicator
-  namespace: confluent
-spec:
-  replicas: 1
-  image:
-    application: confluentinc/cp-enterprise-replicator:6.2.0
-    init: confluentinc/confluent-init-container:2.0.0
-  podTemplate:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+    probe:
+      liveness:
+        periodSeconds: 10
+        failureThreshold: 5
+        timeoutSeconds: 500 
     podSecurityContext:
       fsGroup: 1000
       runAsUser: 1000
@@ -72,12 +88,21 @@ metadata:
   name: ksqldb
   namespace: confluent
 spec:
-  replicas: 2
+  replicas: 1
   image:
     application: confluentinc/cp-ksqldb-server:6.2.0
     init: confluentinc/confluent-init-container:2.0.0
   dataVolumeCapacity: 10Gi
   podTemplate:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+    probe:
+      liveness:
+        periodSeconds: 10
+        failureThreshold: 5
+        timeoutSeconds: 500 
     podSecurityContext:
       fsGroup: 1000
       runAsUser: 1000
@@ -94,7 +119,28 @@ spec:
     application: confluentinc/cp-enterprise-control-center:6.2.0
     init: confluentinc/confluent-init-container:2.0.0
   dataVolumeCapacity: 10Gi
+  configOverrides:
+    server:
+      - confluent.controlcenter.command.topic.replication=1
+      - confluent.controlcenter.replication.factor=1
+      - confluent.metrics.reporter.topic.replicas=1
+      - confluent.metrics.topic.replication=1
+      - confluent.monitoring.interceptor.topic.replication=1
+      - confluent.controlcenter.internal.topics.replication=1
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      domain: minikube.domain
   podTemplate:
+    resources:
+      requests:
+        cpu: 500m
+        memory: 512Mi
+    probe:
+      liveness:
+        periodSeconds: 10
+        failureThreshold: 5
+        timeoutSeconds: 500
     podSecurityContext:
       fsGroup: 1000
       runAsUser: 1000
@@ -115,13 +161,16 @@ metadata:
   name: schemaregistry
   namespace: confluent
 spec:
-  replicas: 2
+  replicas: 1
   image:
     application: confluentinc/cp-schema-registry:6.2.0
     init: confluentinc/confluent-init-container:2.0.0
   podTemplate:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
     podSecurityContext:
       fsGroup: 1000
       runAsUser: 1000
-      runAsNonRoot: true  
-    
+      runAsNonRoot: true
