@@ -41,7 +41,7 @@ In this step, you will create:
 1. Generate a private key called rootCAkey.pem for the CA:
 
 ```
-openssl genrsa -out $TUTORIAL_HOME/generated/rootCAkey.pem 2048
+mkdir $TUTORIAL_HOME/generated && openssl genrsa -out $TUTORIAL_HOME/generated/rootCAkey.pem 2048
 ```
 
 2. Generate the CA certificate.

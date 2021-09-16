@@ -234,6 +234,12 @@ Create ACLs:
  --allow-principal "User:connect" \
  --operation Read --group confluent.connect
 
+/bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
+ --command-config /opt/confluentinc/kafka.properties \
+ --add \
+ --allow-principal "User:connect" \
+ --operation Create --cluster kafka-cluster
+
 
 # For ksqlDB
 
@@ -285,6 +291,39 @@ Create ACLs:
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:c3" \
+ --operation Describe \
+ --topic __consumer_offsets \
+ --topic _confluent_balancer_api_state \
+ --topic _confluent_balancer_broker_samples \
+ --topic _confluent_balancer_partition_samples \
+ --topic _confluent-command \
+ --topic _confluent-ksql-confluent.ksqldb__command_topic \
+ --topic _confluent-license \
+ --topic _confluent-telemetry-metrics \
+ --topic _schemas_schemaregistry_confluent \
+ --topic confluent.connect-configs \
+ --topic confluent.connect-offsets \
+ --topic confluent.connect-status
+
+/bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
+ --command-config /opt/confluentinc/kafka.properties \
+ --add \
+ --allow-principal "User:c3" \
+ --operation DescribeConfigs \
+ --topic _confluent-command
+
+/bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
+ --command-config /opt/confluentinc/kafka.properties \
+ --add \
+ --allow-principal "User:c3" \
+ --operation DescribeConfigs \
+ --topic _confluent-controlcenter \
+ --resource-pattern-type prefixed
+
+/bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
+ --command-config /opt/confluentinc/kafka.properties \
+ --add \
+ --allow-principal "User:c3" \
  --operation AlterConfigs --operation Create --operation Describe \
  --operation DescribeConfigs --operation Describe --cluster kafka-cluster
 
@@ -292,7 +331,21 @@ Create ACLs:
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:c3" \
- --operation Read --group _confluent-controlcenter \
+ --operation AlterConfigs --operation Create --operation Describe \
+ --operation DescribeConfigs --operation Create --cluster kafka-cluster
+
+/bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
+ --command-config /opt/confluentinc/kafka.properties \
+ --add \
+ --allow-principal "User:c3" \
+ --operation Describe --group ConfluentTelemetryReporterSampler \
+ --resource-pattern-type prefixed
+
+/bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
+ --command-config /opt/confluentinc/kafka.properties \
+ --add \
+ --allow-principal "User:c3" \
+ --operation All --group _confluent-controlcenter \
  --resource-pattern-type prefixed
 ```
 
