@@ -202,14 +202,20 @@ Create ACLs:
  --operation Describe \
  --topic __consumer_offsets \
  --topic _confluent-metrics \
- --topic _confluent-telemetry-metrics
-
+ --topic _confluent-telemetry-metrics \
+ --topic _confluent-command \
+ --topic _confluent-monitoring \
+ --topic confluent.connect-configs \
+ --topic confluent.connect-offsets \
+ --topic confluent.connect-status
+ 
 /bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:sr" \
  --operation Describe \
  --topic _confluent_balancer \
+ --topic _confluent-controlcenter \
  --resource-pattern-type prefixed
 
 ### The schemas topic is named: _schemas_<sr-cluster-name>_<namespace>
@@ -225,6 +231,13 @@ Create ACLs:
  --add \
  --allow-principal "User:sr" \
  --operation Read --group id_schemaregistry_confluent
+
+/bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
+ --command-config /opt/confluentinc/kafka.properties \
+ --add \
+ --allow-principal "User:sr" \
+ --operation ClusterAction \
+ --cluster kafka-cluster
 
 
 # For Connect
@@ -255,7 +268,8 @@ Create ACLs:
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:connect" \
- --operation Create --cluster kafka-cluster
+ --operation Create --operation ClusterAction \
+ --cluster kafka-cluster
 
 /bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
  --command-config /opt/confluentinc/kafka.properties \
@@ -372,8 +386,8 @@ Create ACLs:
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:c3" \
- --operation AlterConfigs --operation Create --operation Describe \
- --operation DescribeConfigs --operation Describe --cluster kafka-cluster
+ --operation AlterConfigs --operation Create --operation Describe --operation DescribeConfigs --operation Describe --operation ClusterAction \
+ --cluster kafka-cluster
 
 /bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
  --command-config /opt/confluentinc/kafka.properties \
