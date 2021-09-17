@@ -193,7 +193,8 @@ Create ACLs:
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:sr" \
- --operation Read --operation Write --operation Create --topic _confluent-license
+ --operation Read --operation Write --operation Create \
+ --topic _confluent-license
 
 /bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
  --command-config /opt/confluentinc/kafka.properties \
@@ -207,7 +208,8 @@ Create ACLs:
  --topic _confluent-monitoring \
  --topic confluent.connect-configs \
  --topic confluent.connect-offsets \
- --topic confluent.connect-status
+ --topic confluent.connect-status \
+ --topic _confluent-ksql-confluent.ksqldb__command_topic
  
 /bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
  --command-config /opt/confluentinc/kafka.properties \
@@ -223,14 +225,16 @@ Create ACLs:
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:sr" \
- --operation Read --operation Write --operation Create --topic _schemas_schemaregistry_confluent
+ --operation Read --operation Write --operation Create \
+ --topic _schemas_schemaregistry_confluent
 
 ### The Schema Registry consumer group is: id_<sr-cluster-name>_<namespace>
 /bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:sr" \
- --operation Read --group id_schemaregistry_confluent
+ --operation Read \
+ --group id_schemaregistry_confluent
 
 /bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
  --command-config /opt/confluentinc/kafka.properties \
@@ -262,7 +266,8 @@ Create ACLs:
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:connect" \
- --operation Read --group confluent.connect
+ --operation Read \
+ --group confluent.connect
 
 /bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
  --command-config /opt/confluentinc/kafka.properties \
@@ -309,8 +314,8 @@ Create ACLs:
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:ksql" \
- --operation Read --operation Write --operation Create \
- --operation DescribeConfigs --operation Describe --topic _confluent-ksql-confluent \
+ --operation All \
+ --topic _confluent-ksql-confluent \
  --resource-pattern-type prefixed
 
  /bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
@@ -333,21 +338,22 @@ Create ACLs:
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:c3" \
- --operation Read --operation Write --operation Create --topic _confluent-command
+ --operation Read --operation Write --operation Create \
+ --topic _confluent-command
 
 /bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:c3" \
- --operation Read --operation Write --operation Create \
- --operation DescribeConfigs --operation Describe --topic _confluent-metrics
+ --operation Read --operation Write --operation Create --operation DescribeConfigs --operation Describe \
+ --topic _confluent-metrics
 
 /bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:c3" \
- --operation Read --operation Write --operation Create \
- --operation DescribeConfigs --operation Describe --topic _confluent-monitoring
+ --operation Read --operation Write --operation Create --operation DescribeConfigs --operation Describe \
+ --topic _confluent-monitoring
 
 /bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
  --command-config /opt/confluentinc/kafka.properties \
@@ -393,14 +399,15 @@ Create ACLs:
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:c3" \
- --operation AlterConfigs --operation Create --operation Describe \
- --operation DescribeConfigs --operation Create --cluster kafka-cluster
+ --operation AlterConfigs --operation Create --operation Describe --operation DescribeConfigs --operation Create \
+ --cluster kafka-cluster
 
 /bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:c3" \
- --operation Describe --group ConfluentTelemetryReporterSampler \
+ --operation Describe --operation Delete --operation Read \
+ --group ConfluentTelemetryReporterSampler \
  --resource-pattern-type prefixed
 
 /bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
