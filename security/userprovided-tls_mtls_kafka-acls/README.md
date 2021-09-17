@@ -143,7 +143,7 @@ kubectl get pods --namespace confluent
 If any component does not deploy, it could be due to missing configuration information in secrets.
 The Kubernetes events will tell you if there are any issues with secrets. For example:  
 
-If you see a `CrashLoopBackOff` on any of the components like Schema Registry / Connect or Control Center, this is expected as the ACLs were not yet created, continue to the next steps to add ACLs.  
+If you see a **`CrashLoopBackOff`** on any of the components like Schema Registry / Connect or Control Center, this is **expected** as the ACLs were not yet created, continue to the next steps to add ACLs.  
 
 ```
 kubectl get events --namespace confluent
