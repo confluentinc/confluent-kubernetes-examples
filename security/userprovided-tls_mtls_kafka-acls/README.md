@@ -39,7 +39,7 @@ kubectl get pods --namespace confluent
 
 In this scenario, you`ll configure authentication using the mTLS mechanism. With mTLS, Confluent components and clients use TLS certificates for authentication. The certificate has a CN that identifies the principal name.
 
-Each Confluent component service should have it`s own TLS certificate. In this scenario, you`ll
+Each Confluent component service should have it's own TLS certificate. In this scenario, you`ll
 generate a server certificate for each Confluent component service. Follow [these instructions](../../assets/certs/component-certs/README.md) to generate these certificates.
 
 These TLS certificates include the following principal names for each component in the certificate Common Name:
@@ -445,14 +445,12 @@ https://localhost:9021
 
 ## Tear down
 
-```
-kubectl delete confluentrolebinding --all --namespace confluent
-  
+```  
 kubectl delete -f $TUTORIAL_HOME/confluent-platform-mtls-acls.yaml --namespace confluent
 
-kubectl delete secret credential --namespace confluent
-
-kubectl delete secret tls-group1 --namespace confluent
+kubectl delete secret \
+tls-zookeeper tls-kafka  tls-controlcenter tls-schemaregistry tls-connect tls-ksqldb credential \
+--namespace confluent
 
 helm delete operator --namespace confluent
 ```
