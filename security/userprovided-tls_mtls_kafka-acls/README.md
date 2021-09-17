@@ -251,14 +251,16 @@ Create ACLs:
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:connect" \
- --operation Read --operation Write --operation Create --topic confluent.connect- \
+ --operation Read --operation Write --operation Create \
+ --topic confluent.connect- \
  --resource-pattern-type prefixed
 
 /bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:connect" \
- --operation Write --topic _confluent-monitoring \
+ --operation Write \
+ --topic _confluent-monitoring \
  --resource-pattern-type prefixed
 
 ### The Connect consumer group is: <namespace>.<connect-cluster-name>
@@ -307,7 +309,8 @@ Create ACLs:
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:ksql" \
- --operation Read --operation Write --operation Create --topic app1_ \
+ --operation Read --operation Write --operation Create \
+ --topic app1_ \
  --resource-pattern-type prefixed
 
 /bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
@@ -331,7 +334,8 @@ Create ACLs:
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:c3" \
- --operation Read --operation Write --operation Create --topic _confluent-controlcenter \
+ --operation Read --operation Write --operation Create \
+ --topic _confluent-controlcenter \
  --resource-pattern-type prefixed
 
 /bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
@@ -414,7 +418,8 @@ Create ACLs:
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:c3" \
- --operation All --group _confluent-controlcenter \
+ --operation All \
+ --group _confluent-controlcenter \
  --resource-pattern-type prefixed
 ```
 
