@@ -1,6 +1,6 @@
 # Security setup
 
-In this workflow scenario, you`ll set up a Confluent Platform cluster with the following security:
+In this workflow scenario, you'll set up a Confluent Platform cluster with the following security:
 - Full TLS network encryption with user provided certificates
 - mTLS authentication
 - Kafka ACLs authorization
@@ -37,9 +37,9 @@ kubectl get pods --namespace confluent
 
 ## Create TLS certificates
 
-In this scenario, you`ll configure authentication using the mTLS mechanism. With mTLS, Confluent components and clients use TLS certificates for authentication. The certificate has a CN that identifies the principal name.
+In this scenario, you'll configure authentication using the mTLS mechanism. With mTLS, Confluent components and clients use TLS certificates for authentication. The certificate has a CN that identifies the principal name.
 
-Each Confluent component service should have it's own TLS certificate. In this scenario, you`ll
+Each Confluent component service should have it's own TLS certificate. In this scenario, you'll
 generate a server certificate for each Confluent component service. Follow [these instructions](../../assets/certs/component-certs/README.md) to generate these certificates.
 
 These TLS certificates include the following principal names for each component in the certificate Common Name:
@@ -51,7 +51,7 @@ These TLS certificates include the following principal names for each component 
      
 ## Deploy configuration secrets
 
-You`ll use Kubernetes secrets to provide credential configurations.
+you'll use Kubernetes secrets to provide credential configurations.
 
 With Kubernetes secrets, credential management (defining, configuring, updating)
 can be done outside of the Confluent For Kubernetes. You define the configuration
@@ -150,19 +150,18 @@ Warning  KeyInSecretRefIssue  kafka/kafka  required key [ldap.txt] missing in se
 
 ## Create the ACLs for each component
 
-You`ll see that Schema Registry, Connect, ksqlDB, Control Center - all fail to come up. This is because 
+You'll see that Schema Registry, Connect, ksqlDB, Control Center - all fail to come up. This is because 
 the Kafka ACLs that let these components create, read and write to their required topics have not been 
 created.
 
 Read up on the ACL format and concepts here: https://docs.confluent.io/platform/current/kafka/authorization.html#acl-format
 
-In this step, you`ll create the required ACLs to start each Confluent component.
+In this step, you'll create the required ACLs to start each Confluent component.
 
 ### Create ACLs using tooling on Kafka pod
 
-Note: This is ok to do to test functionality. For production scenarios you'll 
-want to run the CLI or call the Admin API from outside the Kafka cluster 
-and either connect over the internal or external Kubernetes network.
+Note: Bashing to the Broker pod is ok in order to test functionality.  
+For production scenarios you'll want to run the CLI or call the Admin API from outside the Kafka cluster and either connect over the internal or external Kubernetes network.  
 
 Open an interactive shell session in the Kafka broker container:
 
