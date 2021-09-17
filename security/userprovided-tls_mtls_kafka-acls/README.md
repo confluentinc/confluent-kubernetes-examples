@@ -195,6 +195,23 @@ Create ACLs:
  --allow-principal "User:sr" \
  --operation Read --operation Write --operation Create --topic _confluent-license
 
+/bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
+ --command-config /opt/confluentinc/kafka.properties \
+ --add \
+ --allow-principal "User:sr" \
+ --operation Describe \
+ --topic __consumer_offsets \
+ --topic _confluent-metrics \
+ --topic _confluent-telemetry-metrics
+
+/bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
+ --command-config /opt/confluentinc/kafka.properties \
+ --add \
+ --allow-principal "User:sr" \
+ --operation Describe \
+ --topic _confluent_balancer \
+ --resource-pattern-type prefixed
+
 ### The schemas topic is named: _schemas_<sr-cluster-name>_<namespace>
 /bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
  --command-config /opt/confluentinc/kafka.properties \
@@ -240,6 +257,30 @@ Create ACLs:
  --allow-principal "User:connect" \
  --operation Create --cluster kafka-cluster
 
+/bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
+ --command-config /opt/confluentinc/kafka.properties \
+ --add \
+ --allow-principal "User:connect" \
+ --operation Describe \
+ --topic _confluent-controlcenter \
+ --resource-pattern-type prefixed
+
+ /bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
+ --command-config /opt/confluentinc/kafka.properties \
+ --add \
+ --allow-principal "User:connect" \
+ --operation Describe \
+ --topic __consumer_offsets \
+ --topic _confluent-command \
+ --topic _confluent-ksql-confluent.ksqldb__command_topic \
+ --topic _confluent-license \
+ --topic _confluent-metrics \
+ --topic _confluent-telemetry-metrics \
+ --topic _confluent_balancer_api_state \
+ --topic _confluent_balancer_broker_samples \
+ --topic _confluent_balancer_partition_samples \
+ --topic _schemas_schemaregistry_confluent \
+ --topic confluent.connect-offsets
 
 # For ksqlDB
 
@@ -257,6 +298,13 @@ Create ACLs:
  --operation Read --operation Write --operation Create \
  --operation DescribeConfigs --operation Describe --topic _confluent-ksql-confluent \
  --resource-pattern-type prefixed
+
+ /bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
+ --command-config /opt/confluentinc/kafka.properties \
+ --add \
+ --allow-principal "User:ksql" \
+ --operation Describe \
+ --cluster kafka-cluster
  
 # For Control Center
 
