@@ -281,7 +281,7 @@ kubectl delete secret mds-token --namespace confluent
 
 kubectl delete secret credential --namespace confluent
 
-kubectl delete secret tls-kafka tls-zookeeper tls-controlcenter tls-schemaregistry tls-ksqldb tls-connect --namespace confluent
+kubectl delete secret tls-zookeeper tls-kafka tls-connect tls-schemaregistry tls-ksqldb tls-controlcenter --namespace confluent
 
 helm delete test-ldap --namespace confluent
 
