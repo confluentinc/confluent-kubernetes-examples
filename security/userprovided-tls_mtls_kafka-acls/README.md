@@ -335,7 +335,7 @@ Create ACLs:
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:c3" \
- --operation Read --operation Write --operation Create --operation Alter --operation AlterConfigs --operation Delete \
+ --operation Read --operation Write --operation Create \
  --topic _confluent-controlcenter \
  --resource-pattern-type prefixed
 
@@ -357,15 +357,14 @@ Create ACLs:
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:c3" \
- --operation Read --operation Write --operation Create --operation DescribeConfigs --operation Describe --operation Alter --operation AlterConfigs --operation Create --operation Delete \
- --topic _confluent-monitoring \
- --topic _confluent-telemetry-metrics
+ --operation Read --operation Write --operation Create --operation DescribeConfigs --operation Describe \
+ --topic _confluent-monitoring
 
 /bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:c3" \
- --operation Describe --operation Alter --operation AlterConfigs --operation Create --operation Delete --operation DescribeConfigs \
+ --operation Describe \
  --topic __consumer_offsets \
  --topic _confluent_balancer_api_state \
  --topic _confluent_balancer_broker_samples \
