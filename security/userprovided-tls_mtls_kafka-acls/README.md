@@ -362,14 +362,14 @@ Create ACLs:
  --topic _confluent-telemetry-metrics \
  --topic confluent.connect-configs \
  --topic confluent.connect-offsets \
- --topic confluent.connect-status
+ --topic confluent.connect-status \
+  --topic __consumer_offsets
 
 /bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:c3" \
  --operation Describe --operation Alter --operation AlterConfigs --operation Create --operation Delete --operation DescribeConfigs \
- --topic __consumer_offsets \
  --topic _confluent_balancer_api_state \
  --topic _confluent_balancer_broker_samples \
  --topic _confluent_balancer_partition_samples \
