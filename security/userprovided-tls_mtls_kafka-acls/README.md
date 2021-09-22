@@ -335,7 +335,7 @@ Create ACLs:
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:c3" \
- --operation Read --operation Write --operation Create \
+ --operation Read --operation Write --operation Create --operation Alter --operation AlterConfigs --operation Delete \
  --topic _confluent-controlcenter \
  --resource-pattern-type prefixed
 
@@ -357,15 +357,19 @@ Create ACLs:
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:c3" \
- --operation Read --operation Write --operation Create --operation DescribeConfigs --operation Describe \
- --topic _confluent-monitoring
+ --operation Read --operation Write --operation Create --operation DescribeConfigs --operation Describe --operation Alter --operation AlterConfigs --operation Delete \
+ --topic _confluent-monitoring \
+ --topic _confluent-telemetry-metrics \
+ --topic confluent.connect-configs \
+ --topic confluent.connect-offsets \
+ --topic confluent.connect-status \
+  --topic __consumer_offsets
 
 /bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:c3" \
- --operation Describe \
- --topic __consumer_offsets \
+ --operation Describe --operation Alter --operation AlterConfigs --operation Create --operation Delete --operation DescribeConfigs \
  --topic _confluent_balancer_api_state \
  --topic _confluent_balancer_broker_samples \
  --topic _confluent_balancer_partition_samples \
@@ -373,10 +377,7 @@ Create ACLs:
  --topic _confluent-ksql-confluent.ksqldb__command_topic \
  --topic _confluent-license \
  --topic _confluent-telemetry-metrics \
- --topic _schemas_schemaregistry_confluent \
- --topic confluent.connect-configs \
- --topic confluent.connect-offsets \
- --topic confluent.connect-status
+ --topic _schemas_schemaregistry_confluent
 
 /bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
  --command-config /opt/confluentinc/kafka.properties \
