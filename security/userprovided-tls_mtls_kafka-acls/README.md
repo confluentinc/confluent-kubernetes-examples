@@ -226,7 +226,7 @@ Create ACLs:
  --command-config /opt/confluentinc/kafka.properties \
  --add \
  --allow-principal "User:sr" \
- --operation Read --operation Write --operation Create \
+ --operation Read --operation Write --operation Create --operation DescribeConfigs --operation Describe \
  --topic _schemas_schemaregistry_confluent
 
 ### The Schema Registry consumer group is: id_<sr-cluster-name>_<namespace>
