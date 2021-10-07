@@ -81,4 +81,4 @@ NAME                                       CAPACITY   ACCESS MODES   RECLAIM POL
 pvc-1b801f22-5df5-49a5-9569-ae8ffb501a58   10Gi       RWO            Retain           Bound    operator/data0-kafka-2   production-storage-class            5m23s
 ```
 
-Notice the **reclaim policy == Retain!**
+Notice the Reclaim Policy is set to **Retain**!
