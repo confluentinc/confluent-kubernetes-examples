@@ -1,11 +1,63 @@
-## Creating a Production Storage Class
+# Create a Production Storage Class on GKE
 
-We do not recommend using the default storage class for production clusters. Generally the ReclaimPolicy will be Delete. But for production workloads it is best to hold onto your data. In this simple example we will create a new storage class for GKE clusters and show how to set that on your confluent platform deployment
+In this workflow scenario, you'll create a custom storage class on GKE for your Confluent Platform cluster. We do not recommend using the default storage class on GKE for production clusters because it has its `ReclaimPolicy` set to Delete. 
 
-To create the storage class and deployment objects run:
+Before continuing with the scenario, ensure that you have set up the
+[prerequisites](/README.md#prerequisites).
+
+## Set the current tutorial directory
+
+Set the tutorial directory under the directory you downloaded this Github repo:
+
+```   
+export TUTORIAL_HOME=<Github repo directory>/storage
 ```
-kubectl apply -f .
+
+## Deploy Confluent for Kubernetes
+
+This workflow scenario assumes you are using the namespace `confluent`.
+
+Set up the Helm Chart:
+
 ```
+helm repo add confluentinc https://packages.confluent.io/helm
+```
+
+Install Confluent For Kubernetes using Helm:
+
+```
+helm upgrade --install operator confluentinc/confluent-for-kubernetes -n confluent
+```
+  
+Check that the Confluent For Kubernetes pod comes up and is running:
+
+```
+kubectl get pods
+```
+
+## Create a Custom Storage Class
+
+To create the custom storage class for Confluent Platform:
+```
+kubectl apply -f $TUTORIAL_HOME/storage.yml
+```
+
+## Deploy Confluent Platform
+
+Using a Custom Storage Class is as simple as setting a storage class in your CRD spec:
+
+```
+spec:
+  storageClass:
+    name: production-storage-class
+```
+
+Deploy Confluent Platform:
+```
+kubectl apply -f $TUTORIAL_HOME/deployment.yaml
+```
+
+## Confirm Persistent Volume
 
 Now to confirm your PVCs are using the storage class
 ```
@@ -22,7 +74,7 @@ txnlog-zookeeper-1   Bound    pvc-578b8bbf-ea28-4725-99f7-3f519a03d181   10Gi   
 txnlog-zookeeper-2   Bound    pvc-f6de1b11-d36e-4b39-bbca-437a60724cb9   10Gi       RWO            production-storage-class   4m44s
 ```
 
-And to inspect one of the PVs
+And to inspect one of the PVs:
 ```
 % k get pv pvc-1b801f22-5df5-49a5-9569-ae8ffb501a58
 NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                    STORAGECLASS               REASON   AGE

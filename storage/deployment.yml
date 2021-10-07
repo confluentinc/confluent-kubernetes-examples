@@ -2,7 +2,7 @@ apiVersion: platform.confluent.io/v1beta1
 kind: Zookeeper
 metadata:
   name: zookeeper
-  namespace: operator
+  namespace: confluent
 spec:
   replicas: 3
   image:
@@ -17,7 +17,7 @@ apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
 metadata:
   name: kafka
-  namespace: operator
+  namespace: confluent
 spec:
   replicas: 3
   image:
