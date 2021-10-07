@@ -3,6 +3,7 @@ kind: StorageClass
 metadata:
   name: production-storage-class
 provisioner: kubernetes.io/gce-pd
+# For EKS you can set
 # provisioner: kubernetes.io/aws-ebs
 reclaimPolicy: Retain
 allowVolumeExpansion: true
