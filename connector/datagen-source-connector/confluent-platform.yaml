@@ -25,9 +25,6 @@ spec:
   dataVolumeCapacity: 10Gi
   metricReporter:
     enabled: true
-  listeners:
-    internal:
-
   dependencies:
     zookeeper:
       endpoint: zookeeper.confluent.svc.cluster.local:2181
@@ -54,4 +51,3 @@ spec:
   dependencies:
     kafka:
       bootstrapEndpoint: kafka:9071
----

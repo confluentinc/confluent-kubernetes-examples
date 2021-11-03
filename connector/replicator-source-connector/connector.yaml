@@ -31,6 +31,3 @@ spec:
       type: mtls
     tls:
       secretRef: kafka-generated-jks
-
-
-
