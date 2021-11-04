@@ -1,8 +1,7 @@
 # Replicator Source Connector
-In this example, you'll setup a Confluent Platform with installing replicator source connector plugin in Connect cluster and managing replicator source connectors declaratively. 
-For replicator connector, is used to replicate data from one cluster to another, so we need to deploy both Source and Destination clusters. In this scenario, we are assuming 
-Source cluster is using SASL_SSL mode, and Destination cluster is using mTLS mode.
-
+In this example, you'll setup a Confluent Platform with Connect and install and manage the replicator source connector plugin through the declarative `Connector` CRD. 
+Confluent Replicator is used to replicate data from one cluster to another, and so we'll need to two Kafka clusters - one Source and one Destination cluster. 
+In this scenario, we deploy the Source cluster with SASL/Plain for authentication, and the Destination cluster with mTLS for authentication.
 ## Set up Pre-requisites
 
 Set the tutorial directory for this tutorial under the directory you downloaded

@@ -1,7 +1,6 @@
 # DataGen Source Connector
-In this example, you'll setup a Confluent Platform with installing DataGen source connector plugin in Connect cluster and managing DataGen connectors declaratively. 
-
-Note:: only deploy zookeeper, kafka and connect for this example
+In this example, you'll setup a Confluent Platform with Connect, and install and manage the DataGen source connector plugin through the declarative `Connector` CRD.
+Note: Here you'll only deploy Zookeeper, Kafka and Connect
 
 ## Set up Pre-requisites
 
