@@ -8,7 +8,7 @@ spec:
   podTemplate:
     resources:
       requests:
-        cpu: 0.1 # 1
+        cpu: 100m # 1
         memory: 512Mi # 4Gi
   replicas: 3
   image:
@@ -28,7 +28,7 @@ spec:
   podTemplate:
     resources:
       requests:
-        cpu: 0.1 # 1
+        cpu: 100m # 1
         memory: 512Mi # 4Gi
   replicas: 3
   image:
