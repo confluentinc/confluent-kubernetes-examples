@@ -236,9 +236,9 @@ Create RBAC Rolebindings for Control Center admin
 
 Create Control Center Role Binding for a Control Center ``testadmin`` user.
 
-   ::
+::
 
-     kubectl apply -f $TUTORIAL_HOME/controlcenter-testadmin-rolebindings.yaml --namespace confluent
+  kubectl apply -f $TUTORIAL_HOME/controlcenter-testadmin-rolebindings.yaml --namespace confluent
 
 ========
 Validate
