@@ -64,11 +64,13 @@ Deploy Confluent for Kubernetes
      kubectl get pods --namespace=confluent
 
 
-===============
+==================================
 Create Basic authentication secret 
-===============
+==================================
 
- kubectl create secret generic basicsecret \
+::
+
+  kubectl create secret generic basicsecret \
    --from-file=basic.txt=$TUTORIAL_HOME/basic.txt \
    --namespace confluent
 
