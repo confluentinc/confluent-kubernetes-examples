@@ -174,14 +174,17 @@ Deploy the producer app:
 Validate authentication with Connect
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-```
-kubectl --namespace=confluent exec -it connect-0 -- curl -u thisismyusername:thisismypass http://0.0.0.0:8083
-```
+::
+
+  kubectl --namespace=confluent exec -it connect-0 -- curl -u thisismyusername:thisismypass http://0.0.0.0:8083
+
 
 The above should return something like this: 
-```
-{"version":"6.1.0-ce","commit":"958ad0f3c7030f1c","kafka_cluster_id":"SjW1_kcORW-nSsU2Yy1R1Q"}
-```
+
+::
+
+  {"version":"6.1.0-ce","commit":"958ad0f3c7030f1c","kafka_cluster_id":"SjW1_kcORW-nSsU2Yy1R1Q"}
+
 
 Validate in Control Center
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
