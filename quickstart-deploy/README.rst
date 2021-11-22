@@ -90,8 +90,8 @@ For example, the Kafka section of the file is as follows:
   spec:
     replicas: 3
     image:
-      application: confluentinc/cp-server-operator:6.1.0.0
-      init: confluentinc/cp-init-container-operator:6.1.0.0
+      application: confluentinc/cp-server:7.0.0
+      init: confluentinc/confluent-init-container:2.2.0
     dataVolumeCapacity: 10Gi
     metricReporter:
       enabled: true
@@ -107,9 +107,10 @@ Deploy Confluent Platform
 
      kubectl apply -f $TUTORIAL_HOME/confluent-platform.yaml
    
-     ## Note: If you are deploying a single node dev cluster, then use this yaml file:
+   ## Note: If you are deploying a single node dev cluster, then use this yaml file:
      
-     ::
+   ::
+  
      kubectl apply -f $TUTORIAL_HOME/confluent-platform-singlenode.yaml
      
 
