@@ -168,6 +168,7 @@ Deploy the producer app:
    
   kubectl apply -f $TUTORIAL_HOME/producer-app-data.yaml
 
+   
    ## Note: If you are deploying a single node dev cluster, then use this yaml file:
 
    ::
