@@ -28,6 +28,9 @@ spec:
     application: confluentinc/cp-server:7.0.0
     init: confluentinc/confluent-init-container:2.2.0
   dataVolumeCapacity: 10Gi
+  configOverrides:
+    server: #This config override is required for CP 7.0 update to use AclAuthorizer instead of SimpleAclAuthorizer
+      - authorizer.class.name=kafka.security.authorizer.AclAuthorizer
   tls:
     secretRef: tls-kafka
   listeners:
