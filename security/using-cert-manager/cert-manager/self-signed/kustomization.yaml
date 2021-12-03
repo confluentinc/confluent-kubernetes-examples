@@ -1,7 +1,7 @@
 namespace: confluent
 
 configurations:
-  - kustomizeconfig.yaml
+- kustomizeconfig.yaml
 
 resources:
 - issuer.yaml

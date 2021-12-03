@@ -65,7 +65,7 @@ For each component, the following TLS certificate information should be provided
 
 Cert Manager supports different modes for certificate authorities:
 - Using a CA Issuer - https://cert-manager.io/docs/configuration/ca/
-- Using a Self-Signed Issuer - https://cert-manager.io/docs/configuration/selfsigned/\
+- Using a Self-Signed Issuer - https://cert-manager.io/docs/configuration/selfsigned/
 - Using a Let's Encrypt Issuer - https://cert-manager.io/docs/configuration/acme/
 
 You should choose one of these modes. See below for an illustration on how to configure each mode.
