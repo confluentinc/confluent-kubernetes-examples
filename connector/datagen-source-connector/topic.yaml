@@ -1,0 +1,12 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: pageviews
+  namespace: confluent
+spec:
+  replicas: 3
+  partitionCount: 1
+  kafkaClusterRef:
+    name: kafka
+    namespace: confluent

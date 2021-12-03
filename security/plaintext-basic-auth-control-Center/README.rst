@@ -98,8 +98,8 @@ For example, the Kafka section of the file is as follows:
   spec:
     replicas: 3
     image:
-      application: confluentinc/cp-server-operator:6.0.0.0
-      init: confluentinc/cp-init-container-operator:6.0.0.0
+      application: confluentinc/cp-server:7.0.0
+      init: confluentinc/confluent-init-container:2.2.0
     dataVolumeCapacity: 10Gi
     metricReporter:
       enabled: true

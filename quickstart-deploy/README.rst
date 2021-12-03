@@ -90,8 +90,8 @@ For example, the Kafka section of the file is as follows:
   spec:
     replicas: 3
     image:
-      application: confluentinc/cp-server-operator:6.1.0.0
-      init: confluentinc/cp-init-container-operator:6.1.0.0
+      application: confluentinc/cp-server:7.0.0
+      init: confluentinc/confluent-init-container:2.2.0
     dataVolumeCapacity: 10Gi
     metricReporter:
       enabled: true
@@ -103,9 +103,16 @@ Deploy Confluent Platform
 
 #. Deploy Confluent Platform with the above configuration:
 
-::
+   ::
 
-  kubectl apply -f $TUTORIAL_HOME/confluent-platform.yaml
+     kubectl apply -f $TUTORIAL_HOME/confluent-platform.yaml
+   
+   ## Note: If you are deploying a single node dev cluster, then use this yaml file:
+     
+   ::
+  
+     kubectl apply -f $TUTORIAL_HOME/confluent-platform-singlenode.yaml
+     
 
 #. Check that all Confluent Platform resources are deployed:
 
@@ -133,6 +140,12 @@ The producer app is packaged and deployed as a pod on Kubernetes. The required
 topic is defined as a KafkaTopic custom resource in
 ``$TUTORIAL_HOME/secure-producer-app-data.yaml``.
 
+   ## Note: If you are deploying a single node dev cluster, then use this yaml file:
+
+   ::
+  
+     kubectl apply -f $TUTORIAL_HOME/producer-app-data-singlenode.yaml
+
 The ``$TUTORIAL_HOME/secure-producer-app-data.yaml`` defines the ``elastic-0``
 topic as follows:
 
@@ -144,16 +157,20 @@ topic as follows:
     name: elastic-0
     namespace: confluent
   spec:
-    replicas: 1
+    replicas: 3 # change to 1 if using single node
     partitionCount: 1
     configs:
       cleanup.policy: "delete"
       
 Deploy the producer app:
 
-::
-   
-  kubectl apply -f $TUTORIAL_HOME/producer-app-data.yaml
+``kubectl apply -f $TUTORIAL_HOME/producer-app-data.yaml``
+
+   ## Note: If you are deploying a single node dev cluster, then use this yaml file:
+
+   ::
+  
+     kubectl apply -f $TUTORIAL_HOME/producer-app-data-singlenode.yaml
 
 Validate in Control Center
 ^^^^^^^^^^^^^^^^^^^^^^^^^^

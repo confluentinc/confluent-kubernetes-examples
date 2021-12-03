@@ -172,8 +172,8 @@ vault kv put secret/jksPassword.txt password=jksPassword=mystorepassword
 ```
 
 ```
-cat /tmp/credentials/rbac/mdsPublicKey.pem | base64 | vault kv put /secret/mdsPublicKey.pem mdspublickey=-
-cat /tmp/credentials/rbac/mdsTokenKeyPair.pem | base64 | vault kv put /secret/mdsTokenKeyPair.pem mdstokenkeypair=-
+cat /tmp/credentials/rbac/mds-publickey.txt | base64 | vault kv put /secret/mds-publickey.txt mdspublickey=-
+cat /tmp/credentials/rbac/mds-tokenkeypair.txt | base64 | vault kv put /secret/mds-tokenkeypair.txt mdstokenkeypair=-
 cat /tmp/credentials/rbac/ldap.txt | base64 | vault kv put /secret/ldap.txt ldapsimple=-
 cat /tmp/credentials/rbac/mds-client-connect.txt | base64 | vault kv put /secret/connect/bearer.txt bearer=-
 cat /tmp/credentials/rbac/mds-client-controlcenter.txt | base64 | vault kv put /secret/controlcenter/bearer.txt bearer=-
