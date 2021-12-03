@@ -137,7 +137,7 @@ kubectl create secret generic tls-kafka \
 
 ### Provide authentication credentials
 
-Create a Kubernetes secret object for Zookeeper, Kafka, and Control Center.
+Create a Kubernetes secret object for Control Center.
 
 This secret object contains file based properties. These files are in the
 format that each respective Confluent component requires for authentication
@@ -145,16 +145,10 @@ credentials.
 
 ```   
 kubectl create secret generic credential \
-  --from-file=digest-users.json=$TUTORIAL_HOME/creds-zookeeper-sasl-digest-users.json \
-  --from-file=digest.txt=$TUTORIAL_HOME/creds-kafka-zookeeper-credentials.txt \
   --from-file=basic.txt=$TUTORIAL_HOME/creds-control-center-users.txt \
   --from-file=ldap.txt=$TUTORIAL_HOME/ldap.txt \
   --namespace confluent
 ```
-
-In this tutorial, we use one credential for authenticating all client and
-server communication to Kafka brokers. In production scenarios, you'll want
-to specify different credentials for each of them.
 
 ### Provide RBAC principal credentials
 
@@ -222,10 +216,6 @@ automatically, and maintained as `confluentrolebinding` custom resources.
 kubectl get confluentrolebinding --namespace confluent
 ```
 
-If you'd like to see how the RoleBindings custom resources are structured, so that
-you can create your own RoleBindings, take a look at the custom resources in this 
-directory: $TUTORIAL_HOME/internal-rolebindings
-
 ## Create RBAC Rolebindings for Control Center admin
 
 Create Control Center Role Binding for a Control Center `testadmin` user.
@@ -280,7 +270,7 @@ kubectl delete secret mds-token --namespace confluent
 
 kubectl delete secret credential --namespace confluent
 
-kubectl delete secret tls-zookeeper tls-kafka tls-connect tls-schemaregistry tls-ksqldb tls-controlcenter --namespace confluent
+kubectl delete secret tls-kafka --namespace confluent
 
 helm delete test-ldap --namespace confluent
 
