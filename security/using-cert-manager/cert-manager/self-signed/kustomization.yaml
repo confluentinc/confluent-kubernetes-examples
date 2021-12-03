@@ -1,4 +1,4 @@
-namespace: confluent
+namespace: confluent-certs
 
 configurations:
 - kustomizeconfig.yaml

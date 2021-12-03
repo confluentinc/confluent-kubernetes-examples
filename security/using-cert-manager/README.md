@@ -171,10 +171,19 @@ The example uses self-signed certs that might have issues with Chrome browser. T
 if you encounter such an issue.
 
 
-## Clean up: Delete CP platform
+## Clean up
+
+Delete CP platform
 
 ```
 kubectl delete -f $TUTORIAL_HOME/resources/
+```
+
+Delete the Cert Manager resources
+
+```
+kubectl delete -k  $TUTORIAL_HOME/cert-manager/ca
+kubectl delete -k  $TUTORIAL_HOME/cert-manager/self-signed
 ```
 
 
