@@ -1,7 +1,11 @@
-## Use Cert Manager to provide certificates for use
+# Use Cert Manager to provide certificates for use
 
 [Cert-manager](https://cert-manager.io/) builds on top of Kubernetes to provide X.509 
 certificates and issuers as first-class resource types.
+
+Note: Confluent does not provide or support Cert Manager. It is part of the Kubernetes ecosystem. 
+In this scenario workflow document, you'll see how to use Cert Manager to manage certificates 
+used by Confluent components.
 
 In this document, you'll see how to:
 
@@ -50,99 +54,134 @@ kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/relea
 ```
 
 
-<b>Note</b>: Use one of the Issuer describe below    
+## Configure a Certificate Authority Issuer
+
+When you provide TLS certificates, CFK takes the provided files and configures Confluent components accordingly.
+
+For each component, the following TLS certificate information should be provided:
+- The certificate authorities for the component to trust, including the authorites used to issue server certificates for any Confluent component cluster. These are required so that peer-to-peer communication (e.g. between Kafka Brokers) and communication between components (e.g. from Connect workers to Kafka) will work.
+- The component’s server certificate (public key)
+- The component’s server private key
+
+Cert Manager supports different modes for certificate authorities:
+- Using a CA Issuer - https://cert-manager.io/docs/configuration/ca/
+- Using a Self-Signed Issuer - https://cert-manager.io/docs/configuration/selfsigned/\
+- Using a Let's Encrypt Issuer - https://cert-manager.io/docs/configuration/acme/
+
+You should choose one of these modes. See below for an illustration on how to configure each mode.
      
-## Use CA Issuer
+### Using a CA Issuer
 
 ```
-kubectl -k cert-manager/ca apply
+kubectl -k $TUTORIAL_HOME/cert-manager/ca apply
 ```
-    
-If you need to change the certificate SAN or secret names please changes `cert-manager/ca/certificate.yaml`. Current `certificate.yaml` is 
-configured with namespace `operator` and opinionated name of CP platform.
 
-- Check issuers: `kubectl get issuers`
+If you need to change the certificate SAN or secret names, change the file `cert-manager/ca/certificate.yaml`. 
+The provided `certificate.yaml` is configured  with namespace `confluent` and an opinionated name choices for Confluent Platform.
+
+Check issuers: `kubectl -n confluent get issuers`
 
 ```
-$ kubectl get issuers
+$ kubectl -n confluent get issuers
 NAME        READY   AGE
-ca-issuer   True    7d19h
+ca-issuer   True    90s
 ```
 
-- Check Certificates: `kubectl get certificates`
+Check certificates: `kubectl -n confluent get certificates`
 
 ```
-$ kubectl get certificate
-NAME                READY   SECRET                      AGE
-ca-c3-cert          True    controlcenter-tls-group3    7d19h
-ca-kafka-cert       True    kafka-tls-group3            7d19h
-ca-ksql-cert        True    ksql-tls-group3             7d19h
-ca-sr-cert          True    schemaregistry-tls-group3   7d19h
-ca-zookeeper-cert   True    zookeeper-tls-group3        7d19h
+$ kubectl -n confluent get certificate
+NAME                READY   SECRET               AGE
+ca-c3-cert          True    controlcenter-tls    118s
+ca-connect-cert     True    connect-tls          118s
+ca-kafka-cert       True    kafka-tls            118s
+ca-ksql-cert        True    ksqldb-tls           117s
+ca-sr-cert          True    schemaregistry-tls   117s
+ca-zookeeper-cert   True    zookeeper-tls        117s
 ```
 
-The example uses certificate for each CP component. The user can create one secret
-to work for all CP component by using the right SAN information.
+This example uses a separate certificate for each Confluent Platform component.  You can choose to create one secret for 
+all Confluent Platform components, and do so by putting all required SANs in to the `certificate.spec.dnsNames` in 
+`certificate.yaml`.
 
-## Cert-Manager with Self-Signed Issuer
+### Using a Self-Signed Issuer
 
 ```
 kubectl -k $TUTORIAL_HOME/cert-manager/self-signed apply
 ```
 
-If you need to change the certificate SAN or secret names please changes `cert-manager/self-signed/certificate.yaml`. Current `certificate.yaml` is configured with namespace `operator` and opinionated name of CP platform. 
+If you need to change the certificate SAN or secret names, change the file `cert-manager/self-signed/certificate.yaml`. 
+The provided `certificate.yaml` is configured  with namespace `confluent` and an opinionated name choices for Confluent Platform.
 
-- Check issuers: `kubectl -n operator get issuers`
-- Check Certificates: `kubectl -n operator get certificates`
+Check issuers: `kubectl -n confluent get issuers`
 
-## Cert-Manager with Let's Encrypt Issuer
+Check certificates: `kubectl -n confluent get certificates`
 
-For this, look on the cert-manager and create the kustomize bundle by looking on the example in cert-manager/ folder. More information here https://cert-manager.io/docs/configuration/acme/
+### Cert-Manager with Let's Encrypt Issuer
+
+Follow the instructions in https://cert-manager.io/docs/configuration/acme/ to set this up with your account for Let's Encrypt.
+
+Once that is set up, you'll need to modify and use the Kustomize bundle in `$TUTORIAL_HOME/cert-manager/ca`.
 
 ## Deploy CP platform
 
-Before applying following commands make sure all the secrets objects are created by running
-`kubectl -n operator get secrets`. The secret name can be checked with output of `kubectl -n operator get certificates` 
+Before deploying the Confluent Platform components, make sure all the secrets objects are created by running
+`kubectl -n confluent get secrets`. 
 
-The `resources/platform.yaml` is using these generate secrets through cert-manager to run in the TLS mode. The `platform.yaml` is not configured with any authentication.
+The secret names can be checked with output of `kubectl -n confluent get certificates`.
 
-- `kubectl apply -f resources/` 
+The Confluent Platform spec in `$TUTORIAL_HOME/resources/confluent-platform.yaml` is using these generated secrets 
+through cert-manager to configure TLS encryption for all network communication. In this example spec, no authentication 
+is configured.
 
-# Validation
+```
+kubectl apply -n confluent -f $TUTORIAL_HOME/resources/confluent-platform.yaml
+```
 
-## Status
+## Validate
 
-Status section provides information to use the Component like endpoints, internal topics etc
+### Status
 
-- `kubectl -n operator get kafka -oyaml`
-- `kubectl -n operator get zookeeper -oyaml`
-- `kubectl -n operator get schemaregistry -oyaml`
-- `kubectl -n operator get ksqldb -oyaml`
-- `kubectl -n operator get connect -oyaml`
-- `kubectl -n operator get controlcenter -oyaml`
+Use the status section to get information about the component: like endpoints, internal topics etc. Here, you'll see 
+that each component endpoint is TLS enabled.
+
+```
+kubectl -n confluent get kafka -oyaml
+```
+
+```
+kubectl -n confluent get zookeeper -oyaml
+kubectl -n confluent get schemaregistry -oyaml
+kubectl -n confluent get ksqldb -oyaml
+kubectl -n confluent get connect -oyaml
+kubectl -n confluent get controlcenter -oyaml
+```
 
 ### ControlCenter UI
 
-- `kubectl -n operator port-forward controlcenter-0 9021:9021`
+Start a port forwarding to the Control Center UI:
 
-Now, open your browser and run https://localhost:9021
+```
+kubectl -n confluent port-forward controlcenter-0 9021:9021
+```
 
-<b>Note</b>: The example uses self-signed certs that might have issue in chrome browser, use other browsers if issue encountered; use firefox or safari.
+Now, open your browser and run https://localhost:9021.
 
-## Create A Kafka Topic
+The example uses self-signed certs that might have issues with Chrome browser. Try other browsers like Firefox or Safari 
+if you encounter such an issue.
 
-If you want to create kafka topic through Confluent operator then run follow commands
 
-- `kubectl apply -f ../../../config/samples/kafkatopic/topic.yaml`
+## Clean up: Delete CP platform
 
-## Delete CP platform
-
-- `kubectl delete -f resources/`
+```
+kubectl delete -f $TUTORIAL_HOME/resources/
+```
 
 
 ## Reference
 
-To enable this capability, the following field is added in each CP CR. Take a looks on the `resources/platform.yaml` file.
+To enable this capability, the following field is added in each Confluent Platform component CR. 
+See the `$TUTORIAL_HOME/resources/confluent-platform.yaml` file.
 
 ```yaml
 ...

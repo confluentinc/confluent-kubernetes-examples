@@ -2,7 +2,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: ca-kafka-cert
-  namespace: operator
+  namespace: confluent
 spec:
   commonName: kafka
   dnsNames:
@@ -20,7 +20,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: ca-zookeeper-cert
-  namespace: operator
+  namespace: confluent
 spec:
   commonName: zookeeper
   dnsNames:
@@ -38,7 +38,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: ca-c3-cert
-  namespace: operator
+  namespace: confluent
 spec:
   commonName: controlcenter
   dnsNames:
@@ -73,7 +73,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: ca-sr-cert
-  namespace: operator
+  namespace: confluent
 spec:
   commonName: schemaregistry
   dnsNames:
@@ -91,7 +91,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: ca-connect-cert
-  namespace: operator
+  namespace: confluent
 spec:
   commonName: connect
   dnsNames:

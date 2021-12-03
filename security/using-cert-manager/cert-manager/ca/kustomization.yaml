@@ -1,4 +1,4 @@
-namespace: operator
+namespace: confluent
 
 configurations:
 - kustomizeconfig.yaml
