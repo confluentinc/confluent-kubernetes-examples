@@ -184,6 +184,8 @@ Delete the Cert Manager resources
 ```
 kubectl delete -k  $TUTORIAL_HOME/cert-manager/ca
 kubectl delete -k  $TUTORIAL_HOME/cert-manager/self-signed
+
+kubectl delete -f https://github.com/jetstack/cert-manager/releases/download/v1.0.2/cert-manager.yaml
 ```
 
 
