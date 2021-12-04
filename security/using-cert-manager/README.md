@@ -1,4 +1,4 @@
-# Use Cert Manager to provide certificates for use
+# Use Cert Manager to provide certificates
 
 [Cert-manager](https://cert-manager.io/) builds on top of Kubernetes to provide X.509 
 certificates and issuers as first-class resource types.
@@ -142,7 +142,7 @@ kubectl apply -n confluent -f $TUTORIAL_HOME/resources/confluent-platform.yaml
 
 ### Status
 
-Use the status section to get information about the component: like endpoints, internal topics etc. Here, you'll see 
+Use the status section to get information about the component, such as endpoints, internal topics, etc. Here, you'll see 
 that each component endpoint is TLS enabled.
 
 ```
@@ -157,7 +157,7 @@ kubectl -n confluent get connect -oyaml
 kubectl -n confluent get controlcenter -oyaml
 ```
 
-### ControlCenter UI
+### Control Center UI
 
 Start a port forwarding to the Control Center UI:
 
