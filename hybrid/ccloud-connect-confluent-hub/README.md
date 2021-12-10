@@ -70,7 +70,7 @@ curl -X PUT \
 --data '{
 	"connector.class":"io.confluent.connect.jdbc.JdbcSourceConnector",
 	"tasks.max":"1",
-	"connection.url":"<jdbc_connection_string",
+	"connection.url":"<jdbc_connection_string>",
 	"table.whitelist":"<table_to_import>",
 	"mode":"bulk",
 	"topic.prefix":"ccloud-",
