@@ -1,10 +1,10 @@
 # Kafka Connect to Confluent Cloud
 
 In this example, you'll set up the followings:  
-*  Deploy a self managed MySql server for the connector to utilize.  
+*  Deploy a self managed MySql server for the connector to utilize  
 *  Self-managed Kafka Connect cluster connected to Confluent Cloud
-*  Install and manage the JDBC source connector plugin through the declarative `Connector` CRD.  
-*  Install and manage the JDBC source connector plugin through the Connect REST endpoint. 
+*  Install and manage the JDBC source connector plugin through the declarative `Connector` CRD  
+*  Install and manage the JDBC source connector plugin through the Connect REST endpoint  
 
 
 ## Set up Pre-requisites
@@ -71,7 +71,6 @@ INSERT INTO test (name, email, department) VALUES ('bob', 'bob@abc.com', 'sales'
 INSERT INTO test (name, email, department) VALUES ('bob', 'bob@abc.com', 'sales');
 INSERT INTO test (name, email, department) VALUES ('bob', 'bob@abc.com', 'sales');
 INSERT INTO test (name, email, department) VALUES ('bob', 'bob@abc.com', 'sales');
-exit;
 ```
 
 
@@ -115,7 +114,7 @@ kubectl apply -f $TUTORIAL_HOME/kafka-connect.yaml
 ## Shell to the Connect Container  
 
 ```
-kubectl exec connect-0  -it  -n confluent -- bash
+kubectl exec connect-0 -it -n confluent -- bash
 ```
 
 Create consumer properties file:  
@@ -153,7 +152,7 @@ kafka-topics --command-config /opt/confluentinc/etc/connect/consumer.properties 
 ## Create Connector
 
 
-### Example for the REST API endpoint connector  
+### Example for the CRD connector  
 
 Outside the Connect pod shell you can issue the command:  
 ```
