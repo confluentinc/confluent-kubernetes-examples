@@ -4,10 +4,8 @@ kind: Connect
 metadata:
   name: connect
 spec:
-  configOverrides:
-    server:
-      - key.converter=io.confluent.connect.avro.AvroConverter
-      - value.converter=io.confluent.connect.avro.AvroConverter
+  keyConverterType: io.confluent.connect.avro.AvroConverter
+  valueConverterType: io.confluent.connect.avro.AvroConverter
   replicas: 1
   image:
     application: confluentinc/cp-server-connect:7.0.0

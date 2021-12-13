@@ -1,6 +1,6 @@
 # Kafka Connect to Confluent Cloud
 
-In this example, you'll set up the followings:  
+In this example, you'll set up the following:  
 *  Deploy a self managed MySql server for the connector to utilize  
 *  Self-managed Kafka Connect cluster connected to Confluent Cloud
 *  Install and manage the JDBC source connector plugin through the declarative `Connector` CRD  
