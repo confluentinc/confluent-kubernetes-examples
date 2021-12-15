@@ -7,12 +7,12 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-enterprise-replicator:7.0.0
-    init: confluentinc/confluent-init-container:2.2.0
+    application: confluentinc/cp-enterprise-replicator:7.0.1
+    init: confluentinc/confluent-init-container:2.2.0-1
   podTemplate:
     envVars:
       - name: CLASSPATH
-        value: /usr/share/java/kafka-connect-replicator/replicator-rest-extension-7.0.0.jar
+        value: /usr/share/java/kafka-connect-replicator/replicator-rest-extension-7.0.1.jar
   configOverrides:
     server:
       # To activate the monitoring extension, configure this property
