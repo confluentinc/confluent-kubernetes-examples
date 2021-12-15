@@ -1,0 +1,19 @@
+{
+  "CN": "c3",
+  "hosts": [
+    "c3",
+    "controlcenter.mydomain.example",
+    "controlcenter.confluent.svc.cluster.local"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "Universe",
+      "ST": "Pangea",
+      "L": "Earth"
+    }
+  ]
+}

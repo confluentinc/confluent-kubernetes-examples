@@ -1,0 +1,19 @@
+# rolebinding `connect-2` gives user `connect` the role 
+# `DeveloperWrite` for topics prefixed with `_confluent-monitoring`
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: connect-2
+  namespace: confluent
+spec:
+  principal:
+    name: connect
+    type: user
+  resourcePatterns:
+  - name: _confluent-monitoring
+    patternType: PREFIXED
+    resourceType: Topic
+  role: DeveloperWrite
+  ## if use other kafkaRestClass except for default, need to configure accordingly
+  #kafkaRestClassRef:
+  # name: default

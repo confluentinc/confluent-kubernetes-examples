@@ -5,6 +5,7 @@ metadata:
   name: confluent-operator
   namespace: confluent
 rules:
+# The cluster.confluent.com and operator.confluent.cloud rules only needed when migrating from operator 1.x
 - apiGroups:
   - cluster.confluent.com
   resources:
@@ -45,6 +46,7 @@ rules:
   - update
   - patch
   - delete
+# The route.openshift.io rule only needed when deploying on Openshift
 - apiGroups:
   - route.openshift.io
   resources:
@@ -81,7 +83,7 @@ rules:
   - secrets
   - secrets/finalizers
   - pods
-  - pods/exec
+  - pods/exec # This is only required with CFK 2.0.0, CFK 2.0.1+ does not require this
   - services
   verbs:
   - get
@@ -104,6 +106,12 @@ rules:
   - update
   - patch
   - delete
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
 ---
 # Change the service account subject to one that exists in your namespace
 # Change the namespace to your namespace

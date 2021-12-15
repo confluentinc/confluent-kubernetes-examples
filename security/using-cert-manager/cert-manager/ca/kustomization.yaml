@@ -1,0 +1,30 @@
+namespace: confluent
+
+configurations:
+- kustomizeconfig.yaml
+
+resources:
+- issuer.yaml
+- certificate.yaml
+
+commonLabels:
+  app: confluent-platform
+
+secretGenerator:
+- name: ca-key-pair
+  files:
+    - secrets/tls.crt
+    - secrets/tls.key
+  type: "kubernetes.io/tls"
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+vars:
+- name: NAMESPACE
+  objref:
+    kind: Secret
+    apiVersion: v1
+    name: ca-key-pair
+  fieldref:
+    fieldpath: metadata.namespace

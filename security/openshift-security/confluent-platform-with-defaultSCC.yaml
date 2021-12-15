@@ -1,0 +1,110 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Zookeeper
+metadata:
+  name: zookeeper
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-zookeeper:7.0.0
+    init: confluentinc/confluent-init-container:2.2.0
+  dataVolumeCapacity: 10Gi
+  logVolumeCapacity: 10Gi
+  podTemplate:
+    podSecurityContext: {}
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server:7.0.0
+    init: confluentinc/confluent-init-container:2.2.0
+  dataVolumeCapacity: 10Gi
+  metricReporter:
+    enabled: true
+  podTemplate:
+    podSecurityContext: {}
+    resources:
+      requests:
+        cpu: "1"
+        memory: "4Gi"
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+  namespace: confluent
+spec:
+  replicas: 2
+  image:
+    application: confluentinc/cp-server-connect:7.0.0
+    init: confluentinc/confluent-init-container:2.2.0
+  podTemplate:
+    podSecurityContext: {}
+    resources:
+      requests:
+        cpu: "1"
+        memory: "4Gi"
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KsqlDB
+metadata:
+  name: ksqldb
+  namespace: confluent
+spec:
+  replicas: 2
+  image:
+    application: confluentinc/cp-ksqldb-server:7.0.0
+    init: confluentinc/confluent-init-container:2.2.0
+  dataVolumeCapacity: 10Gi
+  podTemplate:
+    podSecurityContext: {}
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-control-center:7.0.0
+    init: confluentinc/confluent-init-container:2.2.0
+  dataVolumeCapacity: 10Gi
+  dependencies:
+    schemaRegistry:
+      url: https://schemaregistry.confluent.svc.cluster.local:8081
+    ksqldb:
+    - name: ksqldb
+      url: https://ksqldb.confluent.svc.cluster.local:8088
+    connect:
+    - name: connect
+      url:  https://connect.confluent.svc.cluster.local:8083
+  podTemplate:
+    podSecurityContext: {}
+    resources:
+      requests:
+        cpu: "1"
+        memory: "4Gi"
+    probe:
+      liveness:
+        periodSeconds: 10
+        failureThreshold: 5
+        timeoutSeconds: 500
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+  namespace: confluent
+spec:
+  replicas: 2
+  image:
+    application: confluentinc/cp-schema-registry:7.0.0
+    init: confluentinc/confluent-init-container:2.2.0
+  podTemplate:
+    podSecurityContext: {}

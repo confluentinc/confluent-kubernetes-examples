@@ -6,6 +6,9 @@ Platform in a namespace, perform the following tasks as a **Kubernetes cluster a
 deploying Operator and Confluent Platform. The snippets in this section uses the ``confluent``
 namespace.
 
+Before continuing with the scenario, ensure that you have set up the
+`prerequisites </README.md#prerequisites>`_.
+
 #. Pull the Helm Chart contents to get the CRDs:
    
    ::

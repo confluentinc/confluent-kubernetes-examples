@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   name: ingress-with-sni
@@ -11,32 +11,53 @@ metadata:
 spec:
   tls:
     - hosts:
-        - rbakhshi0.platformops.dev.gcp.devel.cpdev.cloud
-        - rbakhshi1.platformops.dev.gcp.devel.cpdev.cloud
-        - rbakhshi2.platformops.dev.gcp.devel.cpdev.cloud
-        - rbakhshi.platformops.dev.gcp.devel.cpdev.cloud
+        - kafka.mydomain.example
+        - b0.mydomain.example
+        - b1.mydomain.example
+        - b2.mydomain.example
+        - controlcenter.mydomain.example
+        - ksqldb.mydomain.example
+        - connect.mydomain.example
   rules:
-    - host: rbakhshi0.platformops.dev.gcp.devel.cpdev.cloud
-      http:
-        paths:
-          - backend:
-              serviceName: kafka-0-internal
-              servicePort: 9092
-    - host: rbakhshi1.platformops.dev.gcp.devel.cpdev.cloud
-      http:
-        paths:
-          - backend:
-              serviceName: kafka-1-internal
-              servicePort: 9092
-    - host: rbakhshi2.platformops.dev.gcp.devel.cpdev.cloud
-      http:
-        paths:
-          - backend:
-              serviceName: kafka-2-internal
-              servicePort: 9092
-    - host: rbakhshi.platformops.dev.gcp.devel.cpdev.cloud
+    - host: kafka.mydomain.example
       http:
         paths:
           - backend:
               serviceName: kafka-bootstrap
               servicePort: 9092
+    - host: b0.mydomain.example
+      http:
+        paths:
+          - backend:
+              serviceName: kafka-0-internal
+              servicePort: 9092
+    - host: b1.mydomain.example
+      http:
+        paths:
+          - backend:
+              serviceName: kafka-1-internal
+              servicePort: 9092
+    - host: b2.mydomain.example
+      http:
+        paths:
+          - backend:
+              serviceName: kafka-2-internal
+              servicePort: 9092
+    - host: controlcenter.mydomain.example
+      http:
+        paths:
+          - backend:
+              serviceName: controlcenter-0-internal
+              servicePort: 9021
+    - host: ksqldb.mydomain.example
+      http:
+        paths:
+          - backend:
+              serviceName: ksqldb-bootstrap
+              servicePort: 8088
+    - host: connect.mydomain.example
+      http:
+        paths:
+          - backend:
+              serviceName: connect-bootstrap
+              servicePort: 8083

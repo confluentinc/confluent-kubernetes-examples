@@ -1,19 +1,26 @@
 # Monitoring
 
-All Confluent Platform (CP) components deployed through the Confluent Operator expose metrics that can be scraped by
-Prometheus. This folder contains an example Grafana metrics dashboard for all components include Confluent Operator. For
-production environments, you may need to modify the example dashboard to meet your needs. Follow best practices for
-managing your Prometheus and Grafana deployments. Completing the following instructions will help you understand what the example
-dashboard can display for you.
+All Confluent Platform (CP) components deployed through Confluent for
+Kubernetes expose metrics that can be scraped by Prometheus. This folder
+contains an example Grafana metrics dashboard for all components included with
+Confluent for Kubernetes. For production environments, you may need to modify
+the example dashboard to meet your needs. Follow best practices for managing
+your Prometheus and Grafana deployments. Completing the following instructions
+will help you understand what the example dashboard can display for you.
+
+Before continuing with these instructions, you will need to install Confluent
+for Kubernetes. You may wish to start with the
+[Quickstart Scenario](/quickstart-deploy/README.rst).
 
 These instructions were last verified with:
 
-* Helm v3.0.0+
+* Helm v3.3.0+
 * Prometheus Helm chart 13.8.0+ (app version 2.26.0+)
 * Grafana Helm chart 6.7.4 (app version 7.5.3+)
 
 ## Install Prometheus
     helm repo add stable https://charts.helm.sh/stable
+    helm repo add grafana https://grafana.github.io/helm-charts
     
     helm repo update
 
@@ -24,7 +31,7 @@ These instructions were last verified with:
 
 ## Install Grafana
 
-    helm install grafana stable/grafana --namespace default
+    helm upgrade --install grafana grafana/grafana --namespace default
 
 ## Open Grafana in your Browser
 

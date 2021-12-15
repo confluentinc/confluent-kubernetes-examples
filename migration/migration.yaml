@@ -7,7 +7,7 @@ metadata:
   namespace: confluent
 spec:
   # This version of init-container is required for migration.
-  initContainerImage: confluentinc/cp-init-container-operator:6.1.1.0
+  initContainerImage: confluentinc/confluent-init-container:2.2.0
   zookeeper:
     enabled: false
     name: zookeeper
@@ -18,7 +18,6 @@ spec:
     name: kafka
     namespace: confluent
     release: kafka
-    zookeeperEndpoint: zookeeper.confluent.svc.cluster.local:2181
   controlcenter:
     enabled: false
     name: controlcenter
