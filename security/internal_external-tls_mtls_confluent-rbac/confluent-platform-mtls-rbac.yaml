@@ -60,15 +60,12 @@ spec:
     - User:kafka
   services:
     mds:
+      # Configure this with TLS encryption, but not with external access through a load balancer. 
+      # For external access to MDS, an ingress controller can be used.
       tls:
         enabled: true
       tokenKeyPair:
         secretRef: mds-token
-      externalAccess:
-        type: loadBalancer
-        loadBalancer:
-          domain: mydomain.example
-          prefix: mds
       provider:
         type: ldap
         ldap:

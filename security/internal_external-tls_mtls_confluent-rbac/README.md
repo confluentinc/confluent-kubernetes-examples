@@ -224,6 +224,32 @@ Create Control Center Role Binding for a Control Center `testadmin` user.
 kubectl apply -f $TUTORIAL_HOME/controlcenter-testadmin-rolebindings.yaml --namespace confluent
 ```
 
+# Configure External Access through Ingress Controller
+
+Create a secret with your 
+
+```
+kubectl create secret generic tls-nginx-cert \
+  --from-file=tls.crt=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server.pem \
+  --from-file=ca.crt=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
+  --from-file=tls.key=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server-key.pem \
+  --namespace confluent
+```
+
+#. Add the Kubernetes NginX Helm repo and update the repo.
+
+   ::
+   
+     helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+     helm repo update
+
+#. Install the Ngix controller:
+
+   ::
+   
+     helm upgrade  --install ingress-nginx ingress-nginx/ingress-nginx \
+       --set controller.extraArgs.enable-ssl-passthrough="true"
+
 ## Validate
 
 ### Validate in Control Center

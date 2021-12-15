@@ -1,0 +1,44 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-with-tls-reencryption
+  namespace: confluent
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+spec:
+  tls:
+    - hosts:
+      - mds.my.domain
+      - controlcenter.my.domain
+      - ksqldb.my.domain
+      - connect.my.domain
+      # This assumes tls-secret exists and the SSL
+      # certificate contains a CN for foo.bar.com
+      secretName: tls-nginx-cert
+  rules:
+    - host: mds.my.domain
+      http:
+        paths:
+          - backend:
+              serviceName: mds-bootstrap
+              servicePort: 8090
+    - host: controlcenter.my.domain
+      http:
+        paths:
+          - backend:
+              serviceName: controlcenter-0-internal
+              servicePort: 9021
+    - host: ksqldb.my.domain
+      http:
+        paths:
+          - backend:
+              serviceName: ksqldb-bootstrap
+              servicePort: 8088
+    - host: connect.my.domain
+      http:
+        paths:
+          - backend:
+              serviceName: connect-bootstrap
+              servicePort: 8083
