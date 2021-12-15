@@ -213,7 +213,7 @@ metadata:
 spec:
   replicas: 2
   image:
-    application: confluentinc/cp-server-connect:7.0.0
+    application: confluentinc/cp-server-connect:7.0.1
     init: confluentinc/confluent-init-container:2.2.0-1
   tls:
     directoryPathInContainer: /vault/secrets
@@ -299,7 +299,7 @@ metadata:
 spec:
   replicas: 2
   image:
-    application: confluentinc/cp-ksqldb-server:7.0.0
+    application: confluentinc/cp-ksqldb-server:7.0.1
     init: confluentinc/confluent-init-container:2.2.0-1
   dataVolumeCapacity: 10Gi
   authorization:
@@ -386,7 +386,7 @@ metadata:
 spec:
   replicas: 2
   image:
-    application: confluentinc/cp-schema-registry:7.0.0
+    application: confluentinc/cp-schema-registry:7.0.1
     init: confluentinc/confluent-init-container:2.2.0-1
   tls:
     directoryPathInContainer: /vault/secrets
@@ -468,7 +468,7 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-enterprise-control-center:7.0.0
+    application: confluentinc/cp-enterprise-control-center:7.0.1
     init: confluentinc/confluent-init-container:2.2.0-1
   dataVolumeCapacity: 10Gi
   authorization:

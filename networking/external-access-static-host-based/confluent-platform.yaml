@@ -98,7 +98,7 @@ spec:
   replicas: 2
   image:
     application: confluentinc/cp-ksqldb-server:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1s
+    init: confluentinc/confluent-init-container:2.2.0-1
   dataVolumeCapacity: 10Gi
   tls:
     secretRef: tls-group1
