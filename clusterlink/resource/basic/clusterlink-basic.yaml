@@ -1,0 +1,24 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: ClusterLink
+metadata:
+  name: clusterlinkus-demo
+  namespace: destination
+spec:
+  destinationKafkaCluster:
+    kafkaRestClassRef:
+      name: destination-kafka-rest
+      namespace: destination
+  sourceKafkaCluster:
+    bootstrapEndpoint: kafka.origin.svc.cluster.local:9071
+    authentication:
+      type: plain
+      jaasConfig:
+        secretRef: credential
+    tls:
+      enabled: true
+      secretRef: origin-tls-group1
+    kafkaRestClassRef:
+      name: origin-kafka-rest
+      namespace: origin
+  mirrorTopics:
+  - name: demo
