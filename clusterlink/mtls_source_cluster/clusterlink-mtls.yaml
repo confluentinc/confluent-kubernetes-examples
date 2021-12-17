@@ -9,14 +9,14 @@ spec:
       name: destination-kafka-rest
       namespace: destination
   sourceKafkaCluster:
-    bootstrapEndpoint: kafka.origin.svc.cluster.local:9071
+    bootstrapEndpoint: kafka.source.svc.cluster.local:9071
     authentication:
       type: mtls
     tls:
       enabled: true
-      secretRef: origin-tls-group1
+      secretRef: source-tls-group1
     kafkaRestClassRef:
-      name: origin-kafka-rest
-      namespace: origin
+      name: source-kafka-rest
+      namespace: source
   mirrorTopics:
   - name: demo
