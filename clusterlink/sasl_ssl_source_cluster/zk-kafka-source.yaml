@@ -3,7 +3,7 @@ apiVersion: platform.confluent.io/v1beta1
 kind: Zookeeper
 metadata:
   name: zookeeper
-  namespace: origin
+  namespace: source
 spec:
   replicas: 3
   image:
@@ -14,13 +14,13 @@ spec:
   dataVolumeCapacity: 10Gi
   logVolumeCapacity: 10Gi
   tls:
-    secretRef: origin-tls-group1
+    secretRef: source-tls-group1
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
 metadata:
   name: kafka
-  namespace: origin
+  namespace: source
 spec:
   replicas: 3
   image:
@@ -30,7 +30,7 @@ spec:
       - confluent-registry
   dataVolumeCapacity: 10Gi
   tls:
-    secretRef: origin-tls-group1
+    secretRef: source-tls-group1
   listeners:
     internal:
       authentication:
@@ -59,25 +59,25 @@ apiVersion: platform.confluent.io/v1beta1
 kind: KafkaTopic
 metadata:
   name: demo
-  namespace: origin
+  namespace: source
 spec:
   replicas: 3
   partitionCount: 4
   configs:
     cleanup.policy: "delete"
   kafkaRestClassRef:
-    name: origin-kafka-rest
+    name: source-kafka-rest
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: KafkaRestClass
 metadata:
-  name: origin-kafka-rest
-  namespace: origin
+  name: source-kafka-rest
+  namespace: source
 spec:
   kafkaClusterRef:
     name: kafka
   kafkaRest:
-    endpoint: http://kafka.origin.svc.cluster.local:8090
+    endpoint: http://kafka.source.svc.cluster.local:8090
     authentication:
       type: basic
       basic:
