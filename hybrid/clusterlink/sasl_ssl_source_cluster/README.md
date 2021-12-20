@@ -8,7 +8,7 @@ Set the tutorial directory for this tutorial under the directory you downloaded
 the tutorial files:
 
 ```
-export TUTORIAL_HOME=<Tutorial directory>/clusterlink/sasl_ssl_source_cluster
+export TUTORIAL_HOME=<Tutorial directory>/hybrid/clusterlink/sasl_ssl_source_cluster
 ```
 
 Create two namespaces, one for the source cluster components and one for the destination cluster components.
@@ -44,9 +44,9 @@ kubectl -n destination create secret generic credential \
 ### create required secrets
 ```
 kubectl -n source create secret generic source-tls-group1 \
-    --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server.pem \
-    --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
-    --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server-key.pem
+    --from-file=fullchain.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/kafka-server.pem \
+    --from-file=cacerts.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/cacerts.pem \
+    --from-file=privkey.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/kafka-server-key.pem
    
 kubectl -n source create secret generic rest-credential \
     --from-file=basic.txt=$TUTORIAL_HOME/rest-credential.txt
@@ -83,15 +83,14 @@ kubectl apply -f $TUTORIAL_HOME/zk-kafka-source.yaml
 ```
 
 kubectl -n destination create secret generic destination-tls-group1 \
-    --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server.pem \
-    --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
-    --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server-key.pem 
+    --from-file=fullchain.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/kafka-server.pem \
+    --from-file=cacerts.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/cacerts.pem \
+    --from-file=privkey.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/kafka-server-key.pem 
 
 kubectl -n destination create secret generic source-tls-group1 \
-    --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server.pem \
-    --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
-    --from-file=privkey.pem=/../../assets/certs/component-certs/generated/kafka-server-key.pem
-    --from-file=privkey.pem=/../../assets/certs/component-certs/generated/kafka-server-key.pem
+    --from-file=fullchain.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/kafka-server.pem \
+    --from-file=cacerts.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/cacerts.pem \
+    --from-file=privkey.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/kafka-server-key.pem
    
 kubectl -n destination create secret generic rest-credential \
     --from-file=basic.txt=$TUTORIAL_HOME/rest-credential.txt

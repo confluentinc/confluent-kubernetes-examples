@@ -3,34 +3,30 @@ apiVersion: platform.confluent.io/v1beta1
 kind: Zookeeper
 metadata:
   name: zookeeper
-  namespace: source
+  namespace: destination
 spec:
   replicas: 3
   image:
     application: confluentinc/cp-zookeeper:7.0.0
     init: confluentinc/confluent-init-container:2.2.0
-    pullSecretRef:
-      - confluent-registry
   dataVolumeCapacity: 10Gi
   logVolumeCapacity: 10Gi
   tls:
-    secretRef: source-tls-group1
+    secretRef: destination-tls-group1
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
 metadata:
   name: kafka
-  namespace: source
+  namespace: destination
 spec:
   replicas: 3
   image:
     application: confluentinc/cp-server:7.0.0
     init: confluentinc/confluent-init-container:2.2.0
-    pullSecretRef:
-      - confluent-registry
   dataVolumeCapacity: 10Gi
   tls:
-    secretRef: source-tls-group1
+    secretRef: destination-tls-group1
   listeners:
     internal:
       authentication:
@@ -54,32 +50,26 @@ spec:
           secretRef: credential
           roles:
             - Administrators
----
-apiVersion: platform.confluent.io/v1beta1
-kind: KafkaTopic
-metadata:
-  name: demo
-  namespace: source
-spec:
-  replicas: 3
-  partitionCount: 4
-  configs:
-    cleanup.policy: "delete"
-  kafkaRestClassRef:
-    name: source-kafka-rest
+  mountedSecrets:
+    - secretRef: password-encoder-secret
+  configOverrides:
+    server:
+      - confluent.cluster.link.enable=true
+      - password.encoder.secret=${file:/mnt/secrets/password-encoder-secret/password_encoder_secret:secret}
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: KafkaRestClass
 metadata:
-  name: source-kafka-rest
-  namespace: source
+  name: destination-kafka-rest
+  namespace: destination
 spec:
   kafkaClusterRef:
     name: kafka
   kafkaRest:
-    endpoint: http://kafka.source.svc.cluster.local:8090
+    endpoint: http://kafka.destination.svc.cluster.local:8090
     authentication:
       type: basic
       basic:
         secretRef: rest-credential
 ---
+
