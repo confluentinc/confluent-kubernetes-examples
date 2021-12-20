@@ -1,0 +1,81 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Zookeeper
+metadata:
+  name: zookeeper
+  namespace: source
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-zookeeper:7.0.0
+    init: confluentinc/confluent-init-container:2.2.0
+  dataVolumeCapacity: 10Gi
+  logVolumeCapacity: 10Gi
+  tls:
+    secretRef: source-tls-group1
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: source
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server:7.0.0
+    init: confluentinc/confluent-init-container:2.2.0
+  dataVolumeCapacity: 10Gi
+  tls:
+    secretRef: source-tls-group1
+  listeners:
+    internal:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+    external:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+  services:
+    kafkaRest:
+      authentication:
+        type: basic
+        basic:
+          secretRef: credential
+          roles:
+            - Administrators
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: demo
+  namespace: source
+spec:
+  replicas: 3
+  partitionCount: 4
+  configs:
+    cleanup.policy: "delete"
+  kafkaRestClassRef:
+    name: source-kafka-rest
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: source-kafka-rest
+  namespace: source
+spec:
+  kafkaClusterRef:
+    name: kafka
+  kafkaRest:
+    endpoint: http://kafka.source.svc.cluster.local:8090
+    authentication:
+      type: basic
+      basic:
+        secretRef: rest-credential
+---
