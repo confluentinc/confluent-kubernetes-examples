@@ -5,6 +5,9 @@ In this workflow scenario, you'll set up a Confluent Platform cluster with the f
 - mTLS authentication
 - Confluent RBAC authorization
 
+This scenario uses static host based routing with an ingress controller to provide external access to certain
+REST based Confluent Platform components. View the [static host based routing scenario doc](https://github.com/confluentinc/confluent-kubernetes-examples/tree/master/networking/external-access-static-host-based) for a comprehensive walkthrough of that.
+
 Before continuing with the scenario, ensure that you have set up the [prerequisites](https://github.com/confluentinc/confluent-kubernetes-examples/blob/master/README.md#prerequisites).
 
 ## Set the current tutorial directory
@@ -114,24 +117,37 @@ kubectl create secret tls ca-pair-sslcerts \
   --key=$TUTORIAL_HOME/ca-key.pem -n confluent
 ```
 
-### Provide external component TLS certificates
+### Provide external component TLS certificates for Kafka
 
-Each Confluent component service should have it's own TLS certificate. In this scenario, you'll
-generate a server certificate for each Confluent component service. Follow [these instructions](../../assets/certs/component-certs/README.md) to generate these certificates.
+In this scenario, you'll be allowing Kafka clients to connect with Kafka through the external-to-Kubernetes network.
 
-Once that is done, set the tutorial directory back for this tutorial under the directory you downloaded the tutorial files:
+For that purpose, you'll provide a server certificate that secures the external domain used for Kafka access.
 
 ```
-export TUTORIAL_HOME=<Tutorial directory>/security/userprovided-tls_mtls_confluent_rbac
+# If you dont have one, create a root certificate authority for the external component certs
+openssl genrsa -out $TUTORIAL_HOME/externalRootCAkey.pem 2048
+
+openssl req -x509  -new -nodes \
+  -key $TUTORIAL_HOME/externalRootCAkey.pem \
+  -days 3650 \
+  -out $TUTORIAL_HOME/externalCacerts.pem \
+  -subj "/C=US/ST=CA/L=MVT/O=TestOrg/OU=Cloud/CN=TestCA"
+
+# Create Kafka server certificates
+cfssl gencert -ca=$TUTORIAL_HOME/externalCacerts.pem \
+-ca-key=$TUTORIAL_HOME/externalRootCAkey.pem \
+-config=$TUTORIAL_HOME/../../assets/certs/ca-config.json \
+-profile=server $TUTORIAL_HOME/kafka-server-domain.json | cfssljson -bare $TUTORIAL_HOME/kafka-server
+
 ```
 
-In this step, you will create secrets for Confluent Kafka.
+Provide the certificates to Kafka through a Kubernetes Secret:
 
 ```
 kubectl create secret generic tls-kafka \
-  --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server.pem \
-  --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
-  --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server-key.pem \
+  --from-file=fullchain.pem=$TUTORIAL_HOME/kafka-server.pem \
+  --from-file=cacerts.pem=$TUTORIAL_HOME/externalCacerts.pem \
+  --from-file=privkey.pem=$TUTORIAL_HOME/kafka-server-key.pem \
   --namespace confluent
 ```
 
@@ -226,29 +242,73 @@ kubectl apply -f $TUTORIAL_HOME/controlcenter-testadmin-rolebindings.yaml --name
 
 # Configure External Access through Ingress Controller
 
-Create a secret with your 
+The Ingress Controller will support TLS encryption. For this, you'll need to provide a server certificate
+to use for encypting traffic.
 
 ```
-kubectl create secret generic tls-nginx-cert \
-  --from-file=tls.crt=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server.pem \
-  --from-file=ca.crt=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
-  --from-file=tls.key=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server-key.pem \
+# Generate a server certificate from the external root certificate authority
+cfssl gencert -ca=$TUTORIAL_HOME/externalCacerts.pem \
+-ca-key=$TUTORIAL_HOME/externalRootCAkey.pem \
+-config=$TUTORIAL_HOME/../../assets/certs/ca-config.json \
+-profile=server $TUTORIAL_HOME/ingress-server-domain.json | cfssljson -bare $TUTORIAL_HOME/ingress-server
+
+kubectl create secret tls tls-nginx-cert \
+  --cert=$TUTORIAL_HOME/ingress-server.pem \
+  --key=$TUTORIAL_HOME/ingress-server-key.pem \
   --namespace confluent
 ```
 
-#. Add the Kubernetes NginX Helm repo and update the repo.
+## Install the Nginx Ingress Controller
 
-   ::
-   
-     helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
-     helm repo update
+```
+# Add the Kubernetes NginX Helm repo and update the repo
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo update
 
-#. Install the Ngix controller:
+# Install the Nginx controller
+helm upgrade  --install ingress-nginx ingress-nginx/ingress-nginx
+```
 
-   ::
-   
-     helm upgrade  --install ingress-nginx ingress-nginx/ingress-nginx \
-       --set controller.extraArgs.enable-ssl-passthrough="true"
+## Create Ingress Resources
+
+Create internal bootstrap services for each Confluent Platform component that will round-robin route to each
+components' server pods.
+
+```
+# Create Confluent Platform component bootstrap services
+kubectl apply -f $TUTORIAL_HOME/connect-bootstrap-service.yaml
+kubectl apply -f $TUTORIAL_HOME/ksqldb-bootstrap-service.yaml
+kubectl apply -f $TUTORIAL_HOME/mds-bootstrap-service.yaml
+```
+
+Create an Ingress resource that includes a collection of rules that the Ingress controller uses to route the inbound 
+traffic to each Confluent Platform component. These will point to the bootstrap services created above.
+
+In the resource file, `$TUTORIAL_HOME/ingress-service-hostbased.yaml`, replace `mydomain.com` with the value of your
+external domain.
+
+```
+# Create the Ingress resource:
+kubectl apply -f $TUTORIAL_HOME/ingress-service-hostbased.yaml
+```
+
+## Set up DNS
+
+Create DNS records for Confluent Platform component HTTP endpoints using the ingress controller load balancer externalIP.
+
+```
+# Retrieve the external IP addresses of the ingress load balancer:
+kubectl get svc
+NAME                                 TYPE           CLUSTER-IP     EXTERNAL-IP       PORT(S)
+...
+ingress-nginx-controller             LoadBalancer   10.98.82.133   104.197.186.121   80:31568/TCP,443:31295/TCP
+```
+
+| DNS name | IP address |
+| -------- | ---------- |
+| controlcenter.mydomain.com | The `EXTERNAL-IP` value of the ingress load balancer service |
+| connect.mydomain.com | The `EXTERNAL-IP` value of the ingress load balancer service |
+| ksqldb.mydomain.com | The `EXTERNAL-IP` value of the ingress load balancer service |
 
 ## Validate
 
@@ -280,7 +340,16 @@ You should be able to access the REST endpoint over the external domain name.
 Use curl to access ksqldb cluster status. Provide the certificates you created to authenticate:
 
 ```
-curl -sX GET "https://ksqldb.mydomain.example:443/clusterStatus" -v --cacert $TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem --key $TUTORIAL_HOME/../../assets/certs/component-certs/generated/ksqldb-server-key.pem --cert $TUTORIAL_HOME/../../assets/certs/component-certs/generated/ksqldb-server.pem
+curl -sX GET "https://ksqldb.mydomain.com:443/clusterStatus" --cacert $TUTORIAL_HOME/externalCacerts.pem --key $TUTORIAL_HOME/kafka-server-key.pem --cert $TUTORIAL_HOME/kafka-server.pem
+```
+
+### Validate MDS Access
+
+```
+confluent login \
+ --url https://mds.mydomain.com \
+ --ca-cert-path $TUTORIAL_HOME/externalCacerts.pem
+
 ```
 
 ## Tear down
@@ -316,67 +385,4 @@ kubectl get pods --namespace confluent
 
 # For pod failures, check logs
 kubectl logs <pod-name> --namespace confluent
-```
-
-### Issues with Confluent component certificates
-
-The following errors appear in the logs when their is an issue with certificates, either server or certificate authority are wrong. in case you see these errors, 
-check that:
-
-- the certificate authority (CA) is valid
-- the server certificates are valid
-- the CA and server certificates are specified correctly in the Kubernetes Secrets
-
-```
-[WARN] 2021-07-13 14:51:50,042 [QuorumConnectionThread-[myid=0]-1] org.apache.zookeeper.server.quorum.QuorumCnxManager initiateConnection - Cannot open channel to 1 at election address zookeeper-1.zookeeper.confluent.svc.cluster.local/10.124.3.10:3888
-javax.net.ssl.SSLHandshakeException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
-	at java.base/sun.security.ssl.Alert.createSSLException(Alert.java:131)
-	at java.base/sun.security.ssl.TransportContext.fatal(TransportContext.java:349)
-  ...
-	at java.base/java.lang.Thread.run(Thread.java:829)
-Caused by: sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
-	at java.base/sun.security.validator.PKIXValidator.doBuild(PKIXValidator.java:439)
-	...
-	at java.base/sun.security.ssl.CertificateMessage$T12CertificateConsumer.checkServerCerts(CertificateMessage.java:638)
-	... 16 more
-Caused by: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
-	at java.base/sun.security.provider.certpath.SunCertPathBuilder.build(SunCertPathBuilder.java:141)
-	...
-	... 23 more
-```
-
-```
-[WARN] 2021-07-13 15:12:28,978 [QuorumConnectionThread-[myid=0]-3] org.apache.zookeeper.server.quorum.QuorumCnxManager initiateConnection - Cannot open channel to 1 at election address zookeeper-1.zookeeper.confluent.svc.cluster.local/10.124.0.23:3888
-java.net.ConnectException: Connection refused (Connection refused)
-	at java.base/java.net.PlainSocketImpl.socketConnect(Native Method)
-  ...
-	at java.base/java.lang.Thread.run(Thread.java:829)
-[WARN] 2021-07-13 15:12:29,004 [QuorumConnectionThread-[myid=0]-2] org.apache.zookeeper.server.quorum.QuorumCnxManager initiateConnection - Cannot open channel to 2 at election address zookeeper-2.zookeeper.confluent.svc.cluster.local/10.124.4.12:3888
-javax.net.ssl.SSLHandshakeException: PKIX path validation failed: java.security.cert.CertPathValidatorException: signature check failed
-	at java.base/sun.security.ssl.Alert.createSSLException(Alert.java:131)
-	...
-	at java.base/java.lang.Thread.run(Thread.java:829)
-Caused by: sun.security.validator.ValidatorException: PKIX path validation failed: java.security.cert.CertPathValidatorException: signature check failed
-	at java.base/sun.security.validator.PKIXValidator.doValidate(PKIXValidator.java:369)
-	...
-	at java.base/sun.security.ssl.CertificateMessage$T12CertificateConsumer.checkServerCerts(CertificateMessage.java:638)
-	... 16 more
-Caused by: java.security.cert.CertPathValidatorException: signature check failed
-	at java.base/sun.security.provider.certpath.PKIXMasterCertPathValidator.validate(PKIXMasterCertPathValidator.java:135)
-	...
-	at java.base/sun.security.validator.PKIXValidator.doValidate(PKIXValidator.java:364)
-	... 23 more
-Caused by: java.security.SignatureException: Signature does not match.
-	at java.base/sun.security.x509.X509CertImpl.verify(X509CertImpl.java:422)
-	...
-```
-
-The following error indicates that the certificate SAN does not have the required host names:
-
-```
-[ERROR] 2021-07-13 16:00:35,474 [nioEventLoopGroup-2-1] org.apache.zookeeper.common.ZKTrustManager performHostVerification - Failed to verify host address: 10.124.3.12
-javax.net.ssl.SSLPeerUnverifiedException: Certificate for <10.124.3.12> doesn't match any of the subject alternative names: [zookeeper, *.zookeeper.confluent.svc.cluster.local]
-	at org.apache.zookeeper.common.ZKHostnameVerifier.matchIPAddress(ZKHostnameVerifier.java:194)
-	at org.apache.zookeeper.common.ZKHostnameVerifier.verify(ZKHostnameVerifier.java:164)
-	...
 ```
