@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -C -o pipefail
+set -C -e -o pipefail
 ##
 ## Runs this script if manual resize of PV is required.
 ##
@@ -67,10 +67,9 @@ resize() {
 
     new_mulitplier=$(get_suffix_multiplier ${NEW_SIZE_SUFFIX})
     RAW_new_size=`bc -l <<<  "${INT_NEW_SIZE} * 1024^${new_mulitplier}"`
+    expand=`bc -l <<< "${RAW_new_size} > ${RAW_current_size}"`
 
-    shrink=`bc -l <<< "${RAW_new_size} < ${RAW_current_size}"`
-
-    if [ ${shrink} -eq "0" ]; then
+    if [ ${expand} -eq "1" ]; then
       NEW_SIZE="${INT_NEW_SIZE}${NEW_SIZE_SUFFIX}"
       echo "${green}#########################"
       echo "#### PVC: ${PVC}"
@@ -99,7 +98,7 @@ resize() {
       echo "${green} #### Waiting for Pod to start: ${POD}${reset}"
       kubectl wait --for=condition=ready pod/${POD} -n "${NAMESPACE}" --timeout=30m
     else
-      echo "${green}#### PVC: ${PVC} is already size: ${NEW_SIZE}${reset}. This script is only for disk expansion."
+      echo "${green}#### PVC: ${PVC} is already size: ${current_capacity}${reset}. This script is only for disk expansion."
     fi
   done
 
