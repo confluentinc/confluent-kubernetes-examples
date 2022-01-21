@@ -2,16 +2,6 @@
 
 This document provides information on troubleshooting your Confluent deployment process.
 
-### Unblock Kafka cluster roll
-
-The Kafka Cluster Roll can be blocked (noticed in Confluent Operator logs or from the Kafka CR status). 
-This can happen for many reasons, such as pods not being in a running state or due to some network issue. 
-To force a roll, run the following command:
-
-```   
-kubectl -n <namespace> annotate kafka <name-of-kafka-cluster> platform.confluent.io/roll-metadata-
-```
-
 ### Delete Kubernetes resources
 
 If Kubernetes resources cannot be deleted, i.e. if Confluent Operator pod gets deleted before other resources, 
