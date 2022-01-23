@@ -160,17 +160,17 @@ Review the additional listeners
 
 Review Kafka ConfigMap to check the additional custom listeners
 
-  ::
+::
 
-     kubectl get configmap kafka-shared-config -o jsonpath="{.data.kafka\.properties}" | grep -i listener 
+   kubectl get configmap kafka-shared-config -o jsonpath="{.data.kafka\.properties}" | grep -i listener 
 
 You should see the following, indicating the new listeners 
 
-  ::
+::
 
-    inter.broker.listener.name=REPLICATION
-    listener.security.protocol.map=CUSTOMLISTENER1:PLAINTEXT,CUSTOMLISTENER2:PLAINTEXT,EXTERNAL:PLAINTEXT,INTERNAL:PLAINTEXT,REPLICATION:PLAINTEXT
-    listeners=CUSTOMLISTENER1://:9204,CUSTOMLISTENER2://:9205,EXTERNAL://:9092,INTERNAL://:9071,REPLICATION://:9072
+  inter.broker.listener.name=REPLICATION
+  listener.security.protocol.map=CUSTOMLISTENER1:PLAINTEXT,CUSTOMLISTENER2:PLAINTEXT,EXTERNAL:PLAINTEXT,INTERNAL:PLAINTEXT,REPLICATION:PLAINTEXT
+  listeners=CUSTOMLISTENER1://:9204,CUSTOMLISTENER2://:9205,EXTERNAL://:9092,INTERNAL://:9071,REPLICATION://:9072
 
 
 =========
