@@ -146,7 +146,7 @@ topic is defined as a KafkaTopic custom resource in
   
      kubectl apply -f $TUTORIAL_HOME/producer-app-data-singlenode.yaml
 
-The ``$TUTORIAL_HOME/secure-producer-app-data.yaml`` defines the ``elastic-0``
+The ``$TUTORIAL_HOME/producer-app-data.yaml`` defines the ``elastic-0``
 topic as follows:
 
 ::
