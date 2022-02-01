@@ -138,7 +138,7 @@ app.
 
 The producer app is packaged and deployed as a pod on Kubernetes. The required
 topic is defined as a KafkaTopic custom resource in
-``$TUTORIAL_HOME/secure-producer-app-data.yaml``.
+``$TUTORIAL_HOME/producer-app-data.yaml``.
 
    ## Note: If you are deploying a single node dev cluster, then use this yaml file:
 
