@@ -133,7 +133,8 @@ EOF
 kafka-topics --command-config /opt/confluentinc/etc/connect/consumer.properties \
 --bootstrap-server CCLOUD:9092  \
 --create \
---partitio-replication-factor 3  \
+--partitions 3 \
+--replication-factor 3 \
 --topic quickstart-jdbc-CRD-test
 ```
 
@@ -143,7 +144,8 @@ kafka-topics --command-config /opt/confluentinc/etc/connect/consumer.properties 
 kafka-topics --command-config /opt/confluentinc/etc/connect/consumer.properties \
 --bootstrap-server CCLOUD:9092  \
 --create \
---partitio-replication-factor 3  \
+--partitions 3 \
+--replication-factor 3 \
 --topic quickstart-jdbc-test
 ```
 
