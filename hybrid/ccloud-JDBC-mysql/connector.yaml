@@ -10,7 +10,7 @@ spec:
   connectClusterRef:
     name: connect
   configs:
-    connection.url: "jdbc:mysql://mysql:3306/connect_test?user=root&password=password"
+    connection.url: ${file:/mnt/secrets/mysql-credential/sqlcreds.txt:connection}
     mode: "incrementing"
     incrementing.column.name: "id"
     timestamp.column.name: "modified"
