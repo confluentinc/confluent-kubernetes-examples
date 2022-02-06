@@ -93,12 +93,12 @@ curl http://schemaregistry.confluent.svc.cluster.local:8081/subjects
 
 Get a list of versions registered under the subject `payment-value`: 
 ```
-curl http://schemaregistry.confluent.svc.cluster.local:8081/subjects/test-value/versions
+curl http://schemaregistry.confluent.svc.cluster.local:8081/subjects/payment-value/versions
 ```
 
 Get the schema for the specified version of the subject `payment-value`: 
 ```
-curl http://schemaregistry.confluent.svc.cluster.local:8081/subjects/test-value/versions/1/schema
+curl http://schemaregistry.confluent.svc.cluster.local:8081/subjects/payment-value/versions/1/schema
 ```
 
 ## Tear down Confluent Platform
