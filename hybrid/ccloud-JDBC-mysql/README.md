@@ -101,15 +101,21 @@ kubectl get pods -n confluent
 Add user name and key for the hosted Confluent Platform (Cloud and Schema)
 
 ```
-kubectl create secret generic ccloud-credentials --from-file=plain.txt=$TUTORIAL_HOME/ccloud-credentials.txt  
+kubectl -n confluent create secret generic ccloud-credentials --from-file=plain.txt=$TUTORIAL_HOME/ccloud-credentials.txt  
 
-kubectl create secret generic ccloud-sr-credentials --from-file=basic.txt=$TUTORIAL_HOME/ccloud-sr-credentials.txt
+kubectl -n confluent create secret generic ccloud-sr-credentials --from-file=basic.txt=$TUTORIAL_HOME/ccloud-sr-credentials.txt
 ```
 
+## Create Kubernetes Secret for the JDBC connector to pull connection URL and password for the mysql server
+
+```
+ kubectl -n confluent create secret generic mysql-credential \
+  --from-file=sqlcreds.txt=$TUTORIAL_HOME/sqlcreds.txt
+```
 ## Deploy self-managed Kafka Connect connecting to Confluent Cloud
 
 ```
-kubectl apply -f $TUTORIAL_HOME/kafka-connect.yaml
+kubectl -n confluent apply -f $TUTORIAL_HOME/kafka-connect.yaml
 ```
 ## Shell to the Connect Container  
 
@@ -158,7 +164,7 @@ kafka-topics --command-config /opt/confluentinc/etc/connect/consumer.properties 
 
 Outside the Connect pod shell you can issue the command:  
 ```
- kubectl apply -f connector.yaml 
+ kubectl -n confluent apply -f $TUTORIAL_HOME/connector.yaml 
 ```
 
 ### Example for the REST API endpoint connector  
@@ -169,8 +175,6 @@ curl -X POST \
 --data '{ "name": "quickstart-jdbc-source", "config": { "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector", "tasks.max": 1, "connection.url": "jdbc:mysql://mysql:3306/connect_test?user=root&password=password", "mode": "incrementing", "incrementing.column.name": "id", "timestamp.column.name": "modified", "topic.prefix": "quickstart-jdbc-", "poll.interval.ms": 1000 } }' \
 http://localhost:8083/connectors/
 ```
-
-
 
 ## Validation
 
