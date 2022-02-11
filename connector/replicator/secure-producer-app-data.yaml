@@ -2,22 +2,22 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: elastic
+  name: confluentproducer
   namespace: source
 spec:
-  serviceName: elastic
+  serviceName: confluentproducer
   podManagementPolicy: Parallel
   replicas: 1
   selector:
     matchLabels:
-      app: elastic
+      app: confluentproducer
   template:
     metadata:
       labels:
-        app: elastic
+        app: confluentproducer
     spec:
       containers:
-      - name: elastic
+      - name: confluentproducer
         image: confluentinc/cp-kafka:latest
         command:
         - /bin/sh
@@ -49,7 +49,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: elastic
+  name: confluentproducer
   namespace: source
 spec:
   clusterIP: None

@@ -4,7 +4,7 @@ metadata:
   name: topic-in-source
   namespace: source
 spec:
-  replicas: 1
+  replicas: 3
   partitionCount: 4
   configs:
     cleanup.policy: "delete"

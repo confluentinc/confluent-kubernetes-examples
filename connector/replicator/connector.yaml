@@ -4,30 +4,30 @@ metadata:
   name: replicator
   namespace: destination
 spec:
-  name: connector
+  name: replicator
   class: "io.confluent.connect.replicator.ReplicatorSourceConnector"
   taskMax: 4
   configs:
-    topic.whitelist: "demo"
+    topic.whitelist: "topic-in-source"
+    topic.rename.format: "${topic}_replica"
     key.converter: "io.confluent.connect.replicator.util.ByteArrayConverter"
     value.converter: "io.confluent.connect.replicator.util.ByteArrayConverter"
-    src.kafka.sasl.mechanism: "PLAIN"
-    src.kafka.sasl.jaas.config: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${file:/mnt/secrets/src-kafka-credential/plain.txt:username}\" password=\"${file:/mnt/secrets/src-kafka-credential/plain.txt:password}\";"
-    src.kafka.ssl.truststore.location: "/mnt/sslcerts/src-tls-kafka/truststore.p12"
-    src.kafka.ssl.truststore.password: "${file:/mnt/sslcerts/src-tls-kafka/jksPassword.txt:jksPassword}"
-    src.kafka.bootstrap.servers: "kafka.source.svc.cluster.local:9071"
-    src.kafka.security.protocol: "SASL_SSL"
     dest.kafka.bootstrap.servers: "kafka.destination.svc.cluster.local:9071"
-    dest.kafka.security.protocol: "SSL"
+    dest.kafka.sasl.jaas.config: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${file:/mnt/secrets/credential/plain.txt:username}\" password=\"${file:/mnt/secrets/credential/plain.txt:password}\";"
+    dest.kafka.sasl.mechanism: "PLAIN"
+    dest.kafka.security.protocol: "SASL_SSL"
     dest.kafka.ssl.truststore.location: "/mnt/sslcerts/truststore.jks"
     dest.kafka.ssl.truststore.password: "${file:/mnt/sslcerts/jksPassword.txt:jksPassword}"
-    dest.kafka.ssl.keystore.location: "/mnt/sslcerts/keystore.jks"
-    dest.kafka.ssl.keystore.password: "${file:/mnt/sslcerts/jksPassword.txt:jksPassword}"
+    src.kafka.bootstrap.servers: "kafka.source.svc.cluster.local:9071"
+    src.kafka.sasl.jaas.config: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${file:/mnt/secrets/credential/plain.txt:username}\" password=\"${file:/mnt/secrets/credential/plain.txt:password}\";"
+    src.kafka.sasl.mechanism: "PLAIN"
+    src.kafka.security.protocol: "SASL_SSL"
+    src.kafka.ssl.truststore.location: "/mnt/sslcerts/truststore.jks"
+    src.kafka.ssl.truststore.password: "${file:/mnt/sslcerts/jksPassword.txt:jksPassword}"
     src.consumer.group.id: "replicator"
     confluent.license: ""
     confluent.topic.replication.factor: "3"
   connectRest:
-    authentication:
-      type: mtls
     tls:
-      secretRef: kafka-generated-jks
+      secretRef: replicator-generated-jks
+
