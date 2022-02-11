@@ -60,9 +60,9 @@ kubectl create secret tls ca-pair-sslcerts \
   -n destination
 ```
 
-## Deploy source and destination clusters, including Replicator
+## Create credentials secrets  
 
-Deploy the source and destination cluster.
+In this step you will be creating secrets to be used to authenticate the clusters.  
 
 ```
 # Specify the credentials required by the souce and destination cluster. To understand how these
@@ -77,7 +77,12 @@ kubectl create secret generic credential -n source \
 kubectl create secret generic credential -n destination \
 --from-file=plain-users.json=$TUTORIAL_HOME/creds-kafka-sasl-users.json \
 --from-file=plain.txt=$TUTORIAL_HOME/creds-client-kafka-sasl-user.txt
+```
 
+## Deploy source and destination clusters, including Connect Worker
+
+Deploy the source and destination cluster.  
+```
 # Deploy Zookeeper and Kafka to `source` namespace, to represent the source cluster
 kubectl apply -f $TUTORIAL_HOME/components-source.yaml
 
