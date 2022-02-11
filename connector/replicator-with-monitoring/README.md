@@ -15,7 +15,7 @@ Set the tutorial directory for this tutorial under the directory you downloaded
 the tutorial files:
 
 ```
-export TUTORIAL_HOME=<Tutorial directory>/connector/replicator
+export TUTORIAL_HOME=<Tutorial directory>/connector/replicator-with-monitoring
 ```
 
 Create two namespaces, one for the source cluster and one for the destination cluster.
