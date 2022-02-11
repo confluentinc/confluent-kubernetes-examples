@@ -2,7 +2,8 @@
 
 Confluent Replicator allows you to easily and reliably replicate topics from one Kafka cluster to another. In addition to copying the messages, Replicator will create topics as needed preserving the topic configuration in the source cluster. This includes preserving the number of partitions, the replication factor, and any configuration overrides specified for individual topics. Replicator is implemented as a connector.
 
-In this scenario example, you'll deploy two Confluent clusters. One is the source cluster, and one is the destination cluster. You'll deploy Confluent Replicator on the destination cluster, where it will copy topic messages from the source cluster and write to the destination cluster.
+In this scenario example, you'll deploy two Confluent clusters. One is the source cluster, and one is the destination cluster.  
+You will also deploy a Connect cluster.  You'll deploy Confluent Replicator on the Connect cluster, where it will copy topic messages from the source cluster and write to the destination cluster.
 
 Note: You can deploy Replicator near the destination cluster or the source cluster, and it will work either way. However, a best practice is to deploy Replicator closer to the destination cluster for reliability and performance over networks.
 
@@ -86,7 +87,7 @@ Deploy the source and destination cluster.
 # Deploy Zookeeper and Kafka to `source` namespace, to represent the source cluster
 kubectl apply -f $TUTORIAL_HOME/components-source.yaml
 
-# Deploy Zookeeper, Kafka, Replicator, Control Center to `destination` namespace, 
+# Deploy Zookeeper, Kafka, Connect, Control Center to `destination` namespace, 
 # to represent the destination cluster
 kubectl apply -f $TUTORIAL_HOME/components-destination.yaml
 kubectl apply -f $TUTORIAL_HOME/controlcenter.yaml
@@ -96,9 +97,15 @@ In `$TUTORIAL_HOME/components-destination.yaml`, note that the `Connect` CRD is 
 
 ## Create topic in source cluster
 
+Wait for the Kafka component to be ready on the source cluster:  
+
 ```
-# This uses the `kafkaTopic` CRD to define a topic
+ kubectl -n source get pods 
+```
+Apply the the `kafkaTopic` CRD to define a topic:  
+```
 kubectl apply -f $TUTORIAL_HOME/source-topic.yaml
+kubectl -n source get topics
 ```
 
 ## Configure Replicator in destination cluster
@@ -109,16 +116,6 @@ Confluent Replicator is configured via CRD.
  kubectl apply -f $TUTORIAL_HOME/connector.yaml   
  kubectl -n destination get connectors      
 ```
-
-
-```
-# SSH into the `replicator-0` pod
-kubectl -n destination exec -it replicator-0 -- bash
-
-# Check the status of the Replicator Connector instance
-curl -XGET -H "Content-Type: application/json" https://localhost:8083/connectors -kv
-```
-
 
 ## Validate that it works
 
@@ -133,15 +130,17 @@ sasl.mechanism=PLAIN
 security.protocol=SASL_SSL
 ssl.truststore.location=/mnt/sslcerts/truststore.jks
 ssl.truststore.password=mystorepassword
+```
 
-# Create a configuration secret for client applications to use
+Create a configuration secret for client applications to use:  
+
+```
 kubectl create secret generic kafka-client-config-secure \
   --from-file=$TUTORIAL_HOME/kafka.properties \
   -n source
 ```
 
-Deploy a producer application that produces messages to the topic `topic-in-source`:
-
+Deploy a producer application that produces messages to the topic `topic-in-source`:  
 ```
 kubectl apply -f $TUTORIAL_HOME/secure-producer-app-data.yaml
 ```
