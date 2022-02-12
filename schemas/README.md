@@ -70,7 +70,7 @@ kubectl apply -f $TUTORIAL_HOME/schema-config.yaml
 
 Deploy the Schema CR: 
 ```
-kubectl apply -f $TUTORIAL_HOME/schemas.yaml 
+kubectl apply -f $TUTORIAL_HOME/schema.yaml 
 ```
 
 Check that schema config and schema CR are deployed: 
@@ -104,7 +104,8 @@ curl http://schemaregistry.confluent.svc.cluster.local:8081/subjects/payment-val
 ## Tear down Confluent Platform
 
 ```
-kubectl delete -f $TUTORIAL_HOME/schemas.yaml
+kubectl delete -f $TUTORIAL_HOME/schema.yaml
 kubectl delete -f $TUTORIAL_HOME/schema-config.yaml
 kubectl delete -f $TUTORIAL_HOME/confluent-platform.yaml
+helm delete operator -n confluent
 ```
