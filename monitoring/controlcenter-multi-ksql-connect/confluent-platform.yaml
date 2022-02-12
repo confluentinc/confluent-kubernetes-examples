@@ -156,7 +156,6 @@ spec:
           enabled: true
         authentication:
          type: mtls
-
     ksqldb:
     - name: ksql-dev
       url: https://ksqldb.confluent.svc.cluster.local:8088
