@@ -417,7 +417,6 @@ In this step, you will create secrets for each Confluent component MTLS certific
     --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server-key.pem \
     --namespace confluent
 
-
   kubectl create secret generic tls-controlcenter \
     --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/controlcenter-server.pem \
     --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
