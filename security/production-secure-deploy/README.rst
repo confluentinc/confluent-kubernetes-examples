@@ -397,43 +397,44 @@ Follow [these instructions](../../assets/certs/component-certs/README.md) to gen
 
 In this step, you will create secrets for each Confluent component TLS certificates.
 
-```
-kubectl create secret generic tls-zookeeper \
-  --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/zookeeper-server.pem \
-  --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
-  --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/zookeeper-server-key.pem \
-  --namespace confluent
+::
 
-kubectl create secret generic tls-kafka \
-  --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server.pem \
-  --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
-  --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server-key.pem \
-  --namespace confluent
+  kubectl create secret generic tls-zookeeper \
+    --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/zookeeper-server.pem \
+    --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
+    --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/zookeeper-server-key.pem \
+    --namespace confluent
 
-kubectl create secret generic tls-controlcenter \
-  --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/controlcenter-server.pem \
-  --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
-  --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/controlcenter-server-key.pem \
-  --namespace confluent
+  kubectl create secret generic tls-kafka \
+    --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server.pem \
+    --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
+    --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server-key.pem \
+    --namespace confluent
 
-kubectl create secret generic tls-schemaregistry \
-  --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/schemaregistry-server.pem \
-  --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
-  --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/schemaregistry-server-key.pem \
-  --namespace confluent
+  kubectl create secret generic tls-controlcenter \
+    --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/controlcenter-server.pem \
+    --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
+    --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/controlcenter-server-key.pem \
+    --namespace confluent
 
-kubectl create secret generic tls-connect \
-  --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/connect-server.pem \
-  --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
-  --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/connect-server-key.pem \
-  --namespace confluent
+  kubectl create secret generic tls-schemaregistry \
+    --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/schemaregistry-server.pem \
+    --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
+    --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/schemaregistry-server-key.pem \
+    --namespace confluent
 
-kubectl create secret generic tls-ksqldb \
-  --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/ksqldb-server.pem \
-  --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
-  --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/ksqldb-server-key.pem \
-  --namespace confluent
-```
+  kubectl create secret generic tls-connect \
+    --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/connect-server.pem \
+    --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
+    --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/connect-server-key.pem \
+    --namespace confluent
+
+  kubectl create secret generic tls-ksqldb \
+    --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/ksqldb-server.pem \
+    --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
+    --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/ksqldb-server-key.pem \
+    --namespace confluent
+
 
 =========================
 Appendix: Troubleshooting
