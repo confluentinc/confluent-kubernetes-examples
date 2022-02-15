@@ -395,7 +395,7 @@ Follow [these instructions](../../assets/certs/component-certs/README.md) to gen
   export TUTORIAL_HOME=<Tutorial directory>/production-secure-deploy
   
 
-In this step, you will create secrets for each Confluent component TLS certificates.
+In this step, you will create secrets for each Confluent component MTLS certificates (You also require to create the secrets from the steps above)
 
 ::
 
@@ -405,11 +405,18 @@ In this step, you will create secrets for each Confluent component TLS certifica
     --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/zookeeper-server-key.pem \
     --namespace confluent
 
-  kubectl create secret generic tls-kafka \
+  kubectl create secret generic tls-kafka-internal \
     --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server.pem \
     --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
     --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server-key.pem \
     --namespace confluent
+
+  kubectl create secret generic tls-kafka-external \
+    --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server.pem \
+    --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
+    --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server-key.pem \
+    --namespace confluent
+
 
   kubectl create secret generic tls-controlcenter \
     --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/controlcenter-server.pem \
