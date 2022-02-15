@@ -132,7 +132,7 @@ After the Kafka cluster is in running state, create cluster link between source 
 
 #### produce in source kafka cluster
 
-    seq 100 | kafka-console-producer --topic demo --broker-list kafka.source.svc.cluster.local:9071 --producer.config kafka.properties
+    seq 100 | kafka-console-producer --topic demo --broker-list kafka.source.svc.cluster.local:9071 --producer.config /tmp/kafka.properties
 #### open a new terminal and exec into destination kafka pod
     kubectl -n destination exec kafka-0 -it -- bash
 #### create kafka.properties for destination kafka cluster
@@ -145,10 +145,10 @@ After the Kafka cluster is in running state, create cluster link between source 
     ssl.truststore.password=mystorepassword
     EOF
 #### validate topic is created in destination kafka cluster
-    kafka-topics --describe --topic demo --bootstrap-server kafka.destination.svc.cluster.local:9071 --command-config kafka.properties
+    kafka-topics --describe --topic demo --bootstrap-server kafka.destination.svc.cluster.local:9071 --command-config /tmp/kafka.properties
 
 #### consume in destination kafka cluster and confirm message delivery in destination cluster
 
-    kafka-console-consumer --from-beginning --topic demo --bootstrap-server  kafka.destination.svc.cluster.local:9071  --consumer.config kafka.properties
+    kafka-console-consumer --from-beginning --topic demo --bootstrap-server  kafka.destination.svc.cluster.local:9071  --consumer.config /tmp/kafka.properties
 
  
