@@ -24,7 +24,7 @@ Deploy Confluent for Kubernetes (CFK) in cluster mode, so that the one CFK insta
 ```
 helm upgrade --install confluent-operator \
   confluentinc/confluent-for-kubernetes \
-  --namespace source --set namespaced=false
+  --namespace default --set namespaced=false
 ```
 
 ### create required secrets
@@ -41,6 +41,11 @@ kubectl -n destination create secret generic credential \
 ```
 
 ### Source Cluster Deployment
+
+### create required certificates 
+
+[Follow this guide](https://github.com/confluentinc/confluent-kubernetes-examples/tree/master/assets/certs/component-certs) to created the required certificates.  
+
 ### create required secrets
 ```
 kubectl -n source create secret generic source-tls-group1 \
