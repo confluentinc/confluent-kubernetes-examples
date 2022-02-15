@@ -388,7 +388,7 @@ When using mTLS, you'll need to provide a different certificate for each compone
 has the principal in the Common Name. In the example deployment spec, each component refers to a different
 TLS certificate secret.
 
-Follow [these instructions](../../assets/certs/component-certs/README.md) to generate these certificates.  
+Follow `these instructions <../../assets/certs/component-certs/README.md>`__ to generate these certificates.  
 
 ::
    
