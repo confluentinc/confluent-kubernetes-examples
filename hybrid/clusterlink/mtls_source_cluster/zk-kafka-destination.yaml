@@ -14,7 +14,7 @@ spec:
   authentication:
     type: mtls
   tls:
-    secretRef: destination-tls-group1
+    secretRef: destination-tls-zk1
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
@@ -25,7 +25,7 @@ spec:
   replicas: 3
   image:
     application: confluentinc/cp-server:7.0.0
-    init: confluentinc/confluent-init-containerr:2.2.0
+    init: confluentinc/confluent-init-container:2.2.0
   dataVolumeCapacity: 10Gi
   tls:
     secretRef: destination-tls-group1
