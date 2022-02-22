@@ -69,19 +69,6 @@ spec:
     init: confluentinc/confluent-init-container:2.2.0-1
   dataVolumeCapacity: 10Gi
   dependencies:
-    connect:
-    - name: connect-dev
-      url:  http://connect.confluent.svc.cluster.local:8083
-      authentication:
-        type: basic
-        basic:
-          secretRef: basicsecret
-    schemaRegistry:
-      url: http://schemaregistry.confluent.svc.cluster.local:8081
-      authentication:
-        type: basic
-        basic:
-          secretRef: basicsecret2
     ksqldb:
     - name: ksqldb
       url: http://ksqldb.confluent.svc.cluster.local:8088

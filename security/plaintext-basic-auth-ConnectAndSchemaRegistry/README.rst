@@ -4,8 +4,7 @@ Deploy Confluent Platform
 In this workflow scenario, you'll set up Connect with basic authentication.  
 You will use Control Center to monitor and connect to a Confluent Platform.
 
-NOTE: Control Center does not support basic authentication to the Connect Cluster and you will not be able to connect to it via the UI. 
-
+NOTE: Control Center does not support basic authentication to the Connect Cluster or Schema Registry cluster and you will not be able to connect to it via the UI. 
 
 
 The goal for this scenario is for you to:
@@ -38,7 +37,7 @@ the tutorial files:
 
 ::
    
-  export TUTORIAL_HOME=<Tutorial directory>/plaintext-basic-auth-Connect
+  export TUTORIAL_HOME=<Tutorial directory>/plaintext-basic-auth-ConnectAndSchemaRegistry
 
 ===============================
 Deploy Confluent for Kubernetes
@@ -69,6 +68,10 @@ Create Basic authentication secret
 ==================================
 
 ::
+
+  kubectl create secret generic basicsecret \
+   --from-file=basic.txt=$TUTORIAL_HOME/basic.txt \
+   --namespace confluent
 
   kubectl create secret generic basicsecret2 \
    --from-file=basic.txt=$TUTORIAL_HOME/basicsr.txt \
@@ -184,6 +187,14 @@ The above should return something like this:
 ::
 
   {"version":"6.1.0-ce","commit":"958ad0f3c7030f1c","kafka_cluster_id":"SjW1_kcORW-nSsU2Yy1R1Q"}
+
+
+::
+
+  kubectl --namespace=confluent exec -it schemaregistry-0 -- curl -u thisismyusername:thisismypass http://0.0.0.0:8081
+
+
+The above should return an empty response. 
 
 
 Validate in Control Center
