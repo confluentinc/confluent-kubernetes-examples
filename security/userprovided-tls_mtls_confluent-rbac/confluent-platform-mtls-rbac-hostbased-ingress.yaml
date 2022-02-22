@@ -82,10 +82,12 @@ spec:
             groupMemberAttribute: member
             groupMemberAttributePattern: CN=(.*),DC=test,DC=com
             groupSearchBase: dc=test,dc=com
+            groupSearchScope: 1
             userNameAttribute: cn
             userMemberOfAttributePattern: CN=(.*),DC=test,DC=com
             userObjectClass: organizationalRole
             userSearchBase: dc=test,dc=com
+            userSearchScope: 1
   dependencies:
     kafkaRest:
       authentication:
