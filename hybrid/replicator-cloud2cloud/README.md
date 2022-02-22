@@ -176,7 +176,7 @@ kubectl --namespace destination exec -it replicator-0 -- bash
 #### Define the configuration as a file in the pod
 
 ```
-cat <<EOF > replicator.json
+cat <<EOF > /tmp/replicator.json
  {
  "name": "replicator",
  "config": {
@@ -214,7 +214,7 @@ EOF
 #### Instantiate the Replicator Connector instance through the REST interface
 
 ```
-curl -XPOST -H "Content-Type: application/json" --data @replicator.json http://localhost:8083/connectors
+curl -XPOST -H "Content-Type: application/json" --data @/tmp/replicator.json http://localhost:8083/connectors
 ```
 #### Check the status of the Replicator Connector instance
 ```
