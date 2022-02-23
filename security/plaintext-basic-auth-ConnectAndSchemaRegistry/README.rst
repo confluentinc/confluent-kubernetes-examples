@@ -1,17 +1,17 @@
 Deploy Confluent Platform
 =========================
 
-In this workflow scenario, you'll set up Connect with basic authentication.  
-You will use Control Center to monitor and connect to a Confluent Platform.
+In this workflow scenario, you'll set up Connect and Schema Registry with basic authentication.  
 
-NOTE: Control Center does not support basic authentication to the Connect Cluster or Schema Registry cluster and you will not be able to connect to it via the UI. 
+NOTE: Control Center does not support basic authentication to the Connect Cluster or Schema Registry cluster therefore not being used in this scenario.  
 
 
 The goal for this scenario is for you to:
 
 * Configure basic authentication for Connect authentication (no RBAC).
+* Configure basic authentication for Schema Registry authentication (no RBAC).
 * Quickly set up the complete Confluent Platform on the Kubernetes.
-* Configure a producer to generate sample data.
+* Configure a Avro producer to generate sample data.
 
 
 To complete this scenario, you'll follow these steps:
@@ -20,7 +20,7 @@ To complete this scenario, you'll follow these steps:
 
 #. Deploy Confluent For Kubernetes.
 
-#. Deploy secret for basic authentication.
+#. Deploy secrets for basic authentication.
 
 #. Deploy Confluent Platform.
 
@@ -144,14 +144,14 @@ Validate
 Deploy producer application
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Now that we've got the infrastructure set up, let's deploy the producer client
+Now that we've got the infrastructure set up, let's deploy the avro producer and consumer client
 app.
 
 The producer app is packaged and deployed as a pod on Kubernetes. The required
 topic is defined as a KafkaTopic custom resource in
-``$TUTORIAL_HOME/secure-producer-app-data.yaml``.
+``$TUTORIAL_HOME/producer-consumer-app-data.yaml``.
 
-The ``$TUTORIAL_HOME/secure-producer-app-data.yaml`` defines the ``elastic-0``
+The ``$TUTORIAL_HOME/producer-consumer-app-data.yaml`` defines the ``producer-example-0``
 topic as follows:
 
 ::
@@ -159,7 +159,7 @@ topic as follows:
   apiVersion: platform.confluent.io/v1beta1
   kind: KafkaTopic
   metadata:
-    name: elastic-0
+    name: producer-example-0
     namespace: confluent
   spec:
     replicas: 1
@@ -171,7 +171,7 @@ Deploy the producer app:
 
 ::
    
-  kubectl apply -f $TUTORIAL_HOME/producer-app-data.yaml --namespace=confluent
+  kubectl apply -f $TUTORIAL_HOME/producer-consumer-app-data.yaml --namespace=confluent
 
 
 Validate authentication with Connect
@@ -191,10 +191,13 @@ The above should return something like this:
 
 ::
 
-  kubectl --namespace=confluent exec -it schemaregistry-0 -- curl -u thisismyusername:thisismypass http://0.0.0.0:8081
+ kubectl --namespace=confluent exec -it schemaregistry-0 -- curl -u thisismyusername:thisismypass http://0.0.0.0:8081/schemas
 
+The above should return something like this: 
 
-The above should return an empty response. 
+::
+
+  [{"subject":"producer-example-0-value","version":1,"id":1,"schema":"{\"type\":\"record\",\"name\":\"myrecord\",\"fields\":[{\"name\":\"f1\",\"type\":\"string\"}]}"}]
 
 
 Validate in Control Center
@@ -218,7 +221,7 @@ Use Control Center to monitor the Confluent Platform, and see the created topic 
 
 
 
-#. Check that the ``elastic-0`` topic was created and that messages are being produced to the topic.
+#. Check that the ``producer-example-0`` topic was created and that messages are being produced to the topic.
 
 =========
 Tear Down
@@ -228,7 +231,7 @@ Shut down Confluent Platform and the data:
 
 ::
 
-  kubectl delete -f $TUTORIAL_HOME/producer-app-data.yaml --namespace=confluent
+  kubectl delete -f $TUTORIAL_HOME/producer-consumer-app-data.yaml --namespace=confluent
 
 ::
 
