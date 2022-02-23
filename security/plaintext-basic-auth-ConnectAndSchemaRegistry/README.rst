@@ -2,8 +2,10 @@ Deploy Confluent Platform
 =========================
 
 In this workflow scenario, you'll set up Connect and Schema Registry with basic authentication.  
+You will use Control Center to monitor and connect to a Confluent Platform.
 
-NOTE: Control Center does not support basic authentication to the Connect Cluster or Schema Registry cluster therefore not being used in this scenario.  
+NOTE: Control Center does not support basic authentication to the Connect Cluster and you will not be able to connect to it via the UI. 
+
 
 
 The goal for this scenario is for you to:
@@ -12,6 +14,8 @@ The goal for this scenario is for you to:
 * Configure basic authentication for Schema Registry authentication (no RBAC).
 * Quickly set up the complete Confluent Platform on the Kubernetes.
 * Configure a Avro producer to generate sample data.
+* Configure a Avro consumer to generate sample data.
+
 
 
 To complete this scenario, you'll follow these steps:
@@ -69,12 +73,16 @@ Create Basic authentication secret
 
 ::
 
-  kubectl create secret generic basicsecret \
-   --from-file=basic.txt=$TUTORIAL_HOME/basic.txt \
+  kubectl create secret generic basicsecretconnect \
+   --from-file=basic.txt=$TUTORIAL_HOME/basicConnect.txt \
    --namespace confluent
 
-  kubectl create secret generic basicwithrole \
-   --from-file=basic.txt=$TUTORIAL_HOME/basicwithrole.txt \
+  kubectl create secret generic basicwithrolesr \
+   --from-file=basic.txt=$TUTORIAL_HOME/basicwithroleSR.txt \
+   --namespace confluent
+
+  kubectl create secret generic basicsecretsrccc \
+   --from-file=basic.txt=$TUTORIAL_HOME/basicsecretSRC3.txt \
    --namespace confluent
 
 
@@ -167,11 +175,23 @@ topic as follows:
     configs:
       cleanup.policy: "delete"
       
-Deploy the producer app:
+Deploy the producer/consumer app:
 
 ::
    
   kubectl apply -f $TUTORIAL_HOME/producer-consumer-app-data.yaml --namespace=confluent
+
+Validate the consumer, the output will indicate that the produce was able to produce avro value: 
+
+::
+   
+  kubectl logs consumer-example --namespace=confluent
+
+Note that the following is expected in the end of the log:
+
+::
+  [2022-02-23 11:15:35,545] ERROR Error processing message, terminating consumer process:  (kafka.tools.ConsoleConsumer$:43)
+org.apache.kafka.common.errors.TimeoutException
 
 
 Validate authentication with Connect
@@ -241,7 +261,7 @@ Shut down Confluent Platform and the data:
 
 ::
 
-  kubectl delete secrets basicsecret basicwithrole  --namespace=confluent
+  kubectl delete secrets basicsecretconnect basicsecretsrccc basicwithrolesr  --namespace=confluent
 
 ::
 

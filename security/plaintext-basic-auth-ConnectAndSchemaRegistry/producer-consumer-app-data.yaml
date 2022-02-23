@@ -14,10 +14,11 @@ metadata:
   name: producer-example-0
   namespace: confluent
 spec:
-  replicas: 1
-  partitionCount: 1
+  replicas: 3
+  partitionCount: 3
   configs:
     cleanup.policy: "delete"
+    min.insync.replicas: "1"
 ---
 apiVersion: v1
 kind: Pod

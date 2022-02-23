@@ -36,9 +36,7 @@ spec:
   authentication:
     type: basic
     basic:
-      secretRef: basicwithrole
-      roles:
-      - admin 
+      secretRef: basicsecretconnect
   image:
     application: confluentinc/cp-server-connect:7.0.1
     init: confluentinc/confluent-init-container:2.2.0-1
@@ -72,7 +70,7 @@ spec:
   authentication:
     type: basic
     basic:
-      secretRef: basicwithrole
+      secretRef: basicwithrolesr
       roles:
       - admin 
 ---
@@ -96,4 +94,4 @@ spec:
       authentication:
         type: basic
         basic:
-          secretRef: basicsecret
+          secretRef: basicsecretsrccc
