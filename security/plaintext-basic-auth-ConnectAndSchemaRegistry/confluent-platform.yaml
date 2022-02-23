@@ -60,6 +60,23 @@ spec:
   dataVolumeCapacity: 10Gi
 ---
 apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-schema-registry:7.0.1
+    init: confluentinc/confluent-init-container:2.2.0-1
+  authentication:
+    type: basic
+    basic:
+      secretRef: basicwithrole
+      roles:
+      - admin 
+---
+apiVersion: platform.confluent.io/v1beta1
 kind: ControlCenter
 metadata:
   name: controlcenter
@@ -79,23 +96,4 @@ spec:
       authentication:
         type: basic
         basic:
-          secretRef: basicwithrole
-          roles:
-          - admin 
----
-apiVersion: platform.confluent.io/v1beta1
-kind: SchemaRegistry
-metadata:
-  name: schemaregistry
-  namespace: confluent
-spec:
-  replicas: 1
-  image:
-    application: confluentinc/cp-schema-registry:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
-  authentication:
-    type: basic
-    basic:
-      secretRef: basicwithrole
-      roles:
-      - admin 
+          secretRef: basicsecret
