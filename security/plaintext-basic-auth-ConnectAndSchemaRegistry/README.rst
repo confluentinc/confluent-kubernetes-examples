@@ -73,8 +73,8 @@ Create Basic authentication secret
    --from-file=basic.txt=$TUTORIAL_HOME/basic.txt \
    --namespace confluent
 
-  kubectl create secret generic basicsecret2 \
-   --from-file=basic.txt=$TUTORIAL_HOME/basicsr.txt \
+  kubectl create secret generic basicwithrole \
+   --from-file=basic.txt=$TUTORIAL_HOME/basicwithrole.txt \
    --namespace confluent
 
 
@@ -147,7 +147,7 @@ Deploy producer application
 Now that we've got the infrastructure set up, let's deploy the avro producer and consumer client
 app.
 
-The producer app is packaged and deployed as a pod on Kubernetes. The required
+The avro producer and consumer app is packaged and deployed as a pod on Kubernetes. The required
 topic is defined as a KafkaTopic custom resource in
 ``$TUTORIAL_HOME/producer-consumer-app-data.yaml``.
 
@@ -188,6 +188,8 @@ The above should return something like this:
 
   {"version":"6.1.0-ce","commit":"958ad0f3c7030f1c","kafka_cluster_id":"SjW1_kcORW-nSsU2Yy1R1Q"}
 
+Validate authentication with Schema Registry
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -236,6 +238,10 @@ Shut down Confluent Platform and the data:
 ::
 
   kubectl delete -f $TUTORIAL_HOME/confluent-platform.yaml --namespace=confluent
+
+::
+
+  kubectl delete secrets basicsecret basicwithrole  --namespace=confluent
 
 ::
 

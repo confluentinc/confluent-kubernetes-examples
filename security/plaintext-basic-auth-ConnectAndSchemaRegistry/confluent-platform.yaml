@@ -36,13 +36,16 @@ spec:
   authentication:
     type: basic
     basic:
-      secretRef: basicsecret
+      secretRef: basicwithrole
+      roles:
+      - admin 
   image:
     application: confluentinc/cp-server-connect:7.0.1
     init: confluentinc/confluent-init-container:2.2.0-1
   dependencies:
     kafka:
       bootstrapEndpoint: kafka:9071
+
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: KsqlDB
@@ -57,6 +60,30 @@ spec:
   dataVolumeCapacity: 10Gi
 ---
 apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-control-center:7.0.1
+    init: confluentinc/confluent-init-container:2.2.0-1
+  dataVolumeCapacity: 10Gi
+  dependencies:
+    ksqldb:
+    - name: ksqldb
+      url: http://ksqldb.confluent.svc.cluster.local:8088
+    schemaRegistry:
+      url: http://schemaregistry.confluent.svc.cluster.local:8081
+      authentication:
+        type: basic
+        basic:
+          secretRef: basicwithrole
+          roles:
+          - admin 
+---
+apiVersion: platform.confluent.io/v1beta1
 kind: SchemaRegistry
 metadata:
   name: schemaregistry
@@ -69,6 +96,6 @@ spec:
   authentication:
     type: basic
     basic:
-      secretRef: basicsecret2
+      secretRef: basicwithrole
       roles:
       - admin 
