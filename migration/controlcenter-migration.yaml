@@ -3,7 +3,7 @@
 apiVersion: platform.confluent.io/v1beta1
 kind: MigrationJob
 metadata:
-  name: controlcenterMigration
+  name: controlcenter-migration
   namespace: confluent
 spec:
   # This version of init-container is required for migration.

@@ -3,7 +3,7 @@
 apiVersion: platform.confluent.io/v1beta1
 kind: MigrationJob
 metadata:
-  name: ksqldbMigration
+  name: ksqldb-migration
   namespace: confluent
 spec:
   # This version of init-container is required for migration.
