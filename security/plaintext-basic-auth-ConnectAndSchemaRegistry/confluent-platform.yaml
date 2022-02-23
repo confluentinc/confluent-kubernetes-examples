@@ -43,7 +43,6 @@ spec:
   dependencies:
     kafka:
       bootstrapEndpoint: kafka:9071
-
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: KsqlDB
