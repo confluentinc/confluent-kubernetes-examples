@@ -7,7 +7,7 @@ spec:
   replicas: 1
   image:
     application: confluentinc/cp-zookeeper:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   dataVolumeCapacity: 10Gi
   logVolumeCapacity: 10Gi
   podTemplate:
@@ -29,7 +29,7 @@ spec:
   replicas: 1
   image:
     application: confluentinc/cp-server:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   dataVolumeCapacity: 10Gi
   configOverrides:
     server:
@@ -64,7 +64,7 @@ spec:
   replicas: 1
   image:
     application: confluentinc/cp-server-connect:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   configOverrides:
     server:
       - config.storage.replication.factor=1
@@ -94,7 +94,7 @@ spec:
   replicas: 1
   image:
     application: confluentinc/cp-ksqldb-server:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   dataVolumeCapacity: 10Gi
   podTemplate:
     resources:
@@ -120,7 +120,7 @@ spec:
   replicas: 1
   image:
     application: confluentinc/cp-enterprise-control-center:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   dataVolumeCapacity: 10Gi
   configOverrides:
     server:
@@ -167,7 +167,7 @@ spec:
   replicas: 1
   image:
     application: confluentinc/cp-schema-registry:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   podTemplate:
     resources:
       requests:
@@ -187,7 +187,7 @@ spec:
   replicas: 1
   image:
     application: confluentinc/cp-kafka-rest:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   podTemplate:
     resources:
       requests:
