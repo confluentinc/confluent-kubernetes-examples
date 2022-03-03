@@ -31,6 +31,7 @@ In this step, you'll deploy:
 - 3 Kafka brokers to the `west` region, and 3 Kafka brokers to the `east` region
   - Configure rack awareness so that partition placement can take broker region into account
 - 3 Zookeeper servers to the `central` region
+- 1 Control Center to the `west` region
 
 ### Configure service account
 
@@ -52,6 +53,15 @@ kubectl apply -f $TUTORIAL_HOME/confluent-platform/basic-deployment/confluent-pl
 kubectl apply -f $TUTORIAL_HOME/confluent-platform/basic-deployment/confluent-platform-west.yaml --context mrc-west
 kubectl apply -f $TUTORIAL_HOME/confluent-platform/basic-deployment/confluent-platform-east.yaml --context mrc-east
 ```
+
+## Check deployment
+Log in to Control Center by running:
+```
+kubectl confluent dashboard controlcenter
+```
+The credentials required for logging in are `c3:c3-secret`.
+
+You should see a single cluster with 6 brokers with broker ids: `0, 1, 100, 101, 102, 2`
 
 ## Tear down
 
