@@ -61,7 +61,7 @@ kubectl confluent dashboard controlcenter
 ```
 The credentials required for logging in are `c3:c3-secret`.
 
-You should see a single cluster with 6 brokers with broker ids: `0, 1, 100, 101, 102, 2`
+You should see a single cluster with 6 brokers with broker ids according to the offsets in the Kafka CRs: `0, 1, 2, 100, 101, 102`
 
 ## Tear down
 
