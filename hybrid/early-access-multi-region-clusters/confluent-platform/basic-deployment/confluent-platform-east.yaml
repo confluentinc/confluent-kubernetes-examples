@@ -24,4 +24,4 @@ spec:
       endpoint: zookeeper.central.svc.cluster.local:2181
   configOverrides:
     server:
-      - zookeeper.connect=zookeeper.central.svc.cluster.local:2181/kafka-west
+      - zookeeper.connect=zookeeper.central.svc.cluster.local:2181
