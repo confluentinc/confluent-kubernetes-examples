@@ -88,14 +88,6 @@ kubectl delete -f "$TUTORIAL_HOME"/confluent-platform/rack-awareness/service-acc
 # Uninstall Open LDAP
 helm uninstall open-ldap -n central --kube-context mrc-central
 
-# Uninstall external-dns
-# Allow sufficient time for external-dns to clean up DNS records
-echo "Sleeping for 30s to allow external-dns to clean up DNS entries"
-sleep 30
-helm uninstall external-dns -n west --kube-context mrc-west
-helm uninstall external-dns -n east --kube-context mrc-east
-helm uninstall external-dns -n central --kube-context mrc-central
-
 # Uninstall CFK
 helm uninstall cfk-operator -n west --kube-context mrc-west
 helm uninstall cfk-operator -n east --kube-context mrc-east

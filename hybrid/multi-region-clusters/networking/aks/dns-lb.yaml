@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    # if vnet peering is configured, make the load balancer internal, otherwise, comment the line below.
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+  labels:
+    k8s-app: kube-dns
+  name: kube-dns-lb
+  namespace: kube-system
+spec:
+  ports:
+    - name: dns
+      port: 53
+      protocol: UDP
+      targetPort: dns
+  selector:
+    k8s-app: kube-dns
+  sessionAffinity: None
+  type: LoadBalancer
