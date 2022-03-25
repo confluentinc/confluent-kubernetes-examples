@@ -1,4 +1,4 @@
-# Configure Networking: Azure Kubernetes Service
+# Configure Networking: Elastic Kubernetes Service
 
 This is the architecture you'll achieve on Elastic Kubernetes Service (EKS):
 
@@ -37,6 +37,11 @@ export TUTORIAL_HOME=<Tutorial directory>/hybrid/multi-region-clusters
 
 Spin up the EKS clusters in 3 regions (central, east and west) as documented here: https://docs.aws.amazon.com/eks/latest/userguide/getting-started-console.html
 
+
+**CoreDNS**: Make sure to have self-managed CodeDNS add-on as opposed to Amazon EKS managed add-on since the add-on managed 
+by EKS won't allow us to override the Corefile. If installed as an Amazon EKS managed add-on, follow the guide here to 
+make it a self-managed add-on: https://docs.aws.amazon.com/eks/latest/userguide/managing-coredns.html#removing-coredns-eks-add-on
+
 ```
 # Connect to the cluster in central and set the kubectl context so you can refer to it
 aws eks update-kubeconfig --region ca-central-1 --name mrc-central --alias mrc-central
@@ -74,157 +79,372 @@ https://docs.aws.amazon.com/vpc/latest/peering/vpc-peering-routing.html
 
 ## Set up DNS
 
-### Create a load balancer to access Kube DNS in each Kubernetes cluster
+### Install the AWS Load Balancer Controller add-on
+The AWS Load Balancer Controller manages the AWS Elastic Load Balancers for a Kubernetes cluster. The controller provisions
+an AWS Network Load Balancer (NLB) when you create a Kubernetes service of type LoadBalancer. Follow the AWS doc to install 
+the Load Balancer Controller add-on: https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html 
+
+### Create a load balancer to access CoreDNS in each Kubernetes cluster
 ```
-kubectl apply -f $TUTORIAL_HOME/networking/dns-lb.yaml --context mrc-west
+kubectl apply -f $TUTORIAL_HOME/networking/eks/dns-lb.yaml --context mrc-west
 
-kubectl apply -f $TUTORIAL_HOME/networking/dns-lb.yaml --context mrc-east
+kubectl apply -f $TUTORIAL_HOME/networking/eks/dns-lb.yaml --context mrc-east
 
-kubectl apply -f $TUTORIAL_HOME/networking/dns-lb.yaml --context mrc-central
+kubectl apply -f $TUTORIAL_HOME/networking/eks/dns-lb.yaml --context mrc-central
 ```
 
-### Determine the IP address endpoint for each Kube DNS load balancer
+### Determine the loadBalancer ingress for each CoreDNS LoadBalancer
+```
+# For central region
+kubectl get svc kube-dns-lb --namespace kube-system -o jsonpath='{.status.loadBalancer.ingress}' --context mrc-central
+
+[{"hostname":"k8s-kubesyst-kubednsl-29c7e5470a-dd9bdd1bf4b464fe.elb.ca-central-1.amazonaws.com"}]
+```
 
 ```
-# For West region
-kubectl describe svc kube-dns-lb --namespace kube-system --context mrc-west
+# For east region
+kubectl get svc kube-dns-lb --namespace kube-system -o jsonpath='{.status.loadBalancer.ingress}' --context mrc-east
 
-Name:                     kube-dns-lb
-Namespace:                kube-system
+[{"hostname":"k8s-kubesyst-kubednsl-03e8facfed-b041e455f96a15ec.elb.us-east-2.amazonaws.com"}]
+```
+
+```
+# For west region
+kubectl get svc kube-dns-lb --namespace kube-system -o jsonpath='{.status.loadBalancer.ingress}' --context mrc-west
+
+[{"hostname":"k8s-kubesyst-kubednsl-44b2adc140-16aa661d24a0790c.elb.us-west-2.amazonaws.com"}]
+```
+
+### Lookup the IP address(es) mapped to the LoadBalancer DNS names
+```
+dig k8s-kubesyst-kubednsl-29c7e5470a-dd9bdd1bf4b464fe.elb.us-west-1.amazonaws.com
+
 ...
-Selector:                 k8s-app=kube-dns
-Type:                     LoadBalancer
-IP:                       10.0.37.50
-LoadBalancer Ingress:     35.185.208.215  ## The load balancer IP
-```
 
-```
-# For East region
-kubectl describe svc kube-dns-lb --namespace kube-system --context mrc-east
+;; ANSWER SECTION:
+k8s-kubesyst-kubednsl-29c7e5470a-dd9bdd1bf4b464fe.elb.ca-central-1.amazonaws.com. 60 IN A 10.0.5.225
 
-Name:                     kube-dns-lb
-Namespace:                kube-system
 ...
-Selector:                 k8s-app=kube-dns
-Type:                     LoadBalancer
-IP:                       10.96.0.99
-LoadBalancer Ingress:     34.74.229.93  ## The load balancer IP
 ```
 
 ```
-# For Central region
-kubectl describe svc kube-dns-lb --namespace kube-system --context mrc-central
+dig k8s-kubesyst-kubednsl-03e8facfed-b041e455f96a15ec.elb.us-east-2.amazonaws.com
 
-Name:                     kube-dns-lb
-Namespace:                kube-system
 ...
-Selector:                 k8s-app=kube-dns
-Type:                     LoadBalancer
-IP:                       10.1.32.71
-LoadBalancer Ingress:     35.224.242.222  ## The load balancer IP
+
+;; ANSWER SECTION:
+k8s-kubesyst-kubednsl-03e8facfed-b041e455f96a15ec.elb.us-east-2.amazonaws.com. 60 IN A 10.0.100.177
+
+...
 ```
 
-### Configure cluster DNS configmap
+```
+dig k8s-kubesyst-kubednsl-44b2adc140-16aa661d24a0790c.elb.us-west-2.amazonaws.com
+
+...
+
+;; ANSWER SECTION:
+k8s-kubesyst-kubednsl-44b2adc140-16aa661d24a0790c.elb.us-west-2.amazonaws.com. 60 IN A 10.0.118.91
+
+...
+```
+
+### Configure CoreDNS ConfigMap
 
 Configure each cluster's DNS configuration with entries for the two other cluster's DNS load
 balancer endpoints. In each region, don't include the endpoint for the region's own load balancer,
-so as to protect against infinite recursion in DNS resolutions.
-
+to protect against infinite recursion in DNS resolutions.
 ```
-# For West cluster
+# For central cluster 
 
-# dns-configmap-west.yaml
+# coredns-configmap-central.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: kube-dns
+  name: coredns
   namespace: kube-system
 data:
-  stubDomains: |
-    {"east.svc.cluster.local": ["34.74.229.93"], "central.svc.cluster.local": ["35.224.242.222"]}
+  Corefile: |
+    .:53 {
+        errors
+        health
+        kubernetes cluster.local in-addr.arpa ip6.arpa {
+          pods insecure
+          fallthrough in-addr.arpa ip6.arpa
+        }
+        prometheus :9153
+        forward . /etc/resolv.conf
+        cache 30
+        loop
+        reload
+        loadbalance
+    }
+    east.svc.cluster.local:53 {
+        errors
+        cache 30
+        forward . 10.0.100.177 {
+          force_tcp
+        }
+        reload
+    }
+    west.svc.cluster.local:53 {
+        errors
+        cache 30
+        forward . 10.0.118.91 {
+          force_tcp
+        }
+        reload
+    }
 
-kubectl apply -f $TUTORIAL_HOME/networking/dns-configmap-west.yaml --context mrc-west
+kubectl apply -f $TUTORIAL_HOME/networking/eks/coredns-configmap-central.yaml --context mrc-central
 
-kubectl delete pods -l k8s-app=kube-dns --namespace kube-system --context mrc-west
+kubectl rollout restart deployment/coredns -n kube-system --context mrc-central
 ```
 
 ```
-# For Central cluster
+# For east cluster
 
-# dns-configmap-central.yaml
+# coredns-configmap-east.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: kube-dns
+  name: coredns
   namespace: kube-system
 data:
-  stubDomains: |
-    {"east.svc.cluster.local": ["34.74.229.93"], "west.svc.cluster.local": ["35.185.208.215"]}
+  Corefile: |
+    .:53 {
+        errors
+        health
+        kubernetes cluster.local in-addr.arpa ip6.arpa {
+          pods insecure
+          fallthrough in-addr.arpa ip6.arpa
+        }
+        prometheus :9153
+        forward . /etc/resolv.conf
+        cache 30
+        loop
+        reload
+        loadbalance
+    }
+    central.svc.cluster.local:53 {
+        errors
+        cache 30
+        forward . 10.0.5.225 {
+          force_tcp
+        }
+        reload
+    }
+    west.svc.cluster.local:53 {
+        errors
+        cache 30
+        forward . 10.0.118.91 {
+          force_tcp
+        }
+        reload
+    }
 
-kubectl apply -f $TUTORIAL_HOME/networking/dns-configmap-central.yaml --context mrc-central
+kubectl apply -f $TUTORIAL_HOME/networking/eks/coredns-configmap-east.yaml --context mrc-east
 
-kubectl delete pods -l k8s-app=kube-dns --namespace kube-system --context mrc-central
+kubectl rollout restart deployment/coredns -n kube-system --context mrc-east
 ```
 
 ```
-# For East cluster
+# For west cluster
 
-# dns-configmap-east.yaml
+# coredns-configmap-west.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: kube-dns
+  name: coredns
   namespace: kube-system
 data:
-  stubDomains: |
-    {"central.svc.cluster.local": ["35.224.242.222"], "west.svc.cluster.local": ["35.185.208.215"]}
+  Corefile: |
+    .:53 {
+        errors
+        health
+        kubernetes cluster.local in-addr.arpa ip6.arpa {
+          pods insecure
+          fallthrough in-addr.arpa ip6.arpa
+        }
+        prometheus :9153
+        forward . /etc/resolv.conf
+        cache 30
+        loop
+        reload
+        loadbalance
+    }
+    central.svc.cluster.local:53 {
+        errors
+        cache 30
+        forward . 10.0.5.225 {
+          force_tcp
+        }
+        reload
+    }
+    east.svc.cluster.local:53 {
+        errors
+        cache 30
+        forward . 10.0.100.177 {
+          force_tcp
+        }
+        reload
+    }
 
-kubectl apply -f $TUTORIAL_HOME/networking/dns-configmap-east.yaml --context mrc-east
+kubectl apply -f $TUTORIAL_HOME/networking/eks/coredns-configmap-west.yaml --context mrc-west
 
-kubectl delete pods -l k8s-app=kube-dns --namespace kube-system --context mrc-east
+kubectl rollout restart deployment/coredns -n kube-system --context mrc-west
 ```
 
-## Open ports to allow communication across regions
+## Update security groups
 
-Create a firewall rule to allow TCP traffic between the regions, to facilitate communication 
-to Kafka and Zookeeper across regions:
-
-```
-gcloud compute firewall-rules create allow-cp-internal \
-  --allow=tcp \
-  --source-ranges=10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
-```
+For each Kubernetes cluster, update its security group's inbound rules to allow traffic originating from other Kubernetes 
+clusters.
 
 ## Validate networking setup
 
-You'll validate that the networking is set up correctly by pinging across regions on the local
-Kubernetes network.
-
-Start a Linux container in the `west` region and check the IP address for this pod
-
-```
-kubectl run --image=alpine:3.5 -it alpine-shell -n central --context mrc-central
-# Exit out of the shell session
-/ # exit
-
-# Get the IP address
-kubectl describe pod alpine-shell -n central --context mrc-central
-...
-IP:           10.124.0.5
-...
-```
-
-Start a Linux container in the `east` region and ping the container in the `west` region
+### Validate VPC connectivity and DNS forwarding
+You'll validate that the networking is set up correctly by pinging across regions on the local Kubernetes network. 
+Run the `network_test.sh` script that validates the network connectivity between regions and also checks the DNS forwarding.
 
 ```
-kubectl run --image=alpine:3.5 -it alpine-shell -n east --context mrc-east
+./hybrid/multi-region-clusters/networking/network-test/network_test.sh
+Creating test pods to run network tests
+statefulset.apps/busybox created
+service/busybox created
+statefulset.apps/busybox created
+service/busybox created
+statefulset.apps/busybox created
+service/busybox created
 
-# Ping the `west` container IP address
-/ # ping 10.124.0.5
-PING 10.124.0.5 (10.124.0.5): 56 data bytes
-64 bytes from 10.124.0.5: seq=0 ttl=62 time=66.117 ms
-64 bytes from 10.124.0.5: seq=1 ttl=62 time=65.020 ms
-...
+Getting pod IPs of the test pods
+
+Testing connectivity from central to east
+PING 10.0.102.90 (10.0.102.90): 56 data bytes
+64 bytes from 10.0.102.90: seq=0 ttl=253 time=51.456 ms
+64 bytes from 10.0.102.90: seq=1 ttl=253 time=52.039 ms
+64 bytes from 10.0.102.90: seq=2 ttl=253 time=51.439 ms
+
+--- 10.0.102.90 ping statistics ---
+3 packets transmitted, 3 packets received, 0% packet loss
+round-trip min/avg/max = 51.439/51.644/52.039 ms
+
+Testing connectivity from central to west
+PING 10.0.115.11 (10.0.115.11): 56 data bytes
+64 bytes from 10.0.115.11: seq=0 ttl=253 time=23.062 ms
+64 bytes from 10.0.115.11: seq=1 ttl=253 time=20.685 ms
+64 bytes from 10.0.115.11: seq=2 ttl=253 time=20.757 ms
+
+--- 10.0.115.11 ping statistics ---
+3 packets transmitted, 3 packets received, 0% packet loss
+round-trip min/avg/max = 20.685/21.501/23.062 ms
+
+Testing connectivity from east to central
+PING 10.0.1.144 (10.0.1.144): 56 data bytes
+64 bytes from 10.0.1.144: seq=0 ttl=253 time=51.517 ms
+64 bytes from 10.0.1.144: seq=1 ttl=253 time=51.414 ms
+64 bytes from 10.0.1.144: seq=2 ttl=253 time=51.412 ms
+
+--- 10.0.1.144 ping statistics ---
+3 packets transmitted, 3 packets received, 0% packet loss
+round-trip min/avg/max = 51.412/51.447/51.517 ms
+
+Testing connectivity from east to west
+PING 10.0.115.11 (10.0.115.11): 56 data bytes
+64 bytes from 10.0.115.11: seq=0 ttl=253 time=48.651 ms
+64 bytes from 10.0.115.11: seq=1 ttl=253 time=48.629 ms
+64 bytes from 10.0.115.11: seq=2 ttl=253 time=48.564 ms
+
+--- 10.0.115.11 ping statistics ---
+3 packets transmitted, 3 packets received, 0% packet loss
+round-trip min/avg/max = 48.564/48.614/48.651 ms
+
+Testing connectivity from west to central
+PING 10.0.1.144 (10.0.1.144): 56 data bytes
+64 bytes from 10.0.1.144: seq=0 ttl=253 time=21.792 ms
+64 bytes from 10.0.1.144: seq=1 ttl=253 time=21.799 ms
+64 bytes from 10.0.1.144: seq=2 ttl=253 time=21.778 ms
+
+--- 10.0.1.144 ping statistics ---
+3 packets transmitted, 3 packets received, 0% packet loss
+round-trip min/avg/max = 21.778/21.789/21.799 ms
+
+Testing connectivity from west to east
+PING 10.0.102.90 (10.0.102.90): 56 data bytes
+64 bytes from 10.0.102.90: seq=0 ttl=253 time=52.256 ms
+64 bytes from 10.0.102.90: seq=1 ttl=253 time=52.268 ms
+64 bytes from 10.0.102.90: seq=2 ttl=253 time=52.240 ms
+
+--- 10.0.102.90 ping statistics ---
+3 packets transmitted, 3 packets received, 0% packet loss
+round-trip min/avg/max = 52.240/52.254/52.268 ms
+
+Testing Kubernetes DNS setup
+Testing DNS forwarding from central to east
+PING busybox-0.busybox.east.svc.cluster.local (10.0.102.90): 56 data bytes
+64 bytes from 10.0.102.90: seq=0 ttl=253 time=51.470 ms
+64 bytes from 10.0.102.90: seq=1 ttl=253 time=51.553 ms
+64 bytes from 10.0.102.90: seq=2 ttl=253 time=51.498 ms
+
+--- busybox-0.busybox.east.svc.cluster.local ping statistics ---
+3 packets transmitted, 3 packets received, 0% packet loss
+round-trip min/avg/max = 51.470/51.507/51.553 ms
+
+Testing DNS forwarding from central to west
+PING busybox-0.busybox.west.svc.cluster.local (10.0.115.11): 56 data bytes
+64 bytes from 10.0.115.11: seq=0 ttl=253 time=21.287 ms
+64 bytes from 10.0.115.11: seq=1 ttl=253 time=21.370 ms
+64 bytes from 10.0.115.11: seq=2 ttl=253 time=21.371 ms
+
+--- busybox-0.busybox.west.svc.cluster.local ping statistics ---
+3 packets transmitted, 3 packets received, 0% packet loss
+round-trip min/avg/max = 21.287/21.342/21.371 ms
+
+Testing DNS forwarding from east to central
+PING busybox-0.busybox.central.svc.cluster.local (10.0.1.144): 56 data bytes
+64 bytes from 10.0.1.144: seq=0 ttl=253 time=51.468 ms
+64 bytes from 10.0.1.144: seq=1 ttl=253 time=51.618 ms
+64 bytes from 10.0.1.144: seq=2 ttl=253 time=51.523 ms
+
+--- busybox-0.busybox.central.svc.cluster.local ping statistics ---
+3 packets transmitted, 3 packets received, 0% packet loss
+round-trip min/avg/max = 51.468/51.536/51.618 ms
+
+Testing DNS forwarding from east to west
+PING busybox-0.busybox.west.svc.cluster.local (10.0.115.11): 56 data bytes
+64 bytes from 10.0.115.11: seq=0 ttl=253 time=54.530 ms
+64 bytes from 10.0.115.11: seq=1 ttl=253 time=54.565 ms
+64 bytes from 10.0.115.11: seq=2 ttl=253 time=54.516 ms
+
+--- busybox-0.busybox.west.svc.cluster.local ping statistics ---
+3 packets transmitted, 3 packets received, 0% packet loss
+round-trip min/avg/max = 54.516/54.537/54.565 ms
+
+Testing DNS forwarding from west to central
+PING busybox-0.busybox.central.svc.cluster.local (10.0.1.144): 56 data bytes
+64 bytes from 10.0.1.144: seq=0 ttl=253 time=22.126 ms
+64 bytes from 10.0.1.144: seq=1 ttl=253 time=21.782 ms
+64 bytes from 10.0.1.144: seq=2 ttl=253 time=21.825 ms
+
+--- busybox-0.busybox.central.svc.cluster.local ping statistics ---
+3 packets transmitted, 3 packets received, 0% packet loss
+round-trip min/avg/max = 21.782/21.911/22.126 ms
+
+Testing DNS forwarding from west to east
+PING busybox-0.busybox.east.svc.cluster.local (10.0.102.90): 56 data bytes
+64 bytes from 10.0.102.90: seq=0 ttl=253 time=51.783 ms
+64 bytes from 10.0.102.90: seq=1 ttl=253 time=50.696 ms
+64 bytes from 10.0.102.90: seq=2 ttl=253 time=50.671 ms
+
+--- busybox-0.busybox.east.svc.cluster.local ping statistics ---
+3 packets transmitted, 3 packets received, 0% packet loss
+round-trip min/avg/max = 50.671/51.050/51.783 ms
+
+Test complete. Deleting test pods
+statefulset.apps "busybox" deleted
+service "busybox" deleted
+statefulset.apps "busybox" deleted
+service "busybox" deleted
+statefulset.apps "busybox" deleted
+service "busybox" deleted
 ```
-
-If you see a successful ping result like above, then the networking setup is done correctly.
+With this, the network setup is complete.
