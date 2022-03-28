@@ -43,6 +43,11 @@ kubectl -n destination create secret generic credential \
 ### Source Cluster Deployment
 ### create required secrets
 ```
+kubectl -n source create secret generic source-tls-zk1 \
+    --from-file=fullchain.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/zookeeper-server.pem \
+    --from-file=cacerts.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/cacerts.pem \
+    --from-file=privkey.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/zookeeper-server-key.pem
+
 kubectl -n source create secret generic source-tls-group1 \
     --from-file=fullchain.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/kafka-server.pem \
     --from-file=cacerts.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/cacerts.pem \
@@ -81,16 +86,15 @@ kubectl apply -f $TUTORIAL_HOME/zk-kafka-source.yaml
 ### Destination Cluster Deployment
 #### create required secrets
 ```
+kubectl -n destination create secret generic destination-tls-zk1 \
+    --from-file=fullchain.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/zookeeper-server.pem \
+    --from-file=cacerts.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/cacerts.pem \
+    --from-file=privkey.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/zookeeper-server-key.pem
 
 kubectl -n destination create secret generic destination-tls-group1 \
     --from-file=fullchain.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/kafka-server.pem \
     --from-file=cacerts.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/cacerts.pem \
     --from-file=privkey.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/kafka-server-key.pem
-    
-kubectl -n destination create secret generic source-tls-group1 \
-    --from-file=fullchain.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/kafka-server.pem \
-    --from-file=cacerts.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/cacerts.pem \
-    --from-file=privkey.pem=$TUTORIAL_HOME../../../assets/certs/component-certs/generated/kafka-server-key.pem
     
 kubectl -n destination create secret generic rest-credential \
     --from-file=basic.txt=$TUTORIAL_HOME/rest-credential.txt
@@ -102,6 +106,20 @@ kubectl -n destination create secret generic password-encoder-secret \
 #### deploy destination zookeeper and kafka cluster in namespace `destination`
 
     kubectl apply -f $TUTORIAL_HOME/zk-kafka-destination.yaml
+
+### Create TLS Secret to connect Source Cluster using PKCS8 Key format.
+
+#### convert key to PKCS8 format
+```
+openssl pkcs8 -in $TUTORIAL_HOME../../../assets/certs/component-certs/generated/kafka-server-key.pem -topk8 -nocrypt -out $TUTORIAL_HOME../../../assets/certs/component-certs/generated/kafka-server-key-pkcs8.pem
+```
+#### Create client secret
+```
+kubectl -n destination create secret generic source-tls-secret \
+    --from-file=fullchain.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/kafka-server.pem \
+    --from-file=cacerts.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/cacerts.pem \
+    --from-file=privkey.pem=$TUTORIAL_HOME../../../assets/certs/component-certs/generated/kafka-server-key-pkcs8.pem
+```
 
 After the Kafka cluster is in running state, create cluster link between source and destination. Cluster link will be created in the destination cluster
 
@@ -127,7 +145,7 @@ After the Kafka cluster is in running state, create cluster link between source 
 
 #### produce in source kafka cluster
 
-    seq 100 | kafka-console-producer --topic demo --broker-list kafka.source.svc.cluster.local:9071 --producer.config kafka.properties
+    seq 100 | kafka-console-producer --topic demo --broker-list kafka.source.svc.cluster.local:9071 --producer.config /tmp/kafka.properties
 #### open a new terminal and exec into destination kafka pod
     kubectl -n destination exec kafka-0 -it -- bash
 
@@ -142,9 +160,9 @@ After the Kafka cluster is in running state, create cluster link between source 
     EOF
 
 #### validate topic is created in destination kafka cluster
-    kafka-topics --describe --topic demo --bootstrap-server kafka.destination.svc.cluster.local:9071 --command-config kafka.properties
+    kafka-topics --describe --topic demo --bootstrap-server kafka.destination.svc.cluster.local:9071 --command-config /tmp/kafka.properties
 
 #### consume in destination kafka cluster and confirm message delivery in destination cluster
 
-    kafka-console-consumer --from-beginning --topic demo --bootstrap-server  kafka.destination.svc.cluster.local:9071  --consumer.config kafka.properties
+    kafka-console-consumer --from-beginning --topic demo --bootstrap-server  kafka.destination.svc.cluster.local:9071  --consumer.config /tmp/kafka.properties
 

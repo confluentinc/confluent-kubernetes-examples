@@ -14,7 +14,7 @@ spec:
   authentication:
     type: mtls
   tls:
-    secretRef: source-tls-group1
+    secretRef: source-tls-zk1
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: Kafka

@@ -14,7 +14,7 @@ spec:
       type: mtls
     tls:
       enabled: true
-      secretRef: source-tls-group1
+      secretRef: source-tls-secret
     kafkaRestClassRef:
       name: source-kafka-rest
       namespace: source

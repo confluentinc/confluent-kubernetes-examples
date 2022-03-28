@@ -1,0 +1,15 @@
+# This migration yaml assumes that the Confluent Operator 1.x deployment is in `confluent` namespace.
+# Change this to your namespace.
+apiVersion: platform.confluent.io/v1beta1
+kind: MigrationJob
+metadata:
+  name: kafka-migration
+  namespace: confluent
+spec:
+  # This version of init-container is required for migration.
+  initContainerImage: confluentinc/confluent-init-container:2.2.1
+  kafka:
+    enabled: true
+    name: kafka
+    namespace: confluent
+    release: kafka
