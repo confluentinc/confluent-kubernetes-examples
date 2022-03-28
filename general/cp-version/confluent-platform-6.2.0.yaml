@@ -135,8 +135,8 @@ spec:
     schemaRegistry:
       url: http://schemaregistry.confluent.svc.cluster.local:8081
   image:
-    application: confluentinc/cp-kafka-rest:6.2.0
-    init: confluentinc/confluent-init-container:2.0.0
+    application: confluentinc/cp-kafka-rest:7.0.1
+    init: confluentinc/confluent-init-container:2.2.0-1
   replicas: 2
   podTemplate:
     podSecurityContext:
