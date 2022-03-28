@@ -5,6 +5,7 @@ metadata:
   name: confluent-operator
   namespace: confluent
 rules:
+# The cluster.confluent.com and operator.confluent.cloud rules only needed when migrating from operator 1.x
 - apiGroups:
   - cluster.confluent.com
   resources:
@@ -45,6 +46,7 @@ rules:
   - update
   - patch
   - delete
+# The route.openshift.io rule only needed when deploying on Openshift
 - apiGroups:
   - route.openshift.io
   resources:

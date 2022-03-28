@@ -1,0 +1,35 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-server-connect:7.0.1
+    init: confluentinc/confluent-init-container:2.2.0-1
+  build:
+    type: onDemand
+    onDemand:
+      plugins:
+        locationType: confluentHub
+        confluentHub:
+          - name: kafka-connect-jdbc
+            owner: confluentinc
+            version: 10.2.5
+  dependencies:
+    kafka:
+      bootstrapEndpoint: <replace-with-ccloud-bootstrap>
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: ccloud-credentials
+      tls:
+        enabled: true
+        ignoreTrustStoreConfig: true 
+    schemaRegistry:
+      url: <replace-with-ccloud-sr-url>
+      authentication:
+        type: basic
+        basic:
+          secretRef: ccloud-sr-credentials

@@ -1,0 +1,103 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Zookeeper
+metadata:
+  name: zookeeper
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-zookeeper:7.0.1
+    init: confluentinc/confluent-init-container:2.2.0-1
+  dataVolumeCapacity: 10Gi
+  logVolumeCapacity: 10Gi
+  tls:
+    secretRef: zookeeper-tls
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server:7.0.1
+    init: confluentinc/confluent-init-container:2.2.0-1
+  dataVolumeCapacity: 10Gi
+  tls:
+    secretRef: kafka-tls
+  listeners:
+    external:
+      tls:
+        enabled: true
+  metricReporter:
+    enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+  namespace: confluent
+spec:
+  replicas: 2
+  tls:
+    secretRef: connect-tls
+  image:
+    application: confluentinc/cp-server-connect:7.0.1
+    init: confluentinc/confluent-init-container:2.2.0-1
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KsqlDB
+metadata:
+  name: ksqldb
+  namespace: confluent
+spec:
+  replicas: 2
+  tls:
+    secretRef: ksqldb-tls
+  image:
+    application: confluentinc/cp-ksqldb-server:7.0.1
+    init: confluentinc/confluent-init-container:2.2.0-1
+  dataVolumeCapacity: 10Gi
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter
+  namespace: confluent
+spec:
+  replicas: 1
+  tls:
+    secretRef: controlcenter-tls
+  image:
+    application: confluentinc/cp-enterprise-control-center:7.0.1
+    init: confluentinc/confluent-init-container:2.2.0-1
+  dataVolumeCapacity: 10Gi
+  dependencies:
+    schemaRegistry:
+      url: https://schemaregistry.confluent.svc.cluster.local:8081
+      tls:
+        enabled: true
+    ksqldb:
+    - name: ksql-dev
+      url: https://ksqldb.confluent.svc.cluster.local:8088
+      tls:
+        enabled: true
+    connect:
+    - name: connect-dev
+      url:  https://connect.confluent.svc.cluster.local:8083
+      tls:
+        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+  namespace: confluent
+spec:
+  replicas: 2
+  tls:
+    secretRef: schemaregistry-tls
+  image:
+    application: confluentinc/cp-schema-registry:7.0.1
+    init: confluentinc/confluent-init-container:2.2.0-1

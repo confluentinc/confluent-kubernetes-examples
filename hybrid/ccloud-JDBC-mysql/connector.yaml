@@ -1,0 +1,18 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connector
+metadata:
+  name: mysqlviacrd
+  namespace: confluent
+spec:
+  class: "io.confluent.connect.jdbc.JdbcSourceConnector"
+  taskMax: 1
+  connectClusterRef:
+    name: connect
+  configs:
+    connection.url: ${file:/mnt/secrets/mysql-credential/sqlcreds.txt:connection}
+    mode: "incrementing"
+    incrementing.column.name: "id"
+    timestamp.column.name: "modified"
+    topic.prefix: "quickstart-jdbc-CRD-"
+    poll.interval.ms: "1000"

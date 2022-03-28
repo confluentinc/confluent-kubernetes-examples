@@ -210,16 +210,16 @@ Deploy Confluent Platform
    
      kubectl get pods --namespace confluent
 
-If any component does not deploy, it could be due to missing configuration information in secrets.
-The Kubernetes events will tell you if there are any issues with secrets. For example:
+   If any component does not deploy, it could be due to missing configuration information in secrets.
+   The Kubernetes events will tell you if there are any issues with secrets. For example:
 
    ::
 
      kubectl get events --namespace confluent
      Warning  KeyInSecretRefIssue  kafka/kafka  required key [ldap.txt] missing in secretRef [credential] for auth type [ldap_simple]
 
-The default required RoleBindings for each Confluent component are created
-automatically, and maintained as `confluentrolebinding` custom resources.
+#. The default required RoleBindings for each Confluent component are created
+   automatically, and maintained as `confluentrolebinding` custom resources.
 
    ::
 
@@ -236,9 +236,9 @@ Create RBAC Rolebindings for Control Center admin
 
 Create Control Center Role Binding for a Control Center ``testadmin`` user.
 
-   ::
+::
 
-     kubectl apply -f $TUTORIAL_HOME/controlcenter-testadmin-rolebindings.yaml --namespace confluent
+  kubectl apply -f $TUTORIAL_HOME/controlcenter-testadmin-rolebindings.yaml --namespace confluent
 
 ========
 Validate

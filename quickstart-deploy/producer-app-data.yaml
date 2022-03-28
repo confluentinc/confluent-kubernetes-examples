@@ -31,7 +31,7 @@ spec:
         - -c
         - |
           kafka-producer-perf-test \
-            --topic ${HOSTNAME}  \
+            --topic elastic-0  \
             --record-size 64 \
             --throughput 1 \
             --producer.config /mnt/kafka.properties \
@@ -62,7 +62,7 @@ metadata:
   name: elastic-0
   namespace: confluent
 spec:
-  replicas: 1
+  replicas: 3
   partitionCount: 1
   configs:
     cleanup.policy: "delete"

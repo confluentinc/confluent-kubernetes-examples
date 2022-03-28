@@ -4,7 +4,11 @@
     "kafka",
     "*.my.domain",
     "kafka.confluent.svc.cluster.local",
-    "*.kafka.confluent.svc.cluster.local"
+    "*.kafka.confluent.svc.cluster.local",
+    "kafka.source.svc.cluster.local",
+    "*.kafka.source.svc.cluster.local",
+    "kafka.destination.svc.cluster.local",
+    "*.kafka.destination.svc.cluster.local"
   ],
   "key": {
     "algo": "rsa",

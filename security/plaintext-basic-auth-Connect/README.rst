@@ -64,11 +64,13 @@ Deploy Confluent for Kubernetes
      kubectl get pods --namespace=confluent
 
 
-===============
+==================================
 Create Basic authentication secret 
-===============
+==================================
 
- kubectl create secret generic basicsecret \
+::
+
+  kubectl create secret generic basicsecret \
    --from-file=basic.txt=$TUTORIAL_HOME/basic.txt \
    --namespace confluent
 
@@ -103,8 +105,8 @@ For example, the Kafka section of the file is as follows:
   spec:
     replicas: 3
     image:
-      application: confluentinc/cp-server-operator:6.0.0.0
-      init: confluentinc/cp-init-container-operator:6.0.0.0
+      application: confluentinc/cp-server:7.0.1
+      init: confluentinc/confluent-init-container:2.2.0-1
     dataVolumeCapacity: 10Gi
     metricReporter:
       enabled: true
@@ -172,14 +174,17 @@ Deploy the producer app:
 Validate authentication with Connect
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-```
-kubectl --namespace=confluent exec -it connect-0 -- curl -u thisismyusername:thisismypass http://0.0.0.0:8083
-```
+::
+
+  kubectl --namespace=confluent exec -it connect-0 -- curl -u thisismyusername:thisismypass http://0.0.0.0:8083
+
 
 The above should return something like this: 
-```
-{"version":"6.1.0-ce","commit":"958ad0f3c7030f1c","kafka_cluster_id":"SjW1_kcORW-nSsU2Yy1R1Q"}
-```
+
+::
+
+  {"version":"6.1.0-ce","commit":"958ad0f3c7030f1c","kafka_cluster_id":"SjW1_kcORW-nSsU2Yy1R1Q"}
+
 
 Validate in Control Center
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
