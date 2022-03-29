@@ -194,6 +194,10 @@ Provide RBAC principal credentials
      kubectl create secret generic ksqldb-mds-client \
        --from-file=bearer.txt=$TUTORIAL_HOME/ksqldb-mds-client.txt \
        --namespace confluent
+     # Kafka Rest Proxy RBAC credential
+     kubectl create secret generic krp-mds-client \
+       --from-file=bearer.txt=$TUTORIAL_HOME/krp-mds-client.txt \
+       --namespace confluent
      # Kafka REST credential
      kubectl create secret generic rest-credential \
        --from-file=bearer.txt=$TUTORIAL_HOME/bearer.txt \
@@ -286,7 +290,7 @@ Tear down
 
 ::
 
-  kubectl delete secret rest-credential ksqldb-mds-client sr-mds-client connect-mds-client c3-mds-client mds-client ca-pair-sslcerts --namespace confluent
+  kubectl delete secret rest-credential ksqldb-mds-client sr-mds-client connect-mds-client krp-mds-client c3-mds-client mds-client ca-pair-sslcerts --namespace confluent
 
 ::
 
