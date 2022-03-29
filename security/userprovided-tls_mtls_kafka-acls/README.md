@@ -46,6 +46,7 @@ These TLS certificates include the following principal names for each component 
 - Kafka: `kafka`
 - Schema Registry: `sr`
 - Kafka Connect: `connect`
+- Kafka Rest Pxory: `krp`
 - ksqlDB: `ksql`
 - Control Center: `controlcenter`
      
@@ -109,6 +110,12 @@ kubectl create secret generic tls-ksqldb \
   --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/ksqldb-server.pem \
   --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
   --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/ksqldb-server-key.pem \
+  --namespace confluent
+
+kubectl create secret generic tls-kafkarestproxy \
+  --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafkarestproxy-server.pem \
+  --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
+  --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafkarestproxy-server-key.pem \
   --namespace confluent
 ```
 
