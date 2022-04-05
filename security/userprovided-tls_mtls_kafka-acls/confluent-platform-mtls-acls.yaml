@@ -119,6 +119,31 @@ spec:
         enabled: true
 ---
 apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestProxy
+metadata:
+  name: kafkarestproxy
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-kafka-rest:7.0.1
+    init: confluentinc/confluent-init-container:2.2.0-1
+  tls:
+    secretRef: tls-kafkarestproxy
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      domain: mydomain.example
+      prefix: krp
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: mtls
+      tls:
+        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
 kind: KsqlDB
 metadata:
   name: ksqldb
