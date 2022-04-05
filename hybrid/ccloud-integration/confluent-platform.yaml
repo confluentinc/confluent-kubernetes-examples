@@ -113,6 +113,15 @@ metadata:
   namespace: confluent
 spec:
   dependencies:
+    kafka:
+      bootstrapEndpoint: <cloudKafka_url>:9092
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: cloud-plain
+      tls:
+        enabled: true
+        ignoreTrustStoreConfig: true 
     schemaRegistry:
       url: https://<cloudSR_url>
       authentication:
