@@ -105,3 +105,30 @@ spec:
       url:  https://connect.confluent.svc.cluster.local:8083
       tls:
         enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestProxy
+metadata:
+  name: kafkarestproxy
+  namespace: confluent
+spec:
+  dependencies:
+    kafka:
+      bootstrapEndpoint: <cloudKafka_url>:9092
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: cloud-plain
+      tls:
+        enabled: true
+        ignoreTrustStoreConfig: true 
+    schemaRegistry:
+      url: https://<cloudSR_url>
+      authentication:
+        type: basic
+        basic:
+          secretRef: cloud-sr-access
+  image:
+    application: confluentinc/cp-kafka-rest:7.0.1
+    init: confluentinc/confluent-init-container:2.2.0-1
+  replicas: 1

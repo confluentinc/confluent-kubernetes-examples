@@ -28,7 +28,7 @@ Pre-requisites: Node Labels and Service Account Rolebinding
 
 The Kubernetes cluster must have node labels set for the fault domain. The nodes in each zone should have the same node label.
 
-  Note that Kubernetes v1.17 and newer use label ``topology.kubernetes.io/zone``. Older versions use the ``failure-domain.beta.kubernetes.io/zone`` label instead.
+Note that Kubernetes v1.17 and newer use label ``topology.kubernetes.io/zone``. Older versions use the ``failure-domain.beta.kubernetes.io/zone`` label instead.
 
 
 #. Check the Node Labels for ``topology.kubernetes.io/zone``:

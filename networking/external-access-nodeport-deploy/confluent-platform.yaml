@@ -110,3 +110,22 @@ spec:
     nodePort:
       host: myoperator2.<Kubernetes cluster domain> 
       nodePortOffset: 30500
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestProxy
+metadata:
+  name: kafkarestproxy
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-kafka-rest:7.0.1
+    init: confluentinc/confluent-init-container:2.2.0-1
+  dependencies:
+    schemaRegistry:
+      url: http://schemaregistry.confluent.svc.cluster.local:8081
+  externalAccess:
+    type: nodePort
+    nodePort:
+      host: myoperator2.<Kubernetes cluster domain>
+      nodePortOffset: 30600

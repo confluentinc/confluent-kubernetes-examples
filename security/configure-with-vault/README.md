@@ -314,7 +314,7 @@ https://github.com/confluentinc/confluent-kubernetes-examples/tree/master/securi
 Note: There are two differences from the above scenario, when using "Directory in path container":
 
 - You'll need to use Kubernetes secrets for the KafkaRestClass authentication. Confluent for Kubernetes 
-2.0.x does not support using directory path in container for this specific credential. Instructions foe
+2.0.x does not support using directory path in container for this specific credential. Instructions for
 how to do this are immediately below.
 - You'll need to apply the RBAC rolebindings for the CP components. These will not be created 
 automatically. You'll do this by applying the CustomResources defined in 
