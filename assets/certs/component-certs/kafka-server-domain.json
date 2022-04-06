@@ -8,7 +8,11 @@
     "kafka.source.svc.cluster.local",
     "*.kafka.source.svc.cluster.local",
     "kafka.destination.svc.cluster.local",
-    "*.kafka.destination.svc.cluster.local"
+    "*.kafka.destination.svc.cluster.local",
+    "zookeeper.source.svc.cluster.local",
+    "*.zookeeper.source.svc.cluster.local",
+    "zookeeper.destination.svc.cluster.local",
+    "*.zookeeper.destination.svc.cluster.local"
   ],
   "key": {
     "algo": "rsa",
