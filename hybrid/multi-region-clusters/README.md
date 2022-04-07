@@ -1,14 +1,12 @@
-# Early Access: Confluent Multi-Region Clusters with Confluent for Kubernetes
-
-Note: This is Early Access functionality.
+# Confluent Multi-Region Clusters (MRC) with Confluent for Kubernetes (CFK)
 
 Confluent Server is often run across availability zones or nearby datacenters. If the computer network between brokers across availability zones or nearby datacenters is dissimilar, in term of reliability, latency, bandwidth, or cost, this can result in higher latency, lower throughput and increased cost to produce and consume messages.
 
 To mitigate this, Multi-Region Cluster functionality was added to Confluent Server. Read more about this functionality [here](https://docs.confluent.io/platform/current/multi-dc-deployments/multi-region.html).
 
-In this scenario workflow, you'll understand the concepts and how to set up a Multi-region cluster.
+In this scenario workflow, you'll understand the concepts and how to set up a multi-region cluster.
 
-export TUTORIAL_HOME=<Tutorial directory>/hybrid/multi-region-clusters
+`export TUTORIAL_HOME=confluent-kubernetes-examples/hybrid/multi-region-clusters`
 
 ## Concepts
 
@@ -19,7 +17,7 @@ At a high level, you'll deploy Confluent for Kubernetes (CFK) and Confluent Plat
 There are two key concepts to understand:
 
 - Networking between Kubernetes clusters
-- Confluent Server (Kafka) and Zookeeper deployment with Multi-Region cluster configuration
+- Zookeeper, Confluent Server (Kafka) and Schema Registry deployment with Multi-Region cluster configuration
 
 ### Networking
 
@@ -28,28 +26,38 @@ To support Multi-Region Clusters with Confluent for Kubernetes, you'll need to m
 - Pods in one Kubernetes cluster can resolve the internal Kubernetes network DNS names for pods in the other Kubernetes clusters
 - Pods in one Kubernetes cluster can communicate with pods in the other Kubernetes clusters
 
-There may be multiple ways to acheive these requirements. How you meeet these requirements will depend on your infrastructure setup and Kubernetes vendor. 
-In this scenario documentation, you'll see one illustrative networking solution for these requirements you can follow along.
+There may be multiple ways to achieve these requirements. How you meet these requirements will depend on your infrastructure setup and Kubernetes vendor. 
+In this scenario documentation, you'll see a few illustrative networking solutions for these requirements that you can follow along.
 
-### Confluent Server (Kafka) and Zookeeper deployment
+### Zookeeper, Confluent Server (Kafka) and Schema Registry deployment
 
 To support Multi-Region Clusters with Confluent for Kubernetes, you'll take the following steps:
 
 - Deploy Confluent for Kubernetes to each region
-- For Kafka
-  - Deploy Kafka brokers to 3 regions
-  - Configure the broker id offset to a different number in each region
-  - Configure the Kafka cluster id as the same across all (point to the same Zookeeper)
 - For Zookeeper
   - Deploy Zookeeper servers to 3 regions
   - Configure ZK server id offset to a different number in each region
   - Configure ZK peers that form the ensemble
+- For Kafka
+  - Deploy Kafka brokers to 3 regions
+  - Configure the broker id offset to a different number in each region
+  - Configure the Kafka cluster id as the same across all (point to the same Zookeeper)
+- For Schema Registry
+  - Deploy Schema Registry to 3 regions
+  - Override `kafkastore.topic` to point to the same topic in all the regions
+  - Override `schema.registry.group.id` to have the same value in all the regions
 
 ## Setup - Networking
 
-Depending on your environment, set up Kubernetes networking between the multiple clusters.
+Depending on your environment, set up Kubernetes networking between the different clusters.
 
-[Example for Google Kubernetes Engine](networking/networking-GKE-README.md)
+[Example for Azure Kubernetes Service](networking/aks/networking-AKS-README.md)
+
+[Example for Azure Redhat Openshift](networking/aro/networking-ARO-README.md)
+
+[Example for Elastic Kubernetes Engine](networking/eks/networking-EKS-README.md)
+
+[Example for Google Kubernetes Engine](networking/gke/networking-GKE-README.md)
 
 ## MRC Deployment
 
@@ -398,7 +406,7 @@ kubectl delete -f $TUTORIAL_HOME/confluent-platform/rack-awareness/service-accou
 # Uninstall Open LDAP
 helm uninstall open-ldap -n central --kube-context mrc-central
 
-# Uninstall external-dns
+# Uninstall external-dns (if needed)
 # Allow 1-2 mins for external-dns to clean up DNS records
 helm uninstall external-dns -n west --kube-context mrc-west
 helm uninstall external-dns -n east --kube-context mrc-east
@@ -426,7 +434,7 @@ $ kubectl exec -it zookeeper-0 -n central -c zookeeper --context mrc-central -- 
 
 bash-4.4$ zookeeper-shell 127.0.0.1:2181
 
-ls /brokers/ids
+ls /mrc/brokers/ids
 [0, 1, 10, 11, 20, 21]
 
 # You should see 6 brokers ^

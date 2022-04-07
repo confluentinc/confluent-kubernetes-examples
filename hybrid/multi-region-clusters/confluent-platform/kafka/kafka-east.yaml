@@ -2,9 +2,9 @@ apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
 metadata:
   annotations:
-    platform.confluent.io/broker-id-offset: "20"
+    platform.confluent.io/broker-id-offset: "10"
   name: kafka
-  namespace: west
+  namespace: east
 spec:
   authorization:
     superUsers:
@@ -12,10 +12,9 @@ spec:
     type: rbac
   configOverrides:
     server:
-      - client.rack=us-west1
+      - client.rack=us-east1
       - confluent.license.topic.replication.factor=3
       - replica.selector.class=org.apache.kafka.common.replica.RackAwareReplicaSelector
-      - zookeeper.connect=zookeeper.central.svc.cluster.local:2182,zookeeper.east.svc.cluster.local:2182,zookeeper.west.svc.cluster.local:2182
   dataVolumeCapacity: 10Gi
   dependencies:
     kafkaRest:
@@ -28,11 +27,11 @@ spec:
         jaasConfig:
           secretRef: credential
         type: digest
-      endpoint: overridden:2182
+      endpoint: zookeeper.central.svc.cluster.local:2182/mrc,zookeeper.east.svc.cluster.local:2182/mrc,zookeeper.west.svc.cluster.local:2182/mrc
       tls:
         enabled: true
   image:
-    application: confluentinc/cp-server:7.0.0
+    application: confluentinc/cp-server:7.0.1
     init: confluentinc/confluent-init-container:2.2.1
   listeners:
     external:
@@ -42,8 +41,8 @@ spec:
         type: plain
       externalAccess:
         loadBalancer:
-          bootstrapPrefix: kafka.west
-          brokerPrefix: kafka.west.broker
+          bootstrapPrefix: kafka.east
+          brokerPrefix: kafka.east.broker
           domain: mydomain.com
         type: loadBalancer
       tls:

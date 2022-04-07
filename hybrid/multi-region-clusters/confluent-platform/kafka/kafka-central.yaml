@@ -13,7 +13,6 @@ spec:
       - client.rack=us-central1
       - confluent.license.topic.replication.factor=3
       - replica.selector.class=org.apache.kafka.common.replica.RackAwareReplicaSelector
-      - zookeeper.connect=zookeeper.central.svc.cluster.local:2182,zookeeper.east.svc.cluster.local:2182,zookeeper.west.svc.cluster.local:2182
   dataVolumeCapacity: 10Gi
   dependencies:
     kafkaRest:
@@ -26,11 +25,11 @@ spec:
         jaasConfig:
           secretRef: credential
         type: digest
-      endpoint: overridden:2182
+      endpoint: zookeeper.central.svc.cluster.local:2182/mrc,zookeeper.east.svc.cluster.local:2182/mrc,zookeeper.west.svc.cluster.local:2182/mrc
       tls:
         enabled: true
   image:
-    application: confluentinc/cp-server:7.0.0
+    application: confluentinc/cp-server:7.0.1
     init: confluentinc/confluent-init-container:2.2.1
   listeners:
     external:

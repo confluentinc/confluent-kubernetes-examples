@@ -17,14 +17,6 @@ helm upgrade --install cfk-operator confluentinc/confluent-for-kubernetes -n cen
 helm upgrade --install cfk-operator confluentinc/confluent-for-kubernetes -n east --kube-context mrc-east
 helm upgrade --install cfk-operator confluentinc/confluent-for-kubernetes -n west --kube-context mrc-west
 
-# Setup the Helm chart
-helm repo add bitnami https://charts.bitnami.com/bitnami
-
-# Install External DNS
-helm install external-dns -f "$TUTORIAL_HOME"/external-dns-values.yaml --set namespace=central,txtOwnerId=mrc-central bitnami/external-dns -n central --kube-context mrc-central
-helm install external-dns -f "$TUTORIAL_HOME"/external-dns-values.yaml --set namespace=east,txtOwnerId=mrc-east bitnami/external-dns -n east --kube-context mrc-east
-helm install external-dns -f "$TUTORIAL_HOME"/external-dns-values.yaml --set namespace=west,txtOwnerId=mrc-west bitnami/external-dns -n west --kube-context mrc-west
-
 # Deploy OpenLdap
 helm upgrade --install -f "$TUTORIAL_HOME"/../../assets/openldap/ldaps-rbac.yaml open-ldap "$TUTORIAL_HOME"/../../assets/openldap -n central --kube-context mrc-central
 
@@ -122,14 +114,6 @@ kubectl create secret generic kafka-rest-credential \
   --from-file=bearer.txt="$TUTORIAL_HOME"/confluent-platform/credentials/mds-client.txt \
   -n west --context mrc-west
 
-# Create role bindings for Schema Registry
-kubectl apply -f "$TUTORIAL_HOME"/confluent-platform/rolebindings/mrc-rolebindings.yaml -n central --context mrc-central
-kubectl apply -f "$TUTORIAL_HOME"/confluent-platform/rolebindings/mrc-rolebindings.yaml -n east --context mrc-east
-kubectl apply -f "$TUTORIAL_HOME"/confluent-platform/rolebindings/mrc-rolebindings.yaml -n west --context mrc-west
-
-# Create role bindings for Control Center
-kubectl apply -f "$TUTORIAL_HOME"/confluent-platform/rolebindings/c3-rolebindings.yaml --context mrc-central
-
 # Deploy Zookeeper cluster
 kubectl apply -f "$TUTORIAL_HOME"/confluent-platform/zookeeper/zookeeper-central.yaml --context mrc-central
 kubectl apply -f "$TUTORIAL_HOME"/confluent-platform/zookeeper/zookeeper-east.yaml --context mrc-east
@@ -157,6 +141,14 @@ kubectl apply -f "$TUTORIAL_HOME"/confluent-platform/kafkarestclass.yaml -n cent
 kubectl apply -f "$TUTORIAL_HOME"/confluent-platform/kafkarestclass.yaml -n east --context mrc-east
 kubectl apply -f "$TUTORIAL_HOME"/confluent-platform/kafkarestclass.yaml -n west --context mrc-west
 
+# Create role bindings for Schema Registry
+kubectl apply -f "$TUTORIAL_HOME"/confluent-platform/rolebindings/mrc-rolebindings.yaml -n central --context mrc-central
+kubectl apply -f "$TUTORIAL_HOME"/confluent-platform/rolebindings/mrc-rolebindings.yaml -n east --context mrc-east
+kubectl apply -f "$TUTORIAL_HOME"/confluent-platform/rolebindings/mrc-rolebindings.yaml -n west --context mrc-west
+
+# Create role bindings for Control Center
+kubectl apply -f "$TUTORIAL_HOME"/confluent-platform/rolebindings/c3-rolebindings.yaml --context mrc-central
+
 # Deploy Schema Registry cluster
 kubectl apply -f "$TUTORIAL_HOME"/confluent-platform/schemaregistry/schemaregistry-central.yaml --context mrc-central
 kubectl apply -f "$TUTORIAL_HOME"/confluent-platform/schemaregistry/schemaregistry-east.yaml --context mrc-east
@@ -173,5 +165,5 @@ kubectl apply -f "$TUTORIAL_HOME"/confluent-platform/controlcenter.yaml --contex
 
 # Wait until Control Center is up
 echo "Waiting for Control Center to be Ready..."
-sleep 1
+sleep 2
 kubectl wait pod -l app=controlcenter --for=condition=Ready --timeout=-1s -n central --context mrc-central
