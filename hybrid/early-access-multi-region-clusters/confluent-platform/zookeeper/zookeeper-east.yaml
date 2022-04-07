@@ -18,7 +18,7 @@ spec:
   dataVolumeCapacity: 10Gi
   image:
     application: confluentinc/cp-zookeeper:7.0.0
-    init: confluentinc/confluent-init-container:2.2.0
+    init: confluentinc/confluent-init-container:2.2.1
   logVolumeCapacity: 10Gi
   replicas: 1
   tls:
