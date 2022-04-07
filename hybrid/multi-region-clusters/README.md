@@ -27,7 +27,7 @@ To support Multi-Region Clusters with Confluent for Kubernetes, you'll need to m
 - Pods in one Kubernetes cluster can communicate with pods in the other Kubernetes clusters
 
 There may be multiple ways to achieve these requirements. How you meet these requirements will depend on your infrastructure setup and Kubernetes vendor. 
-In this scenario documentation, you'll see one illustrative networking solution for these requirements you can follow along.
+In this scenario documentation, you'll see a few illustrative networking solutions for these requirements that you can follow along.
 
 ### Zookeeper, Confluent Server (Kafka) and Schema Registry deployment
 
