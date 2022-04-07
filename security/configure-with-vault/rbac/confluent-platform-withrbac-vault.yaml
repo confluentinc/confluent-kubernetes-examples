@@ -6,7 +6,7 @@ spec:
   replicas: 3
   image:
     application: confluentinc/cp-zookeeper:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   dataVolumeCapacity: 10Gi
   logVolumeCapacity: 10Gi
   authentication:
@@ -53,7 +53,7 @@ spec:
   replicas: 3
   image:
     application: confluentinc/cp-server:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   dataVolumeCapacity: 10Gi
   tls:
     directoryPathInContainer: /vault/secrets
@@ -214,7 +214,7 @@ spec:
   replicas: 2
   image:
     application: confluentinc/cp-server-connect:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   tls:
     directoryPathInContainer: /vault/secrets
   license:
@@ -300,7 +300,7 @@ spec:
   replicas: 2
   image:
     application: confluentinc/cp-ksqldb-server:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   dataVolumeCapacity: 10Gi
   authorization:
     type: rbac
@@ -387,7 +387,7 @@ spec:
   replicas: 2
   image:
     application: confluentinc/cp-schema-registry:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   tls:
     directoryPathInContainer: /vault/secrets
   license:
@@ -469,7 +469,7 @@ spec:
   replicas: 1
   image:
     application: confluentinc/cp-enterprise-control-center:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   dataVolumeCapacity: 10Gi
   authorization:
     type: rbac

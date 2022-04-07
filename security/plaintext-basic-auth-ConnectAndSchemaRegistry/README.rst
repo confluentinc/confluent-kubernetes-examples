@@ -1,7 +1,7 @@
 Deploy Confluent Platform
 =========================
 
-In this workflow scenario, you'll set up Connect with basic authentication.  
+In this workflow scenario, you'll set up Connect and Schema Registry with basic authentication.  
 You will use Control Center to monitor and connect to a Confluent Platform.
 
 NOTE: Control Center does not support basic authentication to the Connect Cluster and you will not be able to connect to it via the UI. 
@@ -11,8 +11,11 @@ NOTE: Control Center does not support basic authentication to the Connect Cluste
 The goal for this scenario is for you to:
 
 * Configure basic authentication for Connect authentication (no RBAC).
+* Configure basic authentication for Schema Registry authentication (no RBAC).
 * Quickly set up the complete Confluent Platform on the Kubernetes.
-* Configure a producer to generate sample data.
+* Configure a Avro producer to generate sample data.
+* Configure a Avro consumer to generate sample data.
+
 
 
 To complete this scenario, you'll follow these steps:
@@ -21,7 +24,7 @@ To complete this scenario, you'll follow these steps:
 
 #. Deploy Confluent For Kubernetes.
 
-#. Deploy secret for basic authentication.
+#. Deploy secrets for basic authentication.
 
 #. Deploy Confluent Platform.
 
@@ -38,7 +41,7 @@ the tutorial files:
 
 ::
    
-  export TUTORIAL_HOME=<Tutorial directory>/plaintext-basic-auth-Connect
+  export TUTORIAL_HOME=<Tutorial directory>/plaintext-basic-auth-ConnectAndSchemaRegistry
 
 ===============================
 Deploy Confluent for Kubernetes
@@ -70,8 +73,16 @@ Create Basic authentication secret
 
 ::
 
-  kubectl create secret generic basicsecret \
-   --from-file=basic.txt=$TUTORIAL_HOME/basic.txt \
+  kubectl create secret generic basicsecretconnect \
+   --from-file=basic.txt=$TUTORIAL_HOME/basicConnect.txt \
+   --namespace confluent
+
+  kubectl create secret generic basicwithrolesr \
+   --from-file=basic.txt=$TUTORIAL_HOME/basicwithroleSR.txt \
+   --namespace confluent
+
+  kubectl create secret generic basicsecretsrccc \
+   --from-file=basic.txt=$TUTORIAL_HOME/basicsecretSRC3.txt \
    --namespace confluent
 
 
@@ -106,7 +117,7 @@ For example, the Kafka section of the file is as follows:
     replicas: 3
     image:
       application: confluentinc/cp-server:7.0.1
-      init: confluentinc/confluent-init-container:2.2.1
+      init: confluentinc/confluent-init-container:2.2.0-1
     dataVolumeCapacity: 10Gi
     metricReporter:
       enabled: true
@@ -141,14 +152,14 @@ Validate
 Deploy producer application
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Now that we've got the infrastructure set up, let's deploy the producer client
+Now that we've got the infrastructure set up, let's deploy the avro producer and consumer client
 app.
 
-The producer app is packaged and deployed as a pod on Kubernetes. The required
+The avro producer and consumer app is packaged and deployed as a pod on Kubernetes. The required
 topic is defined as a KafkaTopic custom resource in
-``$TUTORIAL_HOME/secure-producer-app-data.yaml``.
+``$TUTORIAL_HOME/producer-consumer-app-data.yaml``.
 
-The ``$TUTORIAL_HOME/secure-producer-app-data.yaml`` defines the ``elastic-0``
+The ``$TUTORIAL_HOME/producer-consumer-app-data.yaml`` defines the ``producer-example-0``
 topic as follows:
 
 ::
@@ -156,7 +167,7 @@ topic as follows:
   apiVersion: platform.confluent.io/v1beta1
   kind: KafkaTopic
   metadata:
-    name: elastic-0
+    name: producer-example-0
     namespace: confluent
   spec:
     replicas: 1
@@ -164,11 +175,23 @@ topic as follows:
     configs:
       cleanup.policy: "delete"
       
-Deploy the producer app:
+Deploy the producer/consumer app:
 
 ::
    
-  kubectl apply -f $TUTORIAL_HOME/producer-app-data.yaml --namespace=confluent
+  kubectl apply -f $TUTORIAL_HOME/producer-consumer-app-data.yaml --namespace=confluent
+
+Validate the consumer, the output will indicate that the produce was able to produce avro value: 
+
+::
+   
+  kubectl logs consumer-example --namespace=confluent
+
+Note that the following is expected in the end of the log:
+
+::
+  [2022-02-23 11:15:35,545] ERROR Error processing message, terminating consumer process:  (kafka.tools.ConsoleConsumer$:43)
+org.apache.kafka.common.errors.TimeoutException
 
 
 Validate authentication with Connect
@@ -184,6 +207,19 @@ The above should return something like this:
 ::
 
   {"version":"6.1.0-ce","commit":"958ad0f3c7030f1c","kafka_cluster_id":"SjW1_kcORW-nSsU2Yy1R1Q"}
+
+Validate authentication with Schema Registry
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+::
+
+ kubectl --namespace=confluent exec -it schemaregistry-0 -- curl -u thisismyusername:thisismypass http://0.0.0.0:8081/schemas
+
+The above should return something like this: 
+
+::
+
+  [{"subject":"producer-example-0-value","version":1,"id":1,"schema":"{\"type\":\"record\",\"name\":\"myrecord\",\"fields\":[{\"name\":\"f1\",\"type\":\"string\"}]}"}]
 
 
 Validate in Control Center
@@ -207,7 +243,7 @@ Use Control Center to monitor the Confluent Platform, and see the created topic 
 
 
 
-#. Check that the ``elastic-0`` topic was created and that messages are being produced to the topic.
+#. Check that the ``producer-example-0`` topic was created and that messages are being produced to the topic.
 
 =========
 Tear Down
@@ -217,11 +253,15 @@ Shut down Confluent Platform and the data:
 
 ::
 
-  kubectl delete -f $TUTORIAL_HOME/producer-app-data.yaml --namespace=confluent
+  kubectl delete -f $TUTORIAL_HOME/producer-consumer-app-data.yaml --namespace=confluent
 
 ::
 
   kubectl delete -f $TUTORIAL_HOME/confluent-platform.yaml --namespace=confluent
+
+::
+
+  kubectl delete secrets basicsecretconnect basicsecretsrccc basicwithrolesr  --namespace=confluent
 
 ::
 

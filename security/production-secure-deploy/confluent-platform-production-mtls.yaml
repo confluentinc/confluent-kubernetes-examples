@@ -7,7 +7,7 @@ spec:
   replicas: 3
   image:
     application: confluentinc/cp-zookeeper:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   dataVolumeCapacity: 10Gi
   logVolumeCapacity: 10Gi
   authentication:
@@ -26,7 +26,7 @@ spec:
   replicas: 3
   image:
     application: confluentinc/cp-server:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   dataVolumeCapacity: 10Gi
   tls:
     secretRef: tls-group1
@@ -110,7 +110,7 @@ spec:
   replicas: 2
   image:
     application: confluentinc/cp-server-connect:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   tls:
     secretRef: tls-connect
   externalAccess:
@@ -149,7 +149,7 @@ spec:
   replicas: 1
   image:
     application: confluentinc/cp-schema-registry:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   tls:
     secretRef: tls-schemaregistry
   externalAccess:
@@ -180,6 +180,49 @@ spec:
         enabled: true
 ---
 apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestProxy
+metadata:
+  name: kafkarestproxy
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-kafka-rest:7.0.1
+    init: confluentinc/confluent-init-container:2.2.1
+  tls:
+    secretRef: tls-kafkarestproxy
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      domain: my.domain
+      prefix: rb-krp
+  authorization:
+    type: rbac
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+    mds:
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tokenKeyPair:
+        secretRef: mds-token
+      authentication:
+        type: bearer
+        bearer:
+          secretRef: krp-mds-client
+      tls:
+        enabled: true
+    schemaRegistry:
+      url: https://schemaregistry.confluent.svc.cluster.local:8081
+      tls:
+        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
 kind: KsqlDB
 metadata:
   name: ksqldb
@@ -188,7 +231,7 @@ spec:
   replicas: 2
   image:
     application: confluentinc/cp-ksqldb-server:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   dataVolumeCapacity: 10Gi
   authorization:
     type: rbac
@@ -234,7 +277,7 @@ spec:
         timeoutSeconds: 500
   image:
     application: confluentinc/cp-enterprise-control-center:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   dataVolumeCapacity: 10Gi
   authorization:
     type: rbac

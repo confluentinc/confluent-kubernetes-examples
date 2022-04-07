@@ -67,14 +67,21 @@ ldifs:
     objectClass: simpleSecurityObject
     objectClass: organizationalRole
     cn: replicator
-  07_c3-test.ldif: |-
+  07_krp.ldif: |-
+    dn: cn=krp,{{ LDAP_BASE_DN }}
+    userPassword: krp-secret
+    description: krp user
+    objectClass: simpleSecurityObject
+    objectClass: organizationalRole
+    cn: krp
+  08_c3-test.ldif: |-
     dn: cn=testadmin,{{ LDAP_BASE_DN }}
     userPassword: testadmin
     description: testadmin user
     objectClass: simpleSecurityObject
     objectClass: organizationalRole
     cn: testadmin
-  08_c3-groupou.ldif: |-
+  09_c3-groupou.ldif: |-
     dn: ou=users,{{ LDAP_BASE_DN }}
     objectClass: organizationalUnit
     ou: Users
@@ -82,19 +89,19 @@ ldifs:
     dn: ou=groups,{{ LDAP_BASE_DN }}
     objectClass: organizationalUnit
     ou: Groups
-  09_c3usersgroup.ldif: |-
+  10_c3usersgroup.ldif: |-
     dn: cn=c3users,ou=groups,{{ LDAP_BASE_DN }}
     objectClass: top
     objectClass: posixGroup
     cn: c3users
     gidNumber: 5000
-  10_readonlyusersgroup.ldif: |-
+  11_readonlyusersgroup.ldif: |-
     dn: cn=readonlyusers,ou=groups,{{ LDAP_BASE_DN }}
     objectClass: top
     objectClass: posixGroup
     cn: readonlyusers
     gidNumber: 5000
-  11_alice.ldif:  |-
+  12_alice.ldif:  |-
     dn: cn=alice,ou=users,{{ LDAP_BASE_DN }}
     objectClass: inetOrgPerson
     objectClass: posixAccount
@@ -110,7 +117,7 @@ ldifs:
     gecos: alice
     loginShell: /bin/bash
     homeDirectory: /home/alice
-  12_james.ldif:  |-
+  13_james.ldif:  |-
     dn: cn=james,ou=users,{{ LDAP_BASE_DN }}
     objectClass: inetOrgPerson
     objectClass: posixAccount
@@ -126,7 +133,7 @@ ldifs:
     gecos: james
     loginShell: /bin/bash
     homeDirectory: /home/james
-  13_addgroup.ldif:  |-
+  14_addgroup.ldif:  |-
     dn: cn=readonlyusers,ou=groups,{{ LDAP_BASE_DN }}
     changetype: modify
     add: memberuid
@@ -136,7 +143,7 @@ ldifs:
     changetype: modify
     add: memberuid
     memberuid: cn=james,ou=users,{{ LDAP_BASE_DN }}
-  14_kafka-dev.ldif: |-
+  15_kafka-dev.ldif: |-
     dn: cn=devuser,{{ LDAP_BASE_DN }}
     userPassword: dev-password
     description: Developer user

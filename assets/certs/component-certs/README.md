@@ -115,6 +115,14 @@ cfssl gencert -ca=$TUTORIAL_HOME/generated/cacerts.pem \
 -ca-key=$TUTORIAL_HOME/generated/rootCAkey.pem \
 -config=$TUTORIAL_HOME/ca-config.json \
 -profile=server $TUTORIAL_HOME/ksqldb-server-domain.json | cfssljson -bare $TUTORIAL_HOME/generated/ksqldb-server
+
+# Create Kafka Rest Proxy server certificates
+# Use the SANs listed in kafkarestproxy-server-domain.json
+
+cfssl gencert -ca=$TUTORIAL_HOME/generated/cacerts.pem \
+-ca-key=$TUTORIAL_HOME/generated/rootCAkey.pem \
+-config=$TUTORIAL_HOME/ca-config.json \
+-profile=server $TUTORIAL_HOME/kafkarestproxy-server-domain.json | cfssljson -bare $TUTORIAL_HOME/generated/kafkarestproxy-server
 ```
 
 ### Check validity of server certificates
@@ -131,4 +139,6 @@ openssl x509 -in $TUTORIAL_HOME/generated/schemaregistry-server.pem -text -noout
 openssl x509 -in $TUTORIAL_HOME/generated/connect-server.pem -text -noout
 
 openssl x509 -in $TUTORIAL_HOME/generated/ksqldb-server.pem -text -noout
+
+openssl x509 -in $TUTORIAL_HOME/generated/kafkarestproxy-server.pem -text -noout
 ```

@@ -8,7 +8,7 @@ spec:
   replicas: 3
   image:
     application: confluentinc/cp-zookeeper:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   dataVolumeCapacity: 10Gi
   logVolumeCapacity: 10Gi
 ---
@@ -21,7 +21,7 @@ spec:
   replicas: 3
   image:
     application: confluentinc/cp-server:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   dataVolumeCapacity: 10Gi
   tls:
     secretRef: tls-group1
@@ -49,7 +49,7 @@ spec:
   replicas: 2
   image:
     application: confluentinc/cp-server-connect:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   tls:
     secretRef: tls-group1
   dependencies:
@@ -65,7 +65,7 @@ spec:
   replicas: 1
   image:
     application: confluentinc/cp-enterprise-control-center:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   dataVolumeCapacity: 10Gi
   tls:
     secretRef: tls-group1
@@ -82,7 +82,7 @@ spec:
   replicas: 1
   image:
     application: confluentinc/cp-schema-registry:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   tls:
     secretRef: tls-group1
   dependencies:
@@ -98,7 +98,7 @@ spec:
   replicas: 2
   image:
     application: confluentinc/cp-ksqldb-server:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   dataVolumeCapacity: 10Gi
   tls:
     secretRef: tls-group1
