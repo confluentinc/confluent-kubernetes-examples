@@ -104,7 +104,7 @@ spec:
   image:
     # Use the `cp-enterprise-replicator-operator` Docker image, that contains the Replicator jars
     application: confluentinc/cp-enterprise-replicator:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   podTemplate:
     resources:
       requests:

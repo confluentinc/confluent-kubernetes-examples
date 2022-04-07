@@ -8,7 +8,7 @@ spec:
   replicas: 3
   image:
     application: confluentinc/cp-zookeeper:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   dataVolumeCapacity: 10Gi
   logVolumeCapacity: 10Gi
   # Configure to have TLS encryption, and use auto-generated server certs
@@ -39,7 +39,7 @@ spec:
         secretRef: kafka-tls
   image:
     application: confluentinc/cp-server:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   dataVolumeCapacity: 10Gi
 ---
 apiVersion: platform.confluent.io/v1beta1
@@ -54,7 +54,7 @@ spec:
     secretRef: kafka-tls
   image:
     application: confluentinc/cp-schema-registry:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   dependencies:
     kafka:
       bootstrapEndpoint: kafka.destination.svc.cluster.local:9071
@@ -76,7 +76,7 @@ spec:
   image:
     # Use the `cp-enterprise-replicator-operator` Docker image, that contains the Replicator jars
     application: confluentinc/cp-enterprise-replicator:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   podTemplate:
     envVars:
       # The  Confluent Replicator Monitoring Extension allows for detailed metrics from Replicator tasks to be 
@@ -116,7 +116,7 @@ spec:
   replicas: 1
   image:
     application: confluentinc/cp-enterprise-control-center:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   dataVolumeCapacity: 10Gi
   tls:
     secretRef: kafka-tls

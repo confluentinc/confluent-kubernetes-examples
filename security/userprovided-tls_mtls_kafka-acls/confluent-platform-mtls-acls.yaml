@@ -7,7 +7,7 @@ spec:
   replicas: 3
   image:
     application: confluentinc/cp-zookeeper:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   dataVolumeCapacity: 10Gi
   logVolumeCapacity: 10Gi
   authentication:
@@ -26,7 +26,7 @@ spec:
   replicas: 3
   image:
     application: confluentinc/cp-server:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   dataVolumeCapacity: 10Gi
   configOverrides:
     server: #This config override is required for CP 7.0 update to use AclAuthorizer instead of SimpleAclAuthorizer
@@ -77,7 +77,7 @@ spec:
   replicas: 2
   image:
     application: confluentinc/cp-server-connect:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   tls:
     secretRef: tls-connect
   externalAccess:
@@ -102,7 +102,7 @@ spec:
   replicas: 1
   image:
     application: confluentinc/cp-schema-registry:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   tls:
     secretRef: tls-schemaregistry
   externalAccess:
@@ -127,7 +127,7 @@ spec:
   replicas: 1
   image:
     application: confluentinc/cp-kafka-rest:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   tls:
     secretRef: tls-kafkarestproxy
   externalAccess:
@@ -152,7 +152,7 @@ spec:
   replicas: 2
   image:
     application: confluentinc/cp-ksqldb-server:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   dataVolumeCapacity: 10Gi
   externalAccess:
     type: loadBalancer
@@ -184,7 +184,7 @@ spec:
         timeoutSeconds: 500
   image:
     application: confluentinc/cp-enterprise-control-center:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    init: confluentinc/confluent-init-container:2.2.1
   dataVolumeCapacity: 10Gi
   externalAccess:
     type: loadBalancer

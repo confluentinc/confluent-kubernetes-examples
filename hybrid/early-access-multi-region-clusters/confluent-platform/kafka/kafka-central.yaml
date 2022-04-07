@@ -31,7 +31,7 @@ spec:
         enabled: true
   image:
     application: confluentinc/cp-server:7.0.0
-    init: confluentinc/confluent-init-container:2.2.0
+    init: confluentinc/confluent-init-container:2.2.1
   listeners:
     external:
       authentication:
