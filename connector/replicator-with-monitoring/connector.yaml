@@ -1,0 +1,33 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Connector
+metadata:
+  name: replicator
+  namespace: destination
+spec:
+  name: replicator
+  class: "io.confluent.connect.replicator.ReplicatorSourceConnector"
+  taskMax: 4
+  configs:
+    topic.whitelist: "topic-in-source"
+    topic.rename.format: "${topic}_replica"
+    key.converter: "io.confluent.connect.replicator.util.ByteArrayConverter"
+    value.converter: "io.confluent.connect.replicator.util.ByteArrayConverter"
+    dest.kafka.bootstrap.servers: "kafka.destination.svc.cluster.local:9071"
+    dest.kafka.sasl.jaas.config: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${file:/mnt/secrets/credential/plain.txt:username}\" password=\"${file:/mnt/secrets/credential/plain.txt:password}\";"
+    dest.kafka.sasl.mechanism: "PLAIN"
+    dest.kafka.security.protocol: "SASL_SSL"
+    dest.kafka.ssl.truststore.location: "/mnt/sslcerts/truststore.jks"
+    dest.kafka.ssl.truststore.password: "${file:/mnt/sslcerts/jksPassword.txt:jksPassword}"
+    src.kafka.bootstrap.servers: "kafka.source.svc.cluster.local:9071"
+    src.kafka.sasl.jaas.config: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${file:/mnt/secrets/credential/plain.txt:username}\" password=\"${file:/mnt/secrets/credential/plain.txt:password}\";"
+    src.kafka.sasl.mechanism: "PLAIN"
+    src.kafka.security.protocol: "SASL_SSL"
+    src.kafka.ssl.truststore.location: "/mnt/sslcerts/truststore.jks"
+    src.kafka.ssl.truststore.password: "${file:/mnt/sslcerts/jksPassword.txt:jksPassword}"
+    src.consumer.group.id: "replicator"
+    confluent.license: ""
+    confluent.topic.replication.factor: "3"
+  connectRest:
+    tls:
+      secretRef: replicator-generated-jks
+
