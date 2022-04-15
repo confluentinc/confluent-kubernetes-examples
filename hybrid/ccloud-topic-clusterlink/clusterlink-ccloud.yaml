@@ -1,0 +1,21 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: ClusterLink
+metadata:
+  name: clusterlink-demo
+  namespace: operator
+spec:
+  destinationKafkaCluster:
+    kafkaRestClassRef:
+      name: krc-cloud
+      namespace: operator
+  sourceKafkaCluster:
+    authentication:
+      type: plain
+      jaasConfig:
+        secretRef: credential
+    bootstrapEndpoint: cloudclink-src-bootstrap.platformops.dev.gcp.devel.cpdev.cloud:9092
+    kafkaRestClassRef:
+      name: krc-cfk
+      namespace: operator
+  mirrorTopics:
+    - name: demo-topic
