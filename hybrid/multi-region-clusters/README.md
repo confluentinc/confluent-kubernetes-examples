@@ -432,7 +432,7 @@ Look at the ZK nodes.
 ```
 $ kubectl exec -it zookeeper-0 -n central -c zookeeper --context mrc-central -- bash
 
-bash-4.4$ zookeeper-shell 127.0.0.1:2181
+bash-4.4$ zookeeper-shell 127.1.0.1:2181
 
 ls /mrc/brokers/ids
 [0, 1, 10, 11, 20, 21]

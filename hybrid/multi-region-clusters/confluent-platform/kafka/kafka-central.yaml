@@ -29,8 +29,8 @@ spec:
       tls:
         enabled: true
   image:
-    application: confluentinc/cp-server:7.0.1
-    init: confluentinc/confluent-init-container:2.2.1
+    application: confluentinc/cp-server:7.1.0
+    init: confluentinc/confluent-init-container:2.3.0
   listeners:
     external:
       authentication:
