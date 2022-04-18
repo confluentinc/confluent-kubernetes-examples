@@ -85,7 +85,7 @@ Look at the ZK nodes.
 ```
 $ kubectl exec zookeeper-0 -it bash -n central --context mrc-central
 
-bash-4.4$ zookeeper-shell 127.1.0.1:2181
+bash-4.4$ zookeeper-shell 127.0.0.1:2181
 
 ls /kafka-west/brokers/ids
 [0, 1, 100, 101, 102, 2]
