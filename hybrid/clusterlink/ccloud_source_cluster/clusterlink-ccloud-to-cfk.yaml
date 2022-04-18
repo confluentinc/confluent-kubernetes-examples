@@ -1,0 +1,22 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: ClusterLink
+metadata:
+  name: clusterlinkus-demo
+  namespace: destination
+spec:
+  destinationKafkaCluster:
+    kafkaRestClassRef:
+      name: destination-kafka-rest
+      namespace: destination
+  sourceKafkaCluster:
+    tls:
+      enabled: true
+      secretRef: ccloud-tls-certs
+    bootstrapEndpoint: pkc-ep9mm.us-east-2.aws.confluent.cloud:9092 
+    clusterID: lkc-v2n5p
+    authentication:
+      type: plain
+      jaasConfigPassThrough:
+        secretRef: ccloud-credential
+  mirrorTopics:
+  - name: demo
