@@ -1,0 +1,44 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Zookeeper
+metadata:
+  name: zookeeper
+  namespace: destination
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-zookeeper:7.1.0
+    init: confluentinc/confluent-init-container:2.3.0
+  dataVolumeCapacity: 10Gi
+  logVolumeCapacity: 10Gi
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: destination
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server:7.1.0
+    init: confluentinc/confluent-init-container:2.3.0
+  dataVolumeCapacity: 10Gi
+  passwordEncoder:
+    secretRef: password-encoder-secret
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: destination-kafka-rest
+  namespace: destination
+spec:
+  kafkaClusterRef:
+    name: kafka
+  kafkaRest:
+    endpoint: http://kafka:8090
+    authentication:
+      type: basic
+      basic:
+        secretRef: rest-credential
+---
+
