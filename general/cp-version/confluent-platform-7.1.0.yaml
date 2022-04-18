@@ -1,4 +1,3 @@
----
 apiVersion: platform.confluent.io/v1beta1
 kind: Zookeeper
 metadata:
@@ -11,6 +10,11 @@ spec:
     init: confluentinc/confluent-init-container:2.3.0
   dataVolumeCapacity: 10Gi
   logVolumeCapacity: 10Gi
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
@@ -23,32 +27,44 @@ spec:
     application: confluentinc/cp-server:7.1.0
     init: confluentinc/confluent-init-container:2.3.0
   dataVolumeCapacity: 10Gi
-  metricReporter:
-    enabled: true
-  listeners:
-      external:
-        externalAccess:
-          type: loadBalancer
-          loadBalancer:
-            domain: ## Domain 
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: Connect
 metadata:
   name: connect
-  namespace: confluent 
+  namespace: confluent
 spec:
   replicas: 2
   image:
     application: confluentinc/cp-server-connect:7.1.0
     init: confluentinc/confluent-init-container:2.3.0
-  dependencies:
-    kafka:
-      bootstrapEndpoint: kafka:9071
-  externalAccess:
-    type: loadBalancer
-    loadBalancer:
-      domain: ## Domain    
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true  
+---
+apiVersion: platform.confluent.io/v1beta1
+# Confluent Replicator is built as a connector, and so will use the `Connect` CRD.
+kind: Connect
+metadata:
+  name: replicator
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-replicator:7.1.0
+    init: confluentinc/confluent-init-container:2.3.0
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true  
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: KsqlDB
@@ -56,15 +72,16 @@ metadata:
   name: ksqldb
   namespace: confluent
 spec:
-  replicas: 1
+  replicas: 2
   image:
     application: confluentinc/cp-ksqldb-server:7.1.0
     init: confluentinc/confluent-init-container:2.3.0
   dataVolumeCapacity: 10Gi
-  externalAccess:
-    type: loadBalancer
-    loadBalancer:
-      domain: ## Domain    
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: ControlCenter
@@ -77,19 +94,20 @@ spec:
     application: confluentinc/cp-enterprise-control-center:7.1.0
     init: confluentinc/confluent-init-container:2.3.0
   dataVolumeCapacity: 10Gi
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true
   dependencies:
     schemaRegistry:
       url: http://schemaregistry.confluent.svc.cluster.local:8081
     ksqldb:
-    - name: ksqldb
+    - name: ksql-dev
       url: http://ksqldb.confluent.svc.cluster.local:8088
     connect:
-    - name: connect
-      url: http://connect.confluent.svc.cluster.local:8083
-  externalAccess:
-    type: loadBalancer
-    loadBalancer:
-      domain: ## Domain    
+    - name: connect-dev
+      url:  http://connect.confluent.svc.cluster.local:8083
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: SchemaRegistry
@@ -97,14 +115,15 @@ metadata:
   name: schemaregistry
   namespace: confluent
 spec:
-  replicas: 1
+  replicas: 2
   image:
     application: confluentinc/cp-schema-registry:7.1.0
     init: confluentinc/confluent-init-container:2.3.0
-  externalAccess:
-    type: loadBalancer
-    loadBalancer:
-      domain: ## Domain    
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: KafkaRestProxy
@@ -112,14 +131,15 @@ metadata:
   name: kafkarestproxy
   namespace: confluent
 spec:
-  replicas: 1
-  image:
-    application: confluentinc/cp-kafka-rest:7.1.0
-    init: confluentinc/confluent-init-container:2.3.0
   dependencies:
     schemaRegistry:
       url: http://schemaregistry.confluent.svc.cluster.local:8081
-  externalAccess:
-    type: loadBalancer
-    loadBalancer:
-      domain: ## Domain
+  image:
+    application: confluentinc/cp-kafka-rest:7.1.0
+    init: confluentinc/confluent-init-container:2.3.0
+  replicas: 2
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true
