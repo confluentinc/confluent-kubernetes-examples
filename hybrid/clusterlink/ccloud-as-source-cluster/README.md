@@ -49,7 +49,7 @@ openssl s_client -showcerts -servername pkc-41973.westus2.azure.confluent.cloud 
 
 ### create secret for the certificates to connect to Confluent Cloud
 ```
-kubectl -n source create secret generic source-tls-group1 \
+kubectl -n destination create secret generic source-tls-group1 \
     --from-file=fullchain.pem=$TUTORIAL_HOME/fullchain.pem \
     --from-file=cacerts.pem=$TUTORIAL_HOME/cacerts.pem 
     
@@ -58,10 +58,7 @@ kubectl -n source create secret generic source-tls-group1 \
 
 #### create password encoder secret
 ```
-
-    
-kubectl -n destination create secret generic password-encoder-secret \
-    --from-file=password_encoder_secret=$TUTORIAL_HOME/password-encoder-secret.txt
+ kubectl -n destination create secret generic password-encoder-secret --from-file=password-encoder.txt=password-encoder-secret.txt
 ```
 
 #### deploy destination zookeeper and kafka cluster in namespace `destination`
@@ -77,13 +74,13 @@ After the Kafka cluster is in running state, create cluster link between source 
 ### Run test
 
 #### exec into destination kafka pod
-    kubectl -n source exec kafka-0 -it -- bash
+    kubectl -n destination exec kafka-0 -it -- bash
 
 #### produce a message in the Confuent Cloud topic
 Go the UI and produce a message into the topic called demo.
 
 #### consume in destination kafka cluster and confirm message delivery in destination cluster
 
-    kafka-console-consumer --from-beginning --topic demo --bootstrap-server  kafka.destination.svc.cluster.local:9071  --consumer.config /tmp/kafka.properties
+    kafka-console-consumer --from-beginning --topic demo --bootstrap-server  kafka.destination.svc.cluster.local:9071 
 
  
