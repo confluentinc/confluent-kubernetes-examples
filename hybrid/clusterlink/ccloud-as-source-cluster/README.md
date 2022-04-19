@@ -58,10 +58,7 @@ kubectl -n source create secret generic source-tls-group1 \
 
 #### create password encoder secret
 ```
-
-    
-kubectl -n destination create secret generic password-encoder-secret \
-    --from-file=password_encoder_secret=$TUTORIAL_HOME/password-encoder-secret.txt
+ kubectl create secret generic password-encoder-secret --from-file=password-encoder.txt=password-encoder-secret.txt
 ```
 
 #### deploy destination zookeeper and kafka cluster in namespace `destination`
