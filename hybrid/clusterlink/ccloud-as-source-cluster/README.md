@@ -49,7 +49,7 @@ openssl s_client -showcerts -servername pkc-41973.westus2.azure.confluent.cloud 
 
 ### create secret for the certificates to connect to Confluent Cloud
 ```
-kubectl -n source create secret generic source-tls-group1 \
+kubectl -n destination create secret generic source-tls-group1 \
     --from-file=fullchain.pem=$TUTORIAL_HOME/fullchain.pem \
     --from-file=cacerts.pem=$TUTORIAL_HOME/cacerts.pem 
     
