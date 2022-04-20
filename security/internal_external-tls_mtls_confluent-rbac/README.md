@@ -10,6 +10,11 @@ REST based Confluent Platform components. View the [static host based routing sc
 
 Before continuing with the scenario, ensure that you have set up the [prerequisites](https://github.com/confluentinc/confluent-kubernetes-examples/blob/master/README.md#prerequisites).
 
+This scenario workflow requires the following CLI tools to be available on the machine you are using:
+
+- openssl
+- cfssl
+
 ## Set the current tutorial directory
 
 Set the tutorial directory for this tutorial under the directory you downloaded the tutorial files:
