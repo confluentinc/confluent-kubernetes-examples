@@ -1,0 +1,15 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaExporter
+metadata:
+  name: schema-exporter
+  namespace: source
+spec:
+  sourceCluster:
+    schemaRegistryClusterRef:
+      name: schemaregistry
+      namespace: source
+  destinationCluster:
+    schemaRegistryClusterRef:
+      name: schemaregistry
+      namespace: destination
+  contextName: mycustom
