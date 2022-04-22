@@ -54,28 +54,28 @@ the tutorial files:
    
   export TUTORIAL_HOME=<Tutorial directory>/external-access-nodeport
 
-  ===============================
-  Deploy Confluent for Kubernetes
-  ===============================
+===============================
+Deploy Confluent for Kubernetes
+===============================
   
-  #. Set up the Helm Chart:
+#. Set up the Helm Chart:
   
-     ::
+   ::
   
-       helm repo add confluentinc https://packages.confluent.io/helm
+     helm repo add confluentinc https://packages.confluent.io/helm
   
   
-  #. Install Confluent For Kubernetes using Helm:
+#. Install Confluent For Kubernetes using Helm:
   
-     ::
+   ::
   
-       helm upgrade --install operator confluentinc/confluent-for-kubernetes
+     helm upgrade --install operator confluentinc/confluent-for-kubernetes
     
-  #. Check that the Confluent For Kubernetes pod comes up and is running:
+#. Check that the Confluent For Kubernetes pod comes up and is running:
   
-     ::
+   ::
        
-       kubectl get pods
+     kubectl get pods
      
 ============================
 Configure Confluent Platform
