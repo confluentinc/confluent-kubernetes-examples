@@ -46,9 +46,9 @@ spec:
       externalAccess:
         type: loadBalancer
         loadBalancer:
-          domain: my.domain
-          brokerPrefix: rb
-          bootstrapPrefix: rb
+          domain: ## Domain
+          bootstrapPrefix:
+          brokerPrefix:
       tls:
         enabled: true
   authorization:
@@ -64,8 +64,8 @@ spec:
       externalAccess:
         type: loadBalancer
         loadBalancer:
-          domain: my.domain
-          prefix: rb-mds
+          domain: ## Domain
+          prefix:
       provider:
         type: ldap
         ldap:
@@ -114,8 +114,8 @@ spec:
   externalAccess:
     type: loadBalancer
     loadBalancer:
-      domain: my.domain
-      prefix: rb-connect
+      domain: ## Domain
+      prefix:
   authorization:
     type: rbac
   dependencies:
@@ -153,8 +153,8 @@ spec:
   externalAccess:
     type: loadBalancer
     loadBalancer:
-      domain: my.domain
-      prefix: rb-sr
+      domain: ## Domain
+      prefix:
   authorization:
     type: rbac
   dependencies:
@@ -192,8 +192,8 @@ spec:
   externalAccess:
     type: loadBalancer
     loadBalancer:
-      domain: my.domain
-      prefix: rb-krp
+      domain: ## Domain
+      prefix:
   authorization:
     type: rbac
   dependencies:
@@ -236,8 +236,8 @@ spec:
   externalAccess:
     type: loadBalancer
     loadBalancer:
-      domain: my.domain
-      prefix: rb-ksql
+      domain: ## Domain
+      prefix:
   tls:
     secretRef: tls-group1
   dependencies:
@@ -282,8 +282,8 @@ spec:
   externalAccess:
     type: loadBalancer
     loadBalancer:
-      domain: my.domain
-      prefix: rb-c3
+      domain: ## Domain
+      prefix:
   tls:
     secretRef: tls-group1
   dependencies:
