@@ -6,8 +6,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-server-connect:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    application: confluentinc/cp-server-connect:7.1.0
+    init: confluentinc/confluent-init-container:2.3.0
   build:
     type: onDemand
     onDemand:

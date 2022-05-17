@@ -7,8 +7,8 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-zookeeper:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    application: confluentinc/cp-zookeeper:7.1.0
+    init: confluentinc/confluent-init-container:2.3.0
   dataVolumeCapacity: 10Gi
   logVolumeCapacity: 10Gi
 ---
@@ -20,8 +20,8 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-server:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    application: confluentinc/cp-server:7.1.0
+    init: confluentinc/confluent-init-container:2.3.0
   dataVolumeCapacity: 10Gi
   metricReporter:
     enabled: true
@@ -37,8 +37,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-server-connect:7.0.1
-    init: confluentinc/confluent-init-container:2.2.0-1
+    application: confluentinc/cp-server-connect:7.1.0
+    init: confluentinc/confluent-init-container:2.3.0
   build:
     type: onDemand
     onDemand:

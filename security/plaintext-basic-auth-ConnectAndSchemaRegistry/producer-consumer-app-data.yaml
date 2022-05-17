@@ -1,0 +1,94 @@
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kafka-client-config
+  namespace: confluent
+type: Opaque
+data:
+  kafka.properties: Ym9vdHN0cmFwLnNlcnZlcnM9a2Fma2EuY29uZmx1ZW50LnN2Yy5jbHVzdGVyLmxvY2FsOjkwNzEKc2VjdXJpdHkucHJvdG9jb2w9UExBSU5URVhU
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: producer-example-0
+  namespace: confluent
+spec:
+  replicas: 3
+  partitionCount: 3
+  configs:
+    cleanup.policy: "delete"
+    min.insync.replicas: "1"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: producer-example
+  name: producer-example
+  namespace: confluent  
+spec:
+  containers:
+  - image: confluentinc/cp-schema-registry:7.1.0 
+    name: producer-example
+    command:
+    - /bin/sh
+    - -c
+    - |
+      for i in `seq 20000`; do echo '{"f1": "value'$i'"'};done  | kafka-avro-console-producer \
+            --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
+            --producer.config /mnt/kafka.properties \
+            --property schema.registry.url=http://schemaregistry.confluent.svc.cluster.local:8081 \
+            --property value.schema='{"type":"record","name":"myrecord","fields":[{"name":"f1","type":"string"}]}' \
+            --property basic.auth.credentials.source=USER_INFO \
+            --property schema.registry.basic.auth.user.info=thisismyusername:thisismypass \
+            --topic producer-example-0 
+    volumeMounts:
+        - name: kafka-properties
+          mountPath: /mnt
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+  volumes:
+    - name: kafka-properties # Create secret with name `kafka-client-config` with client configurations
+      secret:
+        secretName: kafka-client-config
+status: {}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: consumer-example
+  name: consumer-example
+  namespace: confluent  
+spec:
+  containers:
+  - image: confluentinc/cp-schema-registry:7.1.0 
+    name: consumer-example
+    command:
+    - /bin/sh
+    - -c
+    - |
+      kafka-avro-console-consumer \
+        --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
+        --consumer.config /mnt/kafka.properties \
+        --property schema.registry.url=http://schemaregistry.confluent.svc.cluster.local:8081 \
+        --property basic.auth.credentials.source=USER_INFO \
+        --property schema.registry.basic.auth.user.info=thisismyusername:thisismypass \
+        --topic producer-example-0 \
+        --from-beginning \
+        --timeout-ms 5000
+    volumeMounts:
+        - name: kafka-properties
+          mountPath: /mnt
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+  volumes:
+    - name: kafka-properties # Create secret with name `kafka-client-config` with client configurations
+      secret:
+        secretName: kafka-client-config
+status: {}

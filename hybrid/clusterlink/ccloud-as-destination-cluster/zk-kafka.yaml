@@ -1,0 +1,75 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Zookeeper
+metadata:
+  name: zookeeper
+  namespace: operator
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-zookeeper:7.1.0
+    init: confluentinc/confluent-init-container:2.3.0
+  dataVolumeCapacity: 10Gi
+  logVolumeCapacity: 10Gi
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: operator
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server:7.1.0
+    init: confluentinc/confluent-init-container:2.3.0
+  dataVolumeCapacity: 10Gi
+  listeners:
+    external:
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          bootstrapPrefix: cloudclink-src-bootstrap
+          brokerPrefix: cloudclink-src
+          domain: platformops.dev.gcp.devel.cpdev.cloud
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+    internal:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+  services:
+    kafkaRest:
+      authentication:
+        type: basic
+        basic:
+          secretRef: credential
+          roles:
+            - Administrators
+  passwordEncoder:
+    secretRef: password-encoder-secret
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: krc-cfk
+  namespace: operator
+spec:
+  kafkaClusterRef:
+    name: kafka
+  kafkaRest:
+    endpoint: http://kafka.operator.svc.cluster.local:8090
+    authentication:
+      type: basic
+      basic:
+        secretRef: rest-credential
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: demo-topic
+  namespace: operator
+spec:
+  kafkaRestClassRef:
+    name: krc-cfk
