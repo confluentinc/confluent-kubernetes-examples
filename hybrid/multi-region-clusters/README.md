@@ -53,8 +53,6 @@ Depending on your environment, set up Kubernetes networking between the differen
 
 [Example for Azure Kubernetes Service](networking/aks/networking-AKS-README.md)
 
-[Example for Azure Redhat Openshift](networking/aro/networking-ARO-README.md)
-
 [Example for Elastic Kubernetes Engine](networking/eks/networking-EKS-README.md)
 
 [Example for Google Kubernetes Engine](networking/gke/networking-GKE-README.md)
