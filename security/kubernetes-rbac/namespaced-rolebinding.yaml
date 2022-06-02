@@ -128,3 +128,47 @@ roleRef:
   kind: Role
   name: confluent-operator
   apiGroup: rbac.authorization.k8s.io
+---
+# required only when webhook is enabled
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: confluent-operator-webhook-operator
+rules:
+  - apiGroups:
+      - admissionregistration.k8s.io
+    resources:
+      - validatingwebhookconfigurations
+    verbs:
+      - get
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - persistentvolumes
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    verbs:
+      - get
+      - list
+      - watch
+---
+# required only when webhook is enabled
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: confluent-operator-webhook-operator
+subjects:
+  - kind: ServiceAccount
+    name: confluent-for-kubernetes # customize as required
+    namespace: confluent # customize as required
+roleRef:
+  kind: ClusterRole
+  name: confluent-operator-webhook-operator
+  apiGroup: rbac.authorization.k8s.io
