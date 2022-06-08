@@ -11,6 +11,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: elastic
+  namespace: confluent
 spec:
   serviceName: elastic
   podManagementPolicy: Parallel
