@@ -104,21 +104,21 @@ credentials.
 
 Create the kafka.properties file in $TUTORIAL_HOME. Add the above endpoint and the credentials as follows:
 
-   ::
+::
 
-      bootstrap.servers=<cloudKafka_url>:9092
-      security.protocol=SASL_SSL
-      sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule   required username="<api-key>"   password="<api-secret>";
-      ssl.endpoint.identification.algorithm=https
-      sasl.mechanism=PLAIN
+  bootstrap.servers=<cloudKafka_url>:9092
+  security.protocol=SASL_SSL
+  sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule   required username="<api-key>"   password="<api-secret>";
+  ssl.endpoint.identification.algorithm=https
+  sasl.mechanism=PLAIN
 
 Create a configuration secret for client applications to use
 
-   ::
+::
 
-    kubectl create secret generic kafka-client-config-secure \
-      --from-file=$TUTORIAL_HOME/kafka.properties \
-      -n confluent
+  kubectl create secret generic kafka-client-config-secure \
+  --from-file=$TUTORIAL_HOME/kafka.properties \
+  -n confluent
 
 =========================
 Deploy Confluent Platform
@@ -227,9 +227,9 @@ Use Confluent Rest Proxy to produce and consume from Confluent Cloud.
 
 #. Wait few seconds and then consume, you might need to run the same command twice. 
 
-  ::
+   ::
 
-    curl -X GET -H "Accept: application/vnd.kafka.json.v2+json" http://kafkarestproxy.confluent.svc.cluster.local:8082/consumers/my_json_consumer1/instances/my_consumer_instance1/records
+     curl -X GET -H "Accept: application/vnd.kafka.json.v2+json" http://kafkarestproxy.confluent.svc.cluster.local:8082/consumers/my_json_consumer1/instances/my_consumer_instance1/records
 
 =========
 Tear down
