@@ -1,0 +1,19 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: ClusterLink
+metadata:
+  name: clusterlink-demo-dest
+  namespace: operator
+spec:
+  name: clusterlink-demo
+  sourceInitiatedLink:
+    linkMode: Destination
+  destinationKafkaCluster:
+    kafkaRestClassRef:
+      name: krc-cloud
+      namespace: operator
+  sourceKafkaCluster:
+    kafkaRestClassRef:
+      name: krc-cfk
+      namespace: operator
+  mirrorTopics:
+    - name: demo-topic
