@@ -7,7 +7,7 @@ metadata:
   namespace: confluent
 spec:
   # This version of init-container is required for migration.
-  initContainerImage: confluentinc/confluent-init-container:2.3.0
+  initContainerImage: confluentinc/confluent-init-container:2.4.0
   controlcenter:
     enabled: true
     name: controlcenter

@@ -19,8 +19,8 @@ spec:
       - server.21=zookeeper-1.zookeeper.west.svc.cluster.local:2888:3888
   dataVolumeCapacity: 10Gi
   image:
-    application: confluentinc/cp-zookeeper:7.1.0
-    init: confluentinc/confluent-init-container:2.3.0
+    application: confluentinc/cp-zookeeper:7.2.0
+    init: confluentinc/confluent-init-container:2.4.0
   logVolumeCapacity: 10Gi
   replicas: 2
   tls:
