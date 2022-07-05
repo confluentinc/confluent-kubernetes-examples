@@ -106,11 +106,11 @@ Deploy Confluent Platform
    ::
 
      kubectl apply -f $TUTORIAL_HOME/confluent-platform.yaml
-   
-   ## Note: If you are deploying a single node dev cluster, then use this yaml file:
-     
+
+   Note: If you are deploying a single node dev cluster, then use this yaml file:
+
    ::
-  
+
      kubectl apply -f $TUTORIAL_HOME/confluent-platform-singlenode.yaml
      
 
@@ -140,12 +140,6 @@ The producer app is packaged and deployed as a pod on Kubernetes. The required
 topic is defined as a KafkaTopic custom resource in
 ``$TUTORIAL_HOME/producer-app-data.yaml``.
 
-Note: If you are deploying a single node dev cluster, then use this yaml file:
-
-::
-  
-  kubectl apply -f $TUTORIAL_HOME/producer-app-data-singlenode.yaml
-
 The ``$TUTORIAL_HOME/producer-app-data.yaml`` defines the ``elastic-0``
 topic as follows:
 
@@ -164,7 +158,9 @@ topic as follows:
       
 Deploy the producer app:
 
-``kubectl apply -f $TUTORIAL_HOME/producer-app-data.yaml``
+::
+   
+   kubectl apply -f $TUTORIAL_HOME/producer-app-data.yaml
 
 Note: If you are deploying a single node dev cluster, then use this yaml file:
 
@@ -207,5 +203,5 @@ Shut down Confluent Platform and the data:
 
 ::
 
-  helm delete operator
+  helm delete confluent-operator
   
