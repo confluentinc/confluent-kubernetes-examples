@@ -96,6 +96,10 @@ spec:
     application: confluentinc/cp-ksqldb-server:7.1.0
     init: confluentinc/confluent-init-container:2.3.0
   dataVolumeCapacity: 10Gi
+  internalTopicReplicationFactor: 1
+  dependencies:
+    schemaRegistry:
+      url: http://schemaregistry.confluent.svc.cluster.local:8081
   podTemplate:
     resources:
       requests:
