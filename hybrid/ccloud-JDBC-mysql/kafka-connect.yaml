@@ -8,8 +8,8 @@ spec:
   valueConverterType: io.confluent.connect.avro.AvroConverter
   replicas: 1
   image:
-    application: confluentinc/cp-server-connect:7.1.0
-    init: confluentinc/confluent-init-container:2.3.0
+    application: confluentinc/cp-server-connect:7.2.0
+    init: confluentinc/confluent-init-container:2.4.0
   build:
     type: onDemand
     onDemand:

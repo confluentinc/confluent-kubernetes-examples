@@ -116,8 +116,8 @@ For example, the Kafka section of the file is as follows:
   spec:
     replicas: 3
     image:
-      application: confluentinc/cp-server:7.1.0
-      init: confluentinc/confluent-init-container:2.3.0
+      application: confluentinc/cp-server:7.2.0
+      init: confluentinc/confluent-init-container:2.4.0
     dataVolumeCapacity: 10Gi
     metricReporter:
       enabled: true

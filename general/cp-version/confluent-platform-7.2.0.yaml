@@ -1,4 +1,3 @@
-# Here, for all CRs, we set the groupid to 1001 and userid to 1001
 apiVersion: platform.confluent.io/v1beta1
 kind: Zookeeper
 metadata:
@@ -13,8 +12,8 @@ spec:
   logVolumeCapacity: 10Gi
   podTemplate:
     podSecurityContext:
-      fsGroup: 1001
-      runAsUser: 1001
+      fsGroup: 1000
+      runAsUser: 1000
       runAsNonRoot: true
 ---
 apiVersion: platform.confluent.io/v1beta1
@@ -28,17 +27,11 @@ spec:
     application: confluentinc/cp-server:7.2.0
     init: confluentinc/confluent-init-container:2.4.0
   dataVolumeCapacity: 10Gi
-  metricReporter:
-    enabled: true
   podTemplate:
     podSecurityContext:
-      fsGroup: 1001
-      runAsUser: 1001
+      fsGroup: 1000
+      runAsUser: 1000
       runAsNonRoot: true
-    resources:
-      requests:
-        cpu: "1"
-        memory: "4Gi"
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: Connect
@@ -52,13 +45,26 @@ spec:
     init: confluentinc/confluent-init-container:2.4.0
   podTemplate:
     podSecurityContext:
-      fsGroup: 1001
-      runAsUser: 1001
-      runAsNonRoot: true
-    resources:
-      requests:
-        cpu: "1"
-        memory: "4Gi"
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true  
+---
+apiVersion: platform.confluent.io/v1beta1
+# Confluent Replicator is built as a connector, and so will use the `Connect` CRD.
+kind: Connect
+metadata:
+  name: replicator
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-replicator:7.2.0
+    init: confluentinc/confluent-init-container:2.4.0
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsUser: 1000
+      runAsNonRoot: true  
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: KsqlDB
@@ -73,8 +79,8 @@ spec:
   dataVolumeCapacity: 10Gi
   podTemplate:
     podSecurityContext:
-      fsGroup: 1001
-      runAsUser: 1001
+      fsGroup: 1000
+      runAsUser: 1000
       runAsNonRoot: true
 ---
 apiVersion: platform.confluent.io/v1beta1
@@ -88,29 +94,20 @@ spec:
     application: confluentinc/cp-enterprise-control-center:7.2.0
     init: confluentinc/confluent-init-container:2.4.0
   dataVolumeCapacity: 10Gi
-  dependencies:
-    schemaRegistry:
-      url: https://schemaregistry.confluent.svc.cluster.local:8081
-    ksqldb:
-    - name: ksqldb
-      url: https://ksqldb.confluent.svc.cluster.local:8088
-    connect:
-    - name: connect
-      url:  https://connect.confluent.svc.cluster.local:8083
   podTemplate:
     podSecurityContext:
-      fsGroup: 1001
-      runAsUser: 1001
+      fsGroup: 1000
+      runAsUser: 1000
       runAsNonRoot: true
-    resources:
-      requests:
-        cpu: "1"
-        memory: "4Gi"
-    probe:
-      liveness:
-        periodSeconds: 10
-        failureThreshold: 5
-        timeoutSeconds: 500
+  dependencies:
+    schemaRegistry:
+      url: http://schemaregistry.confluent.svc.cluster.local:8081
+    ksqldb:
+    - name: ksql-dev
+      url: http://ksqldb.confluent.svc.cluster.local:8088
+    connect:
+    - name: connect-dev
+      url:  http://connect.confluent.svc.cluster.local:8083
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: SchemaRegistry
@@ -124,8 +121,8 @@ spec:
     init: confluentinc/confluent-init-container:2.4.0
   podTemplate:
     podSecurityContext:
-      fsGroup: 1001
-      runAsUser: 1001
+      fsGroup: 1000
+      runAsUser: 1000
       runAsNonRoot: true
 ---
 apiVersion: platform.confluent.io/v1beta1
@@ -143,6 +140,6 @@ spec:
   replicas: 2
   podTemplate:
     podSecurityContext:
-      fsGroup: 1001
-      runAsUser: 1001
+      fsGroup: 1000
+      runAsUser: 1000
       runAsNonRoot: true
