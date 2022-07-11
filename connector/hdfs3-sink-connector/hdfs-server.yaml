@@ -1,0 +1,1899 @@
+---
+apiVersion: v1
+data:
+  CORE_CONF_fs_defaultFS: hdfs://namenode.confluent.svc.cluster.local:9000
+  CORE_CONF_hadoop_http_staticuser_user: root
+  CORE_CONF_hadoop_proxyuser_hue_groups: '*'
+  CORE_CONF_hadoop_proxyuser_hue_hosts: '*'
+  CORE_CONF_io_compression_codecs: org.apache.hadoop.io.compress.SnappyCodec
+  HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check: "false"
+  HDFS_CONF_dfs_permissions_enabled: "false"
+  HDFS_CONF_dfs_webhdfs_enabled: "true"
+  MAPRED_CONF_mapred_child_java_opts: -Xmx4096m
+  MAPRED_CONF_mapreduce_framework_name: yarn
+  MAPRED_CONF_mapreduce_map_env: HADOOP_MAPRED_HOME=/opt/hadoop-3.1.3/
+  MAPRED_CONF_mapreduce_map_java_opts: -Xmx3072m
+  MAPRED_CONF_mapreduce_map_memory_mb: "4096"
+  MAPRED_CONF_mapreduce_reduce_env: HADOOP_MAPRED_HOME=/opt/hadoop-3.1.3/
+  MAPRED_CONF_mapreduce_reduce_java_opts: -Xmx6144m
+  MAPRED_CONF_mapreduce_reduce_memory_mb: "8192"
+  MAPRED_CONF_yarn_app_mapreduce_am_env: HADOOP_MAPRED_HOME=/opt/hadoop-3.1.3/
+  YARN_CONF_mapred_map_output_compress_codec: org.apache.hadoop.io.compress.SnappyCodec
+  YARN_CONF_mapreduce_map_output_compress: "true"
+  YARN_CONF_yarn_log___aggregation___enable: "true"
+  YARN_CONF_yarn_log_server_url: http://historyserver:8188/applicationhistory/logs/
+  YARN_CONF_yarn_nodemanager_aux___services: mapreduce_shuffle
+  YARN_CONF_yarn_nodemanager_disk___health___checker_max___disk___utilization___per___disk___percentage: "98.5"
+  YARN_CONF_yarn_nodemanager_remote___app___log___dir: /app-logs
+  YARN_CONF_yarn_nodemanager_resource_cpu___vcores: "8"
+  YARN_CONF_yarn_nodemanager_resource_memory___mb: "16384"
+  YARN_CONF_yarn_resourcemanager_address: resourcemanager:8032
+  YARN_CONF_yarn_resourcemanager_fs_state___store_uri: /rmstate
+  YARN_CONF_yarn_resourcemanager_hostname: resourcemanager
+  YARN_CONF_yarn_resourcemanager_recovery_enabled: "true"
+  YARN_CONF_yarn_resourcemanager_resource__tracker_address: resourcemanager:8031
+  YARN_CONF_yarn_resourcemanager_scheduler_address: resourcemanager:8030
+  YARN_CONF_yarn_resourcemanager_scheduler_class: org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler
+  YARN_CONF_yarn_resourcemanager_store_class: org.apache.hadoop.yarn.server.resourcemanager.recovery.FileSystemRMStateStore
+  YARN_CONF_yarn_resourcemanager_system___metrics___publisher_enabled: "true"
+  YARN_CONF_yarn_scheduler_capacity_root_default_maximum___allocation___mb: "8192"
+  YARN_CONF_yarn_scheduler_capacity_root_default_maximum___allocation___vcores: "4"
+  YARN_CONF_yarn_timeline___service_enabled: "true"
+  YARN_CONF_yarn_timeline___service_generic___application___history_enabled: "true"
+  YARN_CONF_yarn_timeline___service_hostname: historyserver
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: datanode-connect-connect-hdfs3-sink-hadoop-env
+  name: connect-connect-hdfs3-sink-hadoop-env
+---
+apiVersion: v1
+data:
+  CORE_CONF_fs_defaultFS: hdfs://namenode.confluent.svc.cluster.local:9000
+  CORE_CONF_hadoop_http_staticuser_user: root
+  CORE_CONF_hadoop_proxyuser_hue_groups: '*'
+  CORE_CONF_hadoop_proxyuser_hue_hosts: '*'
+  HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check: "false"
+  HDFS_CONF_dfs_permissions_enabled: "false"
+  HDFS_CONF_dfs_webhdfs_enabled: "true"
+  HIVE_SITE_CONF_datanucleus_autoCreateSchema: "false"
+  HIVE_SITE_CONF_hive_metastore_event_db_notification_api_auth: "false"
+  HIVE_SITE_CONF_hive_metastore_uris: thrift://hive-metastore.confluent.svc.cluster.local:9083
+  HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName: org.postgresql.Driver
+  HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword: hive
+  HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-metastore-postgresql/metastore
+  HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: hive
+  YARN_CONF_yarn_log___aggregation___enable: "true"
+  YARN_CONF_yarn_log_server_url: http://historyserver:8188/applicationhistory/logs/
+  YARN_CONF_yarn_nodemanager_remote___app___log___dir: /app-logs
+  YARN_CONF_yarn_resourcemanager_address: resourcemanager:8032
+  YARN_CONF_yarn_resourcemanager_fs_state___store_uri: /rmstate
+  YARN_CONF_yarn_resourcemanager_hostname: resourcemanager
+  YARN_CONF_yarn_resourcemanager_recovery_enabled: "true"
+  YARN_CONF_yarn_resourcemanager_resource__tracker_address: resourcemanager:8031
+  YARN_CONF_yarn_resourcemanager_scheduler_address: resourcemanager:8030
+  YARN_CONF_yarn_resourcemanager_store_class: org.apache.hadoop.yarn.server.resourcemanager.recovery.FileSystemRMStateStore
+  YARN_CONF_yarn_resourcemanager_system___metrics___publisher_enabled: "true"
+  YARN_CONF_yarn_timeline___service_enabled: "true"
+  YARN_CONF_yarn_timeline___service_generic___application___history_enabled: "true"
+  YARN_CONF_yarn_timeline___service_hostname: historyserver
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: hive-metastore-connect-connect-hdfs3-sink-hadoop-hive-env
+  name: connect-connect-hdfs3-sink-hadoop-hive-env
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.1 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: datanode
+  name: datanode
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: datanode
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.26.1 (HEAD)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/mynetwork: "true"
+        io.kompose.service: datanode
+    spec:
+      containers:
+        - env:
+            - name: CORE_CONF_fs_defaultFS
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_fs_defaultFS
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: CORE_CONF_hadoop_http_staticuser_user
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_hadoop_http_staticuser_user
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: CORE_CONF_hadoop_proxyuser_hue_groups
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_hadoop_proxyuser_hue_groups
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: CORE_CONF_hadoop_proxyuser_hue_hosts
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_hadoop_proxyuser_hue_hosts
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: CORE_CONF_io_compression_codecs
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_io_compression_codecs
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check
+              valueFrom:
+                configMapKeyRef:
+                  key: HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: HDFS_CONF_dfs_permissions_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: HDFS_CONF_dfs_permissions_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: HDFS_CONF_dfs_webhdfs_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: HDFS_CONF_dfs_webhdfs_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapred_child_java_opts
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapred_child_java_opts
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_framework_name
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_framework_name
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_map_env
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_map_env
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_map_java_opts
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_map_java_opts
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_map_memory_mb
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_map_memory_mb
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_reduce_env
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_reduce_env
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_reduce_java_opts
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_reduce_java_opts
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_reduce_memory_mb
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_reduce_memory_mb
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_yarn_app_mapreduce_am_env
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_yarn_app_mapreduce_am_env
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: SERVICE_PRECONDITION
+              value: namenode:9870
+            - name: YARN_CONF_mapred_map_output_compress_codec
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_mapred_map_output_compress_codec
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_mapreduce_map_output_compress
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_mapreduce_map_output_compress
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_log___aggregation___enable
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_log___aggregation___enable
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_log_server_url
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_log_server_url
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_nodemanager_aux___services
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_aux___services
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_nodemanager_disk___health___checker_max___disk___utilization___per___disk___percentage
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_disk___health___checker_max___disk___utilization___per___disk___percentage
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_nodemanager_remote___app___log___dir
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_remote___app___log___dir
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_nodemanager_resource_cpu___vcores
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_resource_cpu___vcores
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_nodemanager_resource_memory___mb
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_resource_memory___mb
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_address
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_address
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_fs_state___store_uri
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_fs_state___store_uri
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_hostname
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_hostname
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_recovery_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_recovery_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_resource__tracker_address
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_resource__tracker_address
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_scheduler_address
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_scheduler_address
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_scheduler_class
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_scheduler_class
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_store_class
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_store_class
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_system___metrics___publisher_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_system___metrics___publisher_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_scheduler_capacity_root_default_maximum___allocation___mb
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_scheduler_capacity_root_default_maximum___allocation___mb
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_scheduler_capacity_root_default_maximum___allocation___vcores
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_scheduler_capacity_root_default_maximum___allocation___vcores
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_timeline___service_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_timeline___service_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_timeline___service_generic___application___history_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_timeline___service_generic___application___history_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_timeline___service_hostname
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_timeline___service_hostname
+                  name: connect-connect-hdfs3-sink-hadoop-env
+          image: bde2020/hadoop-datanode:2.0.0-hadoop3.1.2-java8
+          name: datanode
+          resources: {}
+          volumeMounts:
+            - mountPath: /hadoop/dfs/data
+              name: datanode
+      hostname: datanode
+      restartPolicy: Always
+      volumes:
+        - name: datanode
+          persistentVolumeClaim:
+            claimName: datanode
+status: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: datanode
+  name: datanode
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.1 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: datanode
+  name: datanode
+spec:
+  ports:
+    - name: "9001"
+      port: 9001
+      targetPort: 9001
+  clusterIP: None
+  clusterIPs:
+  - None
+  selector:
+    io.kompose.service: datanode
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: hadoop-historyserver
+  name: hadoop-historyserver
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+status: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.1 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: historyserver
+  name: historyserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: historyserver
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.26.1 (HEAD)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/mynetwork: "true"
+        io.kompose.service: historyserver
+    spec:
+      containers:
+        - env:
+            - name: CORE_CONF_fs_defaultFS
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_fs_defaultFS
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: CORE_CONF_hadoop_http_staticuser_user
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_hadoop_http_staticuser_user
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: CORE_CONF_hadoop_proxyuser_hue_groups
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_hadoop_proxyuser_hue_groups
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: CORE_CONF_hadoop_proxyuser_hue_hosts
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_hadoop_proxyuser_hue_hosts
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: CORE_CONF_io_compression_codecs
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_io_compression_codecs
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check
+              valueFrom:
+                configMapKeyRef:
+                  key: HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: HDFS_CONF_dfs_permissions_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: HDFS_CONF_dfs_permissions_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: HDFS_CONF_dfs_webhdfs_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: HDFS_CONF_dfs_webhdfs_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapred_child_java_opts
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapred_child_java_opts
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_framework_name
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_framework_name
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_map_env
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_map_env
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_map_java_opts
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_map_java_opts
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_map_memory_mb
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_map_memory_mb
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_reduce_env
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_reduce_env
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_reduce_java_opts
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_reduce_java_opts
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_reduce_memory_mb
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_reduce_memory_mb
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_yarn_app_mapreduce_am_env
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_yarn_app_mapreduce_am_env
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: SERVICE_PRECONDITION
+              value: namenode:9870 datanode:9864 resourcemanager:8088
+            - name: YARN_CONF_mapred_map_output_compress_codec
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_mapred_map_output_compress_codec
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_mapreduce_map_output_compress
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_mapreduce_map_output_compress
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_log___aggregation___enable
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_log___aggregation___enable
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_log_server_url
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_log_server_url
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_nodemanager_aux___services
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_aux___services
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_nodemanager_disk___health___checker_max___disk___utilization___per___disk___percentage
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_disk___health___checker_max___disk___utilization___per___disk___percentage
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_nodemanager_remote___app___log___dir
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_remote___app___log___dir
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_nodemanager_resource_cpu___vcores
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_resource_cpu___vcores
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_nodemanager_resource_memory___mb
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_resource_memory___mb
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_address
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_address
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_fs_state___store_uri
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_fs_state___store_uri
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_hostname
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_hostname
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_recovery_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_recovery_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_resource__tracker_address
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_resource__tracker_address
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_scheduler_address
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_scheduler_address
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_scheduler_class
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_scheduler_class
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_store_class
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_store_class
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_system___metrics___publisher_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_system___metrics___publisher_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_scheduler_capacity_root_default_maximum___allocation___mb
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_scheduler_capacity_root_default_maximum___allocation___mb
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_scheduler_capacity_root_default_maximum___allocation___vcores
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_scheduler_capacity_root_default_maximum___allocation___vcores
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_timeline___service_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_timeline___service_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_timeline___service_generic___application___history_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_timeline___service_generic___application___history_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_timeline___service_hostname
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_timeline___service_hostname
+                  name: connect-connect-hdfs3-sink-hadoop-env
+          image: bde2020/hadoop-historyserver:2.0.0-hadoop3.1.2-java8
+          name: historyserver
+          resources: {}
+          volumeMounts:
+            - mountPath: /hadoop/yarn/timeline
+              name: hadoop-historyserver
+      hostname: historyserver
+      restartPolicy: Always
+      volumes:
+        - name: hadoop-historyserver
+          persistentVolumeClaim:
+            claimName: hadoop-historyserver
+status: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.1 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: hive-metastore
+  name: hive-metastore
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: hive-metastore
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.26.1 (HEAD)
+      creationTimestamp: null
+      labels:
+        #io.kompose.network/ƒ: "true"
+        io.kompose.service: hive-metastore
+    spec:
+      containers:
+        - args:
+            - /opt/hive/bin/hive
+            - --service
+            - metastore
+          env:
+            - name: CORE_CONF_fs_defaultFS
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_fs_defaultFS
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: CORE_CONF_hadoop_http_staticuser_user
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_hadoop_http_staticuser_user
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: CORE_CONF_hadoop_proxyuser_hue_groups
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_hadoop_proxyuser_hue_groups
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: CORE_CONF_hadoop_proxyuser_hue_hosts
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_hadoop_proxyuser_hue_hosts
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check
+              valueFrom:
+                configMapKeyRef:
+                  key: HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: HDFS_CONF_dfs_permissions_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: HDFS_CONF_dfs_permissions_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: HDFS_CONF_dfs_webhdfs_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: HDFS_CONF_dfs_webhdfs_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: HIVE_SITE_CONF_datanucleus_autoCreateSchema
+              valueFrom:
+                configMapKeyRef:
+                  key: HIVE_SITE_CONF_datanucleus_autoCreateSchema
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: HIVE_SITE_CONF_hive_metastore_event_db_notification_api_auth
+              valueFrom:
+                configMapKeyRef:
+                  key: HIVE_SITE_CONF_hive_metastore_event_db_notification_api_auth
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: HIVE_SITE_CONF_hive_metastore_uris
+              valueFrom:
+                configMapKeyRef:
+                  key: HIVE_SITE_CONF_hive_metastore_uris
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName
+              valueFrom:
+                configMapKeyRef:
+                  key: HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword
+              valueFrom:
+                configMapKeyRef:
+                  key: HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: HIVE_SITE_CONF_javax_jdo_option_ConnectionURL
+              valueFrom:
+                configMapKeyRef:
+                  key: HIVE_SITE_CONF_javax_jdo_option_ConnectionURL
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName
+              valueFrom:
+                configMapKeyRef:
+                  key: HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: SERVICE_PRECONDITION
+              value: namenode:9870 datanode:9864 hive-metastore-postgresql:5432
+            - name: YARN_CONF_yarn_log___aggregation___enable
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_log___aggregation___enable
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_log_server_url
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_log_server_url
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_nodemanager_remote___app___log___dir
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_remote___app___log___dir
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_resourcemanager_address
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_address
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_resourcemanager_fs_state___store_uri
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_fs_state___store_uri
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_resourcemanager_hostname
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_hostname
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_resourcemanager_recovery_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_recovery_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_resourcemanager_resource__tracker_address
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_resource__tracker_address
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_resourcemanager_scheduler_address
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_scheduler_address
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_resourcemanager_store_class
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_store_class
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_resourcemanager_system___metrics___publisher_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_system___metrics___publisher_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_timeline___service_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_timeline___service_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_timeline___service_generic___application___history_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_timeline___service_generic___application___history_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_timeline___service_hostname
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_timeline___service_hostname
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+          image: vdesabou/hive:3.1.2-postgresql-metastore
+          name: hive-metastore
+          ports:
+            - containerPort: 9083
+          resources: {}
+      hostname: hive-metastore
+      restartPolicy: Always
+status: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.1 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: hive-metastore-postgresql
+  name: hive-metastore-postgresql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: hive-metastore-postgresql
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.26.1 (HEAD)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/mynetwork: "true"
+        io.kompose.service: hive-metastore-postgresql
+    spec:
+      containers:
+        - image: bde2020/hive-metastore-postgresql:3.1.0
+          name: hive-metastore-postgresql
+          resources: {}
+      hostname: hive-metastore-postgresql
+      restartPolicy: Always
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.1 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: hive-metastore-postgresql
+  name: hive-metastore-postgresql
+spec:
+  ports:
+    - name: "9002"
+      port: 9002
+      targetPort: 9002
+  clusterIP: None
+  clusterIPs:
+  - None
+  selector:
+    io.kompose.service: hive-metastore-postgresql
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.1 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: hive-metastore
+  name: hive-metastore
+spec:
+  ports:
+    - name: "9083"
+      port: 9083
+      targetPort: 9083
+  clusterIP: None
+  clusterIPs:
+  - None
+  selector:
+    io.kompose.service: hive-metastore
+status:
+  loadBalancer: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.1 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: hive-server
+  name: hive-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: hive-server
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.26.1 (HEAD)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/mynetwork: "true"
+        io.kompose.service: hive-server
+    spec:
+      containers:
+        - env:
+            - name: CORE_CONF_fs_defaultFS
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_fs_defaultFS
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: CORE_CONF_hadoop_http_staticuser_user
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_hadoop_http_staticuser_user
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: CORE_CONF_hadoop_proxyuser_hue_groups
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_hadoop_proxyuser_hue_groups
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: CORE_CONF_hadoop_proxyuser_hue_hosts
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_hadoop_proxyuser_hue_hosts
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check
+              valueFrom:
+                configMapKeyRef:
+                  key: HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: HDFS_CONF_dfs_permissions_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: HDFS_CONF_dfs_permissions_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: HDFS_CONF_dfs_webhdfs_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: HDFS_CONF_dfs_webhdfs_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: HIVE_CORE_CONF_javax_jdo_option_ConnectionURL
+              value: jdbc:postgresql://hive-metastore/metastore
+            - name: HIVE_SITE_CONF_datanucleus_autoCreateSchema
+              valueFrom:
+                configMapKeyRef:
+                  key: HIVE_SITE_CONF_datanucleus_autoCreateSchema
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: HIVE_SITE_CONF_hive_metastore_event_db_notification_api_auth
+              valueFrom:
+                configMapKeyRef:
+                  key: HIVE_SITE_CONF_hive_metastore_event_db_notification_api_auth
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: HIVE_SITE_CONF_hive_metastore_uris
+              valueFrom:
+                configMapKeyRef:
+                  key: HIVE_SITE_CONF_hive_metastore_uris
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName
+              valueFrom:
+                configMapKeyRef:
+                  key: HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword
+              valueFrom:
+                configMapKeyRef:
+                  key: HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: HIVE_SITE_CONF_javax_jdo_option_ConnectionURL
+              valueFrom:
+                configMapKeyRef:
+                  key: HIVE_SITE_CONF_javax_jdo_option_ConnectionURL
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName
+              valueFrom:
+                configMapKeyRef:
+                  key: HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: SERVICE_PRECONDITION
+              value: hive-metastore.confluent.svc.cluster.local:9083
+            - name: YARN_CONF_yarn_log___aggregation___enable
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_log___aggregation___enable
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_log_server_url
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_log_server_url
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_nodemanager_remote___app___log___dir
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_remote___app___log___dir
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_resourcemanager_address
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_address
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_resourcemanager_fs_state___store_uri
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_fs_state___store_uri
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_resourcemanager_hostname
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_hostname
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_resourcemanager_recovery_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_recovery_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_resourcemanager_resource__tracker_address
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_resource__tracker_address
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_resourcemanager_scheduler_address
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_scheduler_address
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_resourcemanager_store_class
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_store_class
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_resourcemanager_system___metrics___publisher_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_system___metrics___publisher_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_timeline___service_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_timeline___service_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_timeline___service_generic___application___history_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_timeline___service_generic___application___history_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+            - name: YARN_CONF_yarn_timeline___service_hostname
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_timeline___service_hostname
+                  name: connect-connect-hdfs3-sink-hadoop-hive-env
+          image: vdesabou/hive:3.1.2-postgresql-metastore
+          name: hive-server
+          resources: {}
+      hostname: hive-server
+      restartPolicy: Always
+status: {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  creationTimestamp: null
+  name: mynetwork
+spec:
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              io.kompose.network/mynetwork: "true"
+  podSelector:
+    matchLabels:
+      io.kompose.network/mynetwork: "true"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.1 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: namenode
+  name: namenode
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: namenode
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.26.1 (HEAD)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/mynetwork: "true"
+        io.kompose.service: namenode
+    spec:
+      containers:
+        - env:
+            - name: CLUSTER_NAME
+              value: test
+            - name: CORE_CONF_fs_defaultFS
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_fs_defaultFS
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: CORE_CONF_hadoop_http_staticuser_user
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_hadoop_http_staticuser_user
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: CORE_CONF_hadoop_proxyuser_hue_groups
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_hadoop_proxyuser_hue_groups
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: CORE_CONF_hadoop_proxyuser_hue_hosts
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_hadoop_proxyuser_hue_hosts
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: CORE_CONF_io_compression_codecs
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_io_compression_codecs
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check
+              valueFrom:
+                configMapKeyRef:
+                  key: HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: HDFS_CONF_dfs_permissions_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: HDFS_CONF_dfs_permissions_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: HDFS_CONF_dfs_webhdfs_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: HDFS_CONF_dfs_webhdfs_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapred_child_java_opts
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapred_child_java_opts
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_framework_name
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_framework_name
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_map_env
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_map_env
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_map_java_opts
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_map_java_opts
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_map_memory_mb
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_map_memory_mb
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_reduce_env
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_reduce_env
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_reduce_java_opts
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_reduce_java_opts
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_reduce_memory_mb
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_reduce_memory_mb
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_yarn_app_mapreduce_am_env
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_yarn_app_mapreduce_am_env
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_mapred_map_output_compress_codec
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_mapred_map_output_compress_codec
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_mapreduce_map_output_compress
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_mapreduce_map_output_compress
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_log___aggregation___enable
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_log___aggregation___enable
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_log_server_url
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_log_server_url
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_nodemanager_aux___services
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_aux___services
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_nodemanager_disk___health___checker_max___disk___utilization___per___disk___percentage
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_disk___health___checker_max___disk___utilization___per___disk___percentage
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_nodemanager_remote___app___log___dir
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_remote___app___log___dir
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_nodemanager_resource_cpu___vcores
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_resource_cpu___vcores
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_nodemanager_resource_memory___mb
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_resource_memory___mb
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_address
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_address
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_fs_state___store_uri
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_fs_state___store_uri
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_hostname
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_hostname
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_recovery_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_recovery_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_resource__tracker_address
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_resource__tracker_address
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_scheduler_address
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_scheduler_address
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_scheduler_class
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_scheduler_class
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_store_class
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_store_class
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_system___metrics___publisher_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_system___metrics___publisher_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_scheduler_capacity_root_default_maximum___allocation___mb
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_scheduler_capacity_root_default_maximum___allocation___mb
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_scheduler_capacity_root_default_maximum___allocation___vcores
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_scheduler_capacity_root_default_maximum___allocation___vcores
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_timeline___service_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_timeline___service_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_timeline___service_generic___application___history_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_timeline___service_generic___application___history_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_timeline___service_hostname
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_timeline___service_hostname
+                  name: connect-connect-hdfs3-sink-hadoop-env
+          image: bde2020/hadoop-namenode:2.0.0-hadoop3.1.2-java8
+          name: namenode
+          resources: {}
+          volumeMounts:
+            - mountPath: /hadoop/dfs/name
+              name: namenode
+      hostname: namenode
+      restartPolicy: Always
+      volumes:
+        - name: namenode
+          persistentVolumeClaim:
+            claimName: namenode
+status: {}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: namenode
+  name: namenode
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.1 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: namenode
+  name: namenode
+spec:
+  ports:
+    - name: "9000"
+      port: 9000
+      targetPort: 9000
+  clusterIP: None
+  clusterIPs:
+  - None
+  selector:
+    io.kompose.service: namenode
+status:
+  loadBalancer: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.1 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: nodemanager
+  name: nodemanager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: nodemanager
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.26.1 (HEAD)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/mynetwork: "true"
+        io.kompose.service: nodemanager
+    spec:
+      containers:
+        - env:
+            - name: CORE_CONF_fs_defaultFS
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_fs_defaultFS
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: CORE_CONF_hadoop_http_staticuser_user
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_hadoop_http_staticuser_user
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: CORE_CONF_hadoop_proxyuser_hue_groups
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_hadoop_proxyuser_hue_groups
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: CORE_CONF_hadoop_proxyuser_hue_hosts
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_hadoop_proxyuser_hue_hosts
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: CORE_CONF_io_compression_codecs
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_io_compression_codecs
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check
+              valueFrom:
+                configMapKeyRef:
+                  key: HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: HDFS_CONF_dfs_permissions_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: HDFS_CONF_dfs_permissions_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: HDFS_CONF_dfs_webhdfs_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: HDFS_CONF_dfs_webhdfs_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapred_child_java_opts
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapred_child_java_opts
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_framework_name
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_framework_name
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_map_env
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_map_env
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_map_java_opts
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_map_java_opts
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_map_memory_mb
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_map_memory_mb
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_reduce_env
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_reduce_env
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_reduce_java_opts
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_reduce_java_opts
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_reduce_memory_mb
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_reduce_memory_mb
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_yarn_app_mapreduce_am_env
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_yarn_app_mapreduce_am_env
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: SERVICE_PRECONDITION
+              value: namenode:9870 datanode:9864 resourcemanager:8088
+            - name: YARN_CONF_mapred_map_output_compress_codec
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_mapred_map_output_compress_codec
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_mapreduce_map_output_compress
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_mapreduce_map_output_compress
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_log___aggregation___enable
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_log___aggregation___enable
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_log_server_url
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_log_server_url
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_nodemanager_aux___services
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_aux___services
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_nodemanager_disk___health___checker_max___disk___utilization___per___disk___percentage
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_disk___health___checker_max___disk___utilization___per___disk___percentage
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_nodemanager_remote___app___log___dir
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_remote___app___log___dir
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_nodemanager_resource_cpu___vcores
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_resource_cpu___vcores
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_nodemanager_resource_memory___mb
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_resource_memory___mb
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_address
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_address
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_fs_state___store_uri
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_fs_state___store_uri
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_hostname
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_hostname
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_recovery_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_recovery_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_resource__tracker_address
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_resource__tracker_address
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_scheduler_address
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_scheduler_address
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_scheduler_class
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_scheduler_class
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_store_class
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_store_class
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_system___metrics___publisher_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_system___metrics___publisher_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_scheduler_capacity_root_default_maximum___allocation___mb
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_scheduler_capacity_root_default_maximum___allocation___mb
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_scheduler_capacity_root_default_maximum___allocation___vcores
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_scheduler_capacity_root_default_maximum___allocation___vcores
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_timeline___service_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_timeline___service_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_timeline___service_generic___application___history_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_timeline___service_generic___application___history_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_timeline___service_hostname
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_timeline___service_hostname
+                  name: connect-connect-hdfs3-sink-hadoop-env
+          image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.1.2-java8
+          name: nodemanager
+          resources: {}
+      hostname: nodemanager
+      restartPolicy: Always
+status: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.1 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: presto-coordinator
+  name: presto-coordinator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: presto-coordinator
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.26.1 (HEAD)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/mynetwork: "true"
+        io.kompose.service: presto-coordinator
+    spec:
+      containers:
+        - image: shawnzhu/prestodb:0.181
+          name: presto-coordinator
+          ports:
+            - containerPort: 8080
+          resources: {}
+      hostname: presto-coordinator
+      restartPolicy: Always
+status: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.1 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: presto-coordinator
+  name: presto-coordinator
+spec:
+  ports:
+    - name: "18080"
+      port: 18080
+      targetPort: 8080
+  selector:
+    io.kompose.service: presto-coordinator
+status:
+  loadBalancer: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.26.1 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: resourcemanager
+  name: resourcemanager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: resourcemanager
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.26.1 (HEAD)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/mynetwork: "true"
+        io.kompose.service: resourcemanager
+    spec:
+      containers:
+        - env:
+            - name: CORE_CONF_fs_defaultFS
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_fs_defaultFS
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: CORE_CONF_hadoop_http_staticuser_user
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_hadoop_http_staticuser_user
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: CORE_CONF_hadoop_proxyuser_hue_groups
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_hadoop_proxyuser_hue_groups
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: CORE_CONF_hadoop_proxyuser_hue_hosts
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_hadoop_proxyuser_hue_hosts
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: CORE_CONF_io_compression_codecs
+              valueFrom:
+                configMapKeyRef:
+                  key: CORE_CONF_io_compression_codecs
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check
+              valueFrom:
+                configMapKeyRef:
+                  key: HDFS_CONF_dfs_namenode_datanode_registration_ip___hostname___check
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: HDFS_CONF_dfs_permissions_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: HDFS_CONF_dfs_permissions_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: HDFS_CONF_dfs_webhdfs_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: HDFS_CONF_dfs_webhdfs_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapred_child_java_opts
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapred_child_java_opts
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_framework_name
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_framework_name
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_map_env
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_map_env
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_map_java_opts
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_map_java_opts
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_map_memory_mb
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_map_memory_mb
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_reduce_env
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_reduce_env
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_reduce_java_opts
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_reduce_java_opts
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_mapreduce_reduce_memory_mb
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_mapreduce_reduce_memory_mb
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: MAPRED_CONF_yarn_app_mapreduce_am_env
+              valueFrom:
+                configMapKeyRef:
+                  key: MAPRED_CONF_yarn_app_mapreduce_am_env
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: SERVICE_PRECONDITION
+              value: namenode:9870 datanode:9864
+            - name: YARN_CONF_mapred_map_output_compress_codec
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_mapred_map_output_compress_codec
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_mapreduce_map_output_compress
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_mapreduce_map_output_compress
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_log___aggregation___enable
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_log___aggregation___enable
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_log_server_url
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_log_server_url
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_nodemanager_aux___services
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_aux___services
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_nodemanager_disk___health___checker_max___disk___utilization___per___disk___percentage
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_disk___health___checker_max___disk___utilization___per___disk___percentage
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_nodemanager_remote___app___log___dir
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_remote___app___log___dir
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_nodemanager_resource_cpu___vcores
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_resource_cpu___vcores
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_nodemanager_resource_memory___mb
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_nodemanager_resource_memory___mb
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_address
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_address
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_fs_state___store_uri
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_fs_state___store_uri
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_hostname
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_hostname
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_recovery_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_recovery_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_resource__tracker_address
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_resource__tracker_address
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_scheduler_address
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_scheduler_address
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_scheduler_class
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_scheduler_class
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_store_class
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_store_class
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_resourcemanager_system___metrics___publisher_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_resourcemanager_system___metrics___publisher_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_scheduler_capacity_root_default_maximum___allocation___mb
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_scheduler_capacity_root_default_maximum___allocation___mb
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_scheduler_capacity_root_default_maximum___allocation___vcores
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_scheduler_capacity_root_default_maximum___allocation___vcores
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_timeline___service_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_timeline___service_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_timeline___service_generic___application___history_enabled
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_timeline___service_generic___application___history_enabled
+                  name: connect-connect-hdfs3-sink-hadoop-env
+            - name: YARN_CONF_yarn_timeline___service_hostname
+              valueFrom:
+                configMapKeyRef:
+                  key: YARN_CONF_yarn_timeline___service_hostname
+                  name: connect-connect-hdfs3-sink-hadoop-env
+          image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.1.2-java8
+          name: resourcemanager
+          resources: {}
+      hostname: resourcemanager
+      restartPolicy: Always
+status: {}
