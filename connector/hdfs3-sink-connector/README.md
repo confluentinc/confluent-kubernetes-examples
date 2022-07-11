@@ -32,7 +32,7 @@ helm upgrade --install confluent-operator \
 ## Deploy Hadoop cluster with all the dependencies   
 
 ```
-kubectl apply -f $TUTORIAL_HOME/hdfs-server.yaml
+kubectl --namespace confluent apply -f $TUTORIAL_HOME/hdfs-server.yaml
 ```
 
 Check that all components were created: 
@@ -117,7 +117,7 @@ export POD_NAME=$(kubectl --namespace confluent get pods -l "io.kompose.service=
 
 echo $POD_NAME
 
-kubectl exec $POD_NAME  -it -- bash  -c "/opt/hadoop-3.1.3/bin/hdfs dfs -ls /topics/test-hdfs"          
+kubectl --namespace confluent exec $POD_NAME  -it -- bash  -c "/opt/hadoop-3.1.3/bin/hdfs dfs -ls /topics/test-hdfs"          
 
 WARNING: HADOOP_PREFIX has been replaced by HADOOP_HOME. Using value of HADOOP_PREFIX.
 Found 10 items
