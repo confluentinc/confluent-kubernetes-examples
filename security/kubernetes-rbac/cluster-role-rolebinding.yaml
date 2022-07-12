@@ -110,6 +110,8 @@ rules:
   - namespaces
   verbs:
   - get
+  - list # needed for nonnamespaced deployments
+  - watch # needed for nonnamespaced deployments
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
