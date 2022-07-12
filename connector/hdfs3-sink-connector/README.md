@@ -2,7 +2,7 @@
 
 In this example, you'll setup the followings:  
 * Hadoop server to leverage in this demo
-* Confluent Platform with Connect and HDSF 3 sink connector jar files.  
+* Confluent Platform with Connect and HDFS 3 sink connector jar files.  
 
 
 You will install and manage the HDFS 3 sink connector plugin through the declarative `Connector` CRD.  
