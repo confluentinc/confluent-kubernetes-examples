@@ -10,7 +10,7 @@ Before continuing with the scenario, ensure that you have set up the
 Set the tutorial directory for this tutorial under the directory you downloaded
 the tutorial files:
 ```   
-export TUTORIAL_HOME=<Tutorial directory>/ccloud-topic
+export TUTORIAL_HOME=<Tutorial directory>/hybrid/ccloud-topic
 ```  
 
 ## Deploy Confluent for Kubernetes
@@ -53,7 +53,7 @@ kubectl apply -f $TUTORIAL_HOME/topic.yaml
 
 ## Update Kafka Topic
 
-You can update the editable settings of the topic in the topic CR, topic.yaml. To update the kafka topic config, add the config under `spec.configs` in the kafka topic custom resource file, apply the changes using the `kubectl apply -f topic.yaml` command.
+You can update the editable settings of the topic in the topic CR, `topic.yaml`. To update the kafka topic config, add the config under `spec.configs` in the kafka topic custom resource file, apply the changes using the `kubectl apply -f topic.yaml` command.
 
 Limitations:
 
@@ -69,7 +69,7 @@ Limitations:
 - If you have more than one environment, select an environment.
 - Select a cluster from the navigation bar and click the `Topics` menu. 
 - The Topics page displays the created topic
-- Select the created topic, and view the `Configuration` of the topic from the Confluent Cloud Console. 
+- Select the created topic, and view the `Configuration` of the topic from the Confluent Cloud Console.
 
 ## Tear down
 
