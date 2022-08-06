@@ -153,3 +153,13 @@ spec:
       url: https://schemaregistry.confluent.svc.cluster.local:8081
       tls:
         enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: default
+  namespace: confluent
+spec:
+  kafkaClusterRef:
+    name: kafka
+    namespace: confluent
