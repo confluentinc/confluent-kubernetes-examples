@@ -38,7 +38,7 @@ This is the architecture you'll achieve on Azure Kubernetes Service (AKS):
     be the authoritative nameserver for the west.svc.cluster.local domain, and like wise for all pairs of regions.
 
 - Firewall rules
-  - At minimum: allow TCP traffic on the standard ZooKeeper, Kafka and SchemaRegistry ports between all region clusters' Pod subnetworks.
+  - At minimum: allow TCP traffic on the standard Zookeeper, Kafka and SchemaRegistry ports between all region clusters' Pod subnetworks.
 
 In this section, you'll configure the required networking between three Azure Kubernetes Service (AKS) clusters, where 
 each AKS cluster is in a different Azure region.

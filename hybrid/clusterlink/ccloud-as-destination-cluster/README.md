@@ -65,7 +65,7 @@ kubectl -n operator create secret tls ca-pair-sslcerts \
 
 ## CCLOUD setup
 - Create a dedicated a cluster in the Confluent Cloud. Dedicated cluster is required for cluster linking. Standard cluster should be good for creating topics
-- Create an API Key with `Global Access`. You can create API key in `Cluster Overview -> Data Integartion -> API Keys`
+- Create an API Key with `Global Access`. You can create API key in `Cluster Overview -> Data Integration -> API Keys`
 - Create a file `basic.txt` with API Key and API secret in this format
 ```
 username=<API-KEY>

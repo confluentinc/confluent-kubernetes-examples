@@ -129,7 +129,7 @@ In this scenario, you'll be allowing Kafka clients to connect with Kafka through
 For that purpose, you'll provide a server certificate that secures the external domain used for Kafka access.
 
 ```
-# If you dont have one, create a root certificate authority for the external component certs
+# If you don't have one, create a root certificate authority for the external component certs
 openssl genrsa -out $TUTORIAL_HOME/externalRootCAkey.pem 2048
 
 openssl req -x509  -new -nodes \
@@ -248,7 +248,7 @@ kubectl apply -f $TUTORIAL_HOME/controlcenter-testadmin-rolebindings.yaml --name
 # Configure External Access through Ingress Controller
 
 The Ingress Controller will support TLS encryption. For this, you'll need to provide a server certificate
-to use for encypting traffic.
+to use for encrypting traffic.
 
 ```
 # Generate a server certificate from the external root certificate authority

@@ -1,6 +1,6 @@
 # MRC Deployment - Basic
 
-In this deploymnet, you'll deploy a quickstart Confluent Platform cluster across a multiple regions set up.
+In this deployment, you'll deploy a quickstart Confluent Platform cluster across a multiple regions set up.
 
 This assumes that you have set up three Kubernetes clusters, and have Kubernetes contexts set up as:
 - mrc-central

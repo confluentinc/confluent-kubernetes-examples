@@ -134,7 +134,7 @@ sasl.mechanism=PLAIN
 EOF
 ```
 
-### Create topic to load dat a from table into (CRD connector)
+### Create topic to load data from table into (CRD connector)
 ```
 kafka-topics --command-config /opt/confluentinc/etc/connect/consumer.properties \
 --bootstrap-server CCLOUD:9092  \
@@ -144,7 +144,7 @@ kafka-topics --command-config /opt/confluentinc/etc/connect/consumer.properties 
 --topic quickstart-jdbc-CRD-test
 ```
 
-### Create topic to load dat a from table into (REST API endpoint connector) 
+### Create topic to load data from table into (REST API endpoint connector)
 
 ```
 kafka-topics --command-config /opt/confluentinc/etc/connect/consumer.properties \

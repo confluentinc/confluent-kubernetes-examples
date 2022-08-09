@@ -76,7 +76,7 @@ After the Kafka cluster is in running state, create cluster link between source 
 #### exec into destination kafka pod
     kubectl -n destination exec kafka-0 -it -- bash
 
-#### produce a message in the Confuent Cloud topic
+#### produce a message in the Confluent Cloud topic
 Go the UI and produce a message into the topic called demo.
 
 #### consume in destination kafka cluster and confirm message delivery in destination cluster

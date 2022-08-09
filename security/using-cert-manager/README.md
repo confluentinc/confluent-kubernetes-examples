@@ -47,7 +47,7 @@ kubectl get pods --namespace confluent
 
 To comprehensively understand how to install cert manager using Helm, see these docs: https://cert-manager.io/docs/installation/kubernetes/
 
-For the purpose of this scenario worklow, use this step to install Cert-manager:
+For the purpose of this scenario workflow, use this step to install Cert-manager:
 
 ```
 kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v1.0.2/cert-manager.yaml
@@ -59,7 +59,7 @@ kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/relea
 When you provide TLS certificates, CFK takes the provided files and configures Confluent components accordingly.
 
 For each component, the following TLS certificate information should be provided:
-- The certificate authorities for the component to trust, including the authorites used to issue server certificates for any Confluent component cluster. These are required so that peer-to-peer communication (e.g. between Kafka Brokers) and communication between components (e.g. from Connect workers to Kafka) will work.
+- The certificate authorities for the component to trust, including the authorities used to issue server certificates for any Confluent component cluster. These are required so that peer-to-peer communication (e.g. between Kafka Brokers) and communication between components (e.g. from Connect workers to Kafka) will work.
 - The component’s server certificate (public key)
 - The component’s server private key
 

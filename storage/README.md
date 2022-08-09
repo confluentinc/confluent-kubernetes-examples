@@ -7,10 +7,10 @@ Before continuing with the scenario, ensure that you have set up the
 
 ## Set the current tutorial directory
 
-Set the tutorial directory under the directory you downloaded this Github repo:
+Set the tutorial directory under the directory you downloaded this GitHub repo:
 
 ```   
-export TUTORIAL_HOME=<Github repo directory>/storage
+export TUTORIAL_HOME=<GitHub repo directory>/storage
 ```
 
 ## Deploy Confluent for Kubernetes

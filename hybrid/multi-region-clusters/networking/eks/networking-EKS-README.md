@@ -13,9 +13,9 @@ This is the architecture you'll achieve on Elastic Kubernetes Service (EKS):
   - For peering to work, address space between VPCs cannot overlap.
   - Additional details on VPC peering can be found here: https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html
 - Flat pod networking
-  - With Amazon VPC Container Networking Interface (CNI), every pod gets an IP address from the subnet and can be accessed directly. 
+  - With Amazon VPC Container Networking Interface (CNI), every pod gets an IP address from the subnet and can be accessed directly.
   - These IP addresses must be unique across your network space. 
-  - Each node can support upto a certain number of pods as defined here: https://github.com/awslabs/amazon-eks-ami/blob/master/files/eni-max-pods.txt 
+  - Each node can support up to a certain number of pods as defined here: https://github.com/awslabs/amazon-eks-ami/blob/master/files/eni-max-pods.txt
   - The equivalent number of IP addresses per node are then reserved up front for that node.
   - With Amazon VPC CNI, pods do not require a separate address space.
   - Additional details on Amazon VPC CNI can be found here: https://docs.aws.amazon.com/eks/latest/userguide/pod-networking.html
