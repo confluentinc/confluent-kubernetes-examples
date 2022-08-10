@@ -37,8 +37,8 @@ Deploy Confluent for Kubernetes
 
      helm repo add confluentinc https://packages.confluent.io/helm
 
-Note that it is assumed that your Kubernetes cluster has a ``confluent`` namespace available, otherwise you can create it by running ``kubectl create namespace confluent``. 
-
+   It is assumed that your Kubernetes cluster has the ``confluent`` namespace available. If not, you can create it by running 
+   ``kubectl create namespace confluent``. 
 
 #. Install Confluent For Kubernetes using Helm:
 
