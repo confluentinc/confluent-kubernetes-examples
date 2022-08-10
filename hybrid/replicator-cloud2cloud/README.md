@@ -100,7 +100,7 @@ Create a Kubernetes secret object for the **source** Confluent Cloud Kafka acces
 ```
 
 
-## Deploy destination components: Control Center and Replicator
+## Deploy destination components: Control Center and Connect Worker  
 
 Deploy destination cluster:  
 
@@ -164,10 +164,28 @@ kubectl --namespace destination apply -f $TUTORIAL_HOME/cloudproducer.yaml
 
 ## Configure Replicator in destination cluster
 
-Confluent Replicator requires the configuration to be provided as a file in the running Docker container.  
-You'll then interact with it through the REST API, to set the configuration.  
+There are two ways to deploy replicator connector: 
 
-### SSH into the `replicator-0` pod
+1) Declaratively creating replicator connector 
+2) Using REST API endpoint to deploy the replicator connector
+
+### 1) Declaratively creating replicator connector
+
+Confluent for Kubernetes supports [declaratively](https://docs.confluent.io/operator/2.4.1/co-manage-connectors.html) creating and managing connectors as Connector custom resources (CRs) in Kubernetes.
+
+#### Create replicator connector 
+```
+kubectl apply -f $TUTORIAL_HOME/connector.yaml
+```
+#### Check connector
+```
+kubectl get connector -n confluent
+```
+
+### 2) Using REST API endpoint to deploy the replicator connector
+Confluent Replicator requires the configuration to be provided as a file in the running Docker container. You'll then interact with it through the REST API, to set the configuration.  
+
+#### SSH into the `replicator-0` pod
 
 ```
 kubectl --namespace destination exec -it replicator-0 -- bash
@@ -223,7 +241,7 @@ curl -XGET -H "Content-Type: application/json" http://localhost:8083/connectors
 curl -XGET -H "Content-Type: application/json" http://localhost:8083/connectors/replicator/status 
 ```
 
-##### To delete the connector: 
+#### To delete the connector: 
 
 ```
 curl -XDELETE -H "Content-Type: application/json" http://localhost:8083/connectors/replicator 
