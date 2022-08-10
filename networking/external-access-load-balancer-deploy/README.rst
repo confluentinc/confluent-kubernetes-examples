@@ -136,7 +136,7 @@ The access endpoint of each Confluent Platform component will be:
 
   <Component CR name>.$DOMAIN
 
-For example, in a brower, you will access Control Center at:
+For example, in a browser, you will access Control Center at:
 
 ::
 

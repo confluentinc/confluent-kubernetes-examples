@@ -144,7 +144,7 @@ kubectl --namespace confluent delete -f $TUTORIAL_HOME/hdfs-server.yaml
 
 ## Notes 
 
-Since the Connect leverage the built in libraries of the hadoop client a name for the user of the pod is needed.  
+Since the Connect leverages the built in libraries of the Hadoop client a name for the user of the pod is needed.
 By default Confluent Platform uses ` user ID 1001` which has no name:  
 
 

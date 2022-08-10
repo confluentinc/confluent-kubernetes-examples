@@ -54,7 +54,7 @@ openssl req -x509  -new -nodes \
   -subj "/C=US/ST=CA/L=MVT/O=TestOrg/OU=Cloud/CN=TestCA"
 ```
 
-3. Check the validatity of the CA
+3. Check the validity of the CA
 
 ```
 openssl x509 -in $TUTORIAL_HOME/generated/cacerts.pem -text -noout

@@ -22,7 +22,7 @@ Note: Hashicorp Vault is a third party software product that is not supported or
 
 Using the Helm Chart, install the latest version of the Vault server running in development mode to a namespace `hashicorp`.
 
-Running a Vault server in development is automatically initialized and unsealed. This is ideal in a learning environment, but not recomended for a production environment. 
+Running a Vault server in development is automatically initialized and unsealed. This is ideal in a learning environment, but not recommended for a production environment.
 
 ```
 $ kubectl create ns hashicorp
@@ -336,7 +336,7 @@ This repo includes a Helm chart for [OpenLdap](https://github.com/osixia/docker-
 The chart `values.yaml` includes the set of principal definitions that Confluent Platform 
 needs for RBAC.
 
-Deploy OpenLdap:
+Deploy OpenLDAP:
 
 ```
 helm upgrade --install -f $TUTORIAL_HOME/../../assets/openldap/ldaps-rbac.yaml test-ldap $TUTORIAL_HOME/../../assets/openldap -n confluent

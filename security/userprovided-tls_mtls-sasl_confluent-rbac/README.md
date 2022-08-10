@@ -41,7 +41,7 @@ kubectl get pods --namespace confluent
 This repo includes a Helm chart for [OpenLdap](https://github.com/osixia/docker-openldap). The chart `values.yaml`
 includes the set of principal definitions that Confluent Platform needs for RBAC.
 
-Deploy OpenLdap:
+Deploy OpenLDAP:
 
 ```
 helm upgrade --install -f $TUTORIAL_HOME/../../assets/openldap/ldaps-rbac.yaml test-ldap $TUTORIAL_HOME/../../assets/openldap --namespace confluent

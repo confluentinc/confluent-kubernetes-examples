@@ -1,6 +1,6 @@
 # Configure Networking: Google Kubernetes Engine
 
-This is the architecture you'll acheive on Google Kubernetes Engine (GKE):
+This is the architecture you'll achieve on Google Kubernetes Engine (GKE):
 
 - Namespace naming
   - 1 uniquely named namespace in each region cluster

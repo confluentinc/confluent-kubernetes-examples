@@ -62,7 +62,7 @@ kubectl create secret tls ca-pair-sslcerts \
 Deploy the source and destination cluster.
 
 ```
-# Specify the credentials required by the souce and destination cluster. To understand how these
+# Specify the credentials required by the source and destination cluster. To understand how these
 # credentials are configured, see 
 # https://github.com/confluentinc/confluent-kubernetes-examples/tree/master/security/secure-authn-encrypt-deploy
 
