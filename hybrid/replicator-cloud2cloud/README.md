@@ -179,7 +179,7 @@ kubectl apply -f $TUTORIAL_HOME/connector.yaml
 ```
 #### Check connector
 ```
-kubectl get connector -n confluent
+kubectl get connector -n destination
 ```
 
 ### 2) Using REST API endpoint to deploy the replicator connector
