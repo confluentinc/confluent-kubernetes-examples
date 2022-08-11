@@ -23,7 +23,7 @@ spec:
     - name: kafka-properties
       mountPath: /mnt
   volumes:
-    - name: kafka-properties # Create secret with name `kafka-client-config` with client configurations
+    - name: kafka-properties # Create secret with name `kafka-client-config-secure` with client configurations
       secret:
         secretName: kafka-client-config-secure
   dnsPolicy: ClusterFirst

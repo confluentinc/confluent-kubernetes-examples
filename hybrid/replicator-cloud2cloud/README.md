@@ -171,7 +171,7 @@ There are two ways to deploy replicator connector:
 
 ### 1) Declaratively creating replicator connector
 
-Confluent for Kubernetes supports [declaratively](https://docs.confluent.io/operator/2.4.1/co-manage-connectors.html) creating and managing connectors as Connector custom resources (CRs) in Kubernetes.
+Starting in Confluent for Kubernetes (CFK) 2.1.0, you can [declaratively](https://docs.confluent.io/operator/2.4.1/co-manage-connectors.html#co-manage-connectors) manage connectors in Kubernetes using the Connector custom resource definition (CRD).
 
 #### Create replicator connector 
 ```

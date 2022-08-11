@@ -111,8 +111,26 @@ kubectl --namespace destination apply -f $TUTORIAL_HOME/cloudproducer.yaml
 
 ## Configure Replicator in destination cluster
 
-Confluent Replicator requires the configuration to be provided as a file in the running Docker container.
-You'll then interact with it through the REST API, to set the configuration.
+There are two ways to deploy replicator connector:
+
+1) Declaratively creating replicator connector
+2) Using REST API endpoint to deploy the replicator connector
+
+### 1) Declaratively creating replicator connector
+
+Starting in Confluent for Kubernetes (CFK) 2.1.0, you can [declaratively](https://docs.confluent.io/operator/2.4.1/co-manage-connectors.html#co-manage-connectors) manage connectors in Kubernetes using the Connector custom resource definition (CRD).
+
+#### Create replicator connector
+```
+kubectl apply -f $TUTORIAL_HOME/connector.yaml
+```
+#### Check connector
+```
+kubectl get connector -n destination
+```
+
+### 2) Using REST API endpoint to deploy the replicator connector
+Confluent Replicator requires the configuration to be provided as a file in the running Docker container. You'll then interact with it through the REST API, to set the configuration.
 
 ### SSH into the `replicator-0` pod
 
@@ -202,6 +220,7 @@ kubectl --namespace destination delete -f $TUTORIAL_HOME/cloudtopic.yaml
 kubectl --namespace destination delete -f $TUTORIAL_HOME/cloudproducer.yaml
 helm --namespace destination delete confluent-operator
 ```
+Stop port-forward which was started earlier.
 
 
 #### Appendix: Create your own certificates
