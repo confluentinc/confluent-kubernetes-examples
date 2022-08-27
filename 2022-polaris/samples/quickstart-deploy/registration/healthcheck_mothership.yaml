@@ -1,0 +1,11 @@
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: CPCHealthCheck
+metadata:
+  name: mothership-hc
+  namespace: cpc-system
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents CPC services healthcheck in mothership Kubernetes cluster."
+spec:
+  k8sClusterRef:
+    name: mothership
+    namespace: cpc-system

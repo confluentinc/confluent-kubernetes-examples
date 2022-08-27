@@ -1,0 +1,16 @@
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: KubernetesCluster
+metadata:
+  name: sat-1-arodoni
+  namespace: cpc-system
+spec:
+  k8sID: ef759764-0687-41c7-a05f-7edd3794124b
+  description: "cpc-dataplane kubernetes cluster"
+  # required
+  topology:
+    region: us-west2
+    zones:
+    - us-west2-a
+    - us-west2-b
+    - us-west2-c
+  k8sClusterDomain: cluster.local

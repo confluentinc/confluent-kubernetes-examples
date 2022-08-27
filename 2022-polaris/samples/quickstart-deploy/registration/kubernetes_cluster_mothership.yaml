@@ -1,0 +1,16 @@
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: KubernetesCluster
+metadata:
+  name: mothership
+  namespace: cpc-system
+spec:
+  k8sID: a6d1c21a-0ef4-4189-b4ac-68e7e7395e65
+  description: "cpc-controlplane kubernetes cluster"
+  # required
+  topology:
+    region: us-central1
+    zones:
+    - us-central1-a
+    - us-central1-b
+    - us-central1-c
+  k8sClusterDomain: cluster.local
