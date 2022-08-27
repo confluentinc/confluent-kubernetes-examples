@@ -5,17 +5,15 @@ Deploy Polaris
 This example will walk you though configuration of Polaris, including deployment
 of the Control Plane and the Data Plane.
 
-#. :ref:`Deploy the Control Plane in the control plane Kubernetes cluster 
-   <deploy-control-plane>`.
+#. Deploy the Control Plane in the control plane Kubernetes cluster.
 
 #. Deploy the Data Plane.
   
-   - To install and follow the local Data Plane scenario, :ref:`deploy the Data
-     Plane  in the same cluster as the Control Plane <deploy-local-data-plane>`.
+   - To install and follow the local Data Plane scenario, deploy the Data
+     Plane  in the same cluster as the Control Plane.
    
-   - To install and follow the remote Data Plane scenario, :ref:`deploy the Data 
-     Plane in a separate Data Plane Kubernetes cluster 
-     <deploy-remote-data-plane>`.
+   - To install and follow the remote Data Plane scenario, deploy the Data 
+     Plane in a separate Data Plane Kubernetes cluster.
 
 Prepare  
 -------------
