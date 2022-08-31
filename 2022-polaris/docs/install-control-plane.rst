@@ -676,45 +676,45 @@ Plane cluster:
 The following is an example of a Confluent CR to deploy Zookeeper, Kafka, and
 Schema Registry:
 
-   .. sourcecode:: yaml
+.. sourcecode:: yaml
 
-      apiVersion: cluster.cpc.platform.confluent.io/v1beta1
-      kind: ZookeeperCluster
-      metadata:
-        name: my-quickstart-zk
-      spec:
-        blueprintRef:
-          name: quickstart-zookeeper
-        k8sClusterRef:
-          name: myQuickstartCluster
-      ---
-      apiVersion: cpc.platform.confluent.io/v1beta1
-      kind: KafkaCluster
-      metadata:
-        name: my-quickstart-kafka
-      spec:
-        blueprintRef:
-          name: quickstart-kafka
-        k8sClusterRef:
-          name: myQuickstartCluster
-        dependencies:
-          zookeeperCluster:
-            name: my-quickstart-zk
-          schemaRegistryCluster:
-            name: my-quickstart-schemaregistry
-      ---
-      apiVersion: cluster.cpc.platform.confluent.io/v1beta1
-      kind: SchemaRegistryCluster
-      metadata:
-        name: my-quickstart-schemaregistry
-      spec:
-        blueprintRef:
-          name: quickstart-schemaregistry
-        k8sClusterRef:
-          name: myQuickstartCluster
-        dependencies:
-          kafkaCluster:
-            name: my-quickstart-kafka
+   apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+   kind: ZookeeperCluster
+   metadata:
+     name: my-quickstart-zk
+   spec:
+     blueprintRef:
+       name: quickstart-zookeeper
+     k8sClusterRef:
+       name: myQuickstartCluster
+   ---
+   apiVersion: cpc.platform.confluent.io/v1beta1
+   kind: KafkaCluster
+   metadata:
+     name: my-quickstart-kafka
+   spec:
+     blueprintRef:
+       name: quickstart-kafka
+     k8sClusterRef:
+       name: myQuickstartCluster
+     dependencies:
+       zookeeperCluster:
+         name: my-quickstart-zk
+       schemaRegistryCluster:
+         name: my-quickstart-schemaregistry
+   ---
+   apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+   kind: SchemaRegistryCluster
+   metadata:
+     name: my-quickstart-schemaregistry
+   spec:
+     blueprintRef:
+       name: quickstart-schemaregistry
+     k8sClusterRef:
+       name: myQuickstartCluster
+     dependencies:
+       kafkaCluster:
+         name: my-quickstart-kafka
 
 #. Deploy the Confluent clusters:
 
