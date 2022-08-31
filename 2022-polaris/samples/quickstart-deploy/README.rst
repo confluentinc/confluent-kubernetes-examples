@@ -2,8 +2,8 @@
 Deploy Polaris
 ==============
 
-This example will walk you though configuration of Polaris, including deployment
-of the Control Plane and the Data Plane.
+This example will walk you through configuration of Polaris, including
+deployment of the Control Plane, the Data Plane, and Blueprints.
 
 #. Deploy the Control Plane in the control plane Kubernetes cluster.
 
@@ -18,14 +18,32 @@ of the Control Plane and the Data Plane.
 Prepare  
 -------------
 
+#. Install Helm 3 on your local machine.
+
+#. Install ``kubectl`` command-line tool on your local machine.
+
 #. Set up the Kubernetes clusters you want to use for the Control Plane and the
    Data Plane. Kubernetes versions 1.22+ are required.
+   
+#. Rename the Kubernetes contexts for easy identifications:
+
+   .. sourcecode:: bash
+   
+      kubectl config rename-context <Kubernetes control plane context> <control-plane>
+      
+      kubectl config rename-context <Kubernetes data plane context> <data-plane>
    
 #. Set the Polaris home directory:
 
    .. sourcecode:: bash
    
       export CPC_HOME=<Directory to install Polaris>
+
+#. Clone the this example repo to your local machine:
+
+   .. sourcecode:: bash
+
+      git clone git@github.com:confluentinc/confluent-kubernetes-examples.git
 
 #. Set the tutorial directory for this tutorial:
 
@@ -41,14 +59,20 @@ Install Control Plane
 In the Kubernetes cluster you want to install the Control Plane on, take the
 following steps:
 
+#. Set the current context to the Control Plane cluster:
+
+   .. sourcecode:: bash
+   
+      kubectl config use-context control-plane
+
 #. Create a namespace for the Polaris system resources. ``cpc-system`` is used 
    in these examples:
 
    .. sourcecode:: bash
 
-      kubectl create namespace cpc-system
+      kubectl create namespace cpc-system 
 
-#. Generate KubeConfig file for the remote Data Planes to connect:
+#. Generate the KubeConfig file for the remote Data Planes to connect:
 
    .. sourcecode:: bash
 
@@ -70,7 +94,7 @@ following steps:
          --docker-username=$JFROG_USERNAME                     \
          --docker-password=$JFROG_PASSWORD                     \
          --docker-email=$EMAIL                                 \
-         --namespace cpc-system 
+         --namespace cpc-system                                
  
 #. Create a Webhook certificate secret. ``webhooks-tls`` is used in these 
    examples:
@@ -87,8 +111,8 @@ following steps:
           --from-file=tls.key=/tmp/server-key.pem \
           --namespace cpc-system                  \
           --save-config --dry-run=client -oyaml | \
-          kubectl apply -f -
-
+          kubectl apply -f -                     
+ 
 #. Install the Orchestrator CRDs:
 
    .. sourcecode:: bash
@@ -102,7 +126,7 @@ following steps:
       helm upgrade --install \
         -values $CPC_HOMEcpc-orchestrator/charts/values/local.yaml \
         cpc-orchestrator cpc-orchestrator/charts/cpc-orchestrator \
-        --namespace cpc-system
+        --namespace cpc-system 
 
 #. Deploy the Blueprint and the Confluent cluster class CRs:
 
@@ -240,18 +264,17 @@ Kubernetes cluster from the Control Plane cluster.
    
       .. sourcecode:: bash
    
-         kubectl get namespace kube-system -oyaml | grep uid
+         kubectl get namespace kube-system -oyaml --context data-plane | grep uid
 
    #. In the Control Plane, edit 
       ``registration/kubernetes_cluster_sat-1.yaml`` and set ``spec.k8sID`` 
       to the Kubernetes ID from previous step.
       
-   #. In the Control Plane, create the KubernetesCluster CR in the Control Plane 
-      Kubernetes cluster:
+   #. In the Control Plane, create the KubernetesCluster CR:
    
       .. sourcecode:: bash
 
-         kubectl apply -f registration/kubernetes_cluster_sat-1.yaml
+         kubectl apply -f registration/kubernetes_cluster_sat-1.yaml --context control-plane
 
    #. In the Control Plane, create the HealthCheck CR in the Control Plane 
       Kubernetes cluster. Its spec has the reference to the Kubernetes Cluster 
@@ -259,7 +282,7 @@ Kubernetes cluster from the Control Plane cluster.
       
       .. sourcecode:: bash
 
-         kubectl apply -f registration/healthcheck_sat-1.yaml
+         kubectl apply -f registration/healthcheck_sat-1.yaml --context control-plane
 
 #. In the Data Plane, create the required secrets.
 
@@ -279,6 +302,7 @@ Kubernetes cluster from the Control Plane cluster.
             --docker-username=$JFROG_USERNAME                     \
             --docker-password=$JFROG_PASSWORD                     \
             --docker-email=$EMAIL                                 \
+            --context data-plane                                  \
             --namespace cpc-system 
 
    #. Create the KubeConfig secret:
@@ -287,6 +311,7 @@ Kubernetes cluster from the Control Plane cluster.
       
          kubectl create secret generic mothership-kubeconfig \
            --from-file=kubeconfig=/tmp/kubeconfig            \
+           --context data-plane                              \
            --namespace cpc-system 
 
 #. In the Data Plane, install the Agent.
@@ -295,13 +320,13 @@ Kubernetes cluster from the Control Plane cluster.
 
       .. sourcecode:: bash 
       
-         kubectl create namespace cpc-system
+         kubectl create namespace cpc-system --context data-plane
 
    #. Apply the Agent CRDs:
 
       .. sourcecode:: bash
 
-         kubectl apply -f $CPC_HOME/cpc-agent/charts/cpc-agent/crds
+         kubectl apply -f $CPC_HOME/cpc-agent/charts/cpc-agent/crds --context data-plane
 
    #. Install the Agent Helm chart in the ``Remote`` mode:
 
@@ -311,6 +336,7 @@ Kubernetes cluster from the Control Plane cluster.
            cpc-agent $CPC_HOME/cpc-agent/charts/cpc-agent \
            --set mode=Remote \
            --set remoteKubeConfig.secretRef=mothership-kubeconfig \
+           --context data-plane \
            --namespace cpc-system
 
 #. In the Data Plane, install the |co| Helm chart in the cluster mode 
@@ -321,6 +347,7 @@ Kubernetes cluster from the Control Plane cluster.
       helm upgrade --install -f cpc-orchestrator/charts/values/local.yaml \
         cpc-orchestrator $CPC_HOME/cpc-orchestrator/charts/cpc-orchestrator \
         --set namespaced=false \
+        --context data-plane \
         --namespace cpc-system
 
 --------------------------
@@ -333,18 +360,18 @@ From the Control Plane cluster, deploy Confluent Platform.
 
    .. sourcecode:: bash
 
-      kubectl create namespace org-confluent
+      kubectl create namespace org-confluent --context control-plane
 
 #. Deploy Confluent Platform: 
 
    .. sourcecode:: bash
 
-      kubectl apply -f deployment/sat-1/zookeeper_cluster_mothership.yaml
-      kubectl apply -f deployment/sat-1/kafka_cluster_mothership.yaml
-      kubectl apply -f deployment/sat-1/connect_cluster_mothership.yaml
-      kubectl apply -f deployment/sat-1/ksqldb_cluster_mothership.yaml
-      kubectl apply -f deployment/sat-1/schemaregistry_cluster_mothership.yaml
-      kubectl apply -f deployment/sat-1/controlcenter_cluster_mothership.yaml
+      kubectl apply -f deployment/sat-1/zookeeper_cluster_mothership.yaml --context control-plane
+      kubectl apply -f deployment/sat-1/kafka_cluster_mothership.yaml --context control-plane
+      kubectl apply -f deployment/sat-1/connect_cluster_mothership.yaml --context control-plane
+      kubectl apply -f deployment/sat-1/ksqldb_cluster_mothership.yaml --context control-plane
+      kubectl apply -f deployment/sat-1/schemaregistry_cluster_mothership.yaml --context control-plane
+      kubectl apply -f deployment/sat-1/controlcenter_cluster_mothership.yaml --context control-plane
 
 #. In the Data Plane, validate the deployment using Control Center.
 
@@ -354,7 +381,7 @@ From the Control Plane cluster, deploy Confluent Platform.
 
       .. sourcecode:: bash
 
-         kubectl port-forward controlcenter-0 9021:9021
+         kubectl port-forward controlcenter-0 9021:9021 --context data-plane
 
    #. Navigate to Control Center in a browser:
 
@@ -366,10 +393,10 @@ From the Control Plane cluster, deploy Confluent Platform.
 
    .. sourcecode:: bash
 
-      kubectl delete -f deployment/sat-1/zookeeper_cluster_mothership.yaml
-      kubectl delete -f deployment/sat-1/kafka_cluster_mothership.yaml
-      kubectl delete -f deployment/sat-1/connect_cluster_mothership.yaml
-      kubectl delete -f deployment/sat-1/ksqldb_cluster_mothership.yaml
-      kubectl delete -f deployment/sat-1/schemaregistry_cluster_mothership.yaml
-      kubectl delete -f deployment/sat-1/controlcenter_cluster_mothership.yaml
+      kubectl delete -f deployment/sat-1/zookeeper_cluster_mothership.yaml --context control-plane
+      kubectl delete -f deployment/sat-1/kafka_cluster_mothership.yaml --context control-plane
+      kubectl delete -f deployment/sat-1/connect_cluster_mothership.yaml --context control-plane
+      kubectl delete -f deployment/sat-1/ksqldb_cluster_mothership.yaml --context control-plane
+      kubectl delete -f deployment/sat-1/schemaregistry_cluster_mothership.yaml --context control-plane
+      kubectl delete -f deployment/sat-1/controlcenter_cluster_mothership.yaml --context control-plane
 

@@ -74,11 +74,19 @@ Install Control Plane
 As a platform admin, you deploy the Control Plane and add specific
 configurations for the Blueprints and Platform resources in the Control Plane.
  
-#. (Recommeded) Create the namespace for the Polaris system components:
+#. If working with multiple clusters, set the current context to the Control 
+   Plane, denoted as ``<control-plane-context>``:
 
    .. sourcecode:: bash
 
-      kubectl create ns <cpc-system-namespace>
+      kubectl config use-context <control-plane-context> 
+      
+#. (Recommeded) Create the namespace for the Polaris system components, denoted
+   as ``<cpc-system-namespace>``:
+
+   .. sourcecode:: bash
+
+      kubectl create namespace <cpc-system-namespace> 
 
 #. Generate a KubeConfig file. The file is used for the Agents on the remote 
    Data Plane clusters to get a token to connect and communicate to the Control 
@@ -119,7 +127,7 @@ configurations for the Blueprints and Platform resources in the Control Plane.
           --from-file=ca.crt=<certs-dir>/ca.pem \
           --from-file=tls.crt=<certs-dir>/server.pem \
           --from-file=tls.key=<certs-dir>/server-key.pem \
-          --namespace <cpc-system-namespace \
+          --namespace <cpc-system-namespace> \
           --save-config --dry-run=client -oyaml | \
           kubectl apply -f -
 
@@ -368,9 +376,9 @@ To deploy a Blueprint and a Confluent component ClusterClass:
 
 .. sourcecode:: 
   
-   kubectl apply -f <blueprint CR>
+   kubectl apply -f <Blueprint-CR>
 
-   kubectl apply -f <Confluent-component-cluster-class CR> 
+   kubectl apply -f <Confluent-component-cluster-class-CR> 
    
 Configure Networking in Blueprint 
 --------------------------------- 
@@ -424,7 +432,7 @@ infrastructure consists of a Kubernetes cluster custom resource and a namespace.
 
    .. sourcecode:: bash 
    
-      kubectl get namespace kube-system -oyaml | grep uid
+      kubectl get namespace kube-system -oyaml --context <data-plane-context> | grep uid
 
 #. In the Control Plan cluster, create a KubernetesCluster CR, using the 
    Kubernetes ID retrieved in the previous step. Then apply the CR with 
@@ -518,17 +526,18 @@ Install remote Agent
 Install an Agent in a separate Data Plane cluster to set up a remote Data Plane
 and to deploy Confluent.
 
-#. Create a namespace for the Polaris system components:
+#. Create a namespace for the Polaris system components, denoted as 
+   ``<cpc-system-namespace>``:
 
    .. sourcecode:: bash 
 
-      kubectl create namespace <cpc-system-namespace>
+      kubectl create namespace <cpc-system-namespace> --context <data-plane-context>
 
 #. Install the Polaris Agent CRDs:
 
    .. sourcecode:: bash 
 
-      kubectl apply -f $CPC_HOME/cpc-agent/charts/cpc-agent/crds
+      kubectl apply -f $CPC_HOME/cpc-agent/charts/cpc-agent/crds --context <data-plane-context>
 
 #. Create a Docker Registry secret to pull the Polaris packages from the image 
    repository. 
@@ -544,7 +553,8 @@ and to deploy Confluent.
            --docker-username=$JFROG_USERNAME \
            --docker-password=$JFROG_PASSWORD \
            --docker-email=$EMAIL \
-     -- namespace <cpc-system-namespace> 
+     --context <data-plane-context> \
+     --namespace <cpc-system-namespace> 
 
 #. Create a KubeConfig secret. KubeConfig is required for a remote Data Plane 
    to communicate with the Control Plane.
@@ -553,6 +563,7 @@ and to deploy Confluent.
 
       kubectl create secret generic <control-plane-kubeconfig> \
         --from-file=kubeconfig=/tmp/kubeconfig \
+        --context <data-plane-context> \
         --namespace <cpc-system-namespace>
 
 #. Install the Agent Helm chart using the secret created in the previous 
@@ -564,6 +575,7 @@ and to deploy Confluent.
       cpc-agent $CPC_HOME/cpc-agent/charts/cpc-agent \
       --set mode=Remote \
       --set remoteKubeConfig.secretRef=<control-plane-kubeconfig> \
+      --context <data-plane-context> \
       --namespace <cpc-system-namespace>
 
 #. Install CFK.
@@ -608,7 +620,7 @@ Plane cluster:
 
    .. sourcecode:: bash 
    
-      kubectl create namespace <Confluent-CR-namespace>
+      kubectl create namespace <Confluent-CR-namespace> --context <control-plane-context>
 
 #. Edit the CRs for the Confluent component clusters: 
 
@@ -708,8 +720,9 @@ Schema Registry:
 
    .. sourcecode:: bash 
    
-      kubectl apply -f <Confluent component cluster CRs> \
-       -n <Confluent-CR-namespace>
+      kubectl apply -f <Confluent-component-cluster-CRs> \
+        --context <control-plane-context> \
+        --namespace <Confluent-CR-namespace>
       
 Monitor Deployments
 ===================
@@ -721,9 +734,9 @@ For example:
 
 .. sourcecode:: bash 
 
-   kubectl get cpc -n <Confluent-CR-namespace>
+   kubectl get cpc --namespace <Confluent-CR-namespace> --context <control-plane-context>
    
-   kubectl get kafkaclusters -n <Confluent-CR-namespace>
+   kubectl get kafkaclusters -namespace <Confluent-CR-namespace> --context <control-plane-context>
 
 Delete Confluent Deployment
 ===========================
@@ -733,5 +746,6 @@ component from the Data Plane:
 
 .. sourcecode:: bash
 
-   kubectl delete -f <Confluent component cluster CR> \
+   kubectl delete -f <Confluent-component-cluster-CR> \
+     --context <control-plane-context> \
      --namespace <Confluent-CR-namespace>
