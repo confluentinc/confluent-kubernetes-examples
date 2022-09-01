@@ -29,9 +29,9 @@ Prepare
 
    .. sourcecode:: bash
    
-      kubectl config rename-context <Kubernetes control plane context> <control-plane>
+      kubectl config rename-context <Kubernetes control plane context> control-plane
       
-      kubectl config rename-context <Kubernetes data plane context> <data-plane>
+      kubectl config rename-context <Kubernetes data plane context> data-plane
    
 #. Set the Polaris home directory:
 
@@ -39,7 +39,8 @@ Prepare
    
       export CPC_HOME=<Directory to install Polaris>
 
-#. Clone the this example repo to your local machine:
+#. From the ``<CFK examples directory>`` on your local machine, clone this 
+   example repo:
 
    .. sourcecode:: bash
 
@@ -49,7 +50,7 @@ Prepare
 
    .. sourcecode:: bash
 
-      export TUTORIAL_HOME=<Directory to host tutorial files>
+      export TUTORIAL_HOME=<CFK examples directory>/confluent-kubernetes-examples/2022-polaris/samples/quickstart-deploy
    
 .. _deploy-control-plane: 
 
@@ -103,7 +104,7 @@ following steps:
    
       mkdir /tmp
       
-      $TUTORIAL_HOME/script/generate-keys.sh cpc-system /tmp
+      $TUTORIAL_HOME/scripts/generate-keys.sh cpc-system /tmp
       
       kubectl create secret generic webhooks-tls  \
           --from-file=ca.crt=/tmp/ca.pem          \
@@ -124,21 +125,22 @@ following steps:
    .. sourcecode:: bash
 
       helm upgrade --install \
-        -values $CPC_HOMEcpc-orchestrator/charts/values/local.yaml \
-        cpc-orchestrator cpc-orchestrator/charts/cpc-orchestrator \
+        --values $CPC_HOME/cpc-orchestrator/charts/values/local.yaml \
+        cpc-orchestrator \
+        $CPC_HOME/cpc-orchestrator/charts/cpc-orchestrator \
         --namespace cpc-system 
 
 #. Deploy the Blueprint and the Confluent cluster class CRs:
 
    .. sourcecode:: bash
 
-      kubectl apply -f deployment/confluentplatform_blueprint.yaml
-      kubectl apply -f deployment/zookeepercluster_class.yaml
-      kubectl apply -f deployment/controlcentercluster_class.yaml
-      kubectl apply -f deployment/connectcluster_class.yaml
-      kubectl apply -f deployment/ksqldbcluster_class.yaml
-      kubectl apply -f deployment/schemaregistrycluster_class.yaml
-      kubectl apply -f deployment/kafkacluster_class.yaml
+      kubectl apply -f $TUTORIAL_HOME/deployment/confluentplatform_blueprint.yaml
+      kubectl apply -f $TUTORIAL_HOME/deployment/zookeepercluster_class.yaml
+      kubectl apply -f $TUTORIAL_HOME/deployment/controlcentercluster_class.yaml
+      kubectl apply -f $TUTORIAL_HOME/deployment/connectcluster_class.yaml
+      kubectl apply -f $TUTORIAL_HOME/deployment/ksqldbcluster_class.yaml
+      kubectl apply -f $TUTORIAL_HOME/deployment/schemaregistrycluster_class.yaml
+      kubectl apply -f $TUTORIAL_HOME/deployment/kafkacluster_class.yaml
 
 .. _deploy-local-data-plane: 
 
@@ -156,14 +158,15 @@ where the Control Plane was installed.
    
          kubectl get namespace kube-system -oyaml | grep uid
 
-   #. Edit ``registration/kubernetes_cluster_mothership.yaml`` and set 
-      ``spec.k8sID`` to the Kubernetes ID retrieved in the previous step.
+   #. Edit ``$TUTORIAL_HOME/registration/kubernetes_cluster_mothership.yaml`` 
+      and set ``spec.k8sID`` to the Kubernetes ID retrieved in the previous 
+      step.
       
    #. Create the KubernetesCluster CR in the control Plane Kubernetes cluster:
    
       .. sourcecode:: bash
 
-         kubectl apply -f registration/kubernetes_cluster_mothership.yaml
+         kubectl apply -f $TUTORIAL_HOME/registration/kubernetes_cluster_mothership.yaml
 
    #. Create the HealthCheck CR in the Control Plane Kubernetes cluster. Its 
       spec has the reference to the Kubernetes Cluster reference you created in 
@@ -171,7 +174,7 @@ where the Control Plane was installed.
       
       .. sourcecode:: bash
 
-         kubectl apply -f registration/healthcheck_mothership.yaml
+         kubectl apply -f $TUTORIAL_HOME/registration/healthcheck_mothership.yaml
 
 #. Install the Agent.
 
@@ -185,7 +188,7 @@ where the Control Plane was installed.
    
       .. sourcecode:: bash
    
-         helm upgrade --install -f cpc-agent/charts/values/local.yaml \
+         helm upgrade --install --values $CPC_HOME/cpc-agent/charts/values/local.yaml \
            cpc-agent $CPC_HOME/cpc-agent/charts/cpc-agent \
            --set mode=Local \
            --namespace cpc-system
@@ -194,8 +197,7 @@ where the Control Plane was installed.
   
    .. sourcecode:: bash
 
-      helm upgrade --install -f cpc-orchestrator/charts/values/local.yaml \
-        cpc-orchestrator $CPC_HOME/cpc-orchestrator/charts/cpc-orchestrator \
+      helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes
         --set namespaced=false \
         --namespace cpc-system
 
@@ -216,12 +218,12 @@ From the Control Plane cluster, deploy Confluent Platform.
 
    .. sourcecode:: bash
 
-      kubectl apply -f deployment/mothership/zookeeper_cluster_mothership.yaml
-      kubectl apply -f deployment/mothership/kafka_cluster_mothership.yaml
-      kubectl apply -f deployment/mothership/connect_cluster_mothership.yaml
-      kubectl apply -f deployment/mothership/ksqldb_cluster_mothership.yaml
-      kubectl apply -f deployment/mothership/schemaregistry_cluster_mothership.yaml
-      kubectl apply -f deployment/mothership/controlcenter_cluster_mothership.yaml
+      kubectl apply -f $TUTORIAL_HOME/deployment/mothership/zookeeper_cluster_mothership.yaml
+      kubectl apply -f $TUTORIAL_HOME/deployment/mothership/kafka_cluster_mothership.yaml
+      kubectl apply -f $TUTORIAL_HOME/deployment/mothership/connect_cluster_mothership.yaml
+      kubectl apply -f $TUTORIAL_HOME/deployment/mothership/ksqldb_cluster_mothership.yaml
+      kubectl apply -f $TUTORIAL_HOME/deployment/mothership/schemaregistry_cluster_mothership.yaml
+      kubectl apply -f $TUTORIAL_HOME/deployment/mothership/controlcenter_cluster_mothership.yaml
       
 #. Validate the deployment using Control Center.
 
@@ -243,12 +245,12 @@ From the Control Plane cluster, deploy Confluent Platform.
 
    .. sourcecode:: bash
 
-      kubectl delete -f deployment/mothership/zookeeper_cluster_mothership.yaml
-      kubectl delete -f deployment/mothership/kafka_cluster_mothership.yaml
-      kubectl delete -f deployment/mothership/connect_cluster_mothership.yaml
-      kubectl delete -f deployment/mothership/ksqldb_cluster_mothership.yaml
-      kubectl delete -f deployment/mothership/schemaregistry_cluster_mothership.yaml
-      kubectl delete -f deployment/mothership/controlcenter_cluster_mothership.yaml
+      kubectl delete -f $TUTORIAL_HOME/deployment/mothership/zookeeper_cluster_mothership.yaml
+      kubectl delete -f $TUTORIAL_HOME/deployment/mothership/kafka_cluster_mothership.yaml
+      kubectl delete -f $TUTORIAL_HOME/deployment/mothership/connect_cluster_mothership.yaml
+      kubectl delete -f $TUTORIAL_HOME/deployment/mothership/ksqldb_cluster_mothership.yaml
+      kubectl delete -f $TUTORIAL_HOME/deployment/mothership/schemaregistry_cluster_mothership.yaml
+      kubectl delete -f $TUTORIAL_HOME/deployment/mothership/controlcenter_cluster_mothership.yaml
 
 .. _deploy-remote-data-plane: 
 
@@ -274,7 +276,7 @@ Kubernetes cluster from the Control Plane cluster.
    
       .. sourcecode:: bash
 
-         kubectl apply -f registration/kubernetes_cluster_sat-1.yaml --context control-plane
+         kubectl apply -f $TUTORIAL_HOME/registration/kubernetes_cluster_sat-1.yaml --context control-plane
 
    #. In the Control Plane, create the HealthCheck CR in the Control Plane 
       Kubernetes cluster. Its spec has the reference to the Kubernetes Cluster 
@@ -282,7 +284,7 @@ Kubernetes cluster from the Control Plane cluster.
       
       .. sourcecode:: bash
 
-         kubectl apply -f registration/healthcheck_sat-1.yaml --context control-plane
+         kubectl apply -f $TUTORIAL_HOME/registration/healthcheck_sat-1.yaml --context control-plane
 
 #. In the Data Plane, create the required secrets.
 
@@ -332,7 +334,7 @@ Kubernetes cluster from the Control Plane cluster.
 
       .. sourcecode:: bash
 
-         helm upgrade --install -f cpc-agent/charts/values/local.yaml \
+         helm upgrade --install --values $CPC_HOME/cpc-agent/charts/values/local.yaml \
            cpc-agent $CPC_HOME/cpc-agent/charts/cpc-agent \
            --set mode=Remote \
            --set remoteKubeConfig.secretRef=mothership-kubeconfig \
@@ -344,8 +346,7 @@ Kubernetes cluster from the Control Plane cluster.
 
    .. sourcecode:: bash
 
-      helm upgrade --install -f cpc-orchestrator/charts/values/local.yaml \
-        cpc-orchestrator $CPC_HOME/cpc-orchestrator/charts/cpc-orchestrator \
+      helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes
         --set namespaced=false \
         --context data-plane \
         --namespace cpc-system
@@ -366,12 +367,12 @@ From the Control Plane cluster, deploy Confluent Platform.
 
    .. sourcecode:: bash
 
-      kubectl apply -f deployment/sat-1/zookeeper_cluster_mothership.yaml --context control-plane
-      kubectl apply -f deployment/sat-1/kafka_cluster_mothership.yaml --context control-plane
-      kubectl apply -f deployment/sat-1/connect_cluster_mothership.yaml --context control-plane
-      kubectl apply -f deployment/sat-1/ksqldb_cluster_mothership.yaml --context control-plane
-      kubectl apply -f deployment/sat-1/schemaregistry_cluster_mothership.yaml --context control-plane
-      kubectl apply -f deployment/sat-1/controlcenter_cluster_mothership.yaml --context control-plane
+      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/zookeeper_cluster_mothership.yaml --context control-plane
+      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/kafka_cluster_mothership.yaml --context control-plane
+      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/connect_cluster_mothership.yaml --context control-plane
+      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/ksqldb_cluster_mothership.yaml --context control-plane
+      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/schemaregistry_cluster_mothership.yaml --context control-plane
+      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/controlcenter_cluster_mothership.yaml --context control-plane
 
 #. In the Data Plane, validate the deployment using Control Center.
 
@@ -393,10 +394,10 @@ From the Control Plane cluster, deploy Confluent Platform.
 
    .. sourcecode:: bash
 
-      kubectl delete -f deployment/sat-1/zookeeper_cluster_mothership.yaml --context control-plane
-      kubectl delete -f deployment/sat-1/kafka_cluster_mothership.yaml --context control-plane
-      kubectl delete -f deployment/sat-1/connect_cluster_mothership.yaml --context control-plane
-      kubectl delete -f deployment/sat-1/ksqldb_cluster_mothership.yaml --context control-plane
-      kubectl delete -f deployment/sat-1/schemaregistry_cluster_mothership.yaml --context control-plane
-      kubectl delete -f deployment/sat-1/controlcenter_cluster_mothership.yaml --context control-plane
+      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/zookeeper_cluster_mothership.yaml --context control-plane
+      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/kafka_cluster_mothership.yaml --context control-plane
+      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/connect_cluster_mothership.yaml --context control-plane
+      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/ksqldb_cluster_mothership.yaml --context control-plane
+      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/schemaregistry_cluster_mothership.yaml --context control-plane
+      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/controlcenter_cluster_mothership.yaml --context control-plane
 

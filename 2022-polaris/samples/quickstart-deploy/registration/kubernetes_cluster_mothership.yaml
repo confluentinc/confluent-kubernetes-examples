@@ -4,7 +4,7 @@ metadata:
   name: mothership
   namespace: cpc-system
 spec:
-  k8sID: a6d1c21a-0ef4-4189-b4ac-68e7e7395e65
+  k8sID: kubectl get ns kube-system -oyaml | grep uid
   description: "cpc-controlplane kubernetes cluster"
   # required
   topology:

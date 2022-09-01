@@ -15,11 +15,11 @@ spec:
         application:
           registry: docker.io
           repository: confluentinc/cp-ksqldb-server
-          tag: 7.1.0
+          tag: 7.2.0
         init:
           registry: docker.io
           repository: confluentinc/confluent-init-container
-          tag: 2.2.1
+          tag: 2.4.1
       internalTopicReplicationFactor: 3
       volume:
         data:
