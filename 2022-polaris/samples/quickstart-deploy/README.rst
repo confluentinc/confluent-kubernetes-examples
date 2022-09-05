@@ -73,6 +73,12 @@ following steps:
 
       kubectl create namespace cpc-system 
 
+#. Install the Orchestrator CRDs:
+
+   .. sourcecode:: bash
+
+      kubectl apply -f $CPC_HOME/cpc-orchestrator/charts/cpc-orchestrator/crds
+
 #. Generate the KubeConfig file for the remote Data Planes to connect:
 
    .. sourcecode:: bash
@@ -114,12 +120,6 @@ following steps:
           --save-config --dry-run=client -oyaml | \
           kubectl apply -f -                     
  
-#. Install the Orchestrator CRDs:
-
-   .. sourcecode:: bash
-
-      kubectl apply -f $CPC_HOME/cpc-orchestrator/charts/cpc-orchestrator/crds
-
 #. Install the Orchestrator Helm chart:
 
    .. sourcecode:: bash
@@ -193,11 +193,11 @@ where the Control Plane was installed.
            --set mode=Local \
            --namespace cpc-system
 
-#. Install the |co| Helm chart in the cluster mode (``--set namespaced=false``):
+#. Install the CFK Helm chart in the cluster mode (``--set namespaced=false``):
   
    .. sourcecode:: bash
 
-      helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes
+      helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes \
         --set namespaced=false \
         --namespace cpc-system
 
@@ -207,8 +207,8 @@ Install Confluent Platform
 
 From the Control Plane cluster, deploy Confluent Platform.
 
-#. Create the namespace to deploy Confluent components into.  `org-confluent` is
-   used in these examples:
+#. Create the namespace to deploy Confluent components into.  ``org-confluent`` 
+   is used in these examples:
 
    .. sourcecode:: bash
      
@@ -341,12 +341,12 @@ Kubernetes cluster from the Control Plane cluster.
            --context data-plane \
            --namespace cpc-system
 
-#. In the Data Plane, install the |co| Helm chart in the cluster mode 
+#. In the Data Plane, install the CFK Helm chart in the cluster mode 
    (``--set namespaced=false``):
 
    .. sourcecode:: bash
 
-      helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes
+      helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes \
         --set namespaced=false \
         --context data-plane \
         --namespace cpc-system
@@ -357,7 +357,7 @@ Install Confluent Platform
 
 From the Control Plane cluster, deploy Confluent Platform.
 
-#. Create the namespace `org-confluent` to deploy Confluent Platform into:
+#. Create the namespace ``org-confluent`` to deploy Confluent Platform into:
 
    .. sourcecode:: bash
 
