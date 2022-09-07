@@ -25,7 +25,7 @@ Prepare
 #. Set up the Kubernetes clusters you want to use for the Control Plane and the
    Data Plane. Kubernetes versions 1.22+ are required.
    
-#. Rename the Kubernetes contexts for easy identifications:
+#. Rename the Kubernetes contexts for easy identification:
 
    .. sourcecode:: bash
    
@@ -77,7 +77,7 @@ following steps:
 
    .. sourcecode:: bash
 
-      kubectl apply -f $TUTORIAL_HOME/cpc-orchestrator/charts/crds
+      kubectl apply -f $CPC_HOME/cpc-orchestrator/charts/cpc-orchestrator/crds
 
 #. Generate the KubeConfig file for the remote Data Planes to connect:
 
@@ -186,7 +186,7 @@ where the Control Plane was installed.
 
       .. sourcecode:: bash
 
-         kubectl apply -f $TUTORIAL_HOME/cpc-agent/charts/crds
+         kubectl apply -f $CPC_HOME/cpc-agent/charts/cpc-agent/crds
 
    #. Install the Agent Helm chart in the ``Local`` mode:
    
@@ -337,7 +337,7 @@ Kubernetes cluster from the Control Plane cluster.
 
       .. sourcecode:: bash
 
-         kubectl apply -f $TUTORIAL_HOME/cpc-agent/charts/crds --context data-plane
+         kubectl apply -f $CPC_HOME/cpc-agent/charts/cpc-agent/crds --context data-plane
 
    #. Install the Agent Helm chart in the ``Remote`` mode:
 
