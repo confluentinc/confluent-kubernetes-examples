@@ -77,7 +77,7 @@ following steps:
 
    .. sourcecode:: bash
 
-      kubectl apply -f $CPC_HOME/cpc-orchestrator/charts/cpc-orchestrator/crds
+      kubectl apply -f $TUTORIAL_HOME/cpc-orchestrator/charts/crds
 
 #. Generate the KubeConfig file for the remote Data Planes to connect:
 
@@ -186,7 +186,7 @@ where the Control Plane was installed.
 
       .. sourcecode:: bash
 
-         kubectl apply -f $CPC_HOME/cpc-agent/charts/cpc-agent/crds
+         kubectl apply -f $TUTORIAL_HOME/cpc-agent/charts/crds
 
    #. Install the Agent Helm chart in the ``Local`` mode:
    
@@ -337,7 +337,7 @@ Kubernetes cluster from the Control Plane cluster.
 
       .. sourcecode:: bash
 
-         kubectl apply -f $CPC_HOME/cpc-agent/charts/cpc-agent/crds --context data-plane
+         kubectl apply -f $TUTORIAL_HOME/cpc-agent/charts/crds --context data-plane
 
    #. Install the Agent Helm chart in the ``Remote`` mode:
 
