@@ -292,24 +292,29 @@ Kubernetes cluster from the Control Plane cluster.
 
 #. In the Data Plane, create the required secrets.
 
-   #. Create a Docker Registry secret for the image repository. 
-      ``confluent-registry`` is used in these examples.
-   
-      For example:
+#. Create a Docker Registry secret for the image repository. 
+   ``confluent-registry`` is used in these examples.
+
+   #. Get a token:
    
       .. sourcecode:: bash
-   
-         export JFROG_USERNAME=<user>@confluent.io
-         export JFROG_PASSWORD=<JFROG_API_KEY>
-         export EMAIL=<user>@confluent.io
-    
-         kubectl create secret docker-registry confluent-registry \
-            --docker-server=confluent-docker.jfrog.io             \
-            --docker-username=$JFROG_USERNAME                     \
-            --docker-password=$JFROG_PASSWORD                     \
-            --docker-email=$EMAIL                                 \
-            --context data-plane                                  \
-            --namespace cpc-system 
+
+         gimme-aws-creds 
+
+   #. Create a Docker registry secret:
+
+      .. sourcecode:: bash
+
+         export ECR_USERNAME=AWS 
+         export ECR_PASSWORD=$(aws ecr get-login-password --region us-west-2 --profile devprod-prod) 
+         export EMAIL=@confluent.io
+
+         kubectl -n cpc-system create secret docker-registry confluent-registry \
+           --docker-server=519856050701.dkr.ecr.us-west-2.amazonaws.com \
+           --docker-username=$ECR_USERNAME \
+           --docker-password=$ECR_PASSWORD \
+           --docker-email=$EMAIL \
+           --namespace cpc-system                                
 
    #. Create the KubeConfig secret:
    
@@ -372,12 +377,12 @@ From the Control Plane cluster, deploy Confluent Platform.
 
    .. sourcecode:: bash
 
-      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/zookeeper_cluster_mothership.yaml --context control-plane
-      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/kafka_cluster_mothership.yaml --context control-plane
-      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/connect_cluster_mothership.yaml --context control-plane
-      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/ksqldb_cluster_mothership.yaml --context control-plane
-      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/schemaregistry_cluster_mothership.yaml --context control-plane
-      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/controlcenter_cluster_mothership.yaml --context control-plane
+      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/zookeeper_cluster_sat-1.yaml --context control-plane
+      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/kafka_cluster_sat-1.yaml --context control-plane
+      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/connect_cluster_sat-1.yaml --context control-plane
+      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/ksqldb_cluster_sat-1.yaml --context control-plane
+      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/schemaregistry_cluster_sat-1.yaml --context control-plane
+      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/controlcenter_cluster_sat-1.yaml --context control-plane
 
 #. In the Data Plane, validate the deployment using Control Center.
 
@@ -399,10 +404,10 @@ From the Control Plane cluster, deploy Confluent Platform.
 
    .. sourcecode:: bash
 
-      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/zookeeper_cluster_mothership.yaml --context control-plane
-      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/kafka_cluster_mothership.yaml --context control-plane
-      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/connect_cluster_mothership.yaml --context control-plane
-      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/ksqldb_cluster_mothership.yaml --context control-plane
-      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/schemaregistry_cluster_mothership.yaml --context control-plane
-      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/controlcenter_cluster_mothership.yaml --context control-plane
+      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/zookeeper_cluster_sat-1.yaml --context control-plane
+      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/kafka_cluster_sat-1.yaml --context control-plane
+      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/connect_cluster_sat-1.yaml --context control-plane
+      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/ksqldb_cluster_sat-1.yaml --context control-plane
+      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/schemaregistry_cluster_sat-1.yaml --context control-plane
+      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/controlcenter_cluster_sat-1.yaml --context control-plane
 
