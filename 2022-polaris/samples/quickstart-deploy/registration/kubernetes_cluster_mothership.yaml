@@ -4,13 +4,13 @@ metadata:
   name: mothership
   namespace: cpc-system
 spec:
-  k8sID: # kubectl get ns kube-system -oyaml | grep uid
+  k8sID:  # kubectl get ns kube-system -oyaml | grep uid
   description: "cpc-controlplane kubernetes cluster"
   # required
   topology:
-    region: us-central1
+    region: us-west2
     zones:
-    - us-central1-a
-    - us-central1-b
-    - us-central1-c
+    - us-west2-a
+    - us-west2-b
+    - us-west2 -c
   k8sClusterDomain: cluster.local

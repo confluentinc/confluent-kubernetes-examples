@@ -88,20 +88,26 @@ following steps:
 #. Create a Docker Registry secret for the image repository. 
    ``confluent-registry`` is used in these examples.
 
-   For example:
+   #. Get a token:
+   
+      .. sourcecode:: bash
 
-   .. sourcecode:: bash
+         gimme-aws-creds 
 
-      export JFROG_USERNAME=<user>@confluent.io
-      export JFROG_PASSWORD=<JFROG_API_KEY>
-      export EMAIL=<user>@confluent.io
- 
-      kubectl create secret docker-registry confluent-registry \
-         --docker-server=confluent-docker.jfrog.io             \
-         --docker-username=$JFROG_USERNAME                     \
-         --docker-password=$JFROG_PASSWORD                     \
-         --docker-email=$EMAIL                                 \
-         --namespace cpc-system                                
+   #. Create a Docker registry secret:
+
+      .. sourcecode:: bash
+
+         export ECR_USERNAME=AWS 
+         export ECR_PASSWORD=$(aws ecr get-login-password --region us-west-2 --profile devprod-prod) 
+         export EMAIL=@confluent.io
+
+         kubectl -n cpc-system create secret docker-registry confluent-registry \
+           --docker-server=519856050701.dkr.ecr.us-west-2.amazonaws.com \
+           --docker-username=$ECR_USERNAME \
+           --docker-password=$ECR_PASSWORD \
+           --docker-email=$EMAIL \
+           --namespace cpc-system                                
  
 #. Create a Webhook certificate secret. ``webhooks-tls`` is used in these 
    examples:
@@ -124,10 +130,8 @@ following steps:
 
    .. sourcecode:: bash
 
-      helm upgrade --install \
-        --values $CPC_HOME/cpc-orchestrator/charts/values/local.yaml \
-        cpc-orchestrator \
-        $CPC_HOME/cpc-orchestrator/charts/cpc-orchestrator \
+      helm upgrade --install cpc-orchestrator $CPC_HOME/cpc-orchestrator/charts/cpc-orchestrator \
+        --values $TUTORIAL_HOME/../cpc-orchestrator/charts/local.yaml \
         --namespace cpc-system 
 
 #. Deploy the Blueprint and the Confluent cluster class CRs:
@@ -188,8 +192,8 @@ where the Control Plane was installed.
    
       .. sourcecode:: bash
    
-         helm upgrade --install --values $CPC_HOME/cpc-agent/charts/values/local.yaml \
-           cpc-agent $CPC_HOME/cpc-agent/charts/cpc-agent \
+         helm upgrade --install cpc-agent $CPC_HOME/cpc-agent/charts/cpc-agent \
+           --values $TUTORIAL_HOME/../cpc-agent/charts/local.yaml \
            --set mode=Local \
            --namespace cpc-system
 
@@ -334,8 +338,9 @@ Kubernetes cluster from the Control Plane cluster.
 
       .. sourcecode:: bash
 
-         helm upgrade --install --values $CPC_HOME/cpc-agent/charts/values/local.yaml \
+         helm upgrade --install \
            cpc-agent $CPC_HOME/cpc-agent/charts/cpc-agent \
+           --values $TUTORIAL_HOME/../cpc-agent/charts/local.yaml \
            --set mode=Remote \
            --set remoteKubeConfig.secretRef=mothership-kubeconfig \
            --context data-plane \

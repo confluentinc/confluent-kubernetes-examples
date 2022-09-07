@@ -1,0 +1,9 @@
+---
+image:
+  registry: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod
+  repository: confluentinc/cp-cpc-operator
+  tag: "v0.63.0"
+  pullPolicy: IfNotPresent
+
+debug: true
+imagePullSecretRef: confluent-registry
