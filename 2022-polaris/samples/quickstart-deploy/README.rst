@@ -237,7 +237,7 @@ From the Control Plane cluster, deploy Confluent Platform.
 
       .. sourcecode:: bash
 
-         kubectl port-forward controlcenter-0 9021:9021
+         kubectl port-forward controlcenter-prod-0 9021:9021 --namespace org-confluent
 
    #. Navigate to Control Center in a browser:
 
@@ -392,7 +392,7 @@ From the Control Plane cluster, deploy Confluent Platform.
 
       .. sourcecode:: bash
 
-         kubectl port-forward controlcenter-0 9021:9021 --context data-plane
+         kubectl port-forward controlcenter-dev-0 9021:9021 --context data-plane --namespace org-confluent
 
    #. Navigate to Control Center in a browser:
 
