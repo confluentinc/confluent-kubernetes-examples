@@ -133,8 +133,12 @@ following steps:
    .. sourcecode:: bash
 
       helm upgrade --install cpc-orchestrator $CPC_HOME/cpc-orchestrator/charts/cpc-orchestrator \
-        --values $TUTORIAL_HOME/../cpc-orchestrator/charts/local.yaml \
-        --namespace cpc-system 
+        --namespace cpc-system \
+        --set image.registry="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod" \
+        --set image.repository="confluentinc/confluent-operator" \
+        --set image.tag="latest" \
+        --set image.pullPolicy="IfNotPresent" \
+        --set imagePullSecretRef="confluent-registry"
 
 #. Deploy the Blueprint and the Confluent cluster class CRs:
 
@@ -195,9 +199,13 @@ where the Control Plane was installed.
       .. sourcecode:: bash
    
          helm upgrade --install cpc-agent $CPC_HOME/cpc-agent/charts/cpc-agent \
-           --values $TUTORIAL_HOME/../cpc-agent/charts/local.yaml \
+           --namespace cpc-system \
            --set mode=Local \
-           --namespace cpc-system
+           --set image.registry="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod" \
+           --set image.repository="confluentinc/confluent-operator" \
+           --set image.tag="latest" \
+           --set image.pullPolicy="IfNotPresent" \
+           --set imagePullSecretRef="confluent-registry"
 
 #. Install the CFK Helm chart in the cluster mode (``--set namespaced=false``):
   
@@ -348,10 +356,14 @@ Kubernetes cluster from the Control Plane cluster.
 
          helm upgrade --install \
            cpc-agent $CPC_HOME/cpc-agent/charts/cpc-agent \
-           --values $TUTORIAL_HOME/../cpc-agent/charts/local.yaml \
            --set mode=Remote \
            --set remoteKubeConfig.secretRef=mothership-kubeconfig \
            --kube-context data-plane \
+           --set image.registry="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod" \
+           --set image.repository="confluentinc/confluent-operator" \
+           --set image.tag="latest" \
+           --set image.pullPolicy="IfNotPresent" \
+           --set imagePullSecretRef="confluent-registry" \
            --namespace cpc-system
 
 #. In the Data Plane, install the CFK Helm chart in the cluster mode 

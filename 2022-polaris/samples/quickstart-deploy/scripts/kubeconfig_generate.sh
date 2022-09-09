@@ -8,7 +8,21 @@ CONFIG_OUTPUT_PATH=$3
 [ $# -ne 3 ] && { echo "Usage: $0 <serviveaccountname> <namespace> <config_output_path>"; exit 1; }
 
 echo "creating serviceaccount ${NAME} in namespace ${NAMESPACE}"
-kubectl -n "${NAMESPACE}" create serviceaccount "${NAME}" --save-config --dry-run=true -oyaml | kubectl apply -f -
+kubectl -n "${NAMESPACE}" create serviceaccount "${NAME}" --save-config --dry-run=client -oyaml | kubectl apply -f -
+
+cat << EOF > "${CONFIG_OUTPUT_PATH}"/"${NAME}"-secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ${NAME}-secret
+  namespace: ${NAMESPACE}
+  annotations:
+    kubernetes.io/service-account.name: ${NAME}
+type: kubernetes.io/service-account-token
+EOF
+
+echo "creating secret for getting token"
+kubectl apply -f "${CONFIG_OUTPUT_PATH}"/"${NAME}"-secret.yaml
 
 cat << EOF > "${CONFIG_OUTPUT_PATH}"/clusterrole-"${NAME}".yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -84,6 +98,9 @@ fi
 
 echo "generating kubeconfig file"
 USER_TOKEN_NAME=$(kubectl -n "${NAMESPACE}" get serviceaccount "${NAME}" -o=jsonpath='{.secrets[0].name}')
+if [ -z "${USER_TOKEN_NAME}" ];then
+  USER_TOKEN_NAME="${NAME}"-secret
+fi
 USER_TOKEN_VALUE=$(kubectl -n "${NAMESPACE}" get secret/"${USER_TOKEN_NAME}" -o=go-template='{{.data.token}}' | base64 --decode)
 CURRENT_CONTEXT=$(kubectl config current-context)
 CURRENT_CLUSTER=$(kubectl config view --raw -o=go-template='{{range .contexts}}{{if eq .name "'''${CURRENT_CONTEXT}'''"}}{{ index .context "cluster" }}{{end}}{{end}}')
