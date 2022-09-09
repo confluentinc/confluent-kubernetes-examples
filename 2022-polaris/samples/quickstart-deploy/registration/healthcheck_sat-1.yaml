@@ -1,11 +1,11 @@
 apiVersion: core.cpc.platform.confluent.io/v1beta1
 kind: CPCHealthCheck
 metadata:
-  name: sat-1-hc-arodoni
+  name: sat-1-hc
   namespace: cpc-system
   annotations:
     cpc.platform.confluent.io/description: "This TILE represents CPC services healthcheck in sat-1 Kubernetes cluster."
 spec:
   k8sClusterRef:
-    name: sat-1-arodoni
+    name: sat-1
     namespace: cpc-system

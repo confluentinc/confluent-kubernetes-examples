@@ -107,6 +107,7 @@ following steps:
            --docker-username=$ECR_USERNAME \
            --docker-password=$ECR_PASSWORD \
            --docker-email=$EMAIL \
+           --context control-plane \
            --namespace cpc-system                                
  
 #. Create a Webhook certificate secret. ``webhooks-tls`` is used in these 
@@ -118,11 +119,12 @@ following steps:
       
       $TUTORIAL_HOME/scripts/generate-keys.sh cpc-system /tmp
       
-      kubectl create secret generic webhooks-tls  \
-          --from-file=ca.crt=/tmp/ca.pem          \
-          --from-file=tls.crt=/tmp/server.pem     \
+      kubectl create secret generic webhooks-tls \
+          --from-file=ca.crt=/tmp/ca.pem \
+          --from-file=tls.crt=/tmp/server.pem \
           --from-file=tls.key=/tmp/server-key.pem \
-          --namespace cpc-system                  \
+          --namespace cpc-system \
+          --context control-plane \
           --save-config --dry-run=client -oyaml | \
           kubectl apply -f -                     
  
@@ -292,37 +294,38 @@ Kubernetes cluster from the Control Plane cluster.
 
 #. In the Data Plane, create the required secrets.
 
-#. Create a Docker Registry secret for the image repository. 
-   ``confluent-registry`` is used in these examples.
-
-   #. Get a token:
+   #. Create a Docker Registry secret for the image repository. 
+      ``confluent-registry`` is used in these examples.
    
-      .. sourcecode:: bash
-
-         gimme-aws-creds 
-
-   #. Create a Docker registry secret:
-
-      .. sourcecode:: bash
-
-         export ECR_USERNAME=AWS 
-         export ECR_PASSWORD=$(aws ecr get-login-password --region us-west-2 --profile devprod-prod) 
-         export EMAIL=@confluent.io
-
-         kubectl -n cpc-system create secret docker-registry confluent-registry \
-           --docker-server=519856050701.dkr.ecr.us-west-2.amazonaws.com \
-           --docker-username=$ECR_USERNAME \
-           --docker-password=$ECR_PASSWORD \
-           --docker-email=$EMAIL \
-           --namespace cpc-system                                
-
+      #. Get a token:
+      
+         .. sourcecode:: bash
+   
+            gimme-aws-creds 
+   
+      #. Create a Docker registry secret:
+   
+         .. sourcecode:: bash
+   
+            export ECR_USERNAME=AWS 
+            export ECR_PASSWORD=$(aws ecr get-login-password --region us-west-2 --profile devprod-prod) 
+            export EMAIL=@confluent.io
+   
+            kubectl -n cpc-system create secret docker-registry confluent-registry \
+              --docker-server=519856050701.dkr.ecr.us-west-2.amazonaws.com \
+              --docker-username=$ECR_USERNAME \
+              --docker-password=$ECR_PASSWORD \
+              --docker-email=$EMAIL \
+              --context data-plane \
+              --namespace cpc-system                                
+   
    #. Create the KubeConfig secret:
    
       .. sourcecode:: bash
       
          kubectl create secret generic mothership-kubeconfig \
-           --from-file=kubeconfig=/tmp/kubeconfig            \
-           --context data-plane                              \
+           --from-file=kubeconfig=/tmp/kubeconfig \
+           --context data-plane \
            --namespace cpc-system 
 
 #. In the Data Plane, install the Agent.
@@ -348,7 +351,7 @@ Kubernetes cluster from the Control Plane cluster.
            --values $TUTORIAL_HOME/../cpc-agent/charts/local.yaml \
            --set mode=Remote \
            --set remoteKubeConfig.secretRef=mothership-kubeconfig \
-           --context data-plane \
+           --kube-context data-plane \
            --namespace cpc-system
 
 #. In the Data Plane, install the CFK Helm chart in the cluster mode 
@@ -358,7 +361,7 @@ Kubernetes cluster from the Control Plane cluster.
 
       helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes \
         --set namespaced=false \
-        --context data-plane \
+        --kube-context data-plane \
         --namespace cpc-system
 
 --------------------------
@@ -367,7 +370,8 @@ Install Confluent Platform
 
 From the Control Plane cluster, deploy Confluent Platform.
 
-#. Create the namespace ``org-confluent`` to deploy Confluent Platform into:
+#. Create the namespace ``org-confluent`` to deploy Confluent Platform clusters 
+   CR into:
 
    .. sourcecode:: bash
 
@@ -384,6 +388,9 @@ From the Control Plane cluster, deploy Confluent Platform.
       kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/schemaregistry_cluster_sat-1.yaml --context control-plane
       kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/controlcenter_cluster_sat-1.yaml --context control-plane
 
+   The Confluent components are installed into the ``confluent-dev`` namespace
+   in the Data Plane.
+   
 #. In the Data Plane, validate the deployment using Control Center.
 
    #. Check when the Confluent components are up and running.
@@ -392,7 +399,7 @@ From the Control Plane cluster, deploy Confluent Platform.
 
       .. sourcecode:: bash
 
-         kubectl port-forward controlcenter-dev-0 9021:9021 --context data-plane --namespace org-confluent
+         kubectl port-forward controlcenter-dev-0 9021:9021 --context data-plane --namespace confluent-dev
 
    #. Navigate to Control Center in a browser:
 
