@@ -97,10 +97,10 @@ RBAC.
 
    ::
 
-  kubectl create secret generic ldap-tls \
---from-file=fullchain.pem=$TUTORIAL_HOME/server.pem \
---from-file=cacerts.pem=$TUTORIAL_HOME/ca.pem \
---from-file=privkey.pem=$TUTORIAL_HOME/server-key.pem
+      kubectl create secret generic ldap-tls \
+    --from-file=fullchain.pem=$TUTORIAL_HOME/server.pem \
+    --from-file=cacerts.pem=$TUTORIAL_HOME/ca.pem \
+    --from-file=privkey.pem=$TUTORIAL_HOME/server-key.pem
 
 
 ============================
