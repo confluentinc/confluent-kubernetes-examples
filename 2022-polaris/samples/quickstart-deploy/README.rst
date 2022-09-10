@@ -135,7 +135,7 @@ following steps:
       helm upgrade --install cpc-orchestrator $CPC_HOME/cpc-orchestrator/charts/cpc-orchestrator \
         --namespace cpc-system \
         --set image.registry="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod" \
-        --set image.repository="confluentinc/confluent-operator" \
+        --set image.repository="confluentinc/cp-cpc-operator" \
         --set image.tag="latest" \
         --set image.pullPolicy="IfNotPresent" \
         --set imagePullSecretRef="confluent-registry"
@@ -202,7 +202,7 @@ where the Control Plane was installed.
            --namespace cpc-system \
            --set mode=Local \
            --set image.registry="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod" \
-           --set image.repository="confluentinc/confluent-operator" \
+           --set image.repository="confluentinc/cp-cpc-operator" \
            --set image.tag="latest" \
            --set image.pullPolicy="IfNotPresent" \
            --set imagePullSecretRef="confluent-registry"
@@ -360,7 +360,7 @@ Kubernetes cluster from the Control Plane cluster.
            --set remoteKubeConfig.secretRef=mothership-kubeconfig \
            --kube-context data-plane \
            --set image.registry="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod" \
-           --set image.repository="confluentinc/confluent-operator" \
+           --set image.repository="confluentinc/cp-cpc-operator" \
            --set image.tag="latest" \
            --set image.pullPolicy="IfNotPresent" \
            --set imagePullSecretRef="confluent-registry" \
