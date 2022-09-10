@@ -140,7 +140,7 @@ following steps:
         --set image.pullPolicy="IfNotPresent" \
         --set imagePullSecretRef="confluent-registry"
 
-#. Deploy the Blueprint and the Confluent cluster class CRs:
+#. Review and deploy the Blueprint and the Confluent cluster class CRs:
 
    .. sourcecode:: bash
 
