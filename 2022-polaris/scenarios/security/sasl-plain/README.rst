@@ -144,7 +144,8 @@ following steps:
         --set image.repository="confluentinc/cp-cpc-operator" \
         --set image.tag="latest" \
         --set image.pullPolicy="IfNotPresent" \
-        --set imagePullSecretRef="confluent-registry"
+        --set imagePullSecretRef="confluent-registry" \
+        --set debug=true
 
 Create Blueprint 
 ----------------
@@ -279,7 +280,8 @@ where the Control Plane was installed.
            --set image.repository="confluentinc/cp-cpc-operator" \
            --set image.tag="latest" \
            --set image.pullPolicy="IfNotPresent" \
-           --set imagePullSecretRef="confluent-registry"
+           --set imagePullSecretRef="confluent-registry" \
+           --set debug=true
 
 #. Install the CFK Helm chart in the cluster mode (``--set namespaced=false``):
   
@@ -287,7 +289,8 @@ where the Control Plane was installed.
 
       helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes \
         --set namespaced=false \
-        --namespace cpc-system
+        --set debug=true \
+        --namespace cpc-system 
 
 
 Install Confluent Platform 
@@ -439,6 +442,7 @@ Kubernetes cluster from the Control Plane cluster.
            --set image.tag="latest" \
            --set image.pullPolicy="IfNotPresent" \
            --set imagePullSecretRef="confluent-registry" \
+           --set debug=true \
            --namespace cpc-system
 
 #. In the Data Plane, install the CFK Helm chart in the cluster mode 
@@ -449,6 +453,7 @@ Kubernetes cluster from the Control Plane cluster.
       helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes \
         --set namespaced=false \
         --kube-context data-plane \
+        --set debug=true \
         --namespace cpc-system
 
 --------------------------
