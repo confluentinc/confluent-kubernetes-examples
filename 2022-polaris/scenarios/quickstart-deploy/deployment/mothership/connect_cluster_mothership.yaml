@@ -1,0 +1,18 @@
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: ConnectCluster
+metadata:
+  name: connect-prod
+  namespace: org-confluent
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents Connect cluster deployment in Mothership Kubernetes cluster."
+spec:
+  replicas: 1
+  k8sClusterRef:
+    name: mothership
+    namespace: cpc-system
+  blueprintRef:
+    name: standard
+    namespace: cpc-system
+  # dependencies:
+  #   kafkaCluster:
+  #     name: kafka-prod

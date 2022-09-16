@@ -1,0 +1,36 @@
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: ConfluentPlatformBlueprint
+metadata:
+  name: standard
+  namespace: cpc-system
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents configurations which are shared across all CP component."
+spec:
+  dockerImages:
+  - registry: docker.io
+  confluentPlatform:
+    version: 7.2.0
+  components:
+    zookeeperCluster:
+      classRef:
+        name: zookeeper-standard
+        namespace: cpc-system
+    kafkaCluster:
+      classRef: 
+        name: kafka-standard
+        namespace: cpc-system
+    ksqlDBCluster:
+      classRef:
+        name: ksqldb-standard
+        namespace: cpc-system
+    controlCenterCluster:
+      classRef:
+        name: controlcenter-standard
+        namespace: cpc-system
+    schemaRegistryCluster:
+      classRef:
+        name: schemaregistry-standard
+    connectCluster:
+      classRef:
+        name: connect-standard
+        namespace: cpc-system

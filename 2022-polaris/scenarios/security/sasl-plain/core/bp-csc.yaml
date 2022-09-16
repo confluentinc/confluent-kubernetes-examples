@@ -1,0 +1,12 @@
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: CredentialStoreConfig
+metadata:
+  name: bp-csc
+  namespace: cpc-system
+spec:
+  kubernetes:
+    secret:
+      name: kafka-credentials
+      namespace: cpc-system
+    type: secret
+  sourceType: kubernetes

@@ -1,0 +1,18 @@
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: ControlCenterCluster
+metadata:
+  name: controlcenter-dev
+  namespace: org-confluent
+spec:
+  targetCluster:
+    namespace: confluent-dev
+    name: controlcenter
+  k8sClusterRef:
+    name: sat-1
+    namespace: cpc-system
+  blueprintRef:
+    name: standard
+    namespace: cpc-system
+  # dependencies:
+  #   kafkaCluster:
+  #     name: kafka-dev

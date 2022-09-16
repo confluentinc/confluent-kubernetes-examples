@@ -1,0 +1,12 @@
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: SchemaRegistryClusterClass
+metadata:
+  name: schemaregistry-standard
+  namespace: cpc-system
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents pre-set configuration to deploy CP SchemaRegistry Cluster."
+spec:
+   provisioner:
+    type: cfk
+    cfk:
+      replicas: 3

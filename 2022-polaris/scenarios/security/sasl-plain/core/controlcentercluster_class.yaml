@@ -1,0 +1,15 @@
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: ControlCenterClusterClass
+metadata:
+  name: controlcenter-standard
+  namespace: cpc-system
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents pre-set configuration to deploy CP Control Center Cluster."
+spec:
+  provisioner:
+    type: cfk
+    cfk:
+      replicas: 1
+      volume:
+        data:
+          capacity: 10Gi

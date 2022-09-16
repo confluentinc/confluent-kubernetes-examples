@@ -1,0 +1,29 @@
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: ZookeeperClusterClass
+metadata:
+  name: zookeeper-standard
+  namespace: cpc-system
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents pre-set configuration to deploy CP Zookeeper Cluster."
+spec:
+   provisioner:
+    type: cfk
+    cfk:
+      replicas: 3
+      # +optional
+      image:
+        application:
+          registry: docker.io
+          repository: confluentinc/cp-zookeeper
+          tag: 7.2.0
+        init:
+          registry: docker.io
+          repository: confluentinc/confluent-init-container
+          tag: 2.4.1
+      volume:
+        data:
+          capacity: 10Gi
+        log:
+          capacity: 10Gi
+
+

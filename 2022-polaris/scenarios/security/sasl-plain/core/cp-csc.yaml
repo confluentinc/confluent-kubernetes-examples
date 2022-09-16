@@ -1,0 +1,12 @@
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: CredentialStoreConfig
+metadata:
+  name: cp-csc
+  namespace: org-confluent
+spec:
+  kubernetes:
+    secret:
+      name: cp-credentials
+      namespace: org-confluent
+    type: secret
+  sourceType: kubernetes

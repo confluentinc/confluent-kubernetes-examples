@@ -1,0 +1,17 @@
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: SchemaRegistryCluster
+metadata:
+  name: schemaregistry-prod
+  namespace: org-confluent
+spec:
+  replicas: 2
+  # +optional
+  # targetCluster:
+  #   namespace: confluent-dev
+  #   name: schemaregistry
+  k8sClusterRef:
+    name: mothership
+    namespace: cpc-system
+  blueprintRef:
+    name: standard
+    namespace: cpc-system

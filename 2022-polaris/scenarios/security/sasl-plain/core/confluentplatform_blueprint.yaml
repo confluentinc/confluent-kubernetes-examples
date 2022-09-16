@@ -1,0 +1,75 @@
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: ConfluentPlatformBlueprint
+metadata:
+  name: standard
+  namespace: cpc-system
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents configurations which are shared across all CP component."
+spec:
+  components:
+    connectCluster:
+      classRef:
+        name: connect-standard
+        namespace: cpc-system
+    controlCenterCluster:
+      classRef:
+        name: controlcenter-standard
+        namespace: cpc-system
+    kafkaCluster:
+      classRef:
+        name: kafka-standard
+        namespace: cpc-system
+    kafkaRestProxyCluster:
+      classRef:
+        name: kafkarestproxy-standard
+        namespace: cpc-system
+    ksqlDBCluster:
+      classRef:
+        name: ksqldb-standard
+        namespace: cpc-system
+    schemaRegistryCluster:
+      classRef:
+        name: schemaregistry-standard
+        namespace: cpc-system
+    zookeeperCluster:
+      classRef:
+        name: zookeeper-standard
+        namespace: cpc-system
+  confluentPlatform:
+    kafkaListeners:
+      customListeners:
+        - authentication:
+            plain:
+              deployment:
+                credentialStoreRef:
+                  key: kafka-server-listener-other-plain-users.json
+                  type: json
+              providerType: deployment
+            type: plain
+          name: other
+          port: 9093
+      internalListener:
+        authentication:
+          plain:
+            blueprint:
+              credentialStoreRef:
+                key: kafka-server-listener-internal-plain-users.json
+                name: bp-csc
+                type: json
+            providerType: blueprint
+          type: plain
+      replicationListener:
+        authentication:
+          plain:
+            blueprint:
+              credentialStoreRef:
+                key: kafka-server-listener-replication-plain-interbroker.txt
+                name: bp-csc
+            providerType: blueprint
+          type: plain
+    version: 7.2.1
+  credentialStoreConfigRefs:
+    - name: bp-csc
+      namespace: cpc-system
+  dockerImages:
+    - registry: docker.io

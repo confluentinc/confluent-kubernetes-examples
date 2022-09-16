@@ -1,0 +1,16 @@
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: KubernetesCluster
+metadata:
+  name: mothership
+  namespace: cpc-system
+spec:
+  k8sID:  a200d637-9a93-45fe-ab76-93e8fa134ffc # kubectl get ns kube-system -oyaml | grep uid
+  description: "cpc-controlplane kubernetes cluster"
+  # required
+  topology:
+    region: us-west2
+    zones:
+    - us-west2-a
+    - us-west2-b
+    - us-west2 -c
+  k8sClusterDomain: cluster.local

@@ -1,0 +1,23 @@
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: ConnectClusterClass
+metadata:
+  name: connect-standard
+  namespace: cpc-system
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents pre-set configuration to deploy CP Connect Cluster."
+spec:
+  provisioner:
+    type: cfk
+    cfk:
+      replicas: 3
+      # +optional
+      image:
+        application:
+          registry: docker.io
+          repository: confluentinc/cp-server-connect
+          tag: 7.2.0
+        init:
+          registry: docker.io
+          repository: confluentinc/confluent-init-container
+          tag: 2.4.1
+      internalTopicReplicationFactor: 3

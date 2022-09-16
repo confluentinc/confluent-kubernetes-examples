@@ -1,0 +1,15 @@
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: ControlCenterCluster
+metadata:
+  name: controlcenter-prod
+  namespace: org-confluent
+spec:
+  blueprintRef:
+    name: standard
+    namespace: cpc-system
+  credentialStoreConfigRef:
+    name: cp-csc
+    namespace: org-confluent
+  k8sClusterRef:
+    name: mothership
+    namespace: cpc-system
