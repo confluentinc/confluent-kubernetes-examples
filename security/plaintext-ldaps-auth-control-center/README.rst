@@ -33,7 +33,7 @@ the tutorial files:
 
 ::
    
-  export TUTORIAL_HOME=<Tutorial directory>/plaintext-ldaps-auth-control-Center
+  export TUTORIAL_HOME=<Tutorial directory>/plaintext-ldaps-auth-control-center
 
 ===============================
 Deploy Confluent for Kubernetes
@@ -106,6 +106,13 @@ Note that it is assumed that your Kubernetes cluster has a ``confluent`` namespa
     kubectl create secret generic ldapforc3-tls \
     --from-file=truststore.jks=$TUTORIAL_HOME/openldapssl/truststore.jks \
     --from-file=jksPassword.txt=$TUTORIAL_HOME/openldapssl/jksPassword.txt
+
+#. Create Control Center `bindDn` and `bindPassword`
+
+  ::
+
+    kubectl create secret generic control-center-ldaps-user \
+    --from-file=ldap.txt=$TUTORIAL_HOME/openldapssl/ldapbinds.txt
 
 ========================================
 Review Confluent Platform configurations

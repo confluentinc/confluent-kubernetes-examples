@@ -69,11 +69,16 @@ spec:
     application: confluentinc/cp-enterprise-control-center:7.2.1
     init: confluentinc/confluent-init-container:2.4.1
   dataVolumeCapacity: 10Gi
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      domain: my.domain
   mountedSecrets:
   - secretRef: ldapforc3-tls
   authentication:
     type: ldap
     ldap:
+      secretRef: control-center-ldaps-user
       roles: [c3users,readonlyusers]
       restrictedRoles: [readonlyusers]
       property:
@@ -82,8 +87,8 @@ spec:
         contextFactory: "com.sun.jndi.ldap.LdapCtxFactory"
         hostname: "ldap.confluent.svc.cluster.local"
         port: "636" 
-        bindDn: "cn=admin,dc=test,dc=com"
-        bindPassword: "confluentrox"
+        bindDn: ""
+        bindPassword: ""
         authenticationMethod: "simple"
         forceBindingLogin: "false"
         userBaseDn: "ou=users,dc=test,dc=com"
