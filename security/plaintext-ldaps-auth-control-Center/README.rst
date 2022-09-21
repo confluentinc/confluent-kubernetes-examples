@@ -258,6 +258,10 @@ Shut down Confluent Platform and the data:
 
   kubectl delete pvc ldap-data-ldap-0 --namespace=confluent
 
+::
+
+  kubectl delete secret ldapforc3-tls --namespace=confluent
+
 
 ===============
 Troubleshooting

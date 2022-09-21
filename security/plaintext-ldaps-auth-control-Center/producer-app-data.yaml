@@ -62,7 +62,7 @@ metadata:
   name: elastic-0
   namespace: confluent
 spec:
-  replicas: 1
-  partitionCount: 1
+  replicas: 3
+  partitionCount: 3
   configs:
     cleanup.policy: "delete"
