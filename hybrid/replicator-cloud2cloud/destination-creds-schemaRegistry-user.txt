@@ -1,2 +1,0 @@
-username=<destination-api-key-SR>
-password=<destination-api-secret-SR> 

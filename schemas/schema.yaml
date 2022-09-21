@@ -1,9 +1,0 @@
-apiVersion: platform.confluent.io/v1beta1
-kind: Schema
-metadata:
-  name: payment-value
-  namespace: confluent
-spec:
-  data:
-    configRef: schema-config
-    format: avro

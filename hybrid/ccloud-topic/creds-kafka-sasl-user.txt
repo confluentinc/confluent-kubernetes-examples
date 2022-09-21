@@ -1,2 +1,0 @@
-username=<api-key>
-password=<api-secret>

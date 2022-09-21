@@ -1,5 +1,0 @@
-.idea
-.vscode/settings.json
-assets/certs/component-certs/generated/*
-assets/certs/generated/*
-**/.local
