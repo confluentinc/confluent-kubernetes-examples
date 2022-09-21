@@ -1,0 +1,131 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Zookeeper
+metadata:
+  name: zookeeper
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-zookeeper:7.2.1
+    init: confluentinc/confluent-init-container:2.4.1
+  dataVolumeCapacity: 10Gi
+  logVolumeCapacity: 10Gi
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server:7.2.1
+    init: confluentinc/confluent-init-container:2.4.1
+  dataVolumeCapacity: 10Gi
+  metricReporter:
+    enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-server-connect:7.2.1
+    init: confluentinc/confluent-init-container:2.4.1
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka:9071
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KsqlDB
+metadata:
+  name: ksqldb
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-ksqldb-server:7.2.1
+    init: confluentinc/confluent-init-container:2.4.1
+  dataVolumeCapacity: 10Gi
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter
+  namespace: confluent
+spec:
+  license:
+    globalLicense: true
+  configOverrides:
+    jvm:
+     - -Djavax.net.ssl.trustStore=/mnt/secrets/ldapforc3-tls/truststore.jks
+     - -Djavax.net.ssl.trustStorePassword=mystorepassword
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-control-center:7.2.1
+    init: confluentinc/confluent-init-container:2.4.1
+  dataVolumeCapacity: 10Gi
+  mountedSecrets:
+  - secretRef: ldapforc3-tls
+  authentication:
+    type: ldap
+    ldap:
+      roles: [c3users,readonlyusers]
+      restrictedRoles: [readonlyusers]
+      property:
+        useLdaps : "true" 
+        debug: "true" 
+        contextFactory: "com.sun.jndi.ldap.LdapCtxFactory"
+        hostname: "ldap.confluent.svc.cluster.local"
+        port: "636" 
+        bindDn: "cn=admin,dc=test,dc=com"
+        bindPassword: "confluentrox"
+        authenticationMethod: "simple"
+        forceBindingLogin: "false"
+        userBaseDn: "ou=users,dc=test,dc=com"
+        userObjectClass: "inetOrgPerson" 
+        userRdnAttribute: "uid"
+        userIdAttribute: "cn"
+        roleBaseDn: "ou=groups,dc=test,dc=com"
+        roleNameAttribute: "cn"
+        roleMemberAttribute: "memberUid"
+        roleObjectClass: "posixGroup" 
+        userPasswordAttribute: "userPassword"
+  dependencies:
+    schemaRegistry:
+      url: http://schemaregistry.confluent.svc.cluster.local:8081
+    ksqldb:
+    - name: ksqldb
+      url: http://ksqldb.confluent.svc.cluster.local:8088
+    connect:
+    - name: connect
+      url: http://connect.confluent.svc.cluster.local:8083
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-schema-registry:7.2.1
+    init: confluentinc/confluent-init-container:2.4.1
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestProxy
+metadata:
+  name: kafkarestproxy
+  namespace: confluent
+spec:
+  dependencies:
+    schemaRegistry:
+      url: http://schemaregistry.confluent.svc.cluster.local:8081
+  image:
+    application: confluentinc/cp-kafka-rest:7.2.1
+    init: confluentinc/confluent-init-container:2.4.1
+  replicas: 1
