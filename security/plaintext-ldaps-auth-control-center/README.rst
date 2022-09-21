@@ -269,6 +269,9 @@ Shut down Confluent Platform and the data:
 
   kubectl delete secret ldapforc3-tls --namespace=confluent
 
+::
+
+  kubectl delete secret control-center-ldaps-user --namespace=confluent
 
 ===============
 Troubleshooting
