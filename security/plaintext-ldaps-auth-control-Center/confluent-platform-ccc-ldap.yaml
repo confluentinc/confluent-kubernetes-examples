@@ -60,11 +60,6 @@ metadata:
 spec:
   license:
     globalLicense: true
-  externalAccess:
-    type: loadBalancer
-    loadBalancer:
-      domain: my.domain
-      prefix: rb-c3
   configOverrides:
     jvm:
      - -Djavax.net.ssl.trustStore=/mnt/secrets/ldapforc3-tls/truststore.jks
