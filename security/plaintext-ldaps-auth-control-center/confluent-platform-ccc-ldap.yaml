@@ -69,10 +69,6 @@ spec:
     application: confluentinc/cp-enterprise-control-center:7.2.1
     init: confluentinc/confluent-init-container:2.4.1
   dataVolumeCapacity: 10Gi
-  externalAccess:
-    type: loadBalancer
-    loadBalancer:
-      domain: my.domain
   mountedSecrets:
   - secretRef: ldapforc3-tls
   authentication:
