@@ -217,7 +217,7 @@ Use Control Center to monitor the Confluent Platform, and see the created topic 
 
    ::
    
-     https://localhost:9021
+     http://localhost:9021
 
 
 #. Users: 
@@ -257,8 +257,6 @@ Shut down Confluent Platform and the data:
 ::
 
   kubectl delete pvc ldap-data-ldap-0 --namespace=confluent
-
-::
 
 
 ===============
