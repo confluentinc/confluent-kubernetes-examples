@@ -284,6 +284,12 @@ Shut down Confluent Platform and the data:
 
 ::
 
+  kubectl delete -f $TUTORIAL_HOME/producer-app-data-ldaps.yaml --namespace=confluent
+
+::
+
+::
+
   kubectl delete -f $TUTORIAL_HOME/producer-app-data.yaml --namespace=confluent
 
 ::
