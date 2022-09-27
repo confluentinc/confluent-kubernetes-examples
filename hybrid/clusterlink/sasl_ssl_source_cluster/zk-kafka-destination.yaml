@@ -50,12 +50,8 @@ spec:
           secretRef: credential
           roles:
             - Administrators
-  mountedSecrets:
-    - secretRef: password-encoder-secret
-  configOverrides:
-    server:
-      - confluent.cluster.link.enable=true
-      - password.encoder.secret=${file:/mnt/secrets/password-encoder-secret/password_encoder_secret:secret}
+  passwordEncoder:
+    secretRef: password-encoder-secret
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: KafkaRestClass
