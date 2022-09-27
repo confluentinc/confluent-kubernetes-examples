@@ -246,18 +246,18 @@ Check external listener
 We've configured ldap authentication on the external listener of Kafka. 
 To validate it you can open a bash to one of the pods and try to connect to the `9092` port:  
 
-```
-kubectl --namespace confluent exec -it kafka-0 -- bash
+::
+  kubectl --namespace confluent exec -it kafka-0 -- bash
 
-cat <<EOF > /tmp/kafka.properties
-bootstrap.servers=kafka.source.svc.cluster.local:9092
-sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=kafka password=kafka-secret;
-sasl.mechanism=PLAIN
-security.protocol=SASL_PLAINTEXT
-EOF
+  cat <<EOF > /tmp/kafka.properties
+  bootstrap.servers=kafka.source.svc.cluster.local:9092
+  sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=kafka password=kafka-secret;
+  sasl.mechanism=PLAIN
+  security.protocol=SASL_PLAINTEXT
+  EOF
 
-kafka-topics --bootstrap-server localhost:9092 --command-config /tmp/kafka.properties --list
-```
+  kafka-topics --bootstrap-server localhost:9092 --command-config /tmp/kafka.properties --list
+
 
 
 =========
