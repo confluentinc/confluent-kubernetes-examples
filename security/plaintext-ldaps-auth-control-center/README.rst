@@ -247,6 +247,7 @@ We've configured ldap authentication on the external listener of Kafka.
 To validate it you can open a bash to one of the pods and try to connect to the `9092` port:  
 
 ::
+
   kubectl --namespace confluent exec -it kafka-0 -- bash
 
   cat <<EOF > /tmp/kafka.properties
