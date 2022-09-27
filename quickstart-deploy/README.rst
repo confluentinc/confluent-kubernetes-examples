@@ -203,5 +203,5 @@ Shut down Confluent Platform and the data:
 
 ::
 
-  helm delete confluent-operator
+  helm delete operator
   
