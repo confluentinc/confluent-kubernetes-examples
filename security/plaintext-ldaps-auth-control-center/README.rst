@@ -259,6 +259,21 @@ To validate it you can open a bash to one of the pods and try to connect to the 
 
   kafka-topics --bootstrap-server localhost:9092 --command-config /tmp/kafka.properties --list
 
+Deploy producer application external listener
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The producer app is packaged and deployed as a pod on Kubernetes. The required
+topic is defined as a KafkaTopic custom resource in
+``$TUTORIAL_HOME/producer-app-data-ldaps.yaml``.
+
+
+      
+Deploy the producer app and check Control Center topic ldaps-producer-test-0: 
+
+::
+   
+  kubectl apply -f $TUTORIAL_HOME/producer-app-data-ldaps.yaml --namespace=confluent
+
 
 
 =========
