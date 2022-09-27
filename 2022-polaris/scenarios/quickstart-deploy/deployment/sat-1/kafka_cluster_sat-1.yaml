@@ -1,0 +1,20 @@
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: KafkaCluster
+metadata:
+  name: kafka-dev
+  namespace: org-confluent
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents Kafka cluster deployment in sat-1 Kubernetes cluster."
+spec:
+  replicas: 3
+  # +optional
+  targetCluster:
+    namespace: confluent-dev
+    name: kafka
+  k8sClusterRef:
+    name: sat-1
+    namespace: cpc-system
+  blueprintRef:
+    name: standard
+    namespace: cpc-system
+

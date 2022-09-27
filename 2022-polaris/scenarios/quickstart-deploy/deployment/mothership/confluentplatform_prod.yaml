@@ -1,0 +1,117 @@
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: ZookeeperCluster
+metadata:
+  name: zookeeper-prod
+  namespace: org-confluent
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents Zookeeper cluster deployment in mothership Kubernetes cluster."
+spec:
+  replicas: 3
+  # +optional
+  #  targetCluster:
+  #    namespace: confluent-dev
+  #    name: zookeeper
+  k8sClusterRef:
+    name: mothership
+    namespace: cpc-system
+  blueprintRef:
+    name: standard
+    namespace: cpc-system
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: KafkaCluster
+metadata:
+  name: kafka-prod
+  namespace: org-confluent
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents Kafka cluster deployment in mothership Kubernetes cluster."
+spec:
+  replicas: 3
+  # +optional
+  #  targetCluster:
+  #    namespace: confluent-dev
+  #    name: kafka
+  k8sClusterRef:
+    name: mothership
+    namespace: cpc-system
+  blueprintRef:
+    name: standard
+    namespace: cpc-system
+  # dependencies:
+  #   zookeeperCluster:
+  #     name: zookeeper-prod
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: SchemaRegistryCluster
+metadata:
+  name: schemaregistry-prod
+  namespace: org-confluent
+spec:
+  replicas: 2
+  # +optional
+  # targetCluster:
+  #   namespace: confluent-dev
+  #   name: schemaregistry
+  k8sClusterRef:
+    name: mothership
+    namespace: cpc-system
+  blueprintRef:
+    name: standard
+    namespace: cpc-system
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: ConnectCluster
+metadata:
+  name: connect-prod
+  namespace: org-confluent
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents Connect cluster deployment in Mothership Kubernetes cluster."
+spec:
+  replicas: 1
+  k8sClusterRef:
+    name: mothership
+    namespace: cpc-system
+  blueprintRef:
+    name: standard
+    namespace: cpc-system
+  # dependencies:
+  #   kafkaCluster:
+  #     name: kafka-prod
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: KsqlDBCluster
+metadata:
+  name: ksqldb-prod
+  namespace: org-confluent
+spec:
+  replicas: 2
+  # +optional
+  # targetCluster:
+  #   namespace: confluent-dev
+  #   name: ksqldb
+  k8sClusterRef:
+    name: mothership
+    namespace: cpc-system
+  blueprintRef:
+    name: standard
+    namespace: cpc-system
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: ControlCenterCluster
+metadata:
+  name: controlcenter-prod
+  namespace: org-confluent
+spec:
+  # +optional
+  #  targetCluster:
+  #    namespace: confluent-dev
+  #    name: controlcenter
+  k8sClusterRef:
+    name: mothership
+    namespace: cpc-system
+  blueprintRef:
+    name: standard
+    namespace: cpc-system
+  # dependencies:
+  #   kafkaCluster:
+  #     name: kafka-prod
