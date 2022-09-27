@@ -86,11 +86,6 @@ metadata:
   name: controlcenter
   namespace: confluent
 spec:
-  externalAccess:
-    type: loadBalancer
-    loadBalancer:
-      domain: my.domain
-      prefix: mb-c3
   license:
     globalLicense: true
   configOverrides:
