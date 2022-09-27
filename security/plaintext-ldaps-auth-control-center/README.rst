@@ -7,6 +7,7 @@ The goal for this scenario is for you to:
 
 * Configure LDAP with TLS server for Control Center authentication (no RBAC).
 * Quickly set up the complete Confluent Platform on the Kubernetes.
+* Configure ldap authentication on the external listener (9092)
 * Configure a producer to generate sample data.
 
 
@@ -103,16 +104,19 @@ Note that it is assumed that your Kubernetes cluster has a ``confluent`` namespa
 
    ::
    
-    kubectl create secret generic ldapforc3-tls \
+    kubectl create secret generic ldaps-tls \
     --from-file=truststore.jks=$TUTORIAL_HOME/openldapssl/truststore.jks \
-    --from-file=jksPassword.txt=$TUTORIAL_HOME/openldapssl/jksPassword.txt
+    --from-file=jksPassword.txt=$TUTORIAL_HOME/openldapssl/jksPassword.txt \
+    --namespace confluent
 
 #. Create Control Center `bindDn` and `bindPassword`
 
   ::
 
-    kubectl create secret generic control-center-ldaps-user \
-    --from-file=ldap.txt=$TUTORIAL_HOME/openldapssl/ldapbinds.txt
+    kubectl create secret generic ldaps-user \
+    --from-file=ldap.txt=$TUTORIAL_HOME/openldapssl/ldapbinds.txt \
+    --namespace confluent
+
 
 ========================================
 Review Confluent Platform configurations
@@ -125,7 +129,7 @@ tutorial, you will configure all components in a single file and deploy all
 components with one ``kubectl apply`` command.
 
 The entire Confluent Platform is configured in one configuration file:
-``$TUTORIAL_HOME/confluent-platform-ccc-ldap.yamll``
+``$TUTORIAL_HOME/confluent-platform-ccc-ldaps.yaml``
 
 In this configuration file, there is a custom Resource configuration spec for
 each Confluent Platform component - replicas, image to use, resource
@@ -159,7 +163,7 @@ Deploy Confluent Platform
 
 ::
 
-  kubectl apply -f $TUTORIAL_HOME/confluent-platform-ccc-ldap.yaml --namespace=confluent
+  kubectl apply -f $TUTORIAL_HOME/confluent-platform-ccc-ldaps.yaml --namespace=confluent
 
 #. Check that all Confluent Platform resources are deployed:
 
@@ -235,6 +239,27 @@ Use Control Center to monitor the Confluent Platform, and see the created topic 
 
 #. Check that the ``elastic-0`` topic was created and that messages are being produced to the topic.
 
+
+Check external listener
+^^^^^^^^^^^^^^^^^^^^^^^
+
+We've configured ldap authentication on the external listener of Kafka. 
+To validate it you can open a bash to one of the pods and try to connect to the `9092` port:  
+
+```
+kubectl --namespace confluent exec -it kafka-0 -- bash
+
+cat <<EOF > /tmp/kafka.properties
+bootstrap.servers=kafka.source.svc.cluster.local:9092
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=kafka password=kafka-secret;
+sasl.mechanism=PLAIN
+security.protocol=SASL_PLAINTEXT
+EOF
+
+kafka-topics --bootstrap-server localhost:9092 --command-config /tmp/kafka.properties --list
+```
+
+
 =========
 Tear Down
 =========
@@ -247,7 +272,7 @@ Shut down Confluent Platform and the data:
 
 ::
 
-  kubectl delete -f $TUTORIAL_HOME/confluent-platform-ccc-ldap.yaml --namespace=confluent
+  kubectl delete -f $TUTORIAL_HOME/confluent-platform-ccc-ldaps.yaml --namespace=confluent
 
 ::
 
@@ -267,11 +292,11 @@ Shut down Confluent Platform and the data:
 
 ::
 
-  kubectl delete secret ldapforc3-tls --namespace=confluent
+  kubectl delete secret ldaps-tls --namespace=confluent
 
 ::
 
-  kubectl delete secret control-center-ldaps-user --namespace=confluent
+  kubectl delete secret ldaps-user --namespace=confluent
 
 ===============
 Troubleshooting

@@ -23,6 +23,31 @@ spec:
     application: confluentinc/cp-server:7.2.1
     init: confluentinc/confluent-init-container:2.4.1
   dataVolumeCapacity: 10Gi
+  listeners:
+    external:
+      authentication:
+        type: ldap
+  identityProvider:
+    type: ldap
+    ldap:
+      address: ldaps://ldap.confluent.svc.cluster.local:636
+      authentication:
+        type: simple
+        simple:
+          secretRef: ldaps-user
+      tls:
+        enabled: true
+        secretRef: ldaps-tls
+      configurations:
+        groupNameAttribute: cn
+        groupObjectClass: group
+        groupMemberAttribute: member
+        groupMemberAttributePattern: CN=(.*),DC=test,DC=com
+        groupSearchBase: dc=test,dc=com
+        userNameAttribute: cn
+        userMemberOfAttributePattern: CN=(.*),DC=test,DC=com
+        userObjectClass: organizationalRole
+        userSearchBase: dc=test,dc=com
   metricReporter:
     enabled: true
 ---
@@ -38,7 +63,7 @@ spec:
     init: confluentinc/confluent-init-container:2.4.1
   dependencies:
     kafka:
-      bootstrapEndpoint: kafka:9071
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: KsqlDB
@@ -51,6 +76,9 @@ spec:
     application: confluentinc/cp-ksqldb-server:7.2.1
     init: confluentinc/confluent-init-container:2.4.1
   dataVolumeCapacity: 10Gi
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: ControlCenter
@@ -58,11 +86,16 @@ metadata:
   name: controlcenter
   namespace: confluent
 spec:
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      domain: my.domain
+      prefix: mb-c3
   license:
     globalLicense: true
   configOverrides:
     jvm:
-     - -Djavax.net.ssl.trustStore=/mnt/secrets/ldapforc3-tls/truststore.jks
+     - -Djavax.net.ssl.trustStore=/mnt/secrets/ldaps-tls/truststore.jks
      - -Djavax.net.ssl.trustStorePassword=mystorepassword
   replicas: 1
   image:
@@ -70,11 +103,11 @@ spec:
     init: confluentinc/confluent-init-container:2.4.1
   dataVolumeCapacity: 10Gi
   mountedSecrets:
-  - secretRef: ldapforc3-tls
+  - secretRef: ldaps-tls
   authentication:
     type: ldap
     ldap:
-      secretRef: control-center-ldaps-user
+      secretRef: ldaps-user
       roles: [c3users,readonlyusers]
       restrictedRoles: [readonlyusers]
       property:
@@ -97,6 +130,8 @@ spec:
         roleObjectClass: "posixGroup" 
         userPasswordAttribute: "userPassword"
   dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
     schemaRegistry:
       url: http://schemaregistry.confluent.svc.cluster.local:8081
     ksqldb:
@@ -116,6 +151,9 @@ spec:
   image:
     application: confluentinc/cp-schema-registry:7.2.1
     init: confluentinc/confluent-init-container:2.4.1
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: KafkaRestProxy
@@ -124,6 +162,8 @@ metadata:
   namespace: confluent
 spec:
   dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
     schemaRegistry:
       url: http://schemaregistry.confluent.svc.cluster.local:8081
   image:
