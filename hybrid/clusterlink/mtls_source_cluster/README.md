@@ -100,7 +100,7 @@ kubectl -n destination create secret generic rest-credential \
     --from-file=basic.txt=$TUTORIAL_HOME/rest-credential.txt
     
 kubectl -n destination create secret generic password-encoder-secret \
-    --from-file=password_encoder_secret=$TUTORIAL_HOME/password-encoder-secret.txt
+    --from-file=password-encoder.txt=$TUTORIAL_HOME/password-encoder-secret.txt
  
 ```
 #### deploy destination zookeeper and kafka cluster in namespace `destination`
