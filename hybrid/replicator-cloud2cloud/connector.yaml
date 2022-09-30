@@ -1,0 +1,35 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connector
+metadata:
+  name: replicator
+  namespace: destination
+spec:
+  name: replicator
+  class: "io.confluent.connect.replicator.ReplicatorSourceConnector"
+  taskMax: 4
+  configs:
+    topic.rename.format: "${topic}_replica"
+    topic.whitelist: "source-topic"
+    confluent.license: ""
+    confluent.topic.replication.factor: "3"
+    confluent.topic.bootstrap.servers: "<destination-ccloud-endpoint:9092>"
+    confluent.topic.sasl.jaas.config: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"<destination-ccloud-key>\" password=\"<destination-ccloud-pass>\";"
+    confluent.topic.sasl.mechanism: "PLAIN"
+    confluent.topic.security.protocol: "SASL_SSL"
+    dest.kafka.bootstrap.servers: "<destination-ccloud-endpoint:9092>"
+    dest.kafka.sasl.jaas.config: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"<destination-ccloud-key>\" password=\"<destination-ccloud-pass>\";"
+    dest.kafka.sasl.mechanism: "PLAIN"
+    dest.kafka.security.protocol: "SASL_SSL"
+    key.converter: "io.confluent.connect.replicator.util.ByteArrayConverter"
+    src.consumer.confluent.monitoring.interceptor.bootstrap.servers: "<source-ccloud-endpoint:9092> "
+    src.consumer.confluent.monitoring.interceptor.sasl.jaas.config: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"<source-ccloud-key>\" password=\"<source-ccloud-pass>\";"
+    src.consumer.confluent.monitoring.interceptor.sasl.mechanism: "PLAIN"
+    src.consumer.confluent.monitoring.interceptor.security.protocol: "SASL_SSL"
+    src.consumer.group.id: "replicator"
+    src.consumer.interceptor.classes: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
+    src.kafka.bootstrap.servers: "<source-ccloud-endpoint:9092>"
+    src.kafka.sasl.jaas.config: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"<source-ccloud-key>\" password=\"<source-ccloud-pass>\";"
+    src.kafka.sasl.mechanism: "PLAIN"
+    src.kafka.security.protocol: "SASL_SSL"
+    value.converter: "io.confluent.connect.replicator.util.ByteArrayConverter"
