@@ -36,7 +36,7 @@ A Deployment is an instantiation of a Blueprint on a target Kubernetes
 infrastructure.
 
 .. image:: images/tech-overview-2.png
-   :scale: 100%
+   :scale: 75%
 
 There are two types of infrastructure configurations options to use CFK
 Blueprints with:
@@ -67,7 +67,7 @@ In a multi-Kubernetes configuration:
   
 
 .. image:: images/tech-overview-1.png
-   :scale: 100%
+   :scale: 75%
 
 Workflow
 --------
