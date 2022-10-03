@@ -30,7 +30,7 @@ Platform Blueprint configures component wide properties, such as security
 etc.
 
 .. image:: images/tech-overview-4.png
-   :scale: 100%
+   :scale: 75%
 
 A Deployment is an instantiation of a Blueprint on a target Kubernetes
 infrastructure.
