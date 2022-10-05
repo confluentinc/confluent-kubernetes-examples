@@ -4,11 +4,11 @@ metadata:
   name: ingress-with-sni
   annotations:
     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
-    kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     ingress.kubernetes.io/ssl-passthrough: "true"
     nginx.ingress.kubernetes.io/backend-protocol: HTTPS
 spec:
+  ingressClassName: nginx
   tls:
     - hosts:
         - kafka.mydomain.example
@@ -19,6 +19,16 @@ spec:
         - ksqldb.mydomain.example
         - connect.mydomain.example
   rules:
+    - host: kafka.mydomain.example
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kafka-bootstrap
+                port: 
+                  number: 9092
     - host: b0.mydomain.example
       http:
         paths:
@@ -47,16 +57,6 @@ spec:
             backend:
               service:
                 name: kafka-2-internal
-                port: 
-                  number: 9092
-    - host: kafka.mydomain.example
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: kafka-bootstrap
                 port: 
                   number: 9092
     - host: controlcenter.mydomain.example
