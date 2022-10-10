@@ -1,0 +1,12 @@
+#must begin with spec(statefulset.spec)
+spec:
+#  only allow configuring fields inside template
+  template:
+    spec:
+      initContainers:
+      - name: busybox
+        image: busybox:1.28
+        command:
+          - echo
+          - Hello World
+        imagePullPolicy: IfNotPresent

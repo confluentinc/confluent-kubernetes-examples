@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: instance
+    service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: preserve_client_ip.enabled=false
+    service.beta.kubernetes.io/aws-load-balancer-type: external
+  labels:
+    k8s-app: kube-dns
+  name: kube-dns-lb
+  namespace: kube-system
+spec:
+  ports:
+    - name: dns-tcp
+      port: 53
+      protocol: TCP
+      targetPort: dns-tcp
+  selector:
+    k8s-app: kube-dns
+  type: LoadBalancer

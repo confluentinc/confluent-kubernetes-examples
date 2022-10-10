@@ -1,0 +1,15 @@
+# This migration yaml assumes that the Confluent Operator 1.x deployment is in `confluent` namespace.
+# Change this to your namespace.
+apiVersion: platform.confluent.io/v1beta1
+kind: MigrationJob
+metadata:
+  name: schemaregistry-migration
+  namespace: confluent
+spec:
+  # This version of init-container is required for migration.
+  initContainerImage: confluentinc/confluent-init-container:2.4.0
+  schemaRegistry:
+    enabled: true
+    name: schemaregistry
+    namespace: confluent
+    release: schemaregistry

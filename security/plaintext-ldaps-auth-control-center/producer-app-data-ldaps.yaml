@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kafka-client-config-ldap
+  namespace: confluent
+type: Opaque
+data:
+  kafka.properties: Ym9vdHN0cmFwLnNlcnZlcnM9a2Fma2EuY29uZmx1ZW50LnN2Yy5jbHVzdGVyLmxvY2FsOjkwOTIKc2FzbC5qYWFzLmNvbmZpZz1vcmcuYXBhY2hlLmthZmthLmNvbW1vbi5zZWN1cml0eS5wbGFpbi5QbGFpbkxvZ2luTW9kdWxlIHJlcXVpcmVkIHVzZXJuYW1lPWthZmthIHBhc3N3b3JkPWthZmthLXNlY3JldDsKc2FzbC5tZWNoYW5pc209UExBSU4Kc2VjdXJpdHkucHJvdG9jb2w9U0FTTF9QTEFJTlRFWFQ=
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ldaps-producer-test
+spec:
+  serviceName: ldaps-producer-test
+  podManagementPolicy: Parallel
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ldaps-producer-test
+  template:
+    metadata:
+      labels:
+        app: ldaps-producer-test
+    spec:
+      containers:
+      - name: ldaps-producer-test
+        image: confluentinc/cp-kafka:latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          kafka-producer-perf-test \
+            --topic ${HOSTNAME}  \
+            --record-size 64 \
+            --throughput 1 \
+            --producer.config /mnt/kafka.properties \
+            --num-records 230400
+        volumeMounts:
+        - name: kafka-properties
+          mountPath: /mnt
+          readOnly: true
+        resources:
+          requests:
+            memory: 512Mi # 768Mi
+            cpu: 500m # 1000m
+      volumes:
+        - name: kafka-properties # Create secret with name `kafka-client-config-ldap` with client configurations
+          secret:
+            secretName: kafka-client-config-ldap
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ldaps-producer-test
+spec:
+  clusterIP: None
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: ldaps-producer-test-0
+  namespace: confluent
+spec:
+  replicas: 3
+  partitionCount: 3
+  configs:
+    cleanup.policy: "delete"

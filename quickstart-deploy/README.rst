@@ -52,7 +52,7 @@ Deploy Confluent for Kubernetes
 
    ::
 
-     helm upgrade --install operator confluentinc/confluent-for-kubernetes
+     helm upgrade --install operator confluentinc/confluent-for-kubernetes --namespace confluent
   
 #. Check that the Confluent For Kubernetes pod comes up and is running:
 
@@ -86,12 +86,12 @@ For example, the Kafka section of the file is as follows:
   kind: Kafka
   metadata:
     name: kafka
-    namespace: operator
+    namespace: confluent
   spec:
     replicas: 3
     image:
-      application: confluentinc/cp-server:7.0.1
-      init: confluentinc/confluent-init-container:2.2.0-1
+      application: confluentinc/cp-server:7.2.0
+      init: confluentinc/confluent-init-container:2.4.0
     dataVolumeCapacity: 10Gi
     metricReporter:
       enabled: true
@@ -106,11 +106,11 @@ Deploy Confluent Platform
    ::
 
      kubectl apply -f $TUTORIAL_HOME/confluent-platform.yaml
-   
-   ## Note: If you are deploying a single node dev cluster, then use this yaml file:
-     
+
+   Note: If you are deploying a single node dev cluster, then use this yaml file:
+
    ::
-  
+
      kubectl apply -f $TUTORIAL_HOME/confluent-platform-singlenode.yaml
      
 
@@ -140,12 +140,6 @@ The producer app is packaged and deployed as a pod on Kubernetes. The required
 topic is defined as a KafkaTopic custom resource in
 ``$TUTORIAL_HOME/producer-app-data.yaml``.
 
-Note: If you are deploying a single node dev cluster, then use this yaml file:
-
-::
-  
-  kubectl apply -f $TUTORIAL_HOME/producer-app-data-singlenode.yaml
-
 The ``$TUTORIAL_HOME/producer-app-data.yaml`` defines the ``elastic-0``
 topic as follows:
 
@@ -164,7 +158,9 @@ topic as follows:
       
 Deploy the producer app:
 
-``kubectl apply -f $TUTORIAL_HOME/producer-app-data.yaml``
+::
+   
+   kubectl apply -f $TUTORIAL_HOME/producer-app-data.yaml
 
 Note: If you are deploying a single node dev cluster, then use this yaml file:
 
@@ -207,5 +203,5 @@ Shut down Confluent Platform and the data:
 
 ::
 
-  helm delete operator
+  helm uninstall operator
   

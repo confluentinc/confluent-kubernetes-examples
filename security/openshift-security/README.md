@@ -28,7 +28,7 @@ Install Confluent for Kubernetes using the default SCC:
 ```
 # Disable the custom pod security context, use the default context
 
-helm upgrade --install cfk-operator confluentinc/confluent-for-kubernetes \ 
+helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes \ 
 --set podSecurity.enabled=false --namespace confluent
 ```
 
@@ -118,7 +118,7 @@ podSecurity:
     runAsNonRoot: true
 
 # For example, to use the group id `1001` and user id `1001`
-helm install cfk-operator confluentinc/confluent-for-kubernetes \ 
+helm install confluent-operator confluentinc/confluent-for-kubernetes \ 
 --set podSecurity.enabled=true \
 --set podSecurity.securityContext.fsGroup=1001 \
 --set podSecurity.securityContext.runAsUser=1001 

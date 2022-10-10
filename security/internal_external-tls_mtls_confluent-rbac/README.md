@@ -10,6 +10,11 @@ REST based Confluent Platform components. View the [static host based routing sc
 
 Before continuing with the scenario, ensure that you have set up the [prerequisites](https://github.com/confluentinc/confluent-kubernetes-examples/blob/master/README.md#prerequisites).
 
+This scenario workflow requires the following CLI tools to be available on the machine you are using:
+
+- openssl
+- cfssl
+
 ## Set the current tutorial directory
 
 Set the tutorial directory for this tutorial under the directory you downloaded the tutorial files:
@@ -124,7 +129,7 @@ In this scenario, you'll be allowing Kafka clients to connect with Kafka through
 For that purpose, you'll provide a server certificate that secures the external domain used for Kafka access.
 
 ```
-# If you dont have one, create a root certificate authority for the external component certs
+# If you don't have one, create a root certificate authority for the external component certs
 openssl genrsa -out $TUTORIAL_HOME/externalRootCAkey.pem 2048
 
 openssl req -x509  -new -nodes \
@@ -243,7 +248,7 @@ kubectl apply -f $TUTORIAL_HOME/controlcenter-testadmin-rolebindings.yaml --name
 # Configure External Access through Ingress Controller
 
 The Ingress Controller will support TLS encryption. For this, you'll need to provide a server certificate
-to use for encypting traffic.
+to use for encrypting traffic.
 
 ```
 # Generate a server certificate from the external root certificate authority

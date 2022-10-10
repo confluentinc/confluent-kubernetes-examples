@@ -1,0 +1,32 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connector
+metadata:
+  name: hdfs3-sink3
+  namespace: confluent
+spec:
+  class: "io.confluent.connect.hdfs3.Hdfs3SinkConnector"
+  taskMax: 1
+  connectClusterRef:
+    name: connect
+  configs:
+    topics : "test-hdfs" # Pre create the topic with the topic.yaml file 
+    store.url : "hdfs://namenode.confluent.svc.cluster.local:9000"
+    flush.size : "3"
+    hadoop.conf.dir : "/etc/hadoop/"
+    partitioner.class : "io.confluent.connect.storage.partitioner.FieldPartitioner"
+    partition.field.name : "f1"
+    rotate.interval.ms : "120000"
+    hadoop.home : "/opt/hadoop-3.1.3/share/hadoop/common"
+    logs.dir : "/tmp"
+    hive.integration : "true"
+    hive.metastore.uris : "thrift://hive-metastore.confluent.svc.cluster.local:9083"
+    hive.database : "testhive"
+    confluent.license : "" ## Add license here if you've not licensed the connect cluster 
+    confluent.topic.bootstrap.servers : "kafka.confluent.svc.cluster.local:9071"
+    confluent.topic.replication.factor : "1"
+    key.converter : "org.apache.kafka.connect.storage.StringConverter"
+    value.converter : "io.confluent.connect.avro.AvroConverter"
+    value.converter.schema.registry.url : "http://schemaregistry.confluent.svc.cluster.local:8081"
+    schema.compatibility : "BACKWARD"
+

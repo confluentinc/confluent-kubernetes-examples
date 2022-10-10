@@ -46,6 +46,7 @@ These TLS certificates include the following principal names for each component 
 - Kafka: `kafka`
 - Schema Registry: `sr`
 - Kafka Connect: `connect`
+- Kafka Rest Proxy: `krp`
 - ksqlDB: `ksql`
 - Control Center: `controlcenter`
      
@@ -109,6 +110,12 @@ kubectl create secret generic tls-ksqldb \
   --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/ksqldb-server.pem \
   --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
   --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/ksqldb-server-key.pem \
+  --namespace confluent
+
+kubectl create secret generic tls-kafkarestproxy \
+  --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafkarestproxy-server.pem \
+  --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
+  --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafkarestproxy-server-key.pem \
   --namespace confluent
 ```
 
@@ -247,7 +254,7 @@ Create ACLs:
 
 # For Connect
 
-### The Connect topic predix is: <namespace>.<connect-cluster-name>-
+### The Connect topic prefix is: <namespace>.<connect-cluster-name>-
 /bin/kafka-acls --bootstrap-server kafka.confluent.svc.cluster.local:9071 \
  --command-config /opt/confluentinc/kafka.properties \
  --add \
@@ -489,7 +496,7 @@ org.apache.kafka.common.errors.TopicAuthorizationException: Not authorized to ac
 
 Check the following:
 1) What principal is being used by the component - this comes from the CN of the certificate used by the component
-2) Are the appopriate ACL created for the components principal
+2) Are the appropriate ACL created for the components principal
 
 To see why Kafka failed the access request, look at the kafka broker logs. 
 You might see messages that indicate authorization failures:

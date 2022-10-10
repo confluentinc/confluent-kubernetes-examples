@@ -134,7 +134,7 @@ sasl.mechanism=PLAIN
 EOF
 ```
 
-### Create topic to load dat a from table into (CRD connector)
+### Create topic to load data from table into (CRD connector)
 ```
 kafka-topics --command-config /opt/confluentinc/etc/connect/consumer.properties \
 --bootstrap-server CCLOUD:9092  \
@@ -144,7 +144,7 @@ kafka-topics --command-config /opt/confluentinc/etc/connect/consumer.properties 
 --topic quickstart-jdbc-CRD-test
 ```
 
-### Create topic to load dat a from table into (REST API endpoint connector) 
+### Create topic to load data from table into (REST API endpoint connector)
 
 ```
 kafka-topics --command-config /opt/confluentinc/etc/connect/consumer.properties \
@@ -214,7 +214,7 @@ export SCHEMA_REGISTRY_OPTS="-Dlog4j.configuration=file:/tmp/log4j.properties"
 kafka-avro-console-consumer \
 --bootstrap-server CCLOUD:9092 \
 --topic quickstart-jdbc-CRD-test \
---consumer.config /opt/confluentinc/etc/connect/kafka.properties \
+--consumer.config /opt/confluentinc/etc/connect/consumer.properties \
 --property schema.registry.url=SR_URL \
 --property schema.registry.basic.auth.user.info=SR_USER:SR_SECRET \
 --property basic.auth.credentials.source=USER_INFO \
@@ -227,7 +227,7 @@ kafka-avro-console-consumer \
 kafka-avro-console-consumer \
 --bootstrap-server CCLOUD:9092 \
 --topic quickstart-jdbc-test \
---consumer.config /opt/confluentinc/etc/connect/kafka.properties \
+--consumer.config /opt/confluentinc/etc/connect/consumer.properties \
 --property schema.registry.url=SR_URL \
 --property schema.registry.basic.auth.user.info=SR_USER:SR_SECRET \
 --property basic.auth.credentials.source=USER_INFO \

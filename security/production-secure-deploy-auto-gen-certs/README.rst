@@ -37,8 +37,8 @@ Deploy Confluent for Kubernetes
 
      helm repo add confluentinc https://packages.confluent.io/helm
 
-Note that it is assumed that your Kubernetes cluster has a ``confluent`` namespace available, otherwise you can create it by running ``kubectl create namespace confluent``. 
-
+   It is assumed that your Kubernetes cluster has the ``confluent`` namespace available. If not, you can create it by running 
+   ``kubectl create namespace confluent``. 
 
 #. Install Confluent For Kubernetes using Helm:
 
@@ -194,6 +194,10 @@ Provide RBAC principal credentials
      kubectl create secret generic ksqldb-mds-client \
        --from-file=bearer.txt=$TUTORIAL_HOME/ksqldb-mds-client.txt \
        --namespace confluent
+     # Kafka Rest Proxy RBAC credential
+     kubectl create secret generic krp-mds-client \
+       --from-file=bearer.txt=$TUTORIAL_HOME/krp-mds-client.txt \
+       --namespace confluent
      # Kafka REST credential
      kubectl create secret generic rest-credential \
        --from-file=bearer.txt=$TUTORIAL_HOME/bearer.txt \
@@ -219,17 +223,17 @@ Deploy Confluent Platform
 If any component does not deploy, it could be due to missing configuration information in secrets.
 The Kubernetes events will tell you if there are any issues with secrets. For example:
 
-   ::
+::
 
-     kubectl get events --namespace confluent
-     Warning  KeyInSecretRefIssue  kafka/kafka  required key [ldap.txt] missing in secretRef [credential] for auth type [ldap_simple]
+  kubectl get events --namespace confluent
+  Warning  KeyInSecretRefIssue  kafka/kafka  required key [ldap.txt] missing in secretRef [credential] for auth type [ldap_simple]
 
 The default required RoleBindings for each Confluent component are created
 automatically, and maintained as `confluentrolebinding` custom resources.
 
-   ::
+::
 
-     kubectl get confluentrolebinding --namespace confluent
+  kubectl get confluentrolebinding --namespace confluent
 
 If you'd like to see how the RoleBindings custom resources are structured, so that
 you can create your own RoleBindings, take a look at the custom resources in this 
@@ -242,9 +246,9 @@ Create RBAC Rolebindings for Control Center admin
 
 Create Control Center Role Binding for a Control Center ``testadmin`` user.
 
-   ::
+::
 
-     kubectl apply -f $TUTORIAL_HOME/controlcenter-testadmin-rolebindings.yaml --namespace confluent
+  kubectl apply -f $TUTORIAL_HOME/controlcenter-testadmin-rolebindings.yaml --namespace confluent
 
 ========
 Validate
@@ -286,7 +290,7 @@ Tear down
 
 ::
 
-  kubectl delete secret rest-credential ksqldb-mds-client sr-mds-client connect-mds-client c3-mds-client mds-client ca-pair-sslcerts --namespace confluent
+  kubectl delete secret rest-credential ksqldb-mds-client sr-mds-client connect-mds-client krp-mds-client c3-mds-client mds-client ca-pair-sslcerts --namespace confluent
 
 ::
 
@@ -295,10 +299,6 @@ Tear down
 ::
 
   kubectl delete secret credential --namespace confluent
-
-::
-
- kubectl delete secret tls-group1 --namespace confluent
 
 ::
 

@@ -97,7 +97,7 @@ the auto-generated certificate is expired and requires the Operator to be notifi
 
 
 
-### ConfluentRoleBindings associaed with older Kafka cluster
+### ConfluentRoleBindings associated with older Kafka cluster
 
 If CP RBAC enabled Kafka Cluster is deleted and redeployed with same cluster name. Then, all the existing `ConfluentRolebindings` are still associated with previous Kafka Cluster. To make existing `ConfluentRolebindings` sync with new Kafka cluster, you need to manually delete the `KafkaRestClass` and recreate it again.
 

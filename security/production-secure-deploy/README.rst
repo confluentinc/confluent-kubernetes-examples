@@ -188,11 +188,80 @@ Provide RBAC principal credentials
      kubectl create secret generic ksqldb-mds-client \
        --from-file=bearer.txt=$TUTORIAL_HOME/ksqldb-mds-client.txt \
        --namespace confluent
+     # Kafka Rest Proxy RBAC credential
+     kubectl create secret generic krp-mds-client \
+       --from-file=bearer.txt=$TUTORIAL_HOME/krp-mds-client.txt \
+       --namespace confluent
      # Kafka REST credential
      kubectl create secret generic rest-credential \
        --from-file=bearer.txt=$TUTORIAL_HOME/bearer.txt \
        --from-file=basic.txt=$TUTORIAL_HOME/bearer.txt \
        --namespace confluent
+
+============================
+Configure Confluent Platform
+============================
+
+You install Confluent Platform components as custom resources (CRs). 
+
+You can configure all Confluent Platform components as custom resources. In this
+tutorial, you will configure all components in a single file and deploy all
+components with one ``kubectl apply`` command.
+
+The CR configuration file contains a custom resource specification for each
+Confluent Platform component, including replicas, image to use, resource
+allocations.
+
+Edit the Confluent Platform CR file: ``$TUTORIAL_HOME/confluent-platform.yaml``
+
+Specifically, note that external accesses to Confluent Platform components are
+configured using the Load Balance services.
+
+The Kafka section of the file is set as follow for load balancer access:
+
+:: 
+
+  Spec:
+    listeners:
+      external:
+        externalAccess:
+          type: loadBalancer
+          loadBalancer:
+            domain:      --- [1]
+
+Component section of the file is set as follows for load balancer access:
+
+::
+
+  spec:
+    externalAccess:
+      type: loadBalancer
+      loadBalancer:
+        domain:          --- [1]
+
+* [1]  Set this to the value of ``$DOMAIN``, Your Kubernetes cluster domain. You need to provide this value for this tutorial.
+
+* The prefixes are used for external DNS hostnames. In this tutorial,  Kafka bootstrap server will use the default prefix, ``kafka``, and the brokers will use the default prefix, ``b``. 
+
+Kafka is configured with 3 replicas in this tutorial. So, the access endpoints
+of Kafka will be:
+
+* kafka.$DOMAIN for the bootstrap server
+* b0.$DOMAIN for the broker #1
+* b1.$DOMAIN for the broker #2
+* b2.$DOMAIN for the broker #3
+
+The access endpoint of each Confluent Platform component will be: 
+
+::
+
+  <Component CR name>.$DOMAIN
+
+For example, in a brower, you will access Control Center at:
+
+::
+
+  http://controlcenter.$DOMAIN
 
 =========================
 Deploy Confluent Platform
@@ -229,6 +298,46 @@ If you'd like to see how the RoleBindings custom resources are structured, so th
 you can create your own RoleBindings, take a look at the custom resources in this 
 directory: $TUTORIAL_HOME/internal-rolebindings
      
+===============
+Add DNS records
+===============
+
+Create DNS records for the externally exposed components:
+
+#. Retrieve the external IP addresses of bootstrap load balancers of the brokers and components:
+
+   ::
+   
+     kubectl get svc
+     
+   Get the ``EXTERNAL-IP`` values of the following services from the output:
+   
+   * ``connect-bootstrap-lb``          
+   * ``controlcenter-bootstrap-lb``   
+   * ``kafka-0-lb``               
+   * ``kafka-1-lb``                  
+   * ``kafka-2-lb``                    
+   * ``kafka-bootstrap-lb``          
+   * ``ksqldb-bootstrap-lb``           
+   * ``schemaregistry-bootstrap-lb`` 
+
+#. Add DNS records for the components and the brokers using the IP addresses and the hostnames above, replacing ``$DOMAIN`` with the actual domain name of your Kubernetes cluster.
+
+   In this tutorial, we are using the default prefixes for components and brokers as shown below:
+   
+   ====================== ====================================================================
+   DNS name               IP address
+   ====================== ====================================================================
+   kafka.$DOMAIN          The ``EXTERNAL-IP`` value of ``kafka-bootstrap-lb`` service
+   b0.$DOMAIN             The ``EXTERNAL-IP`` value of ``kafka-0-lb`` service
+   b1.$DOMAIN             The ``EXTERNAL-IP`` value of ``kafka-1-lb`` service
+   b2.$DOMAIN             The ``EXTERNAL-IP`` value of ``kafka-2-lb`` service
+   mds.$DOMAIN            The ``EXTERNAL-IP`` value of ``kafka-mds-bootstrap-lb`` service
+   controlcenter.$DOMAIN  The ``EXTERNAL-IP`` value of ``controlcenter-bootstrap-lb`` service
+   ksqldb.$DOMAIN         The ``EXTERNAL-IP`` value of ``ksqldb-bootstrap-lb`` service
+   connect.$DOMAIN        The ``EXTERNAL-IP`` value of ``connect-bootstrap-lb`` service
+   schemaregistry.$DOMAIN The ``EXTERNAL-IP`` value of ``schemaregistry-bootstrap-lb`` service
+   ====================== ====================================================================
 
 =================================================
 Create RBAC Rolebindings for Control Center admin
@@ -280,7 +389,7 @@ Tear down
 
 ::
 
-  kubectl delete secret rest-credential ksqldb-mds-client sr-mds-client connect-mds-client c3-mds-client mds-client --namespace confluent
+  kubectl delete secret rest-credential ksqldb-mds-client sr-mds-client connect-mds-client krp-mds-client c3-mds-client mds-client ca-pair-sslcerts --namespace confluent
 
 ::
 

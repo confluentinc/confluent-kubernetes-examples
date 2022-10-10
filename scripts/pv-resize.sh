@@ -43,8 +43,9 @@ resize() {
   local CLUSTER_TYPE=$1
   local CLUSTER_NAME=$2
   local NAMESPACE=$3
-  local INT_NEW_SIZE=$4
-  local NEW_SIZE_SUFFIX=$5
+  local WAIT=$4
+  local INT_NEW_SIZE=$5
+  local NEW_SIZE_SUFFIX=$6
 
   if [ -f "${CLUSTER_NAME}"-sts.yaml ]; then
      die "${CLUSTER_NAME}-sts.yaml exist, please delete by running rm -f ${CLUSTER_NAME}-sts.yaml"
@@ -63,14 +64,13 @@ resize() {
     INT_current_capacity=( $(grep -Eo '^[0-9]+\.?[0-9]*' <<< "${current_capacity}") )
     INT_current_capacity_suffix="${current_capacity#"${INT_current_capacity}"}"
     current_multiplier=$(get_suffix_multiplier ${INT_current_capacity_suffix})
-    RAW_current_size=`bc -l <<< "${INT_current_capacity} * 1024^${current_multiplier}"`
+    let RAW_current_size=( ${INT_current_capacity}*1024**${current_multiplier} )
 
-    new_mulitplier=$(get_suffix_multiplier ${NEW_SIZE_SUFFIX})
-    RAW_new_size=`bc -l <<<  "${INT_NEW_SIZE} * 1024^${new_mulitplier}"`
-    expand=`bc -l <<< "${RAW_new_size} > ${RAW_current_size}"`
+    new_multiplier=$(get_suffix_multiplier ${NEW_SIZE_SUFFIX})
+    let RAW_new_size=( ${INT_NEW_SIZE}*1024**${new_multiplier} )
 
-    if [ ${expand} -eq "1" ]; then
-      NEW_SIZE="${INT_NEW_SIZE}${NEW_SIZE_SUFFIX}"
+    NEW_SIZE="${INT_NEW_SIZE}${NEW_SIZE_SUFFIX}"
+    if [ "${RAW_new_size}" -gt "${RAW_current_size}" ]; then
       echo "${green}#########################"
       echo "#### PVC: ${PVC}"
       echo "#### Current Size: ${current_capacity}"
@@ -90,15 +90,16 @@ resize() {
 
       # Resize can take 2-3 tries 2 mins apart while resizing
       echo "${green}#### Waiting for PVC resize: ${PVC}${reset}"
-      kubectl wait --for=condition=FileSystemResizePending pvc/"${PVC}" -n "${NAMESPACE}" --timeout=30m
+      echo "      kubectl wait --for=condition=FileSystemResizePending pvc/"${PVC}" -n "${NAMESPACE}" --timeout="${WAIT}"m"
+      kubectl wait --for=condition=FileSystemResizePending pvc/"${PVC}" -n "${NAMESPACE}" --timeout="${WAIT}"m
       # Creating the sts puts the pod back and reattached the pvc
       kubectl create -f "${CLUSTER_NAME}"-sts.yaml -n "${NAMESPACE}"
       # This wait isn't strictly necessary as the rolling operator on the next \
       #   pod in the queue would prevent issues.
       echo "${green} #### Waiting for Pod to start: ${POD}${reset}"
-      kubectl wait --for=condition=ready pod/${POD} -n "${NAMESPACE}" --timeout=30m
+      kubectl wait --for=condition=ready pod/${POD} -n "${NAMESPACE}" --timeout="${WAIT}"m
     else
-      echo "${green}#### PVC: ${PVC} is already size: ${current_capacity}${reset}. This script is only for disk expansion."
+      echo "${green}#### PVC: ${PVC} is size: ${current_capacity} which is not less than requested new size: ${NEW_SIZE}${reset}. This script is only for disk expansion."
     fi
   done
 
@@ -113,12 +114,13 @@ resize() {
 components_types=(kafka ksqldb controlcenter zookeeper)
 valid_suffixes=("Ki" "Mi" "Gi" "Ti")
 usage() {
-    echo "usage: ./pv-resize.sh -c <cluster-name> -t <cluster-type> -n <namespace> -s <size_with_unit>"
+    echo "usage: ./pv-resize.sh -c <cluster-name> -t <cluster-type> -n <namespace> -s <size_with_unit> -w <wait_duration_minutes>"
     echo "   ";
     echo "  -c | --cluster-name    : name of the cluster to resize the PV";
     echo "  -t | --cluster-type    : confluent platform component, supported value: ${components_types[*]}";
     echo "  -n | --namespace       : kubernetes namespace where cluster is running";
     echo "  -s | --size            : new PV size in Ki|Mi|Gi|Ti";
+    echo "  -w | --wait            : wait duration for pod to be ready in minutes (default 60 min)";
     echo "  -h | --help            : Usage command";
 }
 
@@ -130,6 +132,7 @@ parse_args() {
             -c | --name )             name="${2}";          shift;;
             -n | --namespace )        namespace="${2}";     shift;;
             -s | --size)              size="${2}";          shift;;
+            -w | --wait)              wait="${2}";       shift;;
             -h | --help )             help="true";          ;;
             *)                        args+=("$1")
         esac
@@ -145,6 +148,7 @@ parse_args() {
     if [[ ! "${components_types[*]}" =~ ${type} ]]; then die "Please provide cluster type, supported value: ${components_types[*]}"; fi
     if [[ -z ${namespace} ]]; then usage; die "==> Please provide namespace where cluster is running"; fi
     if [[ -z ${size} ]]; then usage; die "==> Please provide PV size in ${SUFFIXES_STRING}"; fi
+    if [[ -z ${wait} ]]; then wait=60; fi
 
     local NEW_SIZE_VALUE=( $(grep -Eo '^[0-9]+' <<< "${size}") )
     #decimal todo
@@ -152,7 +156,7 @@ parse_args() {
     if [ -z "${NEW_SIZE_VALUE}" ] || [ "${NEW_SIZE_VALUE}" == "0" ]
     then
       # do not allow decimals https://github.com/kubernetes/kubernetes/pull/100100
-      die "new size with unit parameter is not properly formatted. No decimals allowed"
+      die "--size parameter is not properly formatted. No decimals allowed"
     fi
 
     local in=1
@@ -164,11 +168,10 @@ parse_args() {
     done
     if [[ ${in} -eq 1 ]];
     then
-      die "new size with unit parameter should not have decimals or is not properly formatted with units ${SUFFIXES_STRING}"
+      die "--size with unit parameter should not have decimals and should be properly formatted with units ${SUFFIXES_STRING}"
     fi
 
-    resize "${type}" "${name}" "${namespace}" "${NEW_SIZE_VALUE}" "${NEW_SIZE_SUFFIX}"
+    resize "${type}" "${name}" "${namespace}" "${wait}" "${NEW_SIZE_VALUE}" "${NEW_SIZE_SUFFIX}" 
 }
 
 parse_args "$@";
-

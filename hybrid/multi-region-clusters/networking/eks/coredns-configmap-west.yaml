@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns
+  namespace: kube-system
+data:
+  Corefile: |
+    .:53 {
+      errors
+      health
+      kubernetes cluster.local in-addr.arpa ip6.arpa {
+        pods insecure
+        fallthrough in-addr.arpa ip6.arpa
+      }
+      prometheus :9153
+      forward . /etc/resolv.conf
+      cache 30
+      loop
+      reload
+      loadbalance
+    }
+    central.svc.cluster.local:53 {
+      errors
+      cache 30
+      forward . 10.0.5.225 {
+        force_tcp
+      }
+      reload
+      log
+    }
+    east.svc.cluster.local:53 {
+      errors
+      cache 30
+      forward . 10.0.103.206 {
+        force_tcp
+      }
+      reload
+      log
+    }

@@ -1,7 +1,7 @@
-Deploy Connectors and ksqlDB using managed Confluent Cloud Kafka
+Deploy Control Center Confluent Rest Proxy Connectors and ksqlDB using managed Confluent Cloud Kafka
 ================================================================
 
-You can use Confluent for Kubernetes to deploy and manage Connectors and ksqlDB
+You can use Confluent for Kubernetes to deploy and manage Control Center Confluent Rest Proxy Connectors and ksqlDB
 against a Confluent Cloud Kafka and Schema Registry.
 
 Before continuing with the scenario, ensure that you have set up the
@@ -101,6 +101,25 @@ credentials.
   kubectl create secret generic control-center-user \
   --from-file=basic.txt=$TUTORIAL_HOME/creds-control-center-users.txt
 
+
+Create the kafka.properties file in $TUTORIAL_HOME. Add the above endpoint and the credentials as follows:
+
+::
+
+  bootstrap.servers=<cloudKafka_url>:9092
+  security.protocol=SASL_SSL
+  sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule   required username="<api-key>"   password="<api-secret>";
+  ssl.endpoint.identification.algorithm=https
+  sasl.mechanism=PLAIN
+
+Create a configuration secret for client applications to use
+
+::
+
+  kubectl create secret generic kafka-client-config-secure \
+  --from-file=$TUTORIAL_HOME/kafka.properties \
+  -n confluent
+
 =========================
 Deploy Confluent Platform
 =========================
@@ -149,6 +168,69 @@ and data.
    
      https://localhost:9021
 
+Validate Confluent Rest Proxy
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Use Confluent Rest Proxy to produce and consume from Confluent Cloud. 
+
+#. Open a shell to the connect pod and create a topic, name it CFK-D3dbf1I7mx. 
+
+   ::
+
+    kubectl -n confluent exec -it connect-0 -- bash
+
+#. Create new topic:
+
+   ::
+
+      kafka-topics --bootstrap-server <cloudKafka_url>:9092 \
+      --command-config /mnt/secrets/kafka-client-config-secure/kafka.properties \
+      --create --partitions 3 \
+      --replication-factor 3 \
+      --topic CFK-D3dbf1I7mx
+
+#. Post to new topic:
+
+   ::
+
+      for i in $(seq 100 $END); do curl -X POST \
+      http://kafkarestproxy.confluent.svc.cluster.local:8082/topics/CFK-D3dbf1I7mx \
+      -H 'Accept: application/vnd.kafka.v2+json, application/vnd.kafka+json, application/json' \
+      -H 'Content-Type: application/vnd.kafka.json.v2+json' \
+      -d '{
+      "records": [
+      {
+      "key": "somekey",
+      "value": {"foo": "bar"}
+      },
+      {
+      "value": [ "foo", "bar" ],
+      "partition": 1
+      },
+      {
+      "value": 53.5
+      }
+      ]
+      }';done
+
+#. Create new group: 
+
+   ::
+
+      curl -X POST -H "Content-Type: application/vnd.kafka.v2+json" --data '{"name": "my_consumer_instance1", "format": "json", "auto.offset.reset": "earliest"}' http://kafkarestproxy.confluent.svc.cluster.local:8082/consumers/my_json_consumer1 
+
+#. Subscribe:
+
+   ::
+
+      curl -X POST -H "Content-Type: application/vnd.kafka.v2+json" --data '{"topics":["CFK-D3dbf1I7mx"]}' http://kafkarestproxy.confluent.svc.cluster.local:8082/consumers/my_json_consumer1/instances/my_consumer_instance1/subscription 
+
+#. Wait few seconds and then consume, you might need to run the same command twice. 
+
+   ::
+
+     curl -X GET -H "Accept: application/vnd.kafka.json.v2+json" http://kafkarestproxy.confluent.svc.cluster.local:8082/consumers/my_json_consumer1/instances/my_consumer_instance1/records
+
 =========
 Tear down
 =========
@@ -159,7 +241,7 @@ Tear down
 
 ::
 
-  kubectl delete secrets cloud-plain cloud-sr-access control-center-user
+  kubectl delete secrets cloud-plain cloud-sr-access control-center-user kafka-client-config-secure
 
 ::
 

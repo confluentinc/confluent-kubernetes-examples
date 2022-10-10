@@ -1,0 +1,40 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connector
+metadata:
+  name: replicator
+  namespace: destination
+spec:
+  name: replicator
+  class: "io.confluent.connect.replicator.ReplicatorSourceConnector"
+  taskMax: 4
+  configs:
+    topic.rename.format: "${topic}_replica"
+    topic.whitelist: "topic-in-source"
+    confluent.topic.security.protocol: "SSL"
+    confluent.topic.ssl.truststore.location: "/mnt/sslcerts/kafka-tls/truststore.p12"
+    confluent.topic.ssl.truststore.password: "mystorepassword"
+    confluent.topic.bootstrap.servers: "kafka.destination.svc.cluster.local:9071"
+    dest.kafka.bootstrap.servers: "kafka.destination.svc.cluster.local:9071"
+    dest.kafka.security.protocol: "SSL"
+    dest.kafka.ssl.truststore.location: "/mnt/sslcerts/kafka-tls/truststore.p12"
+    dest.kafka.ssl.truststore.password: "mystorepassword"
+    key.converter: "io.confluent.connect.replicator.util.ByteArrayConverter"
+    src.consumer.confluent.monitoring.interceptor.bootstrap.servers: "<ccloud-endpoint:9092>"
+    src.consumer.confluent.monitoring.interceptor.sasl.jaas.config: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"<ccloud-key>\" password=\"<ccloud-pass>\";"
+    src.consumer.confluent.monitoring.interceptor.sasl.mechanism: "PLAIN"
+    src.consumer.confluent.monitoring.interceptor.security.protocol: "SASL_SSL"
+    src.consumer.confluent.monitoring.interceptor.ssl.truststore.location: "/mnt/sslcerts/kafka-tls/truststore.p12"
+    src.consumer.confluent.monitoring.interceptor.ssl.truststore.password: "mystorepassword"
+    src.consumer.group.id: "replicator"
+    src.consumer.interceptor.classes: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
+    src.kafka.bootstrap.servers: "<ccloud-endpoint:9092>"
+    src.kafka.sasl.jaas.config: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"<ccloud-key>\" password=\"<ccloud-pass>\";"
+    src.kafka.sasl.mechanism: "PLAIN"
+    src.kafka.security.protocol: "SASL_SSL"
+    src.kafka.ssl.truststore.location: "/mnt/sslcerts/kafka-tls/truststore.p12"
+    src.kafka.ssl.truststore.password: "mystorepassword"
+    value.converter: "io.confluent.connect.replicator.util.ByteArrayConverter"
+  connectRest:
+    tls:
+      secretRef: kafka-tls

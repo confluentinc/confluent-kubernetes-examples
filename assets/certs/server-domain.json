@@ -5,6 +5,8 @@
     "*.confluent.svc.cluster.local",
     "*.zookeeper.confluent.svc.cluster.local",
     "*.kafka.confluent.svc.cluster.local",
+    "*.ldap.confluent.svc.cluster.local",
+    "ldap.confluent.svc.cluster.local",
     "*.my.domain",
     "*.destination.svc.cluster.local",
     "*.zookeeper.destination.svc.cluster.local",

@@ -7,8 +7,8 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-zookeeper:7.0.0
-    init: confluentinc/confluent-init-container:2.2.0
+    application: confluentinc/cp-zookeeper:7.2.0
+    init: confluentinc/confluent-init-container:2.4.0
   dataVolumeCapacity: 10Gi
   logVolumeCapacity: 10Gi
   tls:
@@ -22,8 +22,8 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-server:7.0.0
-    init: confluentinc/confluent-init-container:2.2.0
+    application: confluentinc/cp-server:7.2.0
+    init: confluentinc/confluent-init-container:2.4.0
   dataVolumeCapacity: 10Gi
   tls:
     secretRef: destination-tls-group1
@@ -50,12 +50,8 @@ spec:
           secretRef: credential
           roles:
             - Administrators
-  mountedSecrets:
-    - secretRef: password-encoder-secret
-  configOverrides:
-    server:
-      - confluent.cluster.link.enable=true
-      - password.encoder.secret=${file:/mnt/secrets/password-encoder-secret/password_encoder_secret:secret}
+  passwordEncoder:
+    secretRef: password-encoder-secret
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: KafkaRestClass

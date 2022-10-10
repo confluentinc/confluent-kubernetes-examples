@@ -92,7 +92,7 @@ kubectl -n destination create secret tls ca-pair-sslcerts \
 ## Deploy Source Components
 
 ```
-kubectl apply -f $TUTORIAL_HOME/components-source.yaml
+kubectl apply -f $TUTORIAL_HOME/confluent-platform-source.yaml
 ```
 Check that zookeeper, kafka cluster and topic `demo` are deployed:
 
@@ -103,7 +103,7 @@ kubectl get confluent -n source
 ## Deploy Destination Components
 
 ```
-kubectl apply -f $TUTORIAL_HOME/components-destination.yaml
+kubectl apply -f $TUTORIAL_HOME/confluent-platform-destination.yaml
 ```
 Check that zookeeper, kafka and connect cluster are deployed:
 
@@ -180,6 +180,6 @@ kafka-console-consumer --from-beginning --topic demo --bootstrap-server  kafka.d
 
 ```
 kubectl delete -f $TUTORIAL_HOME/connector.yaml
-kubectl delete -f $TUTORIAL_HOME/components-destination.yaml
-kubectl delete -f $TUTORIAL_HOME/components-source.yaml
+kubectl delete -f $TUTORIAL_HOME/confluent-platform-destination.yaml
+kubectl delete -f $TUTORIAL_HOME/confluent-platform-source.yaml
 ```
