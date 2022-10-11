@@ -105,11 +105,10 @@ Components
 
 Orchestrator on Control Plane
   * A set of controllers that service the Kubernetes APIs 
-  * Generates and co-ordinates Layer-1 CFK APIs to deploy Confluent Platform
-  * Manages status of Polaris components
+  * Generates and coordinates Layer-1 CFK APIs to deploy Confluent Platform
+  * Manages status of Blueprints components
   * Supports dynamic registration of Data Plane clusters.
   * Provides unified orchestration for Confluent Platforms on multiple cluster regions.
-
 
 Kubernetes Cluster
   * Orchestrator uses the information in this custom resource (CR) to propagate 
@@ -118,7 +117,7 @@ Kubernetes Cluster
   * Contains Information about regions and zones of a Data Plane cluster.
 
 Health Check
-  * Periodically probe all registered Agents’ heartbeats to check the availability of the Polaris services.
+  * Periodically probe all registered Agents’ heartbeats to check the availability of the Blueprint services.
   * CPC Orchestrator uses this resource to allow or deny user requests based on the availability of services. 
 
 Blueprint
@@ -126,7 +125,7 @@ Blueprint
   * Blueprint references Confluent component classes CRs that represent corresponding CP components.
 
 Cluster Class
-  * Part of the Polaris Blueprint.
+  * Part of the CFK Blueprint.
   * Provides a way for platform administrators to describe the classes of different Confluent deployments which helps to standardize Confluent deployments.
   * Contains the information, such as:
   

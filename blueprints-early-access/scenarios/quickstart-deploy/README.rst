@@ -1,16 +1,18 @@
-==============
-Deploy Polaris
-==============
+=====================
+Deploy CFK Blueprints
+=====================
 
-This example will walk you through configuration of Polaris, including
-deployment of the Control Plane, the Data Plane, and Blueprints.
+This example will walk you through configuration and deployment of Confluent for
+Kubernetes (CFK) Blueprints.
 
 #. Deploy the Control Plane in the control plane Kubernetes cluster.
+
+#. Deploy the Blueprint in the control plane Kubernetes cluster.
 
 #. Deploy the Data Plane.
   
    - To install and follow the local Data Plane scenario, deploy the Data
-     Plane  in the same cluster as the Control Plane.
+     Plane in the same cluster as the Control Plane.
    
    - To install and follow the remote Data Plane scenario, deploy the Data 
      Plane in a separate Data Plane Kubernetes cluster.
@@ -33,12 +35,6 @@ Prepare
       
       kubectl config rename-context <Kubernetes data plane context> data-plane
    
-#. Set the Polaris home directory:
-
-   .. sourcecode:: bash
-   
-      export CPC_HOME=<Directory to install Polaris>
-
 #. From the ``<CFK examples directory>`` on your local machine, clone this 
    example repo:
 
@@ -50,8 +46,8 @@ Prepare
 
    .. sourcecode:: bash
 
-      export TUTORIAL_HOME=<CFK examples directory>/confluent-kubernetes-examples/2022-polaris/samples/quickstart-deploy
-   
+      export TUTORIAL_HOME=<CFK examples directory>/confluent-kubernetes-examples/blueprints-early-access/scenarios/quickstart-deploy
+        
 .. _deploy-control-plane: 
 
 Install Control Plane  
@@ -66,18 +62,12 @@ following steps:
    
       kubectl config use-context control-plane
 
-#. Create a namespace for the Polaris system resources. ``cpc-system`` is used 
+#. Create a namespace for the Blueprint system resources. ``cpc-system`` is used 
    in these examples:
 
    .. sourcecode:: bash
 
       kubectl create namespace cpc-system 
-
-#. Install the Orchestrator CRDs:
-
-   .. sourcecode:: bash
-
-      kubectl apply -f $CPC_HOME/cpc-orchestrator/charts/cpc-orchestrator/crds
 
 #. Generate the KubeConfig file for the remote Data Planes to connect:
 
@@ -85,31 +75,6 @@ following steps:
 
       $TUTORIAL_HOME/scripts/kubeconfig_generate.sh mothership-sa cpc-system /tmp
 
-#. Create a Docker Registry secret for the image repository. 
-   ``confluent-registry`` is used in these examples.
-
-   #. Get a token:
-   
-      .. sourcecode:: bash
-
-         gimme-aws-creds 
-
-   #. Create a Docker registry secret:
-
-      .. sourcecode:: bash
-
-         export ECR_USERNAME=AWS 
-         export ECR_PASSWORD=$(aws ecr get-login-password --region us-west-2 --profile devprod-prod) 
-         export EMAIL=@confluent.io
-
-         kubectl -n cpc-system create secret docker-registry confluent-registry \
-           --docker-server=519856050701.dkr.ecr.us-west-2.amazonaws.com \
-           --docker-username=$ECR_USERNAME \
-           --docker-password=$ECR_PASSWORD \
-           --docker-email=$EMAIL \
-           --context control-plane \
-           --namespace cpc-system                                
- 
 #. Create a Webhook certificate secret. ``webhooks-tls`` is used in these 
    examples:
 
@@ -132,26 +97,14 @@ following steps:
 
    .. sourcecode:: bash
 
-      helm upgrade --install cpc-orchestrator $CPC_HOME/cpc-orchestrator/charts/cpc-orchestrator \
-        --namespace cpc-system \
-        --set image.registry="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod" \
-        --set image.repository="confluentinc/cp-cpc-operator" \
-        --set image.tag="latest" \
-        --set image.pullPolicy="IfNotPresent" \
-        --set debug=true \
-        --set imagePullSecretRef="confluent-registry"
+      helm upgrade --install cpc-orchestrator confluent-inc/cpc-orchestrator \
+        --namespace cpc-system 
 
 #. Deploy the Blueprint and the Confluent cluster class CRs:
 
    .. sourcecode:: bash
 
       kubectl apply -f $TUTORIAL_HOME/deployment/confluentplatform_blueprint.yaml
-      kubectl apply -f $TUTORIAL_HOME/deployment/zookeepercluster_class.yaml
-      kubectl apply -f $TUTORIAL_HOME/deployment/controlcentercluster_class.yaml
-      kubectl apply -f $TUTORIAL_HOME/deployment/connectcluster_class.yaml
-      kubectl apply -f $TUTORIAL_HOME/deployment/ksqldbcluster_class.yaml
-      kubectl apply -f $TUTORIAL_HOME/deployment/schemaregistrycluster_class.yaml
-      kubectl apply -f $TUTORIAL_HOME/deployment/kafkacluster_class.yaml
 
 .. _deploy-local-data-plane: 
 
@@ -173,41 +126,20 @@ where the Control Plane was installed.
       and set ``spec.k8sID`` to the Kubernetes ID retrieved in the previous 
       step.
       
-   #. Create the KubernetesCluster CR in the control Plane Kubernetes cluster:
+   #. Create the KubernetesCluster custom resource (CR) and the HealthCheck CR 
+      in the Control Plane Kubernetes cluster:
    
       .. sourcecode:: bash
 
          kubectl apply -f $TUTORIAL_HOME/registration/kubernetes_cluster_mothership.yaml
 
-   #. Create the HealthCheck CR in the Control Plane Kubernetes cluster. Its 
-      spec has the reference to the Kubernetes Cluster reference you created in 
-      the previous step:
-      
-      .. sourcecode:: bash
-
-         kubectl apply -f $TUTORIAL_HOME/registration/healthcheck_mothership.yaml
-
-#. Install the Agent.
-
-   #. Apply the Agent CRDs:
-
-      .. sourcecode:: bash
-
-         kubectl apply -f $CPC_HOME/cpc-agent/charts/cpc-agent/crds
-
-   #. Install the Agent Helm chart in the ``Local`` mode:
+#. Install the Agent Helm chart in the ``Local`` mode:
    
-      .. sourcecode:: bash
-   
-         helm upgrade --install cpc-agent $CPC_HOME/cpc-agent/charts/cpc-agent \
-           --namespace cpc-system \
-           --set mode=Local \
-           --set image.registry="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod" \
-           --set image.repository="confluentinc/cp-cpc-operator" \
-           --set image.tag="latest" \
-           --set image.pullPolicy="IfNotPresent" \
-           --set debug=true \
-           --set imagePullSecretRef="confluent-registry"
+   .. sourcecode:: bash
+
+      helm upgrade --install cpc-agent confluentinc/cpc-agent \
+        --namespace cpc-system \
+        --set mode=Local 
 
 #. Install the CFK Helm chart in the cluster mode (``--set namespaced=false``):
   
@@ -215,7 +147,6 @@ where the Control Plane was installed.
 
       helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes \
         --set namespaced=false \
-        --set debug=true \
         --namespace cpc-system
 
 --------------------------
@@ -235,12 +166,7 @@ From the Control Plane cluster, deploy Confluent Platform.
 
    .. sourcecode:: bash
 
-      kubectl apply -f $TUTORIAL_HOME/deployment/mothership/zookeeper_cluster_mothership.yaml
-      kubectl apply -f $TUTORIAL_HOME/deployment/mothership/kafka_cluster_mothership.yaml
-      kubectl apply -f $TUTORIAL_HOME/deployment/mothership/connect_cluster_mothership.yaml
-      kubectl apply -f $TUTORIAL_HOME/deployment/mothership/ksqldb_cluster_mothership.yaml
-      kubectl apply -f $TUTORIAL_HOME/deployment/mothership/schemaregistry_cluster_mothership.yaml
-      kubectl apply -f $TUTORIAL_HOME/deployment/mothership/controlcenter_cluster_mothership.yaml
+      kubectl apply -f $TUTORIAL_HOME/deployment/mothership/confluentplatform_prod.yaml
       
 #. Validate the deployment using Control Center.
 
@@ -262,12 +188,7 @@ From the Control Plane cluster, deploy Confluent Platform.
 
    .. sourcecode:: bash
 
-      kubectl delete -f $TUTORIAL_HOME/deployment/mothership/zookeeper_cluster_mothership.yaml
-      kubectl delete -f $TUTORIAL_HOME/deployment/mothership/kafka_cluster_mothership.yaml
-      kubectl delete -f $TUTORIAL_HOME/deployment/mothership/connect_cluster_mothership.yaml
-      kubectl delete -f $TUTORIAL_HOME/deployment/mothership/ksqldb_cluster_mothership.yaml
-      kubectl delete -f $TUTORIAL_HOME/deployment/mothership/schemaregistry_cluster_mothership.yaml
-      kubectl delete -f $TUTORIAL_HOME/deployment/mothership/controlcenter_cluster_mothership.yaml
+      kubectl delete -f $TUTORIAL_HOME/deployment/mothership/confluentplatform_prod.yaml
 
 .. _deploy-remote-data-plane: 
 
@@ -289,47 +210,15 @@ Kubernetes cluster from the Control Plane cluster.
       ``registration/kubernetes_cluster_sat-1.yaml`` and set ``spec.k8sID`` 
       to the Kubernetes ID from previous step.
       
-   #. In the Control Plane, create the KubernetesCluster CR:
+   #. In the Control Plane, create the KubernetesCluster CR and the HealthCheck 
+      CR:
    
       .. sourcecode:: bash
 
          kubectl apply -f $TUTORIAL_HOME/registration/kubernetes_cluster_sat-1.yaml --context control-plane
 
-   #. In the Control Plane, create the HealthCheck CR in the Control Plane 
-      Kubernetes cluster. Its spec has the reference to the Kubernetes Cluster 
-      reference you created in the previous step:
-      
-      .. sourcecode:: bash
-
-         kubectl apply -f $TUTORIAL_HOME/registration/healthcheck_sat-1.yaml --context control-plane
-
 #. In the Data Plane, create the required secrets.
 
-   #. Create a Docker Registry secret for the image repository. 
-      ``confluent-registry`` is used in these examples.
-   
-      #. Get a token:
-      
-         .. sourcecode:: bash
-   
-            gimme-aws-creds 
-   
-      #. Create a Docker registry secret:
-   
-         .. sourcecode:: bash
-   
-            export ECR_USERNAME=AWS 
-            export ECR_PASSWORD=$(aws ecr get-login-password --region us-west-2 --profile devprod-prod) 
-            export EMAIL=@confluent.io
-   
-            kubectl -n cpc-system create secret docker-registry confluent-registry \
-              --docker-server=519856050701.dkr.ecr.us-west-2.amazonaws.com \
-              --docker-username=$ECR_USERNAME \
-              --docker-password=$ECR_PASSWORD \
-              --docker-email=$EMAIL \
-              --context data-plane \
-              --namespace cpc-system                                
-   
    #. Create the KubeConfig secret:
    
       .. sourcecode:: bash
@@ -337,37 +226,25 @@ Kubernetes cluster from the Control Plane cluster.
          kubectl create secret generic mothership-kubeconfig \
            --from-file=kubeconfig=/tmp/kubeconfig \
            --context data-plane \
-           --namespace cpc-system 
+           --namespace cpc-system \
+           --save-config --dry-run=client -oyaml | kubectl apply -f -
 
 #. In the Data Plane, install the Agent.
 
-   #. Create the namespace for the Polaris system resources:
+   #. Create the namespace for the Blueprint system resources:
 
       .. sourcecode:: bash 
       
          kubectl create namespace cpc-system --context data-plane
 
-   #. Apply the Agent CRDs:
-
-      .. sourcecode:: bash
-
-         kubectl apply -f $CPC_HOME/cpc-agent/charts/cpc-agent/crds --context data-plane
-
    #. Install the Agent Helm chart in the ``Remote`` mode:
 
       .. sourcecode:: bash
 
-         helm upgrade --install \
-           cpc-agent $CPC_HOME/cpc-agent/charts/cpc-agent \
+         helm upgrade --install cpc-agent confluentinc/cpc-agent \
            --set mode=Remote \
            --set remoteKubeConfig.secretRef=mothership-kubeconfig \
            --kube-context data-plane \
-           --set image.registry="519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod" \
-           --set image.repository="confluentinc/cp-cpc-operator" \
-           --set image.tag="latest" \
-           --set image.pullPolicy="IfNotPresent" \
-           --set imagePullSecretRef="confluent-registry" \
-           --set debug=true \
            --namespace cpc-system
 
 #. In the Data Plane, install the CFK Helm chart in the cluster mode 
@@ -377,7 +254,6 @@ Kubernetes cluster from the Control Plane cluster.
 
       helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes \
         --set namespaced=false \
-        --set debug=true \
         --kube-context data-plane \
         --namespace cpc-system
 
@@ -398,12 +274,7 @@ From the Control Plane cluster, deploy Confluent Platform.
 
    .. sourcecode:: bash
 
-      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/zookeeper_cluster_sat-1.yaml --context control-plane
-      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/kafka_cluster_sat-1.yaml --context control-plane
-      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/connect_cluster_sat-1.yaml --context control-plane
-      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/ksqldb_cluster_sat-1.yaml --context control-plane
-      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/schemaregistry_cluster_sat-1.yaml --context control-plane
-      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/controlcenter_cluster_sat-1.yaml --context control-plane
+      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/confluentplatform_dev.yaml --context control-plane
 
    The Confluent components are installed into the ``confluent-dev`` namespace
    in the Data Plane.
@@ -428,10 +299,6 @@ From the Control Plane cluster, deploy Confluent Platform.
 
    .. sourcecode:: bash
 
-      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/zookeeper_cluster_sat-1.yaml --context control-plane
-      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/kafka_cluster_sat-1.yaml --context control-plane
-      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/connect_cluster_sat-1.yaml --context control-plane
-      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/ksqldb_cluster_sat-1.yaml --context control-plane
-      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/schemaregistry_cluster_sat-1.yaml --context control-plane
-      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/controlcenter_cluster_sat-1.yaml --context control-plane
+      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/confluentplatform_dev.yaml --context control-plane
+
 
