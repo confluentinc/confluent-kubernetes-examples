@@ -75,6 +75,22 @@ following steps:
 
       $TUTORIAL_HOME/scripts/kubeconfig_generate.sh mothership-sa cpc-system /tmp
 
+#. Create a CA key pair:
+
+cat << EOF > openssl.cnf
+[req]
+distinguished_name=dn
+[ dn ]
+[ v3_ca ]
+basicConstraints = critical,CA:TRUE
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer:always
+EOF
+
+
+openssl req -x509 -new -nodes -newkey rsa:4096 -keyout /tmp/cpc-ca-key.pem -out /tmp/cpc-ca.pem \
+-subj "/C=US/ST=CA/L=MountainView/O=Confluent/OU=CPC/CN=CPC-CA" -reqexts v3_ca -config openssl.cnf
+
 #. Create a Webhook certificate secret. ``webhooks-tls`` is used in these 
    examples:
 
@@ -82,7 +98,7 @@ following steps:
    
       mkdir /tmp
       
-      $TUTORIAL_HOME/scripts/generate-keys.sh cpc-system /tmp
+      $TUTORIAL_HOME/scripts/generate-webhooks-keys.sh cpc-system /tmp
       
       kubectl create secret generic webhooks-tls \
           --from-file=ca.crt=/tmp/ca.pem \
@@ -96,6 +112,9 @@ following steps:
 #. Install the Orchestrator Helm chart:
 
    .. sourcecode:: bash
+
+- Helm repo add 
+ helm repo add confluentinc https://packages.confluent.io/helm
 
       helm upgrade --install cpc-orchestrator confluent-inc/cpc-orchestrator \
         --namespace cpc-system 
@@ -122,7 +141,7 @@ where the Control Plane was installed.
    
          kubectl get namespace kube-system -oyaml | grep uid
 
-   #. Edit ``$TUTORIAL_HOME/registration/kubernetes_cluster_mothership.yaml`` 
+   #. Edit ``$TUTORIAL_HOME/registration/control-plane-k8s.yaml`` 
       and set ``spec.k8sID`` to the Kubernetes ID retrieved in the previous 
       step.
       
@@ -131,7 +150,7 @@ where the Control Plane was installed.
    
       .. sourcecode:: bash
 
-         kubectl apply -f $TUTORIAL_HOME/registration/kubernetes_cluster_mothership.yaml
+         kubectl apply -f $TUTORIAL_HOME/registration/control-plane-k8s.yaml
 
 #. Install the Agent Helm chart in the ``Local`` mode:
    
@@ -166,7 +185,7 @@ From the Control Plane cluster, deploy Confluent Platform.
 
    .. sourcecode:: bash
 
-      kubectl apply -f $TUTORIAL_HOME/deployment/mothership/confluentplatform_prod.yaml
+      kubectl apply -f $TUTORIAL_HOME/deployment/control-plane/confluentplatform_prod.yaml
       
 #. Validate the deployment using Control Center.
 

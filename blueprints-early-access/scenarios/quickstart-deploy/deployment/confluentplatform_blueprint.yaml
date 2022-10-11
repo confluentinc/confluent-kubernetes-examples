@@ -1,10 +1,154 @@
+---
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: ZookeeperClusterClass
+metadata:
+  name: zookeeper-standard
+  namespace: cpc-system
+spec:
+   provisioner:
+    type: cfk
+    cfk:
+      replicas: 3
+      # +optional
+      image:
+        application:
+          registry: docker.io
+          repository: confluentinc/cp-zookeeper
+          tag: 7.2.0
+        init:
+          registry: docker.io
+          repository: confluentinc/confluent-init-container
+          tag: 2.4.1
+      volume:
+        data:
+          capacity: 10Gi
+        log:
+          capacity: 10Gi
+---
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: KafkaClusterClass
+metadata:
+  name: kafka-standard
+  namespace: cpc-system
+spec:
+  provisioner:
+    type: cfk
+    cfk:
+      replicas: 3
+      # +optional
+      image:
+        application:
+          registry: docker.io
+          repository: confluentinc/cp-server
+          tag: 7.2.0
+        init:
+          registry: docker.io
+          repository: confluentinc/confluent-init-container
+          tag: 2.4.0
+      volume:
+        data:
+          capacity: 10Gi
+---
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: KsqlDBClusterClass
+metadata:
+  name: ksqldb-standard
+  namespace: cpc-system
+spec:
+   provisioner:
+    type: cfk
+    cfk:
+      replicas: 3
+      # +optional
+      image:
+        application:
+          registry: docker.io
+          repository: confluentinc/cp-ksqldb-server
+          tag: 7.2.0
+        init:
+          registry: docker.io
+          repository: confluentinc/confluent-init-container
+          tag: 2.4.1
+      internalTopicReplicationFactor: 3
+      volume:
+        data:
+          capacity: 10Gi
+---
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: ControlCenterClusterClass
+metadata:
+  name: controlcenter-standard
+  namespace: cpc-system
+spec:
+  provisioner:
+    type: cfk
+    cfk:
+      id: 1
+      replicas: 1
+      # +optional
+      image:
+        application:
+          registry: docker.io
+          repository: confluentinc/cp-enterprise-control-center
+          tag: 7.2.0
+        init:
+          registry: docker.io
+          repository: confluentinc/confluent-init-container
+          tag: 2.4.1
+      internalTopicReplicationFactor: 3
+      volume:
+        data:
+          capacity: 10Gi
+---
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: SchemaRegistryClusterClass
+metadata:
+  name: schemaregistry-standard
+  namespace: cpc-system
+spec:
+   provisioner:
+    type: cfk
+    cfk:
+      replicas: 3
+      # +optional
+      image:
+        application:
+          registry: docker.io
+          repository: confluentinc/cp-schema-registry
+          tag: 7.2.0
+        init:
+          registry: docker.io
+          repository: confluentinc/confluent-init-container
+          tag: 2.4.1
+      internalTopicReplicationFactor: 3
+---
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: ConnectClusterClass
+metadata:
+  name: connect-standard
+  namespace: cpc-system
+spec:
+  provisioner:
+    type: cfk
+    cfk:
+      replicas: 3
+      # +optional
+      image:
+        application:
+          registry: docker.io
+          repository: confluentinc/cp-server-connect
+          tag: 7.2.0
+        init:
+          registry: docker.io
+          repository: confluentinc/confluent-init-container
+          tag: 2.4.1
+      internalTopicReplicationFactor: 3
+---
 apiVersion: core.cpc.platform.confluent.io/v1beta1
 kind: ConfluentPlatformBlueprint
 metadata:
   name: standard
   namespace: cpc-system
-  annotations:
-    cpc.platform.confluent.io/description: "This TILE represents configurations which are shared across all CP component."
 spec:
   dockerImages:
   - registry: docker.io
@@ -34,161 +178,4 @@ spec:
       classRef:
         name: connect-standard
         namespace: cpc-system
----
-apiVersion: core.cpc.platform.confluent.io/v1beta1
-kind: ZookeeperClusterClass
-metadata:
-  name: zookeeper-standard
-  namespace: cpc-system
-  annotations:
-    cpc.platform.confluent.io/description: "This TILE represents pre-set configuration to deploy CP Zookeeper Cluster."
-spec:
-   provisioner:
-    type: cfk
-    cfk:
-      replicas: 3
-      # +optional
-      image:
-        application:
-          registry: docker.io
-          repository: confluentinc/cp-zookeeper
-          tag: 7.2.0
-        init:
-          registry: docker.io
-          repository: confluentinc/confluent-init-container
-          tag: 2.4.1
-      volume:
-        data:
-          capacity: 10Gi
-        log:
-          capacity: 10Gi
----
-apiVersion: core.cpc.platform.confluent.io/v1beta1
-kind: KafkaClusterClass
-metadata:
-  name: kafka-standard
-  namespace: cpc-system
-  annotations:
-    cpc.platform.confluent.io/description: "This TILE represents pre-set configuration to deploy CP Kafka Cluster."
-spec:
-  provisioner:
-    type: cfk
-    cfk:
-      replicas: 3
-      # +optional
-      image:
-        application:
-          registry: docker.io
-          repository: confluentinc/cp-server
-          tag: 7.2.0
-        init:
-          registry: docker.io
-          repository: confluentinc/confluent-init-container
-          tag: 2.4.0
-      volume:
-        data:
-          capacity: 10Gi
----
-apiVersion: core.cpc.platform.confluent.io/v1beta1
-kind: KsqlDBClusterClass
-metadata:
-  name: ksqldb-standard
-  namespace: cpc-system
-  annotations:
-    cpc.platform.confluent.io/description: "This TILE represents pre-set configuration to deploy CP KsqlDB Cluster."
-spec:
-   provisioner:
-    type: cfk
-    cfk:
-      replicas: 3
-      # +optional
-      image:
-        application:
-          registry: docker.io
-          repository: confluentinc/cp-ksqldb-server
-          tag: 7.2.0
-        init:
-          registry: docker.io
-          repository: confluentinc/confluent-init-container
-          tag: 2.4.1
-      internalTopicReplicationFactor: 3
-      volume:
-        data:
-          capacity: 10Gi
----
-apiVersion: core.cpc.platform.confluent.io/v1beta1
-kind: ControlCenterClusterClass
-metadata:
-  name: controlcenter-standard
-  namespace: cpc-system
-  annotations:
-    cpc.platform.confluent.io/description: "This TILE represents pre-set configuration to deploy CP Control Center Cluster."
-spec:
-  provisioner:
-    type: cfk
-    cfk:
-      id: 1
-      replicas: 1
-      # +optional
-      image:
-        application:
-          registry: docker.io
-          repository: confluentinc/cp-enterprise-control-center
-          tag: 7.2.0
-        init:
-          registry: docker.io
-          repository: confluentinc/confluent-init-container
-          tag: 2.4.1
-      internalTopicReplicationFactor: 3
-      volume:
-        data:
-          capacity: 10Gi
----
-apiVersion: core.cpc.platform.confluent.io/v1beta1
-kind: SchemaRegistryClusterClass
-metadata:
-  name: schemaregistry-standard
-  namespace: cpc-system
-  annotations:
-    cpc.platform.confluent.io/description: "This TILE represents pre-set configuration to deploy CP SchemaRegistry Cluster."
-spec:
-   provisioner:
-    type: cfk
-    cfk:
-      replicas: 3
-      # +optional
-      image:
-        application:
-          registry: docker.io
-          repository: confluentinc/cp-schema-registry
-          tag: 7.2.0
-        init:
-          registry: docker.io
-          repository: confluentinc/confluent-init-container
-          tag: 2.4.1
-      internalTopicReplicationFactor: 3
----
-apiVersion: core.cpc.platform.confluent.io/v1beta1
-kind: ConnectClusterClass
-metadata:
-  name: connect-standard
-  namespace: cpc-system
-  annotations:
-    cpc.platform.confluent.io/description: "This TILE represents pre-set configuration to deploy CP Connect Cluster."
-spec:
-  provisioner:
-    type: cfk
-    cfk:
-      replicas: 3
-      # +optional
-      image:
-        application:
-          registry: docker.io
-          repository: confluentinc/cp-server-connect
-          tag: 7.2.0
-        init:
-          registry: docker.io
-          repository: confluentinc/confluent-init-container
-          tag: 2.4.1
-      internalTopicReplicationFactor: 3
 

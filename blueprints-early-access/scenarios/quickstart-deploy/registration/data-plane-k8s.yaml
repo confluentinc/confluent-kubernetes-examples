@@ -1,29 +1,20 @@
 apiVersion: core.cpc.platform.confluent.io/v1beta1
 kind: KubernetesCluster
 metadata:
-  name: sat-1
+  name: data-plane-k8s
   namespace: cpc-system
 spec:
-  k8sID: a200d637-9a93-45fe-ab76-93e8fa134ffc
+  k8sID: # kubectl get ns kube-system -oyaml | grep uid
   description: "cpc-dataplane kubernetes cluster"
-  # required
-  topology:
-    region: us-west2
-    zones:
-    - us-west2-a
-    - us-west2-b
-    - us-west2-c
   k8sClusterDomain: cluster.local
   ---
     apiVersion: core.cpc.platform.confluent.io/v1beta1
     kind: CPCHealthCheck
     metadata:
-      name: sat-1-hc
+      name: data-plane-hc
       namespace: cpc-system
-      annotations:
-        cpc.platform.confluent.io/description: "This TILE represents CPC services healthcheck in sat-1 Kubernetes cluster."
     spec:
       k8sClusterRef:
-        name: sat-1
+        name: data-plane-k8s
         namespace: cpc-system
 

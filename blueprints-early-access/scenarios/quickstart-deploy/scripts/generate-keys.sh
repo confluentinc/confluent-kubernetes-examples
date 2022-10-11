@@ -39,28 +39,6 @@ cat > ${CERT_DIR}/ca-config.json <<EOF
 }
 EOF
 
-cat > ${CERT_DIR}/ca-csr.json <<EOF
-{
-  "CN": "TestCA",
-  "key": {
-    "algo": "rsa",
-    "size": 2048
-  },
-  "names": [
-    {
-      "C": "US",
-      "L": "CA",
-      "O": "Confluent",
-      "OU": "Engineering",
-      "ST": "Palo Alto"
-    }
-  ]
-}
-EOF
-
-# Generate the CA cert and private key
-cfssl gencert -initca ${CERT_DIR}/ca-csr.json | cfssljson -bare ${CERT_DIR}/ca
-
 cat > ${CERT_DIR}/server-csr.json <<EOF
 {
   "CN": "",
@@ -81,8 +59,8 @@ EOF
 
 # Generate Certficate
 cfssl gencert \
-  -ca=${CERT_DIR}/ca.pem \
-  -ca-key=${CERT_DIR}/ca-key.pem \
+  -ca=${CERT_DIR}/cpc-ca.pem \
+  -ca-key=${CERT_DIR}/cpc-ca-key.pem \
   -config=${CERT_DIR}/ca-config.json \
   -hostname=cpc-orchestrator.${NAMESPACE}.svc \
   -profile=server \
