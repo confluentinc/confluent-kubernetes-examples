@@ -2,8 +2,8 @@
 Deploy CFK Blueprints
 =====================
 
-This example will walk you through configuration and deployment of Confluent for
-Kubernetes (CFK) Blueprints.
+This example will walk you through the configuration and deployment of Confluent
+for Kubernetes (CFK) Blueprints. You will go through the following scenarios:
 
 #. Deploy the Control Plane in the control plane Kubernetes cluster.
 
@@ -24,7 +24,10 @@ Prepare
 
 #. Install ``kubectl`` command-line tool on your local machine.
 
-#. Set up the Kubernetes clusters you want to use for the Control Plane and the
+#. Install `cfssl <https://github.com/cloudflare/cfssl/releases/tag/v1.6.3>`__ 
+   on your local machine.
+
+#. Have the Kubernetes clusters you want to use for the Control Plane and the
    Data Plane. Kubernetes versions 1.22+ are required.
    
 #. Rename the Kubernetes contexts for easy identification:
@@ -67,31 +70,29 @@ following steps:
 
    .. sourcecode:: bash
 
-      kubectl create namespace cpc-system 
+      kubectl create namespace cpc-system --context control-plane
 
-#. Generate the KubeConfig file for the remote Data Planes to connect:
+#. Create a CA key pair to be used for the Blueprint and the Orchestrator:
 
    .. sourcecode:: bash
 
-      $TUTORIAL_HOME/scripts/kubeconfig_generate.sh mothership-sa cpc-system /tmp
+      cat << EOF > openssl.cnf
+      [req]
+      distinguished_name=dn
+      [ dn ]
+      [ v3_ca ]
+      basicConstraints = critical,CA:TRUE
+      subjectKeyIdentifier = hash
+      authorityKeyIdentifier = keyid:always,issuer:always
+      EOF
 
-#. Create a CA key pair:
+      openssl req -x509 -new -nodes -newkey rsa:4096 -keyout /tmp/cpc-ca-key.pem \
+        -out /tmp/cpc-ca.pem \
+        -subj "/C=US/ST=CA/L=MountainView/O=Confluent/OU=CPC/CN=CPC-CA" \
+        -reqexts v3_ca \
+        -config openssl.cnf
 
-cat << EOF > openssl.cnf
-[req]
-distinguished_name=dn
-[ dn ]
-[ v3_ca ]
-basicConstraints = critical,CA:TRUE
-subjectKeyIdentifier = hash
-authorityKeyIdentifier = keyid:always,issuer:always
-EOF
-
-
-openssl req -x509 -new -nodes -newkey rsa:4096 -keyout /tmp/cpc-ca-key.pem -out /tmp/cpc-ca.pem \
--subj "/C=US/ST=CA/L=MountainView/O=Confluent/OU=CPC/CN=CPC-CA" -reqexts v3_ca -config openssl.cnf
-
-#. Create a Webhook certificate secret. ``webhooks-tls`` is used in these 
+#. Create the Webhook certificate secret. ``webhooks-tls`` is used in these 
    examples:
 
    .. sourcecode:: bash
@@ -101,7 +102,7 @@ openssl req -x509 -new -nodes -newkey rsa:4096 -keyout /tmp/cpc-ca-key.pem -out 
       $TUTORIAL_HOME/scripts/generate-webhooks-keys.sh cpc-system /tmp
       
       kubectl create secret generic webhooks-tls \
-          --from-file=ca.crt=/tmp/ca.pem \
+          --from-file=ca.crt=/tmp/cpc-ca-key.pem \
           --from-file=tls.crt=/tmp/server.pem \
           --from-file=tls.key=/tmp/server-key.pem \
           --namespace cpc-system \
@@ -113,17 +114,18 @@ openssl req -x509 -new -nodes -newkey rsa:4096 -keyout /tmp/cpc-ca-key.pem -out 
 
    .. sourcecode:: bash
 
-- Helm repo add 
- helm repo add confluentinc https://packages.confluent.io/helm
+      helm repo add confluentinc https://packages.confluent.io/helm
 
       helm upgrade --install cpc-orchestrator confluent-inc/cpc-orchestrator \
-        --namespace cpc-system 
+        --namespace cpc-system \
+        --kube-context control-plane 
 
 #. Deploy the Blueprint and the Confluent cluster class CRs:
 
    .. sourcecode:: bash
 
-      kubectl apply -f $TUTORIAL_HOME/deployment/confluentplatform_blueprint.yaml
+      kubectl apply -f $TUTORIAL_HOME/deployment/confluentplatform_blueprint.yaml \
+        --context control-plane
 
 .. _deploy-local-data-plane: 
 
@@ -139,7 +141,7 @@ where the Control Plane was installed.
    
       .. sourcecode:: bash
    
-         kubectl get namespace kube-system -oyaml | grep uid
+         kubectl get namespace kube-system -oyaml --context data-plane | grep uid
 
    #. Edit ``$TUTORIAL_HOME/registration/control-plane-k8s.yaml`` 
       and set ``spec.k8sID`` to the Kubernetes ID retrieved in the previous 
@@ -150,7 +152,8 @@ where the Control Plane was installed.
    
       .. sourcecode:: bash
 
-         kubectl apply -f $TUTORIAL_HOME/registration/control-plane-k8s.yaml
+         kubectl apply -f $TUTORIAL_HOME/registration/control-plane-k8s.yaml \
+           --context control-plane
 
 #. Install the Agent Helm chart in the ``Local`` mode:
    
@@ -158,7 +161,8 @@ where the Control Plane was installed.
 
       helm upgrade --install cpc-agent confluentinc/cpc-agent \
         --namespace cpc-system \
-        --set mode=Local 
+        --set mode=Local \
+        --kube-context control-plane 
 
 #. Install the CFK Helm chart in the cluster mode (``--set namespaced=false``):
   
@@ -166,7 +170,9 @@ where the Control Plane was installed.
 
       helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes \
         --set namespaced=false \
-        --namespace cpc-system
+        --set image.tag=”x.xxx.xxx” \
+        --namespace cpc-system \
+        --kube-context control-plane 
 
 --------------------------
 Install Confluent Platform 
@@ -179,23 +185,31 @@ From the Control Plane cluster, deploy Confluent Platform.
 
    .. sourcecode:: bash
      
-      kubectl create namespace org-confluent
+      kubectl create namespace org-confluent --context control-plane
 
 #. Deploy Confluent Platform: 
 
    .. sourcecode:: bash
 
-      kubectl apply -f $TUTORIAL_HOME/deployment/control-plane/confluentplatform_prod.yaml
+      kubectl apply -f $TUTORIAL_HOME/deployment/control-plane/confluentplatform_prod.yaml \
+        --namespace org-confluent \
+        --context control-plane
       
 #. Validate the deployment using Control Center.
 
-   #. Check when the Confluent components are up and running.
+   #. Check when the Confluent components are up and running:
    
+      .. sourcecode:: bash
+
+         kubectl get pods --namespace org-confluent --context control-plane -w
+
    #. Set up port forwarding to Control Center web UI from local machine:
 
       .. sourcecode:: bash
 
-         kubectl port-forward controlcenter-prod-0 9021:9021 --namespace org-confluent
+         kubectl port-forward controlcenter-prod-0 9021:9021 \
+           --namespace org-confluent \
+           --context control-plane
 
    #. Navigate to Control Center in a browser:
 
@@ -207,7 +221,9 @@ From the Control Plane cluster, deploy Confluent Platform.
 
    .. sourcecode:: bash
 
-      kubectl delete -f $TUTORIAL_HOME/deployment/mothership/confluentplatform_prod.yaml
+      kubectl delete -f $TUTORIAL_HOME/deployment/control-plane/confluentplatform_prod.yaml \
+        --namespace org-confluent \
+        --context control-plane
 
 .. _deploy-remote-data-plane: 
 
@@ -225,28 +241,33 @@ Kubernetes cluster from the Control Plane cluster.
    
          kubectl get namespace kube-system -oyaml --context data-plane | grep uid
 
-   #. In the Control Plane, edit 
-      ``registration/kubernetes_cluster_sat-1.yaml`` and set ``spec.k8sID`` 
-      to the Kubernetes ID from previous step.
+   #. In the Control Plane, edit ``registration/data-plane-k8s.yaml`` and set 
+      ``spec.k8sID`` to the Kubernetes ID from the previous step.
       
    #. In the Control Plane, create the KubernetesCluster CR and the HealthCheck 
       CR:
    
       .. sourcecode:: bash
 
-         kubectl apply -f $TUTORIAL_HOME/registration/kubernetes_cluster_sat-1.yaml --context control-plane
+         kubectl apply -f $TUTORIAL_HOME/registration/data-plane-k8s.yaml \
+           --context control-plane
 
-#. In the Data Plane, create the required secrets.
+#. In the Control Plane, generate the Kubeconfig for the Agent to communicate 
+   with the Orchestrator:
 
-   #. Create the KubeConfig secret:
+   .. sourcecode:: bash
+
+      $TUTORIAL_HOME/scripts/kubeconfig_generate.sh control-plane-sa cpc-system /tmp 
+
+#. In the Data Plane, create the KubeConfig secret:
    
-      .. sourcecode:: bash
-      
-         kubectl create secret generic mothership-kubeconfig \
-           --from-file=kubeconfig=/tmp/kubeconfig \
-           --context data-plane \
-           --namespace cpc-system \
-           --save-config --dry-run=client -oyaml | kubectl apply -f -
+   .. sourcecode:: bash
+   
+      kubectl create secret generic control-plane-kubeconfig \
+        --from-file=kubeconfig=/tmp/kubeconfig \
+        --context data-plane \
+        --namespace cpc-system \
+        --save-config --dry-run=client -oyaml | kubectl apply -f -
 
 #. In the Data Plane, install the Agent.
 
@@ -262,7 +283,7 @@ Kubernetes cluster from the Control Plane cluster.
 
          helm upgrade --install cpc-agent confluentinc/cpc-agent \
            --set mode=Remote \
-           --set remoteKubeConfig.secretRef=mothership-kubeconfig \
+           --set remoteKubeConfig.secretRef=control-plane-kubeconfig \
            --kube-context data-plane \
            --namespace cpc-system
 
@@ -282,8 +303,8 @@ Install Confluent Platform
 
 From the Control Plane cluster, deploy Confluent Platform.
 
-#. Create the namespace ``org-confluent`` to deploy Confluent Platform clusters 
-   CR into:
+#. Create the namespace ``org-confluent`` to deploy the Confluent Platform 
+   clusters CR into:
 
    .. sourcecode:: bash
 
@@ -293,20 +314,28 @@ From the Control Plane cluster, deploy Confluent Platform.
 
    .. sourcecode:: bash
 
-      kubectl apply -f $TUTORIAL_HOME/deployment/sat-1/confluentplatform_dev.yaml --context control-plane
+      kubectl create namespace confluent-dev --context data-plane
+
+      kubectl apply -f $TUTORIAL_HOME/deployment/data-plane/confluentplatform_dev.yaml \
+        --context control-plane
 
    The Confluent components are installed into the ``confluent-dev`` namespace
    in the Data Plane.
    
 #. In the Data Plane, validate the deployment using Control Center.
 
-   #. Check when the Confluent components are up and running.
+   #. Check when the Confluent components are up and running:
+   
+      .. sourcecode:: bash
+
+         kubectl get pods --namespace confluent-dev --context data-plane -w
    
    #. Set up port forwarding to Control Center web UI from local machine:
 
       .. sourcecode:: bash
 
-         kubectl port-forward controlcenter-dev-0 9021:9021 --context data-plane --namespace confluent-dev
+         kubectl port-forward controlcenter-dev-0 9021:9021 --context data-plane \
+           --namespace confluent-dev
 
    #. Navigate to Control Center in a browser:
 
@@ -318,6 +347,7 @@ From the Control Plane cluster, deploy Confluent Platform.
 
    .. sourcecode:: bash
 
-      kubectl delete -f $TUTORIAL_HOME/deployment/sat-1/confluentplatform_dev.yaml --context control-plane
+      kubectl delete -f $TUTORIAL_HOME/deployment/data-plane/confluentplatform_dev.yaml \
+        --context control-plane
 
 

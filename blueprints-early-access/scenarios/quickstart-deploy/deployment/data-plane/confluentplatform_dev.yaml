@@ -2,17 +2,13 @@ apiVersion: cluster.cpc.platform.confluent.io/v1beta1
 kind: ZookeeperCluster
 metadata:
   name: zookeeper-dev
-  namespace: org-confluent
-  annotations:
-    cpc.platform.confluent.io/description: "This TILE represents Zookeeper cluster deployment in sat-1 Kubernetes cluster."
 spec:
   replicas: 3
-  # +optional
   targetCluster:
     namespace: confluent-dev
     name: zookeeper
   k8sClusterRef:
-    name: sat-1
+    name: data-plane-k8s
     namespace: cpc-system
   blueprintRef:
     name: standard
@@ -22,17 +18,13 @@ apiVersion: cluster.cpc.platform.confluent.io/v1beta1
 kind: KafkaCluster
 metadata:
   name: kafka-dev
-  namespace: org-confluent
-  annotations:
-    cpc.platform.confluent.io/description: "This TILE represents Kafka cluster deployment in sat-1 Kubernetes cluster."
 spec:
   replicas: 3
-  # +optional
   targetCluster:
     namespace: confluent-dev
     name: kafka
   k8sClusterRef:
-    name: sat-1
+    name: data-plane-k8s
     namespace: cpc-system
   blueprintRef:
     name: standard
@@ -42,15 +34,13 @@ apiVersion: cluster.cpc.platform.confluent.io/v1beta1
 kind: SchemaRegistryCluster
 metadata:
   name: schemaregistry-dev
-  namespace: org-confluent
 spec:
   replicas: 2
-  # +optional
   targetCluster:
     namespace: confluent-dev
     name: schemaregistry
   k8sClusterRef:
-    name: sat-1
+    name: data-plane-k8s
     namespace: cpc-system
   blueprintRef:
     name: standard
@@ -60,37 +50,29 @@ apiVersion: cluster.cpc.platform.confluent.io/v1beta1
 kind: ConnectCluster
 metadata:
   name: connect-dev
-  namespace: org-confluent
-  annotations:
-    cpc.platform.confluent.io/description: "This TILE represents Connect cluster deployment on Satellite Cluster."
 spec:
   replicas: 1
   targetCluster:
     namespace: confluent-dev
     name: connect
   k8sClusterRef:
-    name: sat-1
+    name: data-plane-k8s
     namespace: cpc-system
   blueprintRef:
     name: standard
     namespace: cpc-system
-  # dependencies:
-  #   kafkaCluster:
-  #     name: kafka-dev
 ---
 apiVersion: cluster.cpc.platform.confluent.io/v1beta1
 kind: KsqlDBCluster
 metadata:
   name: ksqldb-dev
-  namespace: org-confluent
 spec:
   replicas: 2
-  # +optional
   targetCluster:
     namespace: confluent-dev
     name: ksqldb
   k8sClusterRef:
-    name: sat-1
+    name: data-plane-k8s
     namespace: cpc-system
   blueprintRef:
     name: standard
@@ -100,17 +82,13 @@ apiVersion: cluster.cpc.platform.confluent.io/v1beta1
 kind: ControlCenterCluster
 metadata:
   name: controlcenter-dev
-  namespace: org-confluent
 spec:
   targetCluster:
     namespace: confluent-dev
     name: controlcenter
   k8sClusterRef:
-    name: sat-1
+    name: data-plane-k8s
     namespace: cpc-system
   blueprintRef:
     name: standard
     namespace: cpc-system
-  # dependencies:
-  #   kafkaCluster:
-  #     name: kafka-dev
