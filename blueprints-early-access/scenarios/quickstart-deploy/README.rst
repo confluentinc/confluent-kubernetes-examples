@@ -87,7 +87,11 @@ following steps:
       subjectKeyIdentifier = hash
       authorityKeyIdentifier = keyid:always,issuer:always
       EOF
-      
+     
+   .. sourcecode:: bash
+   
+      mkdir /tmp
+
    .. sourcecode:: bash
 
       openssl req -x509 -new -nodes -newkey rsa:4096 -keyout /tmp/cpc-ca-key.pem \
@@ -98,10 +102,6 @@ following steps:
 
 #. Create the Webhook certificate secret. ``webhooks-tls`` is used in these 
    examples:
-
-   .. sourcecode:: bash
-   
-      mkdir /tmp
       
    .. sourcecode:: bash
 
