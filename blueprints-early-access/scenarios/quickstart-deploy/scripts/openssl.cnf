@@ -1,7 +1,0 @@
-[req]
-distinguished_name=dn
-[ dn ]
-[ v3_ca ]
-basicConstraints = critical,CA:TRUE
-subjectKeyIdentifier = hash
-authorityKeyIdentifier = keyid:always,issuer:always
