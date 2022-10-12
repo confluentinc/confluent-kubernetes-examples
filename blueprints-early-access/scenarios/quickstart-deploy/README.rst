@@ -105,7 +105,7 @@ following steps:
       
    .. sourcecode:: bash
 
-      $TUTORIAL_HOME/scripts/generate-webhooks-keys.sh cpc-system /tmp
+      $TUTORIAL_HOME/scripts/generate-keys.sh cpc-system /tmp
       
    .. sourcecode:: bash
     
