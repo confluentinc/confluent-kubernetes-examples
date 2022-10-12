@@ -5,9 +5,9 @@ Deploy CFK Blueprints
 This example will walk you through the configuration and deployment of Confluent
 for Kubernetes (CFK) Blueprints. You will go through the following scenarios:
 
-#. Deploy the Control Plane in the control plane Kubernetes cluster.
+#. Deploy the Control Plane in the control plane.
 
-#. Deploy the Blueprint in the control plane Kubernetes cluster.
+#. Deploy the Blueprint in the Control Plane.
 
 #. Deploy the Data Plane.
   
@@ -15,7 +15,7 @@ for Kubernetes (CFK) Blueprints. You will go through the following scenarios:
      Plane in the same cluster as the Control Plane.
    
    - To install and follow the remote Data Plane scenario, deploy the Data 
-     Plane in a separate Data Plane Kubernetes cluster.
+     Plane in a separate Data Plane cluster.
 
 Prepare  
 -------------
@@ -53,7 +53,7 @@ Prepare
         
 .. _deploy-control-plane: 
 
-Install Control Plane  
+Deploy Control Plane  
 ----------------------
 
 In the Kubernetes cluster you want to install the Control Plane on, take the
@@ -120,12 +120,15 @@ following steps:
         --namespace cpc-system \
         --kube-context control-plane 
 
-#. Deploy the Blueprint and the Confluent cluster class CRs:
+Deploy Blueprint
+---------------- 
 
-   .. sourcecode:: bash
+Deploy the Blueprint and the Confluent cluster class CRs:
 
-      kubectl apply -f $TUTORIAL_HOME/deployment/confluentplatform_blueprint.yaml \
-        --context control-plane
+.. sourcecode:: bash
+
+   kubectl apply -f $TUTORIAL_HOME/deployment/confluentplatform_blueprint.yaml \
+     --context control-plane
 
 .. _deploy-local-data-plane: 
 
@@ -175,7 +178,7 @@ where the Control Plane was installed.
         --kube-context control-plane 
 
 --------------------------
-Install Confluent Platform 
+Deploy Confluent Platform 
 -------------------------- 
 
 From the Control Plane cluster, deploy Confluent Platform.
@@ -299,7 +302,7 @@ Kubernetes cluster from the Control Plane cluster.
         --namespace cpc-system
 
 --------------------------
-Install Confluent Platform 
+Deploy Confluent Platform 
 -------------------------- 
 
 From the Control Plane cluster, deploy Confluent Platform.
