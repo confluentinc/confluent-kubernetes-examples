@@ -1,0 +1,76 @@
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: ZookeeperCluster
+metadata:
+  name: zookeeper-prod
+spec:
+  replicas: 3
+  k8sClusterRef:
+    name: control-plane-k8s
+    namespace: cpc-system
+  blueprintRef:
+    name: standard
+    namespace: cpc-system
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: KafkaCluster
+metadata:
+  name: kafka-prod
+spec:
+  replicas: 3
+  k8sClusterRef:
+    name: control-plane-k8s
+    namespace: cpc-system
+  blueprintRef:
+    name: standard
+    namespace: cpc-system
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: SchemaRegistryCluster
+metadata:
+  name: schemaregistry-prod
+spec:
+  replicas: 2
+  k8sClusterRef:
+    name: control-plane-k8s
+    namespace: cpc-system
+  blueprintRef:
+    name: standard
+    namespace: cpc-system
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: ConnectCluster
+metadata:
+  name: connect-prod
+spec:
+  replicas: 1
+  k8sClusterRef:
+    name: control-plane-k8s
+    namespace: cpc-system
+  blueprintRef:
+    name: standard
+    namespace: cpc-system
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: KsqlDBCluster
+metadata:
+  name: ksqldb-prod
+spec:
+  replicas: 2
+  k8sClusterRef:
+    name: control-plane-k8s
+    namespace: cpc-system
+  blueprintRef:
+    name: standard
+    namespace: cpc-system
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: ControlCenterCluster
+metadata:
+  name: controlcenter-prod
+spec:
+  k8sClusterRef:
+    name: control-plane-k8s
+    namespace: cpc-system
+  blueprintRef:
+    name: standard
+    namespace: cpc-system

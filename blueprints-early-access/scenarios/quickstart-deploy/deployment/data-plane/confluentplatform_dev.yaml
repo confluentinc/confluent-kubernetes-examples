@@ -1,0 +1,94 @@
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: ZookeeperCluster
+metadata:
+  name: zookeeper-dev
+spec:
+  replicas: 3
+  targetCluster:
+    namespace: confluent-dev
+    name: zookeeper
+  k8sClusterRef:
+    name: data-plane-k8s
+    namespace: cpc-system
+  blueprintRef:
+    name: standard
+    namespace: cpc-system
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: KafkaCluster
+metadata:
+  name: kafka-dev
+spec:
+  replicas: 3
+  targetCluster:
+    namespace: confluent-dev
+    name: kafka
+  k8sClusterRef:
+    name: data-plane-k8s
+    namespace: cpc-system
+  blueprintRef:
+    name: standard
+    namespace: cpc-system
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: SchemaRegistryCluster
+metadata:
+  name: schemaregistry-dev
+spec:
+  replicas: 2
+  targetCluster:
+    namespace: confluent-dev
+    name: schemaregistry
+  k8sClusterRef:
+    name: data-plane-k8s
+    namespace: cpc-system
+  blueprintRef:
+    name: standard
+    namespace: cpc-system
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: ConnectCluster
+metadata:
+  name: connect-dev
+spec:
+  replicas: 1
+  targetCluster:
+    namespace: confluent-dev
+    name: connect
+  k8sClusterRef:
+    name: data-plane-k8s
+    namespace: cpc-system
+  blueprintRef:
+    name: standard
+    namespace: cpc-system
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: KsqlDBCluster
+metadata:
+  name: ksqldb-dev
+spec:
+  replicas: 2
+  targetCluster:
+    namespace: confluent-dev
+    name: ksqldb
+  k8sClusterRef:
+    name: data-plane-k8s
+    namespace: cpc-system
+  blueprintRef:
+    name: standard
+    namespace: cpc-system
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: ControlCenterCluster
+metadata:
+  name: controlcenter-dev
+spec:
+  targetCluster:
+    namespace: confluent-dev
+    name: controlcenter
+  k8sClusterRef:
+    name: data-plane-k8s
+    namespace: cpc-system
+  blueprintRef:
+    name: standard
+    namespace: cpc-system

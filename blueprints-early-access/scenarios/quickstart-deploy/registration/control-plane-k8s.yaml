@@ -1,0 +1,19 @@
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: KubernetesCluster
+metadata:
+  name: control-plane-k8s
+  namespace: cpc-system
+spec:
+  k8sID:  # kubectl get ns kube-system -oyaml | grep uid
+  description: "cpc-controlplane kubernetes cluster"
+  k8sClusterDomain: cluster.local
+---
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: CPCHealthCheck
+metadata:
+  name: control-plane-hc
+  namespace: cpc-system
+spec:
+  k8sClusterRef:
+    name: control-plane-k8s
+    namespace: cpc-system
