@@ -132,7 +132,7 @@ Deploy the Blueprint and the Confluent cluster class CRs:
 
 .. _deploy-local-data-plane: 
 
-Deploy a local Data Plane
+Deploy Local Data Plane
 -------------------------- 
 
 For the local deployment, install the Data Plane in the same Kubernetes cluster
@@ -230,7 +230,7 @@ From the Control Plane cluster, deploy Confluent Platform.
 
 .. _deploy-remote-data-plane: 
 
-Deploy a remote Data Plane 
+Deploy Remote Data Plane 
 ---------------------------
 
 In the remote deployment mode, the Data Plane is installed in a different
