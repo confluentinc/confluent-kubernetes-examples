@@ -85,6 +85,8 @@ following steps:
       subjectKeyIdentifier = hash
       authorityKeyIdentifier = keyid:always,issuer:always
       EOF
+      
+   .. sourcecode:: bash
 
       openssl req -x509 -new -nodes -newkey rsa:4096 -keyout /tmp/cpc-ca-key.pem \
         -out /tmp/cpc-ca.pem \
