@@ -103,11 +103,11 @@ following steps:
    
       mkdir /tmp
       
-  .. sourcecode:: bash
+   .. sourcecode:: bash
 
       $TUTORIAL_HOME/scripts/generate-webhooks-keys.sh cpc-system /tmp
       
-  .. sourcecode:: bash
+   .. sourcecode:: bash
     
       kubectl create secret generic webhooks-tls \
           --from-file=ca.crt=/tmp/cpc-ca-key.pem \
