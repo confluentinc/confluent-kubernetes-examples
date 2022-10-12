@@ -36,6 +36,8 @@ Prepare
    
       kubectl config rename-context <Kubernetes control plane context> control-plane
       
+   .. sourcecode:: bash
+
       kubectl config rename-context <Kubernetes data plane context> data-plane
    
 #. From the ``<CFK examples directory>`` on your local machine, clone this 
@@ -101,8 +103,12 @@ following steps:
    
       mkdir /tmp
       
+  .. sourcecode:: bash
+
       $TUTORIAL_HOME/scripts/generate-webhooks-keys.sh cpc-system /tmp
       
+  .. sourcecode:: bash
+    
       kubectl create secret generic webhooks-tls \
           --from-file=ca.crt=/tmp/cpc-ca-key.pem \
           --from-file=tls.crt=/tmp/server.pem \
@@ -117,6 +123,8 @@ following steps:
    .. sourcecode:: bash
 
       helm repo add confluentinc https://packages.confluent.io/helm
+
+   .. sourcecode:: bash
 
       helm upgrade --install cpc-orchestrator confluent-inc/cpc-orchestrator \
         --namespace cpc-system \
@@ -321,6 +329,8 @@ From the Control Plane cluster, deploy Confluent Platform.
    .. sourcecode:: bash
 
       kubectl create namespace confluent-dev --context data-plane
+
+   .. sourcecode:: bash
 
       kubectl apply -f $TUTORIAL_HOME/deployment/data-plane/confluentplatform_dev.yaml \
         --context control-plane
