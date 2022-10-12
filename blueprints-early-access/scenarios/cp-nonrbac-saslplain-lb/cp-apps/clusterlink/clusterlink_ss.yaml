@@ -1,0 +1,19 @@
+apiVersion: apps.cpc.platform.confluent.io/v1beta1
+kind: ClusterLink
+metadata:
+  name: clusterlink-test
+spec:
+  name: clusterlink-test-ss
+  sourceInitiatedLink:
+    linkMode: Source
+  destination:
+    kafkaClusterRef:
+      name: kafka-ss
+  source:
+    ## internal CFK cl object is created on the kafka-ms cluster
+    ## In this example kafka-ms is running on your cluster
+    kafkaClusterRef:
+      name: kafka-ms
+  mirrors:
+    topics:
+    - name: topic-global

@@ -1,0 +1,72 @@
+# rolebinding `testadmin-rb` allows `testadmin` to see kafkaCluster
+apiVersion: apps.cpc.platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: testadmin-rb-ms
+  namespace: __NAMESPACE__
+spec:
+  principal:
+    type: user
+    name: testadmin
+  role: ClusterAdmin
+  kafkaClusterRef:
+    name: kafka-ms
+---
+apiVersion: apps.cpc.platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: testadmin-rb-ms
+  namespace: __NAMESPACE__
+spec:
+  principal:
+    type: user
+    name: testadmin
+  clustersScopeByIds:
+    # Find the SR C3 is using and get the id from the status
+    # kubectl -n <NAMESPACE> src schemaregistry-ms -oyaml
+    # follow the pattern id_<schema-registry_cluster_name>_<namespace>
+    schemaRegistryClusterId: id_schemaregistry-ms___NAMESPACE__
+  role: SystemAdmin
+  kafkaClusterRef:
+    name: kafka-ms
+---
+apiVersion: apps.cpc.platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: testadmin-rb-connect-ms
+  namespace: __NAMESPACE__
+spec:
+  principal:
+    type: user
+    name: testadmin
+  clustersScopeByIds:
+    # Find the connect C3 is using and get the id from the status
+    # kubectl -n <NAMESPACE> cc connect-ms -oyaml
+    # follow the pattern <namespace>.<connect_cluster_name>
+    connectClusterId: __NAMESPACE__.connect-ms
+  role: SystemAdmin
+  kafkaClusterRef:
+    name: kafka-ms
+---
+apiVersion: apps.cpc.platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: testadmin-rb-ksql-ms
+  namespace: __NAMESPACE__
+spec:
+  principal:
+    type: user
+    name: testadmin
+  clustersScopeByIds:
+    # Find the connect C3 is using and get the id from the status
+    # kubectl -n <NAMESPACE> ksqldbcluster ksqldb-ms -oyaml
+    # follows the pattern <namespace>.<ksqldb_cluster_name>_
+    ksqlClusterId: __NAMESPACE__.ksqldb-ms_
+  role: ResourceOwner
+  kafkaClusterRef:
+    name: kafka-ms
+  resourcePatterns:
+    - name: ksql-cluster
+      patternType: LITERAL
+      resourceType: KsqlCluster
+---

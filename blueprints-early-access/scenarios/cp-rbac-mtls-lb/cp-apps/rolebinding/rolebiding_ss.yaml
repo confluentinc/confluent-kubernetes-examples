@@ -1,0 +1,72 @@
+# rolebinding `testadmin-rb` allows `testadmin` to see kafkaCluster
+apiVersion: apps.cpc.platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: testadmin-rb
+  namespace: __NAMESPACE__
+spec:
+  principal:
+    type: user
+    name: testadmin
+  role: ClusterAdmin
+  kafkaClusterRef:
+    name: kafka-ss
+---
+apiVersion: apps.cpc.platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: testadmin-rb-sr
+  namespace: __NAMESPACE__
+spec:
+  principal:
+    type: user
+    name: testadmin
+  clustersScopeByIds:
+    # Find the SR C3 is using and get the id from the status
+    # kubectl -n <NAMESPACE> src schemaregistry-ss -oyaml
+    # follow the pattern id_<schema-registry_cluster_name>_<namespace>
+    schemaRegistryClusterId: id_schemaregistry-ss___NAMESPACE__
+  role: SystemAdmin
+  kafkaClusterRef:
+    name: kafka-ss
+---
+apiVersion: apps.cpc.platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: testadmin-rb-connect
+  namespace: __NAMESPACE__
+spec:
+  principal:
+    type: user
+    name: testadmin
+  clustersScopeByIds:
+    # Find the connect C3 is using and get the id from the status
+    # kubectl -n <NAMESPACE> cc connect-ss -oyaml
+    # follow the pattern <namespace>.<connect_cluster_name>
+    connectClusterId: __NAMESPACE__.connect-ss
+  role: SystemAdmin
+  kafkaClusterRef:
+    name: kafka-ss
+---
+apiVersion: apps.cpc.platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: testadmin-rb-ksql
+  namespace: __NAMESPACE__
+spec:
+  principal:
+    type: user
+    name: testadmin
+  clustersScopeByIds:
+    # Find the connect C3 is using and get the id from the status
+    # kubectl -n <NAMESPACE> ksqldbcluster ksqldb-ss -oyaml
+    # follows the pattern <namespace>.<ksqldb_cluster_name>_
+    ksqlClusterId: __NAMESPACE__.ksqldb-ss_
+  role: ResourceOwner
+  kafkaClusterRef:
+    name: kafka-ss
+  resourcePatterns:
+    - name: ksql-cluster
+      patternType: LITERAL
+      resourceType: KsqlCluster
+---

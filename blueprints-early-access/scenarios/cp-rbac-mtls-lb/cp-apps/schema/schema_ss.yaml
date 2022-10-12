@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: schema-config-ss
+data:
+  schema: |
+    {
+      "namespace": "io.confluent.examples.clients.basicavro",
+      "type": "record",
+      "name": "Payment",
+      "fields": [
+          {"name": "id", "type": "string"}
+      ]
+    }
+---
+apiVersion: apps.cpc.platform.confluent.io/v1beta1
+kind: Schema
+metadata:
+  name: schema-foo-ss
+spec:
+  data:
+    format: avro
+    configRef: schema-config-ss
+  schemaRegistryClusterRef:
+    name: schemaregistry-ss
