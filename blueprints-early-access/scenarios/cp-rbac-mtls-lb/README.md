@@ -50,13 +50,13 @@ To create the required CA, run the following commands:
 1. Create a secret `ca-key-pair-sce-2`
 
    ```bash
-   kubectl -n cpc-system create secret tls  ca-key-pair-   sce-2 --cert=/tmp/cpc-ca.pem --key=/tmp/cpc-ca-key.pem
+   kubectl -n cpc-system create secret tls  ca-key-pair-sce-2 --cert=/tmp/cpc-ca.pem --key=/tmp/cpc-ca-key.pem
    ```
 
 2. Create the CertificateStoreConfig to inject CA keypair generated as above:
 
    ```bash
-   kubectl apply -f $SCENARIO_BASEPATH/blueprint/   certificatestoreconfig.yaml --namespace cpc-system
+   kubectl apply -f $SCENARIO_BASEPATH/blueprint/certificatestoreconfig.yaml --namespace cpc-system
    ```
 
 ### Install Blueprint Credentials
