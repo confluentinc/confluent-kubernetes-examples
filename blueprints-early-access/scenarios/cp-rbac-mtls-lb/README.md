@@ -97,10 +97,10 @@ To create the required CA, run the following commands:
   kubectl -n ${MY_NAMESPACE} create secret generic cp-credentials \
       --from-file=mds-client-bearer.txt=$SCENARIO_BASEPATH/cp-clusters/credentials/mds-client-bearer.txt \
       --from-file=connect-client-bearer.txt=$SCENARIO_BASEPATH/cp-clusters/credentials/connect-client-bearer.txt \
-      --from-file=controlcenter-client-bearer.txt=$SCENARIO_BASEPATH/cp-clusters/credentials/controlcenter-client-  bearer.txt \
-      --from-file=kafkarestproxy-client-bearer.txt=$SCENARIO_BASEPATH/cp-clusters/credentials/kafkarestproxy-client-  bearer.txt \
+      --from-file=controlcenter-client-bearer.txt=$SCENARIO_BASEPATH/cp-clusters/credentials/controlcenter-client-bearer.txt \
+      --from-file=kafkarestproxy-client-bearer.txt=$SCENARIO_BASEPATH/cp-clusters/credentials/kafkarestproxy-client-bearer.txt \
       --from-file=ksqldb-client-bearer.txt=$SCENARIO_BASEPATH/cp-clusters/credentials/ksqldb-client-bearer.txt \
-      --from-file=schemaregistry-client-bearer.txt=$SCENARIO_BASEPATH/cp-clusters/credentials/schemaregistry-client-  bearer.txt \
+      --from-file=schemaregistry-client-bearer.txt=$SCENARIO_BASEPATH/cp-clusters/credentials/schemaregistry-client-bearer.txt \
       --save-config --dry-run=client -oyaml | kubectl apply -f -
   ```
 
