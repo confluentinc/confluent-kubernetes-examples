@@ -3,7 +3,6 @@ kind: ZookeeperCluster
 metadata:
   name: zookeeper-prod
 spec:
-  replicas: 3
   k8sClusterRef:
     name: control-plane-k8s
     namespace: cpc-system
@@ -16,7 +15,6 @@ kind: KafkaCluster
 metadata:
   name: kafka-prod
 spec:
-  replicas: 3
   k8sClusterRef:
     name: control-plane-k8s
     namespace: cpc-system
@@ -29,7 +27,6 @@ kind: SchemaRegistryCluster
 metadata:
   name: schemaregistry-prod
 spec:
-  replicas: 2
   k8sClusterRef:
     name: control-plane-k8s
     namespace: cpc-system
@@ -42,7 +39,6 @@ kind: ConnectCluster
 metadata:
   name: connect-prod
 spec:
-  replicas: 1
   k8sClusterRef:
     name: control-plane-k8s
     namespace: cpc-system
@@ -55,7 +51,6 @@ kind: KsqlDBCluster
 metadata:
   name: ksqldb-prod
 spec:
-  replicas: 2
   k8sClusterRef:
     name: control-plane-k8s
     namespace: cpc-system

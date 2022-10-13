@@ -83,6 +83,7 @@ spec:
   provisioner:
     type: cfk
     cfk:
+      replicas: 3
       id: 1
       replicas: 1
       # +optional
