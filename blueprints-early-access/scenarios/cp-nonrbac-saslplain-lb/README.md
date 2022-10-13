@@ -9,7 +9,7 @@
 - Set the home directory for this tutorial:
 
   ```bash
-  export SCENARIO_BASEPATH=<CFK examples directory>/confluent-kubernetes-examples/blueprints-early-access/scenario/cp-  nonrbac-saslplain-lb
+  export SCENARIO_BASEPATH=<CFK examples directory>/confluent-kubernetes-examples/blueprints-early-access/scenario/cp- nonrbac-saslplain-lb
   ```
   ```bash
   export MY_NAMESPACE=<your org namespace>
