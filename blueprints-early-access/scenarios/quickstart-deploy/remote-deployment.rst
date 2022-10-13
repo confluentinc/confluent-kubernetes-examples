@@ -1,21 +1,18 @@
-=====================
-Deploy CFK Blueprints
-=====================
+==================================
+Deploy Remote CFK using Blueprints
+==================================
 
-This example will walk you through the configuration and deployment of Confluent
-for Kubernetes (CFK) Blueprints. You will go through the following scenarios:
+This tutorial walks you through the configuration and deployment of Confluent
+for Kubernetes (CFK) Blueprints in the multi-cluster environment. You will go
+through the following scenarios:
 
-#. Deploy the Control Plane in the control plane.
+#. Deploy the Control Plane.
+
+#. Deploy the Data Plane in a separate cluster.
 
 #. Deploy the Blueprint in the Control Plane.
 
-#. Deploy the Data Plane.
-  
-   - To install and follow the local Data Plane scenario, deploy the Data
-     Plane in the same cluster as the Control Plane.
-   
-   - To install and follow the remote Data Plane scenario, deploy the Data 
-     Plane in a separate Data Plane cluster.
+#. Using the Blueprint, deploy Confluent Platform in the Data Plane. 
 
 Prepare  
 -------------
@@ -58,7 +55,7 @@ Prepare
 Deploy Control Plane  
 ----------------------
 
-In the Kubernetes cluster you want to install the Control Plane on, take the
+In the Kubernetes cluster you want to install the Control Plane, take the
 following steps:
 
 #. Set the current context to the Control Plane cluster:
@@ -100,8 +97,8 @@ following steps:
         -reqexts v3_ca \
         -config openssl.cnf
 
-#. Create the Webhook certificate secret. ``webhooks-tls`` is used in these 
-   examples:
+#. Create the Webhook certificate secret. ``webhooks-tls`` is used in this 
+   tutorial:
       
    .. sourcecode:: bash
 
@@ -110,7 +107,7 @@ following steps:
    .. sourcecode:: bash
     
       kubectl create secret generic webhooks-tls \
-          --from-file=ca.crt=/tmp/cpc-ca-key.pem \
+          --from-file=ca.crt=/tmp/cpc-ca.pem \
           --from-file=tls.crt=/tmp/server.pem \
           --from-file=tls.key=/tmp/server-key.pem \
           --namespace cpc-system \
@@ -130,6 +127,8 @@ following steps:
         --namespace cpc-system \
         --kube-context control-plane 
 
+.. _deploy-blueprint: 
+
 Deploy Blueprint
 ---------------- 
 
@@ -139,104 +138,6 @@ Deploy the Blueprint and the Confluent cluster class CRs:
 
    kubectl apply -f $TUTORIAL_HOME/deployment/confluentplatform_blueprint.yaml \
      --context control-plane
-
-.. _deploy-local-data-plane: 
-
-Deploy Local Data Plane
--------------------------- 
-
-For the local deployment, install the Data Plane in the same Kubernetes cluster
-where the Control Plane was installed.
-
-#. Register the Data Plane Kubernetes cluster.
-   
-   #. Get the Kubernetes ID:
-   
-      .. sourcecode:: bash
-   
-         kubectl get namespace kube-system -oyaml --context data-plane | grep uid
-
-   #. Edit ``$TUTORIAL_HOME/registration/control-plane-k8s.yaml`` 
-      and set ``spec.k8sID`` to the Kubernetes ID retrieved in the previous 
-      step.
-      
-   #. Create the KubernetesCluster custom resource (CR) and the HealthCheck CR 
-      in the Control Plane Kubernetes cluster:
-   
-      .. sourcecode:: bash
-
-         kubectl apply -f $TUTORIAL_HOME/registration/control-plane-k8s.yaml \
-           --context control-plane
-
-#. Install the Agent Helm chart in the ``Local`` mode:
-   
-   .. sourcecode:: bash
-
-      helm upgrade --install cpc-agent confluentinc/cpc-agent \
-        --namespace cpc-system \
-        --set mode=Local \
-        --kube-context control-plane 
-
-#. Install the CFK Helm chart in the cluster mode (``--set namespaced=false``):
-  
-   .. sourcecode:: bash
-
-      helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes \
-        --set namespaced=false \
-        --set image.tag=”2.4.2-ea-blueprint” \
-        --namespace cpc-system \
-        --kube-context control-plane 
-
---------------------------
-Deploy Confluent Platform 
--------------------------- 
-
-From the Control Plane cluster, deploy Confluent Platform.
-
-#. Create the namespace to deploy Confluent components into.  ``org-confluent`` 
-   is used in these examples:
-
-   .. sourcecode:: bash
-     
-      kubectl create namespace org-confluent --context control-plane
-
-#. Deploy Confluent Platform: 
-
-   .. sourcecode:: bash
-
-      kubectl apply -f $TUTORIAL_HOME/deployment/control-plane/confluentplatform_prod.yaml \
-        --namespace org-confluent \
-        --context control-plane
-      
-#. Validate the deployment using Control Center.
-
-   #. Check when the Confluent components are up and running:
-   
-      .. sourcecode:: bash
-
-         kubectl get pods --namespace org-confluent --context control-plane -w
-
-   #. Set up port forwarding to Control Center web UI from local machine:
-
-      .. sourcecode:: bash
-
-         kubectl port-forward controlcenter-prod-0 9021:9021 \
-           --namespace org-confluent \
-           --context control-plane
-
-   #. Navigate to Control Center in a browser:
-
-      .. sourcecode:: bash
-
-         http://localhost:9021
-   
-#. Uninstall Confluent Platform:
-
-   .. sourcecode:: bash
-
-      kubectl delete -f $TUTORIAL_HOME/deployment/control-plane/confluentplatform_prod.yaml \
-        --namespace org-confluent \
-        --context control-plane
 
 .. _deploy-remote-data-plane: 
 
@@ -254,11 +155,11 @@ Kubernetes cluster from the Control Plane cluster.
    
          kubectl get namespace kube-system -oyaml --context data-plane | grep uid
 
-   #. In the Control Plane, edit ``registration/data-plane-k8s.yaml`` and set 
+   #. Edit ``registration/data-plane-k8s.yaml`` and set 
       ``spec.k8sID`` to the Kubernetes ID from the previous step.
       
-   #. In the Control Plane, create the KubernetesCluster CR and the HealthCheck 
-      CR:
+   #. In the Control Plane, create the KubernetesCluster and the HealthCheck 
+      custom resource (CR):
    
       .. sourcecode:: bash
 
@@ -268,6 +169,10 @@ Kubernetes cluster from the Control Plane cluster.
 #. In the Control Plane, generate the Kubeconfig for the Agent to communicate 
    with the Orchestrator:
 
+   .. sourcecode:: bash
+
+      kubectl config use-context control-plan 
+      
    .. sourcecode:: bash
 
       $TUTORIAL_HOME/scripts/kubeconfig_generate.sh control-plane-sa cpc-system /tmp 
@@ -311,9 +216,10 @@ Kubernetes cluster from the Control Plane cluster.
         --kube-context data-plane \
         --namespace cpc-system
 
---------------------------
-Deploy Confluent Platform 
--------------------------- 
+.. _deploy-remote-cp:
+
+Deploy Confluent Platform in Remote Data Plane 
+----------------------------------------------
 
 From the Control Plane cluster, deploy Confluent Platform.
 
@@ -346,18 +252,11 @@ From the Control Plane cluster, deploy Confluent Platform.
 
          kubectl get pods --namespace confluent-dev --context data-plane -w
    
-   #. Set up port forwarding to Control Center web UI from local machine:
+   #. Navigate to Control Center in a browser and check the Confluent cluster:
 
       .. sourcecode:: bash
 
-         kubectl port-forward controlcenter-dev-0 9021:9021 --context data-plane \
-           --namespace confluent-dev
-
-   #. Navigate to Control Center in a browser:
-
-      .. sourcecode:: bash
-
-         http://localhost:9021
+         kubectl confluent dashboard controlcenter --namespace confluent-dev --context data-plane
 
 #. In the Control Plane, uninstall Confluent Platform:
 
@@ -366,4 +265,15 @@ From the Control Plane cluster, deploy Confluent Platform.
       kubectl delete -f $TUTORIAL_HOME/deployment/data-plane/confluentplatform_dev.yaml \
         --context control-plane
 
+Troubleshoot
+-------------
 
+* To check the states of the Operator and the Agent, run:
+
+  .. sourcecode:: bash 
+
+     kubectl get agent cpc-agent-install --namespace cpc-system --context control-plane -oyaml
+     
+  .. sourcecode:: bash 
+
+     kubectl get cpchealthcheck --namespace cpc-system --context control-plane
