@@ -113,7 +113,7 @@ file before running:
 
 ## Single Site Deployment
 
-Install all the single site yaml and make sure to check the validation section:
+- Install all the single site yaml and make sure to check the validation section:
     - Topic
         - `kubectl -n ${MY_NAMESPACE} apply -f $SCENARIO_BASEPATH/cp-apps/topics/topic.yaml`
         - Check Resource
@@ -154,7 +154,7 @@ Install all the single site yaml and make sure to check the validation section:
 
 ## Multi Site Deployment
 
-Install all the single site yaml and make sure to check the validation section:
+- Install all the single site yaml and make sure to check the validation section:
     - Topic
         - `kubectl apply -f $SCENARIO_BASEPATH/cp-apps/topics/global.yaml --namespace `
         - Check Resource
