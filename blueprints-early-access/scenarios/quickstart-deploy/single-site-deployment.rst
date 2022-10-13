@@ -1,9 +1,9 @@
-=================================
-Deploy Local CFK using Blueprints
-=================================
+==========================================
+Single-site Deployment using CFK Blueprint 
+==========================================
 
 This tutorial walks you through the configuration and deployment of Confluent
-for Kubernetes (CFK) Blueprints in the single cluster environment where the
+for Kubernetes (CFK) Blueprints in a single-site environment where the
 Control Plane and Data Plane run in the same cluster. For clarity, we will call
 out the Control Plane and Data Plane separately. You will go through the
 following scenarios. 
