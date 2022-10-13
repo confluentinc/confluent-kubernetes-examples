@@ -11,7 +11,7 @@ spec:
   credentialStoreConfigRef:
     name: cp-csc
   k8sClusterRef:
-    name: cpc-controlplane-k8s
+    name: control-plane-k8s
     namespace: cpc-system
   externalAccess:
     dnsConfig:
@@ -33,7 +33,7 @@ spec:
   credentialStoreConfigRef:
     name: cp-csc
   k8sClusterRef:
-    name: cpc-controlplane-k8s
+    name: control-plane-k8s
     namespace: cpc-system
   externalAccess:
     dnsConfig:
@@ -58,7 +58,7 @@ spec:
   credentialStoreConfigRef:
     name: cp-csc
   k8sClusterRef:
-    name: cpc-controlplane-k8s
+    name: control-plane-k8s
     namespace: cpc-system
   externalAccess:
     listeners:
@@ -83,7 +83,7 @@ spec:
   credentialStoreConfigRef:
     name: cp-csc
   k8sClusterRef:
-    name: cpc-controlplane-k8s
+    name: control-plane-k8s
     namespace: cpc-system
   externalAccess:
     dnsConfig:
@@ -100,7 +100,7 @@ spec:
   credentialStoreConfigRef:
     name: cp-csc
   k8sClusterRef:
-    name: cpc-controlplane-k8s
+    name: control-plane-k8s
     namespace: cpc-system
   externalAccess:
     dnsConfig:
@@ -117,7 +117,7 @@ spec:
   credentialStoreConfigRef:
     name: cp-csc
   k8sClusterRef:
-    name: cpc-controlplane-k8s
+    name: control-plane-k8s
     namespace: cpc-system
   externalAccess:
     dnsConfig:
@@ -134,5 +134,5 @@ spec:
     name: cp-nonrbac-saslplain-lb
     namespace: cpc-system
   k8sClusterRef:
-    name: cpc-controlplane-k8s
+    name: control-plane-k8s
     namespace: cpc-system

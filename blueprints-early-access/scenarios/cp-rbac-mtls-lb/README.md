@@ -104,7 +104,6 @@ To create the required CA, run the following commands:
       --save-config --dry-run=client -oyaml | kubectl apply -f -
   ```
 
-
 - Install Confluent Platform Deployment Credential
 
   ```bash
@@ -117,107 +116,15 @@ To create the required CA, run the following commands:
   ```bash
   kubectl apply -f $SCENARIO_BASEPATH/cp-clusters/deployment_ss.yaml -n ${MY_NAMESPACE}
   ```
+### Validate the Deployment
 
-### Install Confluent Platform in Multi Site Deployment
-- Make sure to add the `k8sClusterRef` and point to your k8s resource  in `$SCENARIO_BASEPATH/cp-clusters `deployment_ms.yaml` file before running
+1. Check when the Confluent components are up and running:
+   
+   ```bash 
+   kubectl get pods --namespace $MY_NAMESPACE -w
+   ```
 
-  ```bash
-  kubectl apply -f $SCENARIO_BASEPATH/cp-clusters/deployment_ms.yaml -n ${MY_NAMESPACE}
-  ```
+2. Navigate to Control Center in a browser and check the Confluent cluster:
 
-### Confluent Platform Deployment Validation
-
-
-## Install Confluent Platform APPs
-
-## Pre-requisite
-
-- Make sure single & multi-site Confluent Platform deployment is running
-    - You can validate by checking status
-
-## Single Site Deployment
-
-- First install all the single site yaml and make sure to check the validation section
-    - Topic
-        - `kubectl -n ${MY_NAMESPACE} apply -f $SCENARIO_BASEPATH/cp-apps/topics/topic.yaml`
-        - Check Resource
-            - `kubectl -n ${MY_NAMESPACE} get kafkatopics.apps topic-foo`
-        - Validation:
-            - Make sure the `state` is in `Created` mode
-    - Rolebinding
-        - Make sure to find id for schemaregistry/connect cluster before applying
-            - To get `schemaRegistryClusterId`
-                - `kubectl -n ${MY_NAMESPACE} get schemaregistrycluster -oyaml | grep schemaRegistryClusterId`
-            - To get `connectClusterId`
-                - `kubectl -n ${MY_NAMESPACE} get connectcluster -oyaml | grep connectClusterId`
-            - To get `ksqldbClusterId`
-                - `kubectl -n ${MY_NAMESPACE} get ksqldbcluster -oyaml | grep ksqlClusterId`
-        - `cat $SCENARIO_BASEPATH/cp-apps/rolebinding/rolebiding_ss.yaml | sed 's/__NAMESPACE__/'"$MY_NAMESPACE"'/g' | kubectl apply -f -`
-        - Check Resource
-            - `kubectl -n ${MY_NAMESPACE} get confluentrolebindings.apps`
-        - Validation:
-            - Make sure the `state` is in `Created` mode
-    - SchemaExporter
-        - `kubectl -n ${MY_NAMESPACE} apply -f $SCENARIO_BASEPATH/cp-apps/schemaexporter/schemaexporter_ss.yaml`
-        - Check Resource
-            - `kubectl -n ${MY_NAMESPACE} get schemaexporters.apps schema-exporter-ss`
-        - Validation:
-            - Make sure the `state` is in `Created` mode
-    - Schema
-        - `kubectl -n ${MY_NAMESPACE} apply -f $SCENARIO_BASEPATH/cp-apps/schema/schema_ss.yaml`
-        - Check Resource
-            - `kubectl -n ${MY_NAMESPACE} get schemas.app schema-foo-ss`
-        - Validation:
-            - Make sure the `state` is in `Running` mode
-    - Connectors
-        - `kubectl -n ${MY_NAMESPACE} apply -f $SCENARIO_BASEPATH/cp-apps/schema/connector_ss.yaml`
-        - Check Resource
-            - `kubectl -n ${MY_NAMESPACE} get connectors.apps`
-        - Validation:
-            - Make sure the `state` is in `Created` mode
-
-### Confluent Platform APP Validation
-- Update Workflow
-- Delete Workflow
-
-## Multi Site Deployment
-
-- First install all the single site yaml and make sure to check the validation section
-    - Topic
-        - `kubectl apply -f $SCENARIO_BASEPATH/cp-apps/topics/global.yaml --namespace `
-        - Check Resource
-            - `kubectl -n ${MY_NAMESPACE} get kafkatopics.apps topic-global`
-        - Validation:
-            - Make sure the `state` is in `Created` mode
-    - Rolebinding
-      - Make sure to find id for schemaregistry/connect cluster before applying
-        - To get `schemaRegistryClusterId`
-          - `kubectl -n ${MY_NAMESPACE} get schemaregistrycluster -oyaml | grep schemaRegistryClusterId`
-        - To get `connectClusterId`
-          - `kubectl -n ${MY_NAMESPACE} get connectcluster -oyaml | grep connectClusterId`
-        - To get `ksqldbClusterId`
-          - `kubectl -n ${MY_NAMESPACE} get ksqldbcluster -oyaml | grep ksqlClusterId`
-      - `cat $SCENARIO_BASEPATH/cp-apps/rolebinding/rolebiding_ms.yaml | sed 's/__NAMESPACE__/'"$MY_NAMESPACE"'/g' | kubectl apply -f -`
-      - Check Resource
-        - `kubectl -n ${MY_NAMESPACE} get confluentrolebindings.apps`
-      - Validation:
-        - Make sure the `state` is in `Created` mode
-    - SchemaExporter
-        - `kubectl -n ${MY_NAMESPACE} apply -f $SCENARIO_BASEPATH/cp-apps/schemaexporter/schemaexporter_ms.yaml`
-        - Check Resource
-            - `kubectl -n ${MY_NAMESPACE} get schemaexporters.apps | grep schema-exporter-ms`
-        - Validation:
-            - Make sure the `state` is in `Created` mode
-    - Schema
-        - `kubectl  -n ${MY_NAMESPACE} apply -f $SCENARIO_BASEPATH/cp-apps/schema/schema_ms.yaml`
-        - Check Resource
-            - `kubectl -n ${MY_NAMESPACE} get schemas.apps schema-config-ms`
-        - Validation:
-            - Make sure the `state` is in `Running` mode
-    - Connectors
-        - `kubectl -n ${MY_NAMESPACE} apply -f $SCENARIO_BASEPATH/cp-apps/connectors/connector_ms.yaml`
-        - Check Resource
-            - `kubectl -n ${MY_NAMESPACE} get connectors.apps datagen-connector-ms`
-        - Validation:
-            - Make sure the `state` is in `Created` mode
-
+   ```bash       
+   kubectl confluent dashboard controlcenter --namespace $MY_NAMESPACE

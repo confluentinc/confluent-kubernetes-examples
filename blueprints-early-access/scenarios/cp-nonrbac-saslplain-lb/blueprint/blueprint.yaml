@@ -157,10 +157,6 @@ spec:
           name: cp-nonrbac-saslplain-lb-bp-csc
   confluentPlatform:
     version: 7.2.1
-    authorization:
-      type: rbac
-      superUsers:
-        - User:kafka
     http:
       externalAccess:
         type: loadBalancer
