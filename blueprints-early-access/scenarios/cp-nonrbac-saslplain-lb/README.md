@@ -15,18 +15,18 @@
   export MY_NAMESPACE=<your org namespace>
   ``` 
 
-- [Deploy the Control Plane with the Orchestrator](../quickstart-deploy/local-deployment.rst#deploy-control-plane).
+- [Deploy the Control Plane with the Orchestrator](../quickstart-deploy/single-site-deployment.rst#deploy-control-plane).
 
-- [Deploy the Data Plane with the Agent](../quickstart-deploy/local-deployment.rst#deploy-local-data-plane).
+- [Deploy the Data Plane with the Agent](../quickstart-deploy/single-site-deployment.rst#deploy-local-data-plane).
 
-- Create the namespace for the Blueprint system resources, `cpc-system`.
+- The above setup creates the namespace for the Blueprint system resources, `cpc-system`.
 
 ## Install Blueprint
 
 ### Install Blueprint Certificate Authority (CA)
 
 The Control Plane uses CA keypair to generate certificates for all the Confluent Platform component. Run the following commands:
-1. Create a secret `ca-key-pair-sce-4` using the CA keypair generated in when deploying [the Control Plane](../quickstart-deploy/local-deployment.rst#deploy-control-plane).
+1. Create a secret `ca-key-pair-sce-4` using the CA keypair generated in when deploying [the Control Plane](../quickstart-deploy/single-site-deployment.rst#deploy-control-plane).
 
    ```bash 
    kubectl -n cpc-system create secret tls  ca-key-pair-sce-4 --cert=/tmp/cpc-ca.pem --key=/tmp/cpc-ca-key.pem

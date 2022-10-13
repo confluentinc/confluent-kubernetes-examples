@@ -17,11 +17,11 @@
   export MY_NAMESPACE=<your org namespace>
   ``` 
 
-- [Deploy the Control Plane with the Orchestrator](../quickstart-deploy/local-deployment.rst#deploy-control-plane).
+- [Deploy the Control Plane with the Orchestrator](../quickstart-deploy/single-site-deployment.rst#deploy-control-plane).
 
-- [Deploy the Data Plane with the Agent](../quickstart-deploy/local-deployment.rst#deploy-local-data-plane).
+- [Deploy the Data Plane with the Agent](../quickstart-deploy/single-site-deployment.rst#deploy-local-data-plane).
 
-- Create the namespace for the Blueprint system resources, `cpc-system`.
+- The above setup creates the namespace for the Blueprint system resources, `cpc-system`.
 
 ### Deploy OpenLDAP
 This repo includes a Helm chart for OpenLdap. The chart `values.yaml` includes the set of principal definitions that Confluent Platform needs for Confluent Platform RBAC.
