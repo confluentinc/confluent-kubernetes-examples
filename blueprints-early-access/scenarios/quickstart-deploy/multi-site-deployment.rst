@@ -1,9 +1,9 @@
-==================================
-Deploy Remote CFK using Blueprints
-==================================
+==========================================
+Multi-site Deployment using CFK Blueprint
+==========================================
 
 This tutorial walks you through the configuration and deployment of Confluent
-for Kubernetes (CFK) Blueprints in the multi-cluster environment. You will go
+for Kubernetes (CFK) Blueprints in a multi-cluster environment. You will go
 through the following scenarios:
 
 #. Deploy the Control Plane.
