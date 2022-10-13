@@ -12,6 +12,6 @@ spec:
   source:
     kafkaClusterRef:
       name: kafka-ss
-  mirrors
+  mirrors:
    topics:
     - name: topic-global

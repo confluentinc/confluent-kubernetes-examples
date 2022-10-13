@@ -11,6 +11,11 @@ spec:
     type: cfk
     cfk:
       replicas: 3
+      connectorPlugins:
+        confluentHubPlugins:
+          - name: kafka-connect-datagen
+            owner: confluentinc
+            version: 0.5.2
       k8s:
         podTemplate:
           resources:
@@ -20,11 +25,6 @@ spec:
             limits:
               cpu: "2"
               memory: "4Gi"
-      connectorPlugins:
-        confluentHubPlugins:
-          - name: kafka-connect-datagen
-            owner: confluentinc
-            version: 0.5.2
 ---
 apiVersion: core.cpc.platform.confluent.io/v1beta1
 kind: ControlCenterClusterClass
@@ -210,7 +210,7 @@ spec:
         enabled: true
     kafkaCluster:
       classRef:
-        name: kafka-standard
+        name: cp-nonrbac-saslplain-lb-kafka-standard
         namespace: cpc-system
     kafkaRestProxyCluster:
       classRef:

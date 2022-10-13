@@ -8,10 +8,8 @@ spec:
   blueprintRef:
     name: cp-rbac-mtls-lb
     namespace: cpc-system
-  credentialStoreConfigRef:
-    name: cp-csc
   k8sClusterRef:
-    name: cpc-controlplane-k8s
+    name: control-plane-k8s
     namespace: cpc-system
   externalAccess:
     dnsConfig:
@@ -30,18 +28,16 @@ spec:
   blueprintRef:
     name: cp-rbac-mtls-lb
     namespace: cpc-system
-  credentialStoreConfigRef:
-    name: cp-csc
   k8sClusterRef:
-    name: cpc-controlplane-k8s
+    name: control-plane-k8s
     namespace: cpc-system
   externalAccess:
     dnsConfig:
       subdomain: "cpc-c3-ss"
   dependencies:
-    schemaRegistryClusterList:
+    schemaRegistryClusterRefs:
     - name: schemaregistry-ss
-    connectClusterList:
+    connectClusterRefs:
     - name: connect-ss
 
 ---
@@ -55,10 +51,8 @@ spec:
   blueprintRef:
     name: cp-rbac-mtls-lb
     namespace: cpc-system
-  credentialStoreConfigRef:
-    name: cp-csc
   k8sClusterRef:
-    name: cpc-controlplane-k8s
+    name: control-plane-k8s
     namespace: cpc-system
   externalAccess:
     listeners:
@@ -80,10 +74,8 @@ spec:
   blueprintRef:
     name: cp-rbac-mtls-lb
     namespace: cpc-system
-  credentialStoreConfigRef:
-    name: cp-csc
   k8sClusterRef:
-    name: cpc-controlplane-k8s
+    name: control-plane-k8s
     namespace: cpc-system
   externalAccess:
     dnsConfig:
@@ -97,10 +89,8 @@ spec:
   blueprintRef:
     name: cp-rbac-mtls-lb
     namespace: cpc-system
-  credentialStoreConfigRef:
-    name: cp-csc
   k8sClusterRef:
-    name: cpc-controlplane-k8s
+    name: control-plane-k8s
     namespace: cpc-system
   externalAccess:
     dnsConfig:
@@ -114,10 +104,8 @@ spec:
   blueprintRef:
     name: cp-rbac-mtls-lb
     namespace: cpc-system
-  credentialStoreConfigRef:
-    name: cp-csc
   k8sClusterRef:
-    name: cpc-controlplane-k8s
+    name: control-plane-k8s
     namespace: cpc-system
   externalAccess:
     dnsConfig:
@@ -134,5 +122,5 @@ spec:
     name: cp-rbac-mtls-lb
     namespace: cpc-system
   k8sClusterRef:
-    name: cpc-controlplane-k8s
+    name: control-plane-k8s
     namespace: cpc-system

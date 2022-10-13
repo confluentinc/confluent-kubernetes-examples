@@ -1,7 +1,7 @@
 apiVersion: apps.cpc.platform.confluent.io/v1beta1
 kind: SchemaExporter
 metadata:
-  name: schema-exporter-ss
+  name: schema-exporter-ms
 spec:
   # internal sr needs to be managed by data-plane's confluent operator
   source:

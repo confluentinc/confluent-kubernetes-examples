@@ -19,12 +19,14 @@
 
 - [Deploy the Data Plane with the Agent](../quickstart-deploy/local-deployment.rst#deploy-local-data-plane).
 
+- Create the namespace for the Blueprint system resources, `cpc-system`.
+
 ## Install Blueprint
 
 ### Install Blueprint Certificate Authority (CA)
 
 The Control Plane uses CA keypair to generate certificates for all the Confluent Platform component. Run the following commands:
-1. Create a secret `ca-key-pair-sce-4`:
+1. Create a secret `ca-key-pair-sce-4` using the CA keypair generated in when deploying [the Control Plane](../quickstart-deploy/local-deployment.rst#deploy-control-plane).
 
    ```bash 
    kubectl -n cpc-system create secret tls  ca-key-pair-sce-4 --cert=/tmp/cpc-ca.pem --key=/tmp/cpc-ca-key.pem
@@ -49,7 +51,7 @@ The Control Plane uses CA keypair to generate certificates for all the Confluent
        --save-config --dry-run=client -oyaml | kubectl apply -f -
    ```
 
-2. The following credential store is only used by this Blueprint and can't be share with other resource and Blueprints:
+2. Create the credential store used by this Blueprint. The credential store is only used by this Blueprint and can't be share with other resource and Blueprints:
 
    ```bash
    kubectl apply -f $SCENARIO_BASEPATH/blueprint/credentialstoreconfig.yaml --namespace cpc-system

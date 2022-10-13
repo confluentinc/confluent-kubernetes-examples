@@ -104,6 +104,7 @@ apiVersion: core.cpc.platform.confluent.io/v1beta1
 kind: ZookeeperClusterClass
 metadata:
   name: cp-rbac-mtls-lb-zookeeper-standard
+  namespace: cpc-system
   annotations:
     cpc.platform.confluent.io/description: "This TILE represents pre-set configuration to deploy CP Zookeeper Cluster."
 spec:
@@ -197,6 +198,15 @@ spec:
     version: 7.2.1
     authorization:
       type: rbac
+      mdsClient:
+        authentication:
+          bearer:
+            blueprint:
+              credentialStoreRef:
+                key: client-bearer.txt
+                name: cp-rbac-mtls-lb-bp-csc
+            providerType: blueprint
+          type: bearer
       superUsers:
         - User:kafka
     zookeeper:
@@ -252,7 +262,7 @@ spec:
         enabled: true
     kafkaCluster:
       classRef:
-        name: kafka-standard
+        name: cp-rbac-mtls-lb-kafka-standard
         namespace: cpc-system
     kafkaRestProxyCluster:
       classRef:

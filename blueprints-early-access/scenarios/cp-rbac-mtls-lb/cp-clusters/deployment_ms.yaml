@@ -8,8 +8,6 @@ spec:
   blueprintRef:
     name: cp-rbac-mtls-lb
     namespace: cpc-system
-  credentialStoreConfigRef:
-    name: cp-csc
   k8sClusterRef:
     name: #INSERT_K8S_NS
     namespace: cpc-system
@@ -30,8 +28,6 @@ spec:
   blueprintRef:
     name: cp-rbac-mtls-lb
     namespace: cpc-system
-  credentialStoreConfigRef:
-    name: cp-csc
   k8sClusterRef:
     name: #INSERT_K8S_NS
     namespace: cpc-system
@@ -39,10 +35,10 @@ spec:
     dnsConfig:
       subdomain: "cpc-c3-ms"
   dependencies:
-    schemaRegistryClusterList:
-    - name: schmaregistry-ms
+    schemaRegistryClusterRefs:
+    - name: schemaregistry-ms
     - name: schemaregistry-ss
-    connectClusterList:
+    connectClusterRefs:
     - name: connect-ms
     - name: connect-ss
 ---
@@ -56,8 +52,6 @@ spec:
   blueprintRef:
     name: cp-rbac-mtls-lb
     namespace: cpc-system
-  credentialStoreConfigRef:
-    name: cp-csc
   k8sClusterRef:
     name: #INSERT_K8S_NS
     namespace: cpc-system
@@ -81,8 +75,6 @@ spec:
   blueprintRef:
     name: cp-rbac-mtls-lb
     namespace: cpc-system
-  credentialStoreConfigRef:
-    name: cp-csc
   k8sClusterRef:
     name: #INSERT_K8S_NS
     namespace: cpc-system
@@ -98,8 +90,6 @@ spec:
   blueprintRef:
     name: cp-rbac-mtls-lb
     namespace: cpc-system
-  credentialStoreConfigRef:
-    name: cp-csc
   k8sClusterRef:
     name: #INSERT_K8S_NS
     namespace: cpc-system
@@ -115,8 +105,6 @@ spec:
   blueprintRef:
     name: cp-rbac-mtls-lb
     namespace: cpc-system
-  credentialStoreConfigRef:
-    name: cp-csc
   k8sClusterRef:
     name: #INSERT_K8S_NS
     namespace: cpc-system

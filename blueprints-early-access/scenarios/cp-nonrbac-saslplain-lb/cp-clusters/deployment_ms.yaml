@@ -39,10 +39,10 @@ spec:
     dnsConfig:
       subdomain: "cpc-c3-ms"
   dependencies:
-    schemaRegistryClusterList:
-    - name: schmaregistry-ms
+    schemaRegistryClusterRefs:
+    - name: schemaregistry-ms
     - name: schemaregistry-ss
-    connectClusterList:
+    connectClusterRefs:
     - name: connect-ms
     - name: connect-ss
 ---

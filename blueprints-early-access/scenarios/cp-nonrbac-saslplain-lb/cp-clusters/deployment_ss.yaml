@@ -39,9 +39,9 @@ spec:
     dnsConfig:
       subdomain: "cpc-c3-ss"
   dependencies:
-    schemaRegistryClusterList:
+    schemaRegistryClusterRefs:
     - name: schemaregistry-ss
-    connectClusterList:
+    connectClusterRefs:
     - name: connect-ss
 
 ---
