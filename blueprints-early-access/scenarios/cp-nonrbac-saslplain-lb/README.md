@@ -141,6 +141,6 @@ kubectl apply -f $SCENARIO_BASEPATH/blueprint/blueprint.yaml --namespace cpc-sys
    kubectl confluent dashboard controlcenter --namespace $MY_NAMESPACE
    ```
 
-  Log in as the `kafka` user with the `kafka-secret` password.
+   Log in as the `kafka` user with the `kafka-secret` password.
   
 1. In Control Center, check if the `topic-foo-ss` topic exists.

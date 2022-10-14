@@ -189,6 +189,7 @@ To create the required CA, run the following commands:
 
    ```bash       
    kubectl confluent dashboard controlcenter --namespace $MY_NAMESPACE
+   ```
    
    Log in as the `kafka` user with the `kafka-secret` password.
 
