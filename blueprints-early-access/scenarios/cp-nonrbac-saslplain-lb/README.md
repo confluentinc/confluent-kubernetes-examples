@@ -69,13 +69,13 @@ kubectl apply -f $SCENARIO_BASEPATH/blueprint/blueprint.yaml --namespace cpc-sys
 1. Create the namespace for Confluent Platform:
 
    ```bash 
-   kubectl create namespace ${MY_NAMESPACE}
+   kubectl create namespace $MY_NAMESPACE
    ```
 
 1. Install Confluent Platform on the Control Plane cluster:
  
    ```bash 
-   kubectl apply -f $SCENARIO_BASEPATH/cp-clusters/deployment_ss.yaml -n ${MY_NAMESPACE}
+   kubectl apply -f $SCENARIO_BASEPATH/cp-clusters/deployment_ss.yaml -n $MY_NAMESPACE
    ```
 
 ## Install Confluent Applications
@@ -85,13 +85,13 @@ kubectl apply -f $SCENARIO_BASEPATH/blueprint/blueprint.yaml --namespace cpc-sys
 - Create a topic:
 
   ```bash 
-  kubectl -n ${MY_NAMESPACE} apply -f $SCENARIO_BASEPATH/cp-apps/topics/topic_ss.yaml
+  kubectl -n $MY_NAMESPACE apply -f $SCENARIO_BASEPATH/cp-apps/topics/topic_ss.yaml
   ```
   
 - Validate:
 
   ```bash 
-  kubectl -n ${MY_NAMESPACE} get kafkatopics.apps topic-foo-ss
+  kubectl -n $MY_NAMESPACE get kafkatopics.apps topic-foo-ss
   ```
   The `STATE` should be set to `Created`.
 
@@ -100,13 +100,13 @@ kubectl apply -f $SCENARIO_BASEPATH/blueprint/blueprint.yaml --namespace cpc-sys
 - Create a schema: 
 
   ```bash
-  kubectl -n ${MY_NAMESPACE} apply -f $SCENARIO_BASEPATH/cp-apps/schema/schema_ss.yaml
+  kubectl -n $MY_NAMESPACE apply -f $SCENARIO_BASEPATH/cp-apps/schema/schema_ss.yaml
   ``` 
   
 - Validate:
 
   ```bash
-  kubectl -n ${MY_NAMESPACE} get schemas.app schema-foo-ss
+  kubectl -n $MY_NAMESPACE get schemas.app schema-foo-ss
   ``` 
   
   The `STATE` should be set to `Created`.
@@ -122,7 +122,7 @@ kubectl apply -f $SCENARIO_BASEPATH/blueprint/blueprint.yaml --namespace cpc-sys
 - Validate:
   
   ```bash 
-  kubectl -n ${MY_NAMESPACE} get connectors.apps
+  kubectl -n $MY_NAMESPACE get connectors.apps
   ```
   
   The `STATE` should be set to `Created`.
@@ -132,13 +132,13 @@ kubectl apply -f $SCENARIO_BASEPATH/blueprint/blueprint.yaml --namespace cpc-sys
 1. Check when the Confluent components are up and running:
    
    ```bash 
-   kubectl get pods --namespace ${MY_NAMESPACE} -w
+   kubectl get pods --namespace $MY_NAMESPACE -w
    ```
 
 1. Navigate to Control Center in a browser and check the Confluent cluster:
 
    ```bash       
-   kubectl confluent dashboard controlcenter --namespace ${MY_NAMESPACE}
+   kubectl confluent dashboard controlcenter --namespace $MY_NAMESPACE
    ```
 
    Log in as the `kafka` user with the `kafka-secret` password.

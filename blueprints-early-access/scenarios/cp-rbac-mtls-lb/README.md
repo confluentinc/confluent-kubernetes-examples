@@ -91,12 +91,12 @@ To create the required CA, run the following commands:
 1. Create the namespace for Confluent Platform:
 
    ```bash 
-   kubectl create namespace ${MY_NAMESPACE}
+   kubectl create namespace $MY_NAMESPACE
    ```
 2. Install Confluent Platform:
 
    ```bash
-     kubectl apply -f $SCENARIO_BASEPATH/cp-clusters/deployment_ss.yaml -n ${MY_NAMESPACE}
+     kubectl apply -f $SCENARIO_BASEPATH/cp-clusters/deployment_ss.yaml -n $MY_NAMESPACE
    ```
 
 ## Install Confluent Applications
@@ -106,13 +106,13 @@ To create the required CA, run the following commands:
 - Create a topic:
 
   ```bash 
-  kubectl -n ${MY_NAMESPACE} apply -f $SCENARIO_BASEPATH/cp-apps/topics/topic_ss.yaml
+  kubectl -n $MY_NAMESPACE apply -f $SCENARIO_BASEPATH/cp-apps/topics/topic_ss.yaml
   ```
   
 - Validate:
 
   ```bash 
-  kubectl -n ${MY_NAMESPACE} get kafkatopics.apps topic-foo-ss
+  kubectl -n $MY_NAMESPACE get kafkatopics.apps topic-foo-ss
   ```
   The `STATE` should be set to `Created`.
 
@@ -121,15 +121,15 @@ To create the required CA, run the following commands:
 - Make sure to find the ids for Schema Registry, Connect, and ksqlDB clusters before creating role bindings:
 
   ```bash 
-  kubectl -n ${MY_NAMESPACE} get schemaregistrycluster -oyaml | grep schemaRegistryClusterId
+  kubectl -n $MY_NAMESPACE get schemaregistrycluster -oyaml | grep schemaRegistryClusterId
   ```
   
   ```bash 
-  kubectl -n ${MY_NAMESPACE} get connectcluster -oyaml | grep connectClusterId
+  kubectl -n $MY_NAMESPACE get connectcluster -oyaml | grep connectClusterId
   ``` 
   
   ```bash 
-  kubectl -n ${MY_NAMESPACE} get ksqldbcluster -oyaml | grep ksqlClusterId
+  kubectl -n $MY_NAMESPACE get ksqldbcluster -oyaml | grep ksqlClusterId
   ``` 
 - Create role bindings: 
 
@@ -140,7 +140,7 @@ To create the required CA, run the following commands:
 - Validate:
 
   ```bash
-  kubectl -n ${MY_NAMESPACE} get confluentrolebindings.apps
+  kubectl -n $MY_NAMESPACE get confluentrolebindings.apps
   ```
 
   The `STATE` should be set to `Created`.
@@ -150,13 +150,13 @@ To create the required CA, run the following commands:
 - Create a schema: 
 
   ```bash
-  kubectl -n ${MY_NAMESPACE} apply -f $SCENARIO_BASEPATH/cp-apps/schema/schema_ss.yaml
+  kubectl -n $MY_NAMESPACE apply -f $SCENARIO_BASEPATH/cp-apps/schema/schema_ss.yaml
   ``` 
   
 - Validate:
 
   ```bash
-  kubectl -n ${MY_NAMESPACE} get schemas.app schema-foo-ss
+  kubectl -n $MY_NAMESPACE get schemas.app schema-foo-ss
   ``` 
   
   The `STATE` should be set to `Created`.
@@ -172,7 +172,7 @@ To create the required CA, run the following commands:
 - Validate:
   
   ```bash 
-  kubectl -n ${MY_NAMESPACE} get connectors.apps
+  kubectl -n $MY_NAMESPACE get connectors.apps
   ```
   
   The `STATE` should be set to `Created`.
@@ -182,13 +182,13 @@ To create the required CA, run the following commands:
 1. Check when the Confluent components are up and running:
    
    ```bash 
-   kubectl get pods --namespace ${MY_NAMESPACE} -w
+   kubectl get pods --namespace $MY_NAMESPACE -w
    ```
 
 1. Navigate to Control Center in a browser and check the Confluent cluster:
 
    ```bash       
-   kubectl confluent dashboard controlcenter --namespace ${MY_NAMESPACE}
+   kubectl confluent dashboard controlcenter --namespace $MY_NAMESPACE
    ```
    
    Log in as the `kafka` user with the `kafka-secret` password.
