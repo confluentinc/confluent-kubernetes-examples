@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-backend-api
+  labels:
+    app: my-backend-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-backend-api
+  template:
+    metadata:
+      labels:
+        app: my-backend-api
+    spec:
+      containers:
+      - name: my-backend-api
+        image: mosheblumberg/my-backend-api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-backend-api
+  labels:
+    app: my-backend-api
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: my-backend-api

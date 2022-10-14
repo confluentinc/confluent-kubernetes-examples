@@ -1,0 +1,25 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Connector
+metadata:
+  name: httpsinkconnector
+  namespace: confluent
+spec:
+  class: "io.confluent.connect.http.HttpSinkConnector"
+  taskMax: 1
+  connectClusterRef:
+    name: connect
+  configs:
+    topics: "http-messages"
+    tasks.max: "1"
+    connector.class: "io.confluent.connect.http.HttpSinkConnector"
+    http.api.url: "http://my-backend-api/messages"
+    value.converter: "org.apache.kafka.connect.storage.StringConverter" 
+    key.converter: "org.apache.kafka.connect.storage.StringConverter" 
+    confluent.topic.bootstrap.servers: "kafka:9071"
+    confluent.topic.replication.factor: "3"
+    reporter.bootstrap.servers: "kafka:9071"
+    reporter.result.topic.name: "success-responses"
+    reporter.result.topic.replication.factor: "3"
+    reporter.error.topic.name: "error-responses"
+    reporter.error.topic.replication.factor: "3"
+    headers: "Content-Type:application/json|Accept:application/json"
