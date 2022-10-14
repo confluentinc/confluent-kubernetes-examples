@@ -1,0 +1,290 @@
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: ConnectClusterClass
+metadata:
+  name: cp-rbac-mtls-lb-connect-standard
+  namespace: cpc-system
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents pre-set configuration to deploy CP Connect Cluster."
+spec:
+  provisioner:
+    type: cfk
+    cfk:
+      replicas: 3
+      k8s:
+        podTemplate:
+          resources:
+            requests:
+              cpu: "1"
+              memory: "2Gi"
+            limits:
+              cpu: "2"
+              memory: "4Gi"
+      connectorPlugins:
+        confluentHubPlugins:
+          - name: kafka-connect-datagen
+            owner: confluentinc
+            version: 0.5.2
+---
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: ControlCenterClusterClass
+metadata:
+  name: cp-rbac-mtls-lb-controlcenter-standard
+  namespace: cpc-system
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents pre-set configuration to deploy CP Control Center Cluster."
+spec:
+  provisioner:
+    type: cfk
+    cfk:
+      replicas: 1
+      volume:
+        data:
+          capacity: 10Gi
+---
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: KafkaClusterClass
+metadata:
+  name: cp-rbac-mtls-lb-kafka-standard
+  namespace: cpc-system
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents pre-set configuration to deploy CP Kafka Cluster."
+spec:
+  provisioner:
+    type: cfk
+    cfk:
+      replicas: 3
+      volume:
+        data:
+          capacity: 10Gi
+---
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: KafkaRestProxyClusterClass
+metadata:
+  name: cp-rbac-mtls-lb-kafkarestproxy-standard
+  namespace: cpc-system
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents pre-set configuration to deploy CP KafkaRestProxy Cluster."
+spec:
+  provisioner:
+    type: cfk
+    cfk:
+      replicas: 3
+---
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: KsqlDBClusterClass
+metadata:
+  name: cp-rbac-mtls-lb-ksqldb-standard
+  namespace: cpc-system
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents pre-set configuration to deploy CP KsqlDB Cluster."
+spec:
+  provisioner:
+    type: cfk
+    cfk:
+      replicas: 3
+      volume:
+        data:
+          capacity: 10Gi
+---
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: SchemaRegistryClusterClass
+metadata:
+  name: cp-rbac-mtls-lb-schemaregistry-standard
+  namespace: cpc-system
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents pre-set configuration to deploy CP SchemaRegistry Cluster."
+spec:
+  provisioner:
+    type: cfk
+    cfk:
+      replicas: 3
+      enableSchemaExporter: true
+---
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: ZookeeperClusterClass
+metadata:
+  name: cp-rbac-mtls-lb-zookeeper-standard
+  namespace: cpc-system
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents pre-set configuration to deploy CP Zookeeper Cluster."
+spec:
+  provisioner:
+    type: cfk
+    cfk:
+      replicas: 3
+      volume:
+        data:
+          capacity: 10Gi
+        log:
+          capacity: 10Gi
+---
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: ConfluentPlatformBlueprint
+metadata:
+  name: cp-rbac-mtls-lb
+  namespace: cpc-system
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents configurations which are shared across all CP component."
+spec:
+  credentialStoreConfigRefs:
+    - name: cp-rbac-mtls-lb-bp-csc
+      namespace: cpc-system
+  certificateStoreConfigRefs:
+    - name: ca-key-pair-sce-2
+  dockerImages:
+    - registry: docker.io
+  internalCAKeyPair:
+    providerType: blueprint
+    blueprint:
+      type: custom
+      custom:
+        certificateStoreConfig:
+          name: ca-key-pair-sce-2
+  dnsConfig:
+    domain: platformops.dev.gcp.devel.cpdev.cloud
+    providerType: deployment
+    deployment:
+      subdomainRegex: cpc+
+  passwordEncoder:
+    providerType: blueprint
+    blueprint:
+      credentialStoreRefs:
+        forKafka:
+          key: kafka-pwd-encoder.txt
+          name: cp-rbac-mtls-lb-bp-csc
+        forSchemaRegistry:
+          key: sr-pwd-encoder.txt
+          name: cp-rbac-mtls-lb-bp-csc
+  identityProvider:
+    type: ldap
+    ldap:
+      address: ldap://ldap.cpc-system.svc.cluster.local:389
+      authentication:
+        type: simple
+        simple:
+          blueprint:
+            credentialStoreRef:
+              key: idp-simple.txt
+              name: cp-rbac-mtls-lb-bp-csc
+          providerType: blueprint
+      configurations:
+        groupNameAttribute: cn
+        groupObjectClass: group
+        groupMemberAttribute: member
+        groupMemberAttributePattern: CN=(.*),DC=test,DC=com
+        groupSearchBase: dc=test,dc=com
+        userNameAttribute: cn
+        userMemberOfAttributePattern: CN=(.*),DC=test,DC=com
+        userObjectClass: organizationalRole
+        userSearchBase: dc=test,dc=com
+  metaDataService:
+    identityProviderType: ldap
+    tlsConfig:
+      providerType: blueprint
+    tokenKeyPair:
+      tokenKey:
+        providerType: blueprint
+        blueprint:
+          credentialStoreRef:
+            key: mds-token-key.txt
+            name: cp-rbac-mtls-lb-bp-csc
+      publicKey:
+        providerType: blueprint
+        blueprint:
+          credentialStoreRef:
+            key: mds-public-key.txt
+            name: cp-rbac-mtls-lb-bp-csc
+  confluentPlatform:
+    version: 7.2.1
+    authorization:
+      type: rbac
+      mdsClient:
+        authentication:
+          bearer:
+            blueprint:
+              credentialStoreRef:
+                key: client-bearer.txt
+                name: cp-rbac-mtls-lb-bp-csc
+            providerType: blueprint
+          type: bearer
+      superUsers:
+        - User:kafka
+    zookeeper:
+      authentication:
+        type: mtls
+      tlsConfig:
+        providerType: blueprint
+    http:
+      authentication:
+        type: bearer
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          advertisedPort: 8443
+      tlsConfig:
+        providerType: blueprint
+    kafkaListeners:
+      global:
+        externalAccessType: loadBalancer
+      externalListener:
+        authentication:
+          type: mtls
+        externalAccess:
+          enabled: true
+          loadBalancer:
+            advertisedPort: 8443
+        tlsConfig:
+          providerType: blueprint
+      customListeners:
+        - authentication:
+            type: mtls
+          name: other
+          port: 9093
+          tlsConfig:
+            providerType: blueprint
+      internalListener:
+        authentication:
+          type: mtls
+        tlsConfig:
+          providerType: blueprint
+  components:
+    connectCluster:
+      classRef:
+        name: cp-rbac-mtls-lb-connect-standard
+        namespace: cpc-system
+      externalAccess:
+        enabled: true
+    controlCenterCluster:
+      classRef:
+        name: cp-rbac-mtls-lb-controlcenter-standard
+        namespace: cpc-system
+      externalAccess:
+        enabled: true
+    kafkaCluster:
+      classRef:
+        name: cp-rbac-mtls-lb-kafka-standard
+        namespace: cpc-system
+    kafkaRestProxyCluster:
+      classRef:
+        name: cp-rbac-mtls-lb-kafkarestproxy-standard
+        namespace: cpc-system
+      externalAccess:
+        enabled: true
+    ksqlDBCluster:
+      classRef:
+        name: cp-rbac-mtls-lb-ksqldb-standard
+        namespace: cpc-system
+      externalAccess:
+        enabled: true
+    schemaRegistryCluster:
+      classRef:
+        name: cp-rbac-mtls-lb-schemaregistry-standard
+        namespace: cpc-system
+      externalAccess:
+        enabled: true
+    zookeeperCluster:
+      classRef:
+        name: cp-rbac-mtls-lb-zookeeper-standard
+        namespace: cpc-system
+
+

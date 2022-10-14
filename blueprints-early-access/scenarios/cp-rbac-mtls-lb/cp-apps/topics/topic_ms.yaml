@@ -1,0 +1,10 @@
+apiVersion: apps.cpc.platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: topic-foo-ms
+spec:
+  kafkaClusterRefs:
+    - name: kafka-ms
+  parameters:
+    replicationFactor: 1
+    partitions: 12

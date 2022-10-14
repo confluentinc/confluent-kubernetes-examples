@@ -1,0 +1,18 @@
+apiVersion: apps.cpc.platform.confluent.io/v1beta1
+kind: SchemaExporter
+metadata:
+  name: schema-exporter-ms
+spec:
+  # internal sr needs to be managed by data-plane's confluent operator
+  source:
+    schemaRegistryClusterRef:
+      name: schemaregistry-ms
+  destination:
+    schemaRegistryClusterRef:
+      name: schemaregistry-ss
+  contextName: mycustom
+
+
+
+
+

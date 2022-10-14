@@ -1,0 +1,23 @@
+##
+##  Source Initiated ClusterLink
+##
+apiVersion: apps.cpc.platform.confluent.io/v1beta1
+kind: ClusterLink
+metadata:
+  name: clusterlink-test-dst-ss
+  namespace: cp-global-__NAMESPACE__
+spec:
+  sourceInitiatedLink:
+    linkMode: Source
+  name: clusterlink-test-src-intiated-ms
+  destination:
+    kafkaClusterRef:
+      name: kafka-ss-dev
+  source:
+    kafkaClusterRef:
+      name: kafka-ss
+      namespace: __NAMESPACE__
+  mirrors:
+    topics:
+      - name: topic-global
+

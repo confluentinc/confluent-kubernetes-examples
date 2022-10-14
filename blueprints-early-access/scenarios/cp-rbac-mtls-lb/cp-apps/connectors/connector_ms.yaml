@@ -1,0 +1,30 @@
+apiVersion: apps.cpc.platform.confluent.io/v1beta1
+kind: Connector
+metadata:
+  name: datagen-connector-ms
+spec:
+  connectClusterRef:
+    name: connect-ms
+  connectorConfigs:
+    class: "io.confluent.kafka.connect.datagen.DatagenConnector"
+    taskMax: 6
+    configs:
+      kafka.topic: "pageviews"
+      quickstart: "pageviews"
+      key.converter: "org.apache.kafka.connect.storage.StringConverter"
+      value.converter: "org.apache.kafka.connect.json.JsonConverter"
+      value.converter.schemas.enable: "false"
+      max.interval: "100"
+      iterations: "10000000"
+      admin.override.ssl.truststore.location: /mnt/sslcerts/truststore.jks
+      admin.override.ssl.truststore.password: ${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
+      admin.override.bootstrap.servers: "kafka-ms.__NAMESPACE__.svc.cluster.local:9071"
+      admin.override.security.protocol: "SSL"
+      producer.override.ssl.truststore.location: /mnt/sslcerts/truststore.jks
+      producer.override.ssl.truststore.password: ${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
+      producer.override.bootstrap.servers: "kafka-ms.__NAMESPACE__.svc.cluster.local:9071"
+      producer.override.security.protocol: "SSL"
+      consumer.override.ssl.truststore.location: /mnt/sslcerts/truststore.jks
+      consumer.override.ssl.truststore.password: ${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
+      consumer.override.bootstrap.servers: "kafka-ms.__NAMESPACE__.svc.cluster.local:9071"
+      consumer.override.security.protocol: "SSL"
