@@ -96,7 +96,7 @@ To create the required CA, run the following commands:
 2. Install Confluent Platform:
 
    ```bash
-     kubectl apply -f $SCENARIO_BASEPATH/cp-clusters/deployment_ss.yaml -n $MY_NAMESPACE
+   kubectl apply -f $SCENARIO_BASEPATH/cp-clusters/deployment_ss.yaml -n $MY_NAMESPACE
    ```
 
 ## Install Confluent Applications
