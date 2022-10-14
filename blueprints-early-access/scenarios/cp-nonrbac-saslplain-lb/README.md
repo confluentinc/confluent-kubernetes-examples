@@ -1,8 +1,9 @@
 # Deploy CFK with SASL/PLAIN and Load Balancer using Blueprint
 
-## Deployment Scenario
+This scenario uses the Control Plane and Data Plane you deploy in [Quick Start](../quickstart-deploy/single-site-deployment.rst) and creates a new Blueprint with the following features:
+
 - SASL/PLAIN authentication with encryption
-- External Access using Load Balancer
+- External access using Load Balancer
 - Custom Kafka Listeners and its credential coming from deployment API
 
 ## Prerequisite
@@ -51,7 +52,7 @@ The Control Plane uses CA keypair to generate certificates for all the Confluent
        --save-config --dry-run=client -oyaml | kubectl apply -f -
    ```
 
-2. Create the credential store used by this Blueprint. The credential store is only used by this Blueprint and can't be share with other resource and Blueprints:
+2. Create the credential store used by this Blueprint. The credential store is only used by this Blueprint and can't be share with other resource or Blueprints:
 
    ```bash
    kubectl apply -f $SCENARIO_BASEPATH/blueprint/credentialstoreconfig.yaml --namespace cpc-system
@@ -63,43 +64,70 @@ The Control Plane uses CA keypair to generate certificates for all the Confluent
 kubectl apply -f $SCENARIO_BASEPATH/blueprint/blueprint.yaml --namespace cpc-system
 ```
 
-## Deploy Confluent Platform 
+## Deploy Confluent Platform in Single Site Deployment
 
-### Create Namespace
-
-```bash 
-kubectl create namespace $MY_NAMESPACE
-```
-
-### Install Credentials
-
-1. Create a secret that contains all the required credential on namespace `MY_NAMESPACE`. 
-   The key names can't be changed once the secret is created.
-
-   ```bash
-   kubectl -n ${MY_NAMESPACE} create secret generic cp-credentials \
-       --from-file=connect-client-plain.txt=$SCENARIO_BASEPATH/cp-clusters/credentials/connect-client-plain.txt \
-       --from-file=controlcenter-client-plain.txt=$SCENARIO_BASEPATH/cp-clusters/credentials/controlcenter-client-plain.txt \
-       --from-file=kafkarestproxy-client-plain.txt=$SCENARIO_BASEPATH/cp-clusters/credentials/kafkarestproxy-client-plain.txt \
-       --from-file=ksqldb-client-plain.txt=$SCENARIO_BASEPATH/cp-clusters/credentials/ksqldb-client-plain.txt \
-       --from-file=schemaregistry-client-plain.txt=$SCENARIO_BASEPATH/cp-clusters/credentials/schemaregistry-client-plain.txt \
-       --save-config --dry-run=client -oyaml | kubectl apply -f -
-   ```
-
-1. Install Confluent Platform Deployment credential:
+1. Create the namespace for Confluent Platform:
 
    ```bash 
-   kubectl apply -f $SCENARIO_BASEPATH/cp-clusters/credentialstoreconfig.yaml -n ${MY_NAMESPACE}
+   kubectl create namespace $MY_NAMESPACE
    ```
 
-### Install Confluent Platform in Single Site Deployment
-
-Install Confluent Platform on the Control Plane cluster:
+1. Install Confluent Platform on the Control Plane cluster:
  
-```bash 
-kubectl apply -f $SCENARIO_BASEPATH/cp-clusters/deployment_ss.yaml -n ${MY_NAMESPACE}
-```
-### Validate the Deployment
+   ```bash 
+   kubectl apply -f $SCENARIO_BASEPATH/cp-clusters/deployment_ss.yaml -n ${MY_NAMESPACE}
+   ```
+
+## Install Confluent Applications
+
+### Topic
+ 
+- Create a topic:
+
+  ```bash 
+  kubectl -n ${MY_NAMESPACE} apply -f $SCENARIO_BASEPATH/cp-apps/topics/topic_ss.yaml
+  ```
+  
+- Validate:
+
+  ```bash 
+  kubectl -n ${MY_NAMESPACE} get kafkatopics.apps topic-foo-ss
+  ```
+  The `STATE` should be set to `Created`.
+
+### Schema
+
+- Create a schema: 
+
+  ```bash
+  kubectl -n ${MY_NAMESPACE} apply -f $SCENARIO_BASEPATH/cp-apps/schema/schema_ss.yaml
+  ``` 
+  
+- Validate:
+
+  ```bash
+  kubectl -n ${MY_NAMESPACE} get schemas.app schema-foo-ss
+  ``` 
+  
+  The `STATE` should be set to `Created`.
+
+### Connector
+
+- Create a connector:
+
+  ```bash 
+  cat $SCENARIO_BASEPATH/cp-apps/connectors/connector_ss.yaml | sed 's/__NAMESPACE__/'"$MY_NAMESPACE"'/g' | kubectl apply -f -
+  ```
+
+- Validate:
+  
+  ```bash 
+  kubectl -n ${MY_NAMESPACE} get connectors.apps
+  ```
+  
+  The `STATE` should be set to `Created`.
+
+## Validate the Deployment
 
 1. Check when the Confluent components are up and running:
    
@@ -107,9 +135,12 @@ kubectl apply -f $SCENARIO_BASEPATH/cp-clusters/deployment_ss.yaml -n ${MY_NAMES
    kubectl get pods --namespace $MY_NAMESPACE -w
    ```
 
-2. Navigate to Control Center in a browser and check the Confluent cluster:
+1. Navigate to Control Center in a browser and check the Confluent cluster:
 
    ```bash       
    kubectl confluent dashboard controlcenter --namespace $MY_NAMESPACE
    ```
 
+  Log in as the `kafka` user with the `kafka-secret` password.
+  
+1. In Control Center, check if the `topic-foo-ss` topic exists.
