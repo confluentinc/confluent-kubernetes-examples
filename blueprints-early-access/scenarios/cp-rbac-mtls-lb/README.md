@@ -114,11 +114,11 @@ To create the required CA, run the following commands:
   ```bash 
   kubectl -n $MY_NAMESPACE get kafkatopics.apps topic-foo-ss
   ```
-  The `STATE` should be set to `Created`.
+  Verify that the `STATE` field is set to `Created`.
 
 ### Rolebindings
 
-- Make sure to find the ids for Schema Registry, Connect, and ksqlDB clusters before creating role bindings:
+- Before creating role bindings, make sure that the cluster ids exist for Schema Registry, Connect, and ksqlDB:
 
   ```bash 
   kubectl -n $MY_NAMESPACE get schemaregistrycluster -oyaml | grep schemaRegistryClusterId
@@ -143,7 +143,7 @@ To create the required CA, run the following commands:
   kubectl -n $MY_NAMESPACE get confluentrolebindings.apps
   ```
 
-  The `STATE` should be set to `Created`.
+  Verify that the `STATE` field is set to `Created`.
 
 ### Schema
 
@@ -159,7 +159,7 @@ To create the required CA, run the following commands:
   kubectl -n $MY_NAMESPACE get schemas.app schema-foo-ss
   ``` 
   
-  The `STATE` should be set to `Created`.
+  Verify that the `STATE` field is set to `Created`.
 
 ### Connector
 
@@ -175,7 +175,7 @@ To create the required CA, run the following commands:
   kubectl -n $MY_NAMESPACE get connectors.apps
   ```
   
-  The `STATE` should be set to `Created`.
+  Verify that the `STATE` field is set to `Created`.
 
 ## Validate the Deployment
 

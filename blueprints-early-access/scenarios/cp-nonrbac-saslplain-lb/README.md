@@ -93,7 +93,7 @@ kubectl apply -f $SCENARIO_BASEPATH/blueprint/blueprint.yaml --namespace cpc-sys
   ```bash 
   kubectl -n $MY_NAMESPACE get kafkatopics.apps topic-foo-ss
   ```
-  The `STATE` should be set to `Created`.
+  Verify that the `STATE` field is set to `Created`.
 
 ### Schema
 
@@ -109,14 +109,14 @@ kubectl apply -f $SCENARIO_BASEPATH/blueprint/blueprint.yaml --namespace cpc-sys
   kubectl -n $MY_NAMESPACE get schemas.app schema-foo-ss
   ``` 
   
-  The `STATE` should be set to `Created`.
+  Verify that the `STATE` field is set to `Created`.
 
 ### Connector
 
 - Create a connector:
 
   ```bash 
-  cat $SCENARIO_BASEPATH/cp-apps/connectors/connector_ss.yaml | sed 's/__NAMESPACE__/'"$MY_NAMESPACE"'/g' | kubectl apply -f -
+  kubectl -n $MY_NAMESPACE apply -f $SCENARIO_BASEPATH/cp-apps/connectors/connector_ss.yaml
   ```
 
 - Validate:
@@ -125,7 +125,7 @@ kubectl apply -f $SCENARIO_BASEPATH/blueprint/blueprint.yaml --namespace cpc-sys
   kubectl -n $MY_NAMESPACE get connectors.apps
   ```
   
-  The `STATE` should be set to `Created`.
+  Verify that the `STATE` field is set to `Created`.
 
 ## Validate the Deployment
 
