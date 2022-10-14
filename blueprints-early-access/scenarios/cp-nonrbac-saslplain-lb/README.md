@@ -69,7 +69,7 @@ kubectl apply -f $SCENARIO_BASEPATH/blueprint/blueprint.yaml --namespace cpc-sys
 1. Create the namespace for Confluent Platform:
 
    ```bash 
-   kubectl create namespace $MY_NAMESPACE
+   kubectl create namespace ${MY_NAMESPACE}
    ```
 
 1. Install Confluent Platform on the Control Plane cluster:
@@ -132,13 +132,13 @@ kubectl apply -f $SCENARIO_BASEPATH/blueprint/blueprint.yaml --namespace cpc-sys
 1. Check when the Confluent components are up and running:
    
    ```bash 
-   kubectl get pods --namespace $MY_NAMESPACE -w
+   kubectl get pods --namespace ${MY_NAMESPACE} -w
    ```
 
 1. Navigate to Control Center in a browser and check the Confluent cluster:
 
    ```bash       
-   kubectl confluent dashboard controlcenter --namespace $MY_NAMESPACE
+   kubectl confluent dashboard controlcenter --namespace ${MY_NAMESPACE}
    ```
 
    Log in as the `kafka` user with the `kafka-secret` password.
