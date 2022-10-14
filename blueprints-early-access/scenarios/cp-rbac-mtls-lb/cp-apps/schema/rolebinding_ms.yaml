@@ -1,0 +1,17 @@
+apiVersion: apps.cpc.platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: user-kafka-rb-sr-ms
+  namespace: __NAMESPACE__
+spec:
+  principal:
+    type: user
+    name: kafka
+  clustersScopeByIds:
+    # Find the SchemaRegistryCluster is using and get the id from the status
+    # kubectl -n <NAMESPACE> src schemaregistry-ms -oyaml
+    # follow the pattern id_<schema-registry_cluster_name>_<namespace>
+    schemaRegistryClusterId: id_schemaregistry-ms___NAMESPACE__
+  role: SystemAdmin
+  kafkaClusterRef:
+    name: kafka-ms
