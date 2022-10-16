@@ -79,29 +79,29 @@ following steps:
      
    .. sourcecode:: bash
    
-      mkdir /tmp
+      mkdir $TUTORIAL_HOME/tmp
 
    .. sourcecode:: bash
 
-      openssl req -x509 -new -nodes -newkey rsa:4096 -keyout /tmp/cpc-ca-key.pem \
-        -out /tmp/cpc-ca.pem \
+      openssl req -x509 -new -nodes -newkey rsa:4096 -keyout $TUTORIAL_HOME/tmp/cpc-ca-key.pem \
+        -out $TUTORIAL_HOME/tmp/cpc-ca.pem \
         -subj "/C=US/ST=CA/L=MountainView/O=Confluent/OU=CPC/CN=CPC-CA" \
         -reqexts v3_ca \
         -config openssl.cnf
 
-#. Create the Webhook certificate secret. ``webhooks-tls`` is used in this 
+#. Create the Webhook certificate secret. ``webhooks-tls`` is used in this
    tutorial:
       
    .. sourcecode:: bash
 
-      $TUTORIAL_HOME/scripts/generate-keys.sh cpc-system /tmp
-      
+      $TUTORIAL_HOME/scripts/generate-keys.sh cpc-system $TUTORIAL_HOME/tmp
+
    .. sourcecode:: bash
     
       kubectl create secret generic webhooks-tls \
-          --from-file=ca.crt=/tmp/cpc-ca.pem \
-          --from-file=tls.crt=/tmp/server.pem \
-          --from-file=tls.key=/tmp/server-key.pem \
+          --from-file=ca.crt=$TUTORIAL_HOME/tmp/cpc-ca.pem \
+          --from-file=tls.crt=$TUTORIAL_HOME/tmp/server.pem \
+          --from-file=tls.key=$TUTORIAL_HOME/tmp/server-key.pem \
           --namespace cpc-system \
           --context control-plane \
           --save-config --dry-run=client -oyaml | \
@@ -115,7 +115,7 @@ following steps:
 
    .. sourcecode:: bash
 
-      helm upgrade --install cpc-orchestrator confluent-inc/cpc-orchestrator \
+      helm upgrade --install cpc-orchestrator confluentinc/cpc-orchestrator \
         --namespace cpc-system \
         --kube-context control-plane 
 
