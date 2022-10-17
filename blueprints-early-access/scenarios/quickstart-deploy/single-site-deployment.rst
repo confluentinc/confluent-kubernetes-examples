@@ -112,6 +112,7 @@ following steps:
    .. sourcecode:: bash
 
       helm repo add confluentinc https://packages.confluent.io/helm
+      helm repo update
 
    .. sourcecode:: bash
 
