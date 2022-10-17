@@ -6,7 +6,11 @@ metadata:
   namespace: confluent
 type: Opaque
 data:
-  kafka.properties: Ym9vdHN0cmFwLnNlcnZlcnM9a2Fma2EuY29uZmx1ZW50LnN2Yy5jbHVzdGVyLmxvY2FsOjkwNzEKc2VjdXJpdHkucHJvdG9jb2w9UExBSU5URVhU
+  kafka.properties: |
+    <put the decoded here>
+# for example   Ym9vdHN0cmFwLnNlcnZlcnM9a2Fma2EuY29uZmx1ZW50LnN2Yy5jbHVzdGVyLmxvY2FsOjkwNzEKc2VjdXJpdHkucHJvdG9jb2w9UExBSU5URVhU
+
+
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: KafkaTopic
