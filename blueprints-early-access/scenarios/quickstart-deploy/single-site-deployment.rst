@@ -117,7 +117,7 @@ following steps:
    .. sourcecode:: bash
 
       helm upgrade --install cpc-orchestrator confluentinc/cpc-orchestrator \
-        --set image.tag="v0.158.0" \
+        --set image.tag="v0.160.0" \
         --set image.pullPolicy="IfNotPresent" \
         --set debug=true \
         --namespace cpc-system \
@@ -156,7 +156,7 @@ where the Control Plane is installed.
    .. sourcecode:: bash
 
       helm upgrade --install cpc-agent confluentinc/cpc-agent \
-        --set image.tag="v0.158.0" \
+        --set image.tag="v0.160.0" \
         --set image.pullPolicy="IfNotPresent" \
         --namespace cpc-system \
         --set mode=Local \
