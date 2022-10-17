@@ -37,7 +37,7 @@ Prepare
 
       kubectl config rename-context <Kubernetes data plane context> data-plane
    
-#. From the ``<CFK examples directory>`` on your local machine, clone this 
+#. From the ``<CFK examples directory>`` on your local machine, clone the 
    example repo:
 
    .. sourcecode:: bash
@@ -130,18 +130,6 @@ following steps:
         --namespace cpc-system \
         --kube-context control-plane 
 
-.. _deploy-blueprint: 
-
-Deploy Blueprint
----------------- 
-
-Deploy the Blueprint and the Confluent cluster class CRs:
-
-.. sourcecode:: bash
-
-   kubectl apply -f $TUTORIAL_HOME/deployment/confluentplatform_blueprint.yaml \
-     --context control-plane
-
 .. _deploy-remote-data-plane: 
 
 Deploy Remote Data Plane 
@@ -158,7 +146,7 @@ Kubernetes cluster from the Control Plane cluster.
    
          kubectl get namespace kube-system -oyaml --context data-plane | grep uid
 
-   #. Edit ``registration/data-plane-k8s.yaml`` and set 
+   #. Edit ``$TUTORIAL_HOME/registration/data-plane-k8s.yaml`` and set 
       ``spec.k8sID`` to the Kubernetes ID from the previous step.
       
    #. In the Control Plane, create the KubernetesCluster and the HealthCheck 
@@ -207,6 +195,7 @@ Kubernetes cluster from the Control Plane cluster.
            --set image.pullPolicy="IfNotPresent" \
            --set mode=Remote \
            --set remoteKubeConfig.secretRef=control-plane-kubeconfig \
+           --set debug=true \
            --kube-context data-plane \
            --namespace cpc-system
 
@@ -216,10 +205,24 @@ Kubernetes cluster from the Control Plane cluster.
    .. sourcecode:: bash
 
       helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes \
-        --set namespaced=false \
+        --set namespaced="false" \
         --set image.tag=”2.4.2-ea-blueprint” \
+        --set debug=true \
         --kube-context data-plane \
         --namespace cpc-system
+
+.. _deploy-blueprint: 
+
+Deploy Blueprint
+---------------- 
+
+Deploy the Blueprint and the Confluent cluster class CRs:
+
+.. sourcecode:: bash
+
+   kubectl apply -f $TUTORIAL_HOME/deployment/confluentplatform_blueprint.yaml \
+     --context control-plane
+
 
 .. _deploy-remote-cp:
 
