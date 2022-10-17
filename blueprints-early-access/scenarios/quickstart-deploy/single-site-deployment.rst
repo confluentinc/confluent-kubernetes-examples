@@ -35,7 +35,7 @@ Prepare
    
       kubectl config rename-context <Kubernetes control plane context> control-plane
          
-#. From the ``<CFK examples directory>`` on your local machine, clone this 
+#. From the ``<CFK examples directory>`` on your local machine, clone the 
    example repo:
 
    .. sourcecode:: bash
@@ -119,6 +119,7 @@ following steps:
       helm upgrade --install cpc-orchestrator confluentinc/cpc-orchestrator \
         --set image.tag="v0.158.0" \
         --set image.pullPolicy="IfNotPresent" \
+        --set debug=true \
         --namespace cpc-system \
         --kube-context control-plane 
 
@@ -159,6 +160,7 @@ where the Control Plane is installed.
         --set image.pullPolicy="IfNotPresent" \
         --namespace cpc-system \
         --set mode=Local \
+        --set debug=true \
         --kube-context control-plane 
 
 #. Install the CFK Helm chart in the cluster mode (``--set namespaced=false``):
@@ -168,6 +170,7 @@ where the Control Plane is installed.
       helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes \
         --set namespaced="false" \
         --set image.tag="2.4.2-ea-blueprint" \
+        --set debug=true \
         --namespace cpc-system \
         --kube-context control-plane 
 
