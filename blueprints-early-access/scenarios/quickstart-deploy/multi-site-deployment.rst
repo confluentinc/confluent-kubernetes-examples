@@ -124,6 +124,9 @@ following steps:
    .. sourcecode:: bash
 
       helm upgrade --install cpc-orchestrator confluentinc/cpc-orchestrator \
+        --set image.tag="v0.158.0" \
+        --set image.pullPolicy="IfNotPresent" \
+        --set debug=true \
         --namespace cpc-system \
         --kube-context control-plane 
 
@@ -200,6 +203,8 @@ Kubernetes cluster from the Control Plane cluster.
       .. sourcecode:: bash
 
          helm upgrade --install cpc-agent confluentinc/cpc-agent \
+           --set image.tag="v0.158.0" \
+           --set image.pullPolicy="IfNotPresent" \
            --set mode=Remote \
            --set remoteKubeConfig.secretRef=control-plane-kubeconfig \
            --kube-context data-plane \
