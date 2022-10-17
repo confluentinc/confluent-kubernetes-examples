@@ -217,7 +217,7 @@ Kubernetes cluster from the Control Plane cluster.
 
       helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes \
         --set namespaced=false \
-        --set image.tag=”2.4.2-ea-blueprint” \
+        --set image.tag="2.4.2-ea-blueprint" \
         --kube-context data-plane \
         --namespace cpc-system
 
