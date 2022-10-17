@@ -7,6 +7,10 @@ In this example, you'll setup the followings:
 You will install and manage the https sink connector and plugin jars through the declarative `Connector` CRD.  
 In this scenario, we deploy the a Confluent cluster without security.  
 
+This setup uses a custom built nodejs API server which take `POST/GET` calls.  
+When the connector sends a message from a topic to the server the server log the request to a file and able to serve get requests from this file (command included later on).
+
+
 ## Set up Pre-requisites
 
 Set the tutorial directory for this tutorial under the directory you downloaded
