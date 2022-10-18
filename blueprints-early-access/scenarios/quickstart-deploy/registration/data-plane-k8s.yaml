@@ -7,14 +7,14 @@ spec:
   k8sID: # kubectl get ns kube-system -oyaml | grep uid
   description: "cpc-dataplane kubernetes cluster"
   k8sClusterDomain: cluster.local
-  ---
-    apiVersion: core.cpc.platform.confluent.io/v1beta1
-    kind: CPCHealthCheck
-    metadata:
-      name: data-plane-hc
-      namespace: cpc-system
-    spec:
-      k8sClusterRef:
-        name: data-plane-k8s
-        namespace: cpc-system
+---
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: CPCHealthCheck
+metadata:
+  name: data-plane-hc
+  namespace: cpc-system
+spec:
+  k8sClusterRef:
+    name: data-plane-k8s
+    namespace: cpc-system
 
