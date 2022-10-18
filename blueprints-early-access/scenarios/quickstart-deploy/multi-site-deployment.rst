@@ -125,7 +125,6 @@ following steps:
    .. sourcecode:: bash
 
       helm upgrade --install cpc-orchestrator confluentinc/cpc-orchestrator \
-        --set image.tag="v0.160.0" \
         --set image.pullPolicy="IfNotPresent" \
         --set debug=true \
         --namespace cpc-system \
@@ -138,6 +137,61 @@ Deploy Remote Data Plane
 
 In the remote deployment mode, the Data Plane is installed in a different
 Kubernetes cluster from the Control Plane cluster.
+
+#. In the Control Plane, generate the Kubeconfig for the Agent to communicate 
+   with the Orchestrator:
+
+   .. sourcecode:: bash
+
+      kubectl config use-context control-plane
+      
+   .. sourcecode:: bash
+
+      $TUTORIAL_HOME/scripts/kubeconfig_generate.sh control-plane-sa cpc-system $TUTORIAL_HOME/tmp
+
+#. In the Data Plane, create the KubeConfig secret:
+   
+   .. sourcecode:: bash
+   
+      kubectl config use-context data-plane
+
+      kubectl create secret generic control-plane-kubeconfig \
+        --from-file=kubeconfig=$TUTORIAL_HOME/tmp/kubeconfig \
+        --context data-plane \
+        --namespace cpc-system \
+        --save-config --dry-run=client -oyaml | kubectl apply -f -
+
+#. In the Data Plane, install the Agent.
+
+   #. Create the namespace for the Blueprint system resources:
+
+      .. sourcecode:: bash 
+      
+         kubectl create namespace cpc-system --context data-plane
+
+   #. Install the Agent Helm chart in the ``Remote`` mode:
+
+      .. sourcecode:: bash
+
+         helm upgrade --install cpc-agent confluentinc/cpc-agent \
+           --set image.pullPolicy="IfNotPresent" \
+           --set mode=Remote \
+           --set remoteKubeConfig.secretRef=control-plane-kubeconfig \
+           --set debug=true \
+           --kube-context data-plane \
+           --namespace cpc-system
+
+#. In the Data Plane, install the CFK Helm chart in the cluster mode 
+   (``--set namespaced=false``):
+
+   .. sourcecode:: bash
+
+      helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes \
+        --set namespaced="false" \
+        --set image.tag="2.4.2-ea-blueprint" \
+        --set debug=true \
+        --kube-context data-plane \
+        --namespace cpc-system
 
 #. Register the Data Plane Kubernetes cluster with the Control Plane.
    
@@ -158,59 +212,6 @@ Kubernetes cluster from the Control Plane cluster.
          kubectl apply -f $TUTORIAL_HOME/registration/data-plane-k8s.yaml \
            --context control-plane
 
-#. In the Control Plane, generate the Kubeconfig for the Agent to communicate 
-   with the Orchestrator:
-
-   .. sourcecode:: bash
-
-      kubectl config use-context control-plan 
-      
-   .. sourcecode:: bash
-
-      $TUTORIAL_HOME/scripts/kubeconfig_generate.sh control-plane-sa cpc-system $TUTORIAL_HOME/tmp
-
-#. In the Data Plane, create the KubeConfig secret:
-   
-   .. sourcecode:: bash
-   
-      kubectl create secret generic control-plane-kubeconfig \
-        --from-file=kubeconfig=$TUTORIAL_HOME/tmp/kubeconfig \
-        --context data-plane \
-        --namespace cpc-system \
-        --save-config --dry-run=client -oyaml | kubectl apply -f -
-
-#. In the Data Plane, install the Agent.
-
-   #. Create the namespace for the Blueprint system resources:
-
-      .. sourcecode:: bash 
-      
-         kubectl create namespace cpc-system --context data-plane
-
-   #. Install the Agent Helm chart in the ``Remote`` mode:
-
-      .. sourcecode:: bash
-
-         helm upgrade --install cpc-agent confluentinc/cpc-agent \
-           --set image.tag="v0.160.0" \
-           --set image.pullPolicy="IfNotPresent" \
-           --set mode=Remote \
-           --set remoteKubeConfig.secretRef=control-plane-kubeconfig \
-           --set debug=true \
-           --kube-context data-plane \
-           --namespace cpc-system
-
-#. In the Data Plane, install the CFK Helm chart in the cluster mode 
-   (``--set namespaced=false``):
-
-   .. sourcecode:: bash
-
-      helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes \
-        --set namespaced="false" \
-        --set image.tag=”2.4.2-ea-blueprint” \
-        --set debug=true \
-        --kube-context data-plane \
-        --namespace cpc-system
 
 .. _deploy-blueprint: 
 

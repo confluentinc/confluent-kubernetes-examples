@@ -117,7 +117,6 @@ following steps:
    .. sourcecode:: bash
 
       helm upgrade --install cpc-orchestrator confluentinc/cpc-orchestrator \
-        --set image.tag="v0.160.0" \
         --set image.pullPolicy="IfNotPresent" \
         --set debug=true \
         --namespace cpc-system \
@@ -130,6 +129,17 @@ Deploy Local Data Plane
 
 For the local deployment, install the Data Plane in the same Kubernetes cluster
 where the Control Plane is installed.
+
+#. Install the Agent Helm chart in the ``Local`` mode:
+   
+   .. sourcecode:: bash
+
+      helm upgrade --install cpc-agent confluentinc/cpc-agent \
+        --set image.pullPolicy="IfNotPresent" \
+        --namespace cpc-system \
+        --set mode=Local \
+        --set debug=true \
+        --kube-context control-plane 
 
 #. Register the Data Plane Kubernetes cluster.
    
@@ -150,18 +160,6 @@ where the Control Plane is installed.
 
          kubectl apply -f $TUTORIAL_HOME/registration/control-plane-k8s.yaml \
            --context control-plane
-
-#. Install the Agent Helm chart in the ``Local`` mode:
-   
-   .. sourcecode:: bash
-
-      helm upgrade --install cpc-agent confluentinc/cpc-agent \
-        --set image.tag="v0.160.0" \
-        --set image.pullPolicy="IfNotPresent" \
-        --namespace cpc-system \
-        --set mode=Local \
-        --set debug=true \
-        --kube-context control-plane 
 
 #. Install the CFK Helm chart in the cluster mode (``--set namespaced=false``):
   

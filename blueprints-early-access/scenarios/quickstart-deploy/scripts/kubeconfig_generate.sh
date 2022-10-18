@@ -34,6 +34,7 @@ rules:
   - ""
   resources:
   - configmaps
+  - configmaps/finalizers
   - secrets
   - secrets/finalizers
   verbs:
