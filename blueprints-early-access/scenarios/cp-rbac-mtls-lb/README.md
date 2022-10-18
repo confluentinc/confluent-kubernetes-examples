@@ -1,6 +1,6 @@
 # Deploy CFK with RBAC, mTLS, and Load Balancer using Blueprint
 
-This scenario uses the Control Plane and Data Plane you deploy in [Quick Start](../quickstart-deploy/single-site-deployment.rst) and creates a new Blueprint with the following features:
+This scenario uses the Control Plane and Data Plane you deployed in [Quick Start](../quickstart-deploy/single-site-deployment.rst) and creates a new Blueprint with the following features:
 
 - mTLS authentication
 - Confluent Platform RBAC 
