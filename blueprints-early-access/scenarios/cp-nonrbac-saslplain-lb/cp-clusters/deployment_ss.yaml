@@ -8,8 +8,6 @@ spec:
   blueprintRef:
     name: cp-nonrbac-saslplain-lb
     namespace: cpc-system
-  credentialStoreConfigRef:
-    name: cp-csc
   k8sClusterRef:
     name: control-plane-k8s
     namespace: cpc-system
@@ -30,8 +28,6 @@ spec:
   blueprintRef:
     name: cp-nonrbac-saslplain-lb
     namespace: cpc-system
-  credentialStoreConfigRef:
-    name: cp-csc
   k8sClusterRef:
     name: control-plane-k8s
     namespace: cpc-system
@@ -43,7 +39,6 @@ spec:
     - name: schemaregistry-ss
     connectClusterRefs:
     - name: connect-ss
-
 ---
 apiVersion: cluster.cpc.platform.confluent.io/v1beta1
 kind: KafkaCluster
@@ -55,8 +50,6 @@ spec:
   blueprintRef:
     name: cp-nonrbac-saslplain-lb
     namespace: cpc-system
-  credentialStoreConfigRef:
-    name: cp-csc
   k8sClusterRef:
     name: control-plane-k8s
     namespace: cpc-system
@@ -80,8 +73,6 @@ spec:
   blueprintRef:
     name: cp-nonrbac-saslplain-lb
     namespace: cpc-system
-  credentialStoreConfigRef:
-    name: cp-csc
   k8sClusterRef:
     name: control-plane-k8s
     namespace: cpc-system
@@ -97,8 +88,6 @@ spec:
   blueprintRef:
     name: cp-nonrbac-saslplain-lb
     namespace: cpc-system
-  credentialStoreConfigRef:
-    name: cp-csc
   k8sClusterRef:
     name: control-plane-k8s
     namespace: cpc-system
@@ -114,8 +103,6 @@ spec:
   blueprintRef:
     name: cp-nonrbac-saslplain-lb
     namespace: cpc-system
-  credentialStoreConfigRef:
-    name: cp-csc
   k8sClusterRef:
     name: control-plane-k8s
     namespace: cpc-system
@@ -136,3 +123,4 @@ spec:
   k8sClusterRef:
     name: control-plane-k8s
     namespace: cpc-system
+
