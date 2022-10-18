@@ -29,13 +29,13 @@ Platform Blueprint configures component wide properties, such as security
 (authentication, authorization, encryption), networking, container registry,
 etc.
 
-.. image:: images/tech-overview-4.png
+.. image:: concepts/images/tech-overview-4.png
    :scale: 75%
 
 A Deployment is an instantiation of a Blueprint on a target Kubernetes
 infrastructure.
 
-.. image:: images/tech-overview-2.png
+.. image:: concepts/images/tech-overview-2.png
    :scale: 75%
 
 There are two types of infrastructure configurations options to use CFK
@@ -51,7 +51,7 @@ Blueprints with:
   
   * Confluent Platform is deployed on the Data Plane Kubernetes.
 
-.. image:: images/tech-overview-3.png
+.. image:: concepts/images/tech-overview-3.png
    :scale: 100%
 
 In a multi-Kubernetes configuration:
@@ -66,7 +66,7 @@ In a multi-Kubernetes configuration:
   Data Plane to run a Confluent Platform deployment. 
   
 
-.. image:: images/tech-overview-1.png
+.. image:: concepts/images/tech-overview-1.png
    :scale: 75%
 
 Workflow
