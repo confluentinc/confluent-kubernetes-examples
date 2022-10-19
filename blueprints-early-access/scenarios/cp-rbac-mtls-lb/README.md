@@ -130,14 +130,14 @@ To create the required CA, run the following commands:
    
    ```bash 
    kubectl -n $MY_NAMESPACE get ksqldbcluster -oyaml | grep ksqlClusterId
-  ``` 
+   ``` 
 1. Create role bindings: 
 
    ```bash 
    cat ${SCENARIO_BASEPATH}/cp-apps/rolebinding/rolebiding_ss.yaml | sed 's/__NAMESPACE__/'"${MY_NAMESPACE}"'/g' | kubectl apply - f -
    ```
  
- - Validate:
+1. Validate:
  
    ```bash
    kubectl -n $MY_NAMESPACE get confluentrolebindings.apps
