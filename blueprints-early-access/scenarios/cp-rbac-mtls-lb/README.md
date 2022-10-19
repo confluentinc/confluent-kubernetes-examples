@@ -103,79 +103,103 @@ To create the required CA, run the following commands:
 
 ### Topic
  
-- Create a topic:
+1. Create a topic:
 
-  ```bash 
-  kubectl -n $MY_NAMESPACE apply -f $SCENARIO_BASEPATH/cp-apps/topics/topic_ss.yaml
-  ```
+   ```bash 
+   kubectl -n $MY_NAMESPACE apply -f $SCENARIO_BASEPATH/cp-apps/topics/topic_ss.yaml
+   ```
   
-- Validate:
+1. Validate:
 
-  ```bash 
-  kubectl -n $MY_NAMESPACE get kafkatopics.apps topic-foo-ss
-  ```
-  Verify that the `STATE` field is set to `Created`.
+   ```bash 
+   kubectl -n $MY_NAMESPACE get kafkatopics.apps topic-foo-ss
+   ```
+   Verify that the `STATE` field is set to `Created`.
 
 ### Rolebindings
 
-- Before creating role bindings, make sure that the cluster ids exist for Schema Registry, Connect, and ksqlDB:
+1. Before creating role bindings, make sure that the cluster ids exist for Schema Registry, Connect, and ksqlDB:
 
-  ```bash 
-  kubectl -n $MY_NAMESPACE get schemaregistrycluster -oyaml | grep schemaRegistryClusterId
-  ```
-  
-  ```bash 
-  kubectl -n $MY_NAMESPACE get connectcluster -oyaml | grep connectClusterId
+   ```bash 
+   kubectl -n $MY_NAMESPACE get schemaregistrycluster -oyaml | grep schemaRegistryClusterId
+   ```
+   
+   ```bash 
+   kubectl -n $MY_NAMESPACE get connectcluster -oyaml | grep connectClusterId
+   ``` 
+   
+   ```bash 
+   kubectl -n $MY_NAMESPACE get ksqldbcluster -oyaml | grep ksqlClusterId
   ``` 
-  
-  ```bash 
-  kubectl -n $MY_NAMESPACE get ksqldbcluster -oyaml | grep ksqlClusterId
-  ``` 
-- Create role bindings: 
+1. Create role bindings: 
 
-  ```bash 
-  cat ${SCENARIO_BASEPATH}/cp-apps/rolebinding/rolebiding_ss.yaml | sed 's/__NAMESPACE__/'"${MY_NAMESPACE}"'/g' | kubectl apply -f -
-  ```
+   ```bash 
+   cat ${SCENARIO_BASEPATH}/cp-apps/rolebinding/rolebiding_ss.yaml | sed 's/__NAMESPACE__/'"${MY_NAMESPACE}"'/g' | kubectl apply - f -
+   ```
+ 
+ - Validate:
+ 
+   ```bash
+   kubectl -n $MY_NAMESPACE get confluentrolebindings.apps
+   ```
 
-- Validate:
-
-  ```bash
-  kubectl -n $MY_NAMESPACE get confluentrolebindings.apps
-  ```
-
-  Verify that the `STATE` field is set to `Created`.
+   Verify that the `STATE` field is set to `Created`.
 
 ### Schema
 
-- Create a schema: 
+1. Create the required role binding:
 
-  ```bash
-  kubectl -n $MY_NAMESPACE apply -f $SCENARIO_BASEPATH/cp-apps/schema/schema_ss.yaml
-  ``` 
+   ```bash
+   cat $SCENARIO_BASEPATH/cp-apps/schema/rolebinding_ss.yaml | sed 's/__NAMESPACE__/'"$MY_NAMESPACE"'/g' | kubectl apply -f -
+   ```
   
-- Validate:
+1. Check Resource and verify that the `STATE` field is set to `Created`:
 
-  ```bash
-  kubectl -n $MY_NAMESPACE get schemas.app schema-foo-ss
-  ``` 
+   ```bash
+   kubectl -n ${MY_NAMESPACE} get confluentrolebindings.apps user-kafka-rb-sr-ss
+   ``` 
+   
+1. Create a schema: 
+
+   ```bash
+   kubectl -n $MY_NAMESPACE apply -f $SCENARIO_BASEPATH/cp-apps/schema/schema_ss.yaml
+   ``` 
   
-  Verify that the `STATE` field is set to `Created`.
+1. Validate:
+
+   ```bash
+   kubectl -n $MY_NAMESPACE get schemas.app schema-foo-ss
+   ``` 
+   
+   Verify that the `STATE` field is set to `Created`.
 
 ### Connector
 
-- Create a connector:
+1. Create the required role binding:
 
-  ```bash 
-  cat $SCENARIO_BASEPATH/cp-apps/connectors/connector_ss.yaml | sed 's/__NAMESPACE__/'"${MY_NAMESPACE}"'/g' | kubectl apply -n ${MY_NAMESPACE} -f -
-  ```
+   ```bash
+   cat $SCENARIO_BASEPATH/cp-apps/connectors/rolebinding_ss.yaml | sed 's/__NAMESPACE__/'"$MY_NAMESPACE"'/g' | kubectl apply -n ${MY_NAMESPACE} -f -      
+   ```
+   
+1. Check Resource and verify that the `STATE` field is set to `Created`:
 
-- Validate:
+   ```bash 
+   kubectl -n ${MY_NAMESPACE} get confluentrolebindings.apps user-kafka-rb-connect-ss
+   ``` 
+   
+1. Create a connector:
+
+   ```bash 
+   cat $SCENARIO_BASEPATH/cp-apps/connectors/connector_ss.yaml | sed 's/__NAMESPACE__/'"${MY_NAMESPACE}"'/g' | kubectl apply -n  ${MY_NAMESPACE} -f -
+   ```
   
-  ```bash 
-  kubectl -n $MY_NAMESPACE get connectors.apps
-  ```
+1. Validate:
   
-  Verify that the `STATE` field is set to `Created`.
+   ```bash 
+   kubectl -n $MY_NAMESPACE get connectors.apps
+   ```
+  
+   Verify that the `STATE` field is set to `Created`.
 
 ## Validate the Deployment
 
