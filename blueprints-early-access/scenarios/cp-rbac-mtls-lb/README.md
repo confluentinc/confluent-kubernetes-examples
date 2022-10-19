@@ -166,7 +166,7 @@ To create the required CA, run the following commands:
 - Create a connector:
 
   ```bash 
-  cat $SCENARIO_BASEPATH/cp-apps/connectors/connector_ss.yaml | sed 's/__NAMESPACE__/'"$MY_NAMESPACE"'/g' | kubectl apply -f -
+  cat $SCENARIO_BASEPATH/cp-apps/connectors/connector_ss.yaml | sed 's/__NAMESPACE__/'"${MY_NAMESPACE}"'/g' | kubectl apply -f -
   ```
 
 - Validate:
