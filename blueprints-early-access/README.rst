@@ -5,7 +5,7 @@ Confluent for Kubernetes Blueprints
 Overview
 --------
 
-Confluent for Kubernets (CFK) Blueprints extend CFK with a new set of
+Confluent for Kubernetes (CFK) Blueprints extend CFK with a new set of
 Kubernetes-native APIs (CustomResourceDefinitions) that configure, deploy and
 operate Confluent Platform services and application resources.
 
