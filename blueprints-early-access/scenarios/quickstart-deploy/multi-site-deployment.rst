@@ -90,6 +90,8 @@ following steps:
    .. sourcecode:: bash
    
       mkdir /tmp
+      
+   Generate a CA key pair:
 
    .. sourcecode:: bash
 
