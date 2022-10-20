@@ -27,10 +27,10 @@ This scenario uses the Control Plane and Data Plane you deployed in [Quick Start
 ### Install Blueprint Certificate Authority (CA)
 
 The Control Plane uses CA keypair to generate certificates for all the Confluent Platform component. Run the following commands:
-1. Create a secret `ca-key-pair-sce-4` using the CA keypair generated in when deploying [the Control Plane](../quickstart-deploy/single-site-deployment.rst#deploy-control-plane):
+1. Create a secret `ca-key-pair-sce-4` using the CA keypair generated when deploying [the Control Plane](../quickstart-deploy/single-site-deployment.rst#deploy-control-plane):
 
    ```bash 
-   kubectl -n cpc-system create secret tls  ca-key-pair-sce-4 --cert=$TUTORIAL_HOME/tmp/cpc-ca.pem --key=$TUTORIAL_HOME/tmp/cpc-ca-key.pem
+   kubectl -n cpc-system create secret tls  ca-key-pair-sce-4 --cert=/tmp/cpc-ca.pem --key=/tmp/cpc-ca-key.pem
    ```
 
 1. Create the CertificateStoreConfig to inject CA keypair generated as above:
