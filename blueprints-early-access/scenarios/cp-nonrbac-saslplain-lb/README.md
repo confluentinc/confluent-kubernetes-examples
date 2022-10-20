@@ -139,15 +139,15 @@ kubectl apply -f $SCENARIO_BASEPATH/blueprint/blueprint.yaml --namespace cpc-sys
 
    1. Set up port forwarding to Control Center web UI from local machine:
 
-      .. sourcecode:: bash
-
-         kubectl port-forward controlcenter-ss-0 9021:9021 --namespace $MY_NAMESPACE
-
+      ```bash
+      kubectl port-forward controlcenter-ss-0 9021:9021 --namespace $MY_NAMESPACE
+      ```
+      
    1. Navigate to Control Center in a browser and check the cluster:
 
-      .. sourcecode:: bash
-
-         https://localhost:9021
+      ```bash
+      https://localhost:9021
+      ```
 
    Log in as the `kafka` user with the `kafka-secret` password.
   
