@@ -135,11 +135,19 @@ kubectl apply -f $SCENARIO_BASEPATH/blueprint/blueprint.yaml --namespace cpc-sys
    kubectl get pods --namespace $MY_NAMESPACE -w
    ```
 
-1. Navigate to Control Center in a browser and check the Confluent cluster:
+1. Navigate to Control Center in a browser and check the cluster:
 
-   ```bash       
-   kubectl confluent dashboard controlcenter --namespace $MY_NAMESPACE
-   ```
+   1. Set up port forwarding to Control Center web UI from local machine:
+
+      ```bash
+      kubectl port-forward controlcenter-ss-0 9021:9021 --namespace $MY_NAMESPACE
+      ```
+      
+   1. Navigate to Control Center in a browser and check the cluster:
+
+      ```bash
+      https://localhost:9021
+      ```
 
    Log in as the `kafka` user with the `kafka-secret` password.
   
