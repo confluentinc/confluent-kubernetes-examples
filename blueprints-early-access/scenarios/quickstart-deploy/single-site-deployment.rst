@@ -81,7 +81,7 @@ following steps:
      
    .. sourcecode:: bash
    
-      mkdir $TUTORIAL_HOME/tmp
+      mkdir /tmp
 
    .. sourcecode:: bash
 
