@@ -83,6 +83,8 @@ following steps:
    
       mkdir /tmp
 
+   Generate a CA key pair: 
+   
    .. sourcecode:: bash
 
       openssl req -x509 -new -nodes -newkey rsa:4096 -keyout /tmp/cpc-ca-key.pem \
