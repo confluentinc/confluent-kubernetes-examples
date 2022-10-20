@@ -104,7 +104,7 @@ following steps:
       
    .. sourcecode:: bash
 
-      $TUTORIAL_HOME/scripts/generate-keys.sh cpc-system $TUTORIAL_HOME/tmp
+      $TUTORIAL_HOME/scripts/generate-keys.sh cpc-system /tmp
       
    .. sourcecode:: bash
     
