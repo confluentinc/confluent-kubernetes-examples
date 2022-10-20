@@ -85,14 +85,16 @@ following steps:
       authorityKeyIdentifier = keyid:always,issuer:always
       EOF
      
+   If ``/tmp`` does not exist in your local system, create the folder: 
+   
    .. sourcecode:: bash
    
-      mkdir $TUTORIAL_HOME/tmp
+      mkdir /tmp
 
    .. sourcecode:: bash
 
-      openssl req -x509 -new -nodes -newkey rsa:4096 -keyout $TUTORIAL_HOME/tmp/cpc-ca-key.pem \
-        -out $TUTORIAL_HOME/tmp/cpc-ca.pem \
+      openssl req -x509 -new -nodes -newkey rsa:4096 -keyout /tmp/cpc-ca-key.pem \
+        -out /tmp/cpc-ca.pem \
         -subj "/C=US/ST=CA/L=MountainView/O=Confluent/OU=CPC/CN=CPC-CA" \
         -reqexts v3_ca \
         -config openssl.cnf
@@ -107,9 +109,9 @@ following steps:
    .. sourcecode:: bash
     
       kubectl create secret generic webhooks-tls \
-          --from-file=ca.crt=$TUTORIAL_HOME/tmp/cpc-ca.pem \
-          --from-file=tls.crt=$TUTORIAL_HOME/tmp/server.pem \
-          --from-file=tls.key=$TUTORIAL_HOME/tmp/server-key.pem \
+          --from-file=ca.crt=/tmp/cpc-ca.pem \
+          --from-file=tls.crt=/tmp/server.pem \
+          --from-file=tls.key=/tmp/server-key.pem \
           --namespace cpc-system \
           --context control-plane \
           --save-config --dry-run=client -oyaml | \
@@ -147,7 +149,7 @@ Kubernetes cluster from the Control Plane cluster.
       
    .. sourcecode:: bash
 
-      $TUTORIAL_HOME/scripts/kubeconfig_generate.sh control-plane-sa cpc-system $TUTORIAL_HOME/tmp
+      $TUTORIAL_HOME/scripts/kubeconfig_generate.sh control-plane-sa cpc-system /tmp
 
 #. In the Data Plane, create the KubeConfig secret:
    
@@ -156,7 +158,7 @@ Kubernetes cluster from the Control Plane cluster.
       kubectl config use-context data-plane
 
       kubectl create secret generic control-plane-kubeconfig \
-        --from-file=kubeconfig=$TUTORIAL_HOME/tmp/kubeconfig \
+        --from-file=kubeconfig=/tmp/kubeconfig \
         --context data-plane \
         --namespace cpc-system \
         --save-config --dry-run=client -oyaml | kubectl apply -f -
