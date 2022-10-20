@@ -266,11 +266,17 @@ From the Control Plane cluster, deploy Confluent Platform.
 
          kubectl get pods --namespace confluent-dev --context data-plane -w
    
-   #. Navigate to Control Center in a browser and check the Confluent cluster:
+   #. Set up port forwarding to Control Center web UI from local machine:
 
       .. sourcecode:: bash
 
-         kubectl confluent dashboard controlcenter --namespace confluent-dev --context data-plane
+         kubectl port-forward controlcenter-0 9021:9021 --context data-plane --namespace confluent-dev
+
+   #. Navigate to Control Center in a browser and check the cluster:
+
+      .. sourcecode:: bash
+
+         http://localhost:9021
 
 #. In the Control Plane, uninstall Confluent Platform:
 

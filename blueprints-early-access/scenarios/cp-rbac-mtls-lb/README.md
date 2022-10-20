@@ -209,12 +209,20 @@ To create the required CA, run the following commands:
    kubectl get pods --namespace $MY_NAMESPACE -w
    ```
 
-1. Navigate to Control Center in a browser and check the Confluent cluster:
+1. Navigate to Control Center in a browser and check the cluster:
 
-   ```bash       
-   kubectl confluent dashboard controlcenter --namespace $MY_NAMESPACE
-   ```
-   
+   1. Set up port forwarding to Control Center web UI from local machine:
+
+      .. sourcecode:: bash
+
+         kubectl port-forward controlcenter-ss-0 9021:9021 --namespace $MY_NAMESPACE
+
+   1. Navigate to Control Center in a browser and check the cluster:
+
+      .. sourcecode:: bash
+
+         https://localhost:9021
+
    Log in as the `kafka` user with the `kafka-secret` password.
 
 1. In Control Center, check if the `topic-foo-ss` topic exists.
