@@ -5,12 +5,10 @@ metadata:
   name: kafka-client-config
   namespace: confluent
 type: Opaque
-data:
+stringData:
   kafka.properties: |
-    <put the decoded here>
-# for example   Ym9vdHN0cmFwLnNlcnZlcnM9a2Fma2EuY29uZmx1ZW50LnN2Yy5jbHVzdGVyLmxvY2FsOjkwNzEKc2VjdXJpdHkucHJvdG9jb2w9UExBSU5URVhU
-
-
+    bootstrap.servers=kafka.confluent.svc.cluster.local:9071
+    security.protocol=PLAINTEXT
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: KafkaTopic
