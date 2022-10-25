@@ -1,0 +1,53 @@
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kafka-client-config
+  namespace: confluent
+type: Opaque
+stringData:
+  kafka.properties: |
+    bootstrap.servers=kafka.confluent.svc.cluster.local:9071
+    security.protocol=PLAINTEXT
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: http-messages
+  namespace: confluent
+spec:
+  replicas: 3
+  partitionCount: 4
+  configs:
+    cleanup.policy: "delete"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: producer-example
+  name: producer-example
+  namespace: confluent  
+spec:
+  containers:
+  - image: confluentinc/cp-server:7.2.0
+    name: producer-example
+    command:
+    - /bin/sh
+    - -c
+    - |
+      for i in `seq 20000`; do echo '{"f1": "value'$i'"'};done  | kafka-console-producer \
+            --bootstrap-server kafka:9071 \
+            --producer.config /mnt/kafka.properties \
+            --topic http-messages
+    volumeMounts:
+        - name: kafka-properties
+          mountPath: /mnt
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+  volumes:
+    - name: kafka-properties # Create secret with name `kafka-client-config` with client configurations
+      secret:
+        secretName: kafka-client-config
