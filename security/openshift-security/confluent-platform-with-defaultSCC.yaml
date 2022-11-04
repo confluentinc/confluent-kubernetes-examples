@@ -6,8 +6,8 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-zookeeper:7.2.0
-    init: confluentinc/confluent-init-container:2.4.0
+    application: confluentinc/cp-zookeeper:7.3.0
+    init: confluentinc/confluent-init-container:2.5.0
   dataVolumeCapacity: 10Gi
   logVolumeCapacity: 10Gi
   podTemplate:
@@ -21,8 +21,8 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-server:7.2.0
-    init: confluentinc/confluent-init-container:2.4.0
+    application: confluentinc/cp-server:7.3.0
+    init: confluentinc/confluent-init-container:2.5.0
   dataVolumeCapacity: 10Gi
   metricReporter:
     enabled: true
@@ -41,8 +41,8 @@ metadata:
 spec:
   replicas: 2
   image:
-    application: confluentinc/cp-server-connect:7.2.0
-    init: confluentinc/confluent-init-container:2.4.0
+    application: confluentinc/cp-server-connect:7.3.0
+    init: confluentinc/confluent-init-container:2.5.0
   podTemplate:
     podSecurityContext: {}
     resources:
@@ -58,8 +58,8 @@ metadata:
 spec:
   replicas: 2
   image:
-    application: confluentinc/cp-ksqldb-server:7.2.0
-    init: confluentinc/confluent-init-container:2.4.0
+    application: confluentinc/cp-ksqldb-server:7.3.0
+    init: confluentinc/confluent-init-container:2.5.0
   dataVolumeCapacity: 10Gi
   podTemplate:
     podSecurityContext: {}
@@ -72,8 +72,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-enterprise-control-center:7.2.0
-    init: confluentinc/confluent-init-container:2.4.0
+    application: confluentinc/cp-enterprise-control-center:7.3.0
+    init: confluentinc/confluent-init-container:2.5.0
   dataVolumeCapacity: 10Gi
   dependencies:
     schemaRegistry:
@@ -104,8 +104,8 @@ metadata:
 spec:
   replicas: 2
   image:
-    application: confluentinc/cp-schema-registry:7.2.0
-    init: confluentinc/confluent-init-container:2.4.0
+    application: confluentinc/cp-schema-registry:7.3.0
+    init: confluentinc/confluent-init-container:2.5.0
   podTemplate:
     podSecurityContext: {}
 ---
@@ -119,8 +119,8 @@ spec:
     schemaRegistry:
       url: http://schemaregistry.confluent.svc.cluster.local:8081
   image:
-    application: confluentinc/cp-kafka-rest:7.2.0
-    init: confluentinc/confluent-init-container:2.4.0
+    application: confluentinc/cp-kafka-rest:7.3.0
+    init: confluentinc/confluent-init-container:2.5.0
   replicas: 2
   podTemplate:
     podSecurityContext: {}
