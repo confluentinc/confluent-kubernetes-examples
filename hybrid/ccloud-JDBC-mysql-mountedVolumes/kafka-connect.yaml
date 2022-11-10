@@ -1,0 +1,42 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: mosheconnect
+spec:
+  configOverrides:
+    server:
+      - plugin.path=/usr/share/java,/usr/share/confluent-hub-components,/mnt/dataconnect
+  mountedVolumes:
+      volumes:
+        - name: task-pv-storage
+          persistentVolumeClaim:
+            claimName: task-pv-claim
+      volumeMounts:
+        - mountPath: "/mnt/dataconnect"
+          name: task-pv-storage 
+  keyConverterType: io.confluent.connect.avro.AvroConverter
+  valueConverterType: io.confluent.connect.avro.AvroConverter
+  replicas: 1
+  image:
+    application: confluentinc/cp-server-connect:7.3.0
+    init: confluentinc/confluent-init-container:2.5.0
+  dependencies:
+    kafka:
+      bootstrapEndpoint: <cloudKafka_url>:9092
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: ccloud-credentials
+      tls:
+        enabled: true
+        ignoreTrustStoreConfig: true 
+    schemaRegistry:
+      url: https://<cloudSR_url>
+      authentication:
+        type: basic
+        basic:
+          secretRef: ccloud-sr-credentials
+  mountedSecrets:
+  - secretRef: mysql-credential
+  
