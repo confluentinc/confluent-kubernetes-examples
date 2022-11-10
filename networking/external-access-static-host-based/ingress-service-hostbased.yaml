@@ -1,14 +1,14 @@
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ingress-with-sni
   annotations:
     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
-    kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     ingress.kubernetes.io/ssl-passthrough: "true"
     nginx.ingress.kubernetes.io/backend-protocol: HTTPS
 spec:
+  ingressClassName: nginx
   tls:
     - hosts:
         - kafka.$DOMAIN
@@ -22,42 +22,70 @@ spec:
     - host: kafka.$DOMAIN
       http:
         paths:
-          - backend:
-              serviceName: kafka-bootstrap
-              servicePort: 9092
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kafka-bootstrap
+                port: 
+                  number: 9092
     - host: b0.$DOMAIN
       http:
         paths:
-          - backend:
-              serviceName: kafka-0-internal
-              servicePort: 9092
+          - path: /
+            pathType: Prefix
+            backend:
+              service: 
+                name: kafka-0-internal
+                port:
+                  number: 9092
     - host: b1.$DOMAIN
       http:
         paths:
-          - backend:
-              serviceName: kafka-1-internal
-              servicePort: 9092
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kafka-1-internal
+                port: 
+                  number: 9092
     - host: b2.$DOMAIN
       http:
         paths:
-          - backend:
-              serviceName: kafka-2-internal
-              servicePort: 9092
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kafka-2-internal
+                port: 
+                  number: 9092
     - host: controlcenter.$DOMAIN
       http:
         paths:
-          - backend:
-              serviceName: controlcenter-0-internal
-              servicePort: 9021
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: controlcenter-0-internal
+                port: 
+                  number: 9021
     - host: ksqldb.$DOMAIN
       http:
         paths:
-          - backend:
-              serviceName: ksqldb-bootstrap
-              servicePort: 8088
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ksqldb-bootstrap
+                port: 
+                  number: 8088
     - host: connect.$DOMAIN
       http:
         paths:
-          - backend:
-              serviceName: connect-bootstrap
-              servicePort: 8083
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: connect-bootstrap
+                port: 
+                  number: 8083

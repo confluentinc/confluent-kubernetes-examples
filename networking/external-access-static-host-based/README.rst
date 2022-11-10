@@ -504,7 +504,7 @@ Shut down Confluent Platform and the data:
   
 ::
 
-  helm delete nginx-operator
+  helm delete ingress-nginx
 
 ::
 
