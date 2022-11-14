@@ -1,0 +1,1 @@
+connection=jdbc:mysql://mysql:3306/connect_test?user=root&password=password
