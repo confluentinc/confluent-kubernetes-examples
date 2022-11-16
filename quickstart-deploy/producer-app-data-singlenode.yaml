@@ -24,6 +24,10 @@ spec:
       labels:
         app: elastic
     spec:
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+        runAsNonRoot: true
       containers:
       - name: elastic
         image: confluentinc/cp-kafka:latest
