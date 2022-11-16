@@ -142,7 +142,6 @@ Confluent For Kubernetes will generate those for Confluent Server from
        -extfile \
        <(echo "[server_ext]"; echo "extendedKeyUsage=serverAuth,clientAuth"; echo "subjectAltName=DNS:*.$DOMAIN")
 
-#. 
 
 #. Create a Kubernetes secret using the provided PEM files:
  
