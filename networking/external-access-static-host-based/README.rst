@@ -483,7 +483,7 @@ Shut down Confluent Platform and the data:
 
 ::
 
-  kubectl delete -f $TUTORIAL_HOME/producer-app-data.yaml
+  kubectl delete -f $TUTORIAL_HOME/topic.yaml
   
 ::
 
