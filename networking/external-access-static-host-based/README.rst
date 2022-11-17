@@ -430,18 +430,18 @@ Create Client Properties File
 
 Create a configuration file for the client called ``kafka.properties``.
 
-  ::
+::
 
-    cat <<-EOF > $TUTORIAL_HOME/client/kafka.properties
-    bootstrap.servers=kafka.$DOMAIN:443
-    security.protocol=SSL
-    ssl.truststore.location=$TUTORIAL_HOME/client/client.truststore.p12
-    ssl.truststore.password=mystorepassword
-    ssl.truststore.type=PKCS12
-    ssl.keystore.location=$TUTORIAL_HOME/client/client.keystore.p12
-    ssl.keystore.password=mystorepassword
-    ssl.keystore.type=PKCS12
-    EOF
+  cat <<-EOF > $TUTORIAL_HOME/client/kafka.properties
+  bootstrap.servers=kafka.$DOMAIN:443
+  security.protocol=SSL
+  ssl.truststore.location=$TUTORIAL_HOME/client/client.truststore.p12
+  ssl.truststore.password=mystorepassword
+  ssl.truststore.type=PKCS12
+  ssl.keystore.location=$TUTORIAL_HOME/client/client.keystore.p12
+  ssl.keystore.password=mystorepassword
+  ssl.keystore.type=PKCS12
+  EOF
 
 Remember that in production, all properties files with sensitive credentials 
 should be locked down with elevated permissions and encrypted with 
