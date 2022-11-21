@@ -30,7 +30,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: ksqldb-bootstrap
+                name: ksqldb
                 port: 
                   number: 8088
     - host: connect.$DOMAIN
@@ -40,6 +40,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: connect-bootstrap
+                name: connect
                 port: 
                   number: 8083
