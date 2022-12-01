@@ -1,0 +1,28 @@
+apiVersion: apps.cpc.platform.confluent.io/v1beta1
+kind: SchemaExporter
+metadata:
+  name: sr-exporter-ss-local
+spec:
+  # internal sr needs to be managed by the controlplane's confluent-operator
+  # and it is local exporter as there is no destination cluster
+  schemaExporterAction: Auto
+  source:
+    schemaRegistryClusterRef:
+      name: schemaregistry-ss
+  contextName: control-plane-sr-exporter-local
+---
+apiVersion: apps.cpc.platform.confluent.io/v1beta1
+kind: SchemaExporter
+metadata:
+  name: schema-exporter-ss
+spec:
+  schemaExporterAction: Auto
+  source:
+    schemaRegistryClusterRef:
+      name: schemaregistry-ss
+  destination:
+    schemaRegistryClusterRef:
+      name: schemaregistry-ss-dev
+      namespace: cp-global-__NAMESPACE__
+  contextName: control-plane-sr-exporter
+

@@ -1,0 +1,25 @@
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: KafkaCluster
+metadata:
+  name: kafka-ss-dev
+  namespace: cp-global-$__NAMESPACE__
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents Kafka cluster."
+spec:
+  blueprintRef:
+    name: cp-rbac-saslplain-lb
+    namespace: cpc-system
+  k8sClusterRef:
+    name: cpc-controlplane-k8s
+    namespace: cpc-system
+  externalAccess:
+    listeners:
+      external:
+        dnsConfig:
+          bootstrapSubdomain: cpc-kafka-ss-dev
+          brokerSubdomain: cpc-broker-ss-dev
+  dependencies:
+    zookeeperCluster:
+      name: zookeeper-ss
+      namespace: __NAMESPACE__
