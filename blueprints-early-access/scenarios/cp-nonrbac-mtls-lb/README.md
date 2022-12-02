@@ -6,20 +6,32 @@ This scenario uses the Control Plane and Data Plane you deployed in [Quick Start
 - External access using Load Balancer
 
 ## Prerequisite
-- Set the home directory for this tutorial:
+1. Set the home directory for this tutorial:
 
   ```bash
   export SCENARIO_BASEPATH=<CFK examples directory>/confluent-kubernetes-examples/blueprints-early-access/scenario/cp-nonrbac-mtls-lb
   ```
-  ```bash
-  export MY_NAMESPACE=<your org namespace for this scenario>
-  ``` 
+  
+1. Set the namespace to deploy Confluent Platform in:
 
-- [Deploy the Control Plane with the Orchestrator](../quickstart-deploy/single-site-deployment.rst#deploy-control-plane).
+   ```bash
+   export MY_NAMESPACE=<your org namespace for this scenario>
+   ``` 
 
-- [Deploy the Data Plane with the Agent](../quickstart-deploy/single-site-deployment.rst#deploy-local-data-plane).
+1. Save the Kubernetes cluster domain name:
+ 
+   In this document, `$DOMAIN is used to denote your Kubernetes cluster
+   domain name.
+  
+   ```bash
+   export DOMAIN=<Your Kubernetes cluster domain name>
+   ```
 
-- The above setup creates the namespace for the Blueprint system resources, `cpc-system`.
+1. [Deploy the Control Plane with the Orchestrator](../quickstart-deploy/single-site-deployment.rst#deploy-control-plane).
+
+1. [Deploy the Data Plane with the Agent](../quickstart-deploy/single-site-deployment.rst#deploy-local-data-plane).
+
+  The above setup creates the namespace for the Blueprint system resources, `cpc-system`.
 
 ## Install Blueprint
 
@@ -49,7 +61,7 @@ The Control Plane uses CA keypair to generate certificates for all the Confluent
        --save-config --dry-run=client -oyaml | kubectl apply -f -
    ```
 
-2. Create the credential store used by this Blueprint. The credential store is only used by this Blueprint and can't be share with other resource or Blueprints:
+1. Create the credential store used by this Blueprint. The credential store is only used by this Blueprint and can't be share with other resource or Blueprints:
 
    ```bash
    kubectl apply -f $SCENARIO_BASEPATH/blueprint/credentialstoreconfig.yaml --namespace cpc-system
@@ -57,9 +69,21 @@ The Control Plane uses CA keypair to generate certificates for all the Confluent
 
 ### Install Blueprint
   
-```bash
-kubectl apply -f $SCENARIO_BASEPATH/blueprint/blueprint.yaml --namespace cpc-system
-```
+1. Edit the `$SCENARIO_BASEPATH/blueprint/blueprint.yaml` file and set the Kubernetes domain to the value of ``$DOMAIN`:
+
+   ```yaml
+   apiVersion: core.cpc.platform.confluent.io/v1beta1
+   kind: ConfluentPlatformBlueprint
+   spec:
+     dnsConfig:
+       domain: #Set this to the value of $DOMAIN
+   ```
+
+1. Install the Blueprint:
+
+   ```bash
+   kubectl apply -f $SCENARIO_BASEPATH/blueprint/blueprint.yaml --namespace cpc-system
+   ```
 
 ## Deploy Confluent Platform in Single Site Deployment
 
@@ -148,4 +172,4 @@ kubectl apply -f $SCENARIO_BASEPATH/blueprint/blueprint.yaml --namespace cpc-sys
 
    Log in as the `kafka` user with the `kafka-secret` password.
   
-1. In Control Center, check if the `topic-foo-ss` topic exists.
+1. In Control Center, check if the `topic-foo` topic exists.

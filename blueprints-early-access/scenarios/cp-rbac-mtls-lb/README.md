@@ -14,9 +14,20 @@ This scenario uses the Control Plane and Data Plane you deployed in [Quick Start
   export SCENARIO_BASEPATH=<CFK examples directory>/confluent-kubernetes-examples/blueprints-early-access/scenario/cp-rbac-mtls-lb
   ```
 
+- Set the namespace to deploy Confluent Platform in:
+
   ```bash
   export MY_NAMESPACE=<your org namespace>
   ``` 
+
+- Save the Kubernetes cluster domain name:
+ 
+  In this document, `$DOMAIN is used to denote your Kubernetes cluster
+  domain name.
+ 
+  ```bash
+  export DOMAIN=<Your Kubernetes cluster domain name>
+  ```
 
 - [Deploy the Control Plane with the Orchestrator](../quickstart-deploy/single-site-deployment.rst#deploy-control-plane).
 
@@ -81,11 +92,24 @@ To create the required CA, run the following commands:
   kubectl apply -f $SCENARIO_BASEPATH/blueprint/credentialstoreconfig.yaml --namespace cpc-system
   ```
 
-- Install Blueprint:
+### Install Blueprint
 
-  ```bash
-  kubectl apply -f $SCENARIO_BASEPATH/blueprint/blueprint.yaml --namespace cpc-system
-  ```
+1. Edit the `$SCENARIO_BASEPATH/blueprint/blueprint.yaml` file and set the Kubernetes domain to the value of ``$DOMAIN`:
+
+   ```yaml
+   apiVersion: core.cpc.platform.confluent.io/v1beta1
+   kind: ConfluentPlatformBlueprint
+   spec:
+     dnsConfig:
+       domain: #Set this to the value of $DOMAIN
+   ```
+
+1. Install the Blueprint:
+
+   ```bash
+   kubectl apply -f $SCENARIO_BASEPATH/blueprint/blueprint.yaml -- namespace cpc-system
+   ```
+   
 ## Deploy Confluent Platform in Single Site Deployment
 
 1. Create the namespace for Confluent Platform:

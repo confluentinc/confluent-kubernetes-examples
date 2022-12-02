@@ -12,10 +12,21 @@ This scenario uses the Control Plane and Data Plane you deployed in [Quick Start
   ```bash
   export SCENARIO_BASEPATH=<CFK examples directory>/confluent-kubernetes-examples/blueprints-early-access/scenario/cp- nonrbac-saslplain-lb
   ```
+- Set the namespace to deploy Confluent Platform in:
+
   ```bash
   export MY_NAMESPACE=<your org namespace>
   ``` 
 
+- Save the Kubernetes cluster domain name:
+ 
+  In this document, `$DOMAIN is used to denoteyour Kubernetes cluster
+  domain name.
+ 
+  ```bash
+  export DOMAIN=<Your Kubernetes cluster domainname>
+  ```
+  
 - [Deploy the Control Plane with the Orchestrator](../quickstart-deploy/single-site-deployment.rst#deploy-control-plane).
 
 - [Deploy the Data Plane with the Agent](../quickstart-deploy/single-site-deployment.rst#deploy-local-data-plane).
@@ -60,9 +71,21 @@ The Control Plane uses CA keypair to generate certificates for all the Confluent
 
 ### Install Blueprint
   
-```bash
-kubectl apply -f $SCENARIO_BASEPATH/blueprint/blueprint.yaml --namespace cpc-system
-```
+1. Edit the `$SCENARIO_BASEPATH/blueprint/blueprint.yaml` file and set the Kubernetes domain to the value of ``$DOMAIN`:
+
+   ```yaml
+   apiVersion: core.cpc.platform.confluent.io/v1beta1
+   kind: ConfluentPlatformBlueprint
+   spec:
+     dnsConfig:
+       domain: #Set this to the value of $DOMAIN
+   ```
+
+1. Install the Blueprint:
+
+   ```bash
+   kubectl apply -f $SCENARIO_BASEPATH/blueprint/   blueprint.yaml --namespace cpc-system
+   ```
 
 ## Deploy Confluent Platform in Single Site Deployment
 
