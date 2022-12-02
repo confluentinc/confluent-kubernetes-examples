@@ -8,9 +8,9 @@ This scenario uses the Control Plane and Data Plane you deployed in [Quick Start
 ## Prerequisite
 1. Set the home directory for this tutorial:
 
-  ```bash
-  export SCENARIO_BASEPATH=<CFK examples directory>/confluent-kubernetes-examples/blueprints-early-access/scenario/cp-nonrbac-mtls-lb
-  ```
+   ```bash
+   export SCENARIO_BASEPATH=<CFK examples directory>/confluent-kubernetes-examples/blueprints-early-access/ scenario/cp-nonrbac-mtls-lb
+   ```
   
 1. Set the namespace to deploy Confluent Platform in:
 
@@ -20,8 +20,7 @@ This scenario uses the Control Plane and Data Plane you deployed in [Quick Start
 
 1. Save the Kubernetes cluster domain name:
  
-   In this document, `$DOMAIN is used to denote your Kubernetes cluster
-   domain name.
+   In this document, `$DOMAIN` is used to denote your Kubernetes cluster domain name.
   
    ```bash
    export DOMAIN=<Your Kubernetes cluster domain name>
@@ -69,7 +68,7 @@ The Control Plane uses CA keypair to generate certificates for all the Confluent
 
 ### Install Blueprint
   
-1. Edit the `$SCENARIO_BASEPATH/blueprint/blueprint.yaml` file and set the Kubernetes domain to the value of ``$DOMAIN`:
+1. Edit the `$SCENARIO_BASEPATH/blueprint/blueprint.yaml` file and set the Kubernetes domain to the value of `$DOMAIN`:
 
    ```yaml
    apiVersion: core.cpc.platform.confluent.io/v1beta1

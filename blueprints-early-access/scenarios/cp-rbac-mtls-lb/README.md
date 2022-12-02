@@ -22,8 +22,7 @@ This scenario uses the Control Plane and Data Plane you deployed in [Quick Start
 
 - Save the Kubernetes cluster domain name:
  
-  In this document, `$DOMAIN is used to denote your Kubernetes cluster
-  domain name.
+  In this document, `$DOMAIN` is used to denote your Kubernetes cluster domain name.
  
   ```bash
   export DOMAIN=<Your Kubernetes cluster domain name>
@@ -94,7 +93,7 @@ To create the required CA, run the following commands:
 
 ### Install Blueprint
 
-1. Edit the `$SCENARIO_BASEPATH/blueprint/blueprint.yaml` file and set the Kubernetes domain to the value of ``$DOMAIN`:
+1. Edit the `$SCENARIO_BASEPATH/blueprint/blueprint.yaml` file and set the Kubernetes domain to the value of `$DOMAIN`:
 
    ```yaml
    apiVersion: core.cpc.platform.confluent.io/v1beta1
