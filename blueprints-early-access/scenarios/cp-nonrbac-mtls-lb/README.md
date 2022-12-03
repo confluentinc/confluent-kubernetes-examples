@@ -147,28 +147,3 @@ The Control Plane uses CA keypair to generate certificates for all the Confluent
   
   Verify that the `STATE` field is set to `Created`.
 
-## Validate the Deployment
-
-1. Check when the Confluent components are up and running:
-   
-   ```bash 
-   kubectl get pods --namespace $MY_NAMESPACE -w
-   ```
-
-1. Navigate to Control Center in a browser and check the cluster:
-
-   1. Set up port forwarding to Control Center web UI from local machine:
-
-      ```bash
-      kubectl port-forward controlcenter-ss-0 9021:9021 --namespace $MY_NAMESPACE
-      ```
-      
-   1. Navigate to Control Center in a browser and check the cluster:
-
-      ```bash
-      https://localhost:9021
-      ```
-
-   Log in as the `kafka` user with the `kafka-secret` password.
-  
-1. In Control Center, check if the `topic-foo` topic exists.
