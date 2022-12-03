@@ -1,0 +1,126 @@
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: ConnectCluster
+metadata:
+  name: connect-ss
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents Connect cluster"
+spec:
+  blueprintRef:
+    name: cp-nonrbac-mtls-lb
+    namespace: cpc-system
+  k8sClusterRef:
+    name: control-plane-k8s #INSERT_K8S_NS
+    namespace: cpc-system
+  externalAccess:
+    dnsConfig:
+      subdomain: "cpc-connect-ss"
+  build:
+    type: static
+    static:
+      plugins:
+        - name: kafka-connect-datagen
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: ControlCenterCluster
+metadata:
+  name: controlcenter-ss
+spec:
+  blueprintRef:
+    name: cp-nonrbac-mtls-lb
+    namespace: cpc-system
+  k8sClusterRef:
+    name: control-plane-k8s #INSERT_K8S_NS
+    namespace: cpc-system
+  externalAccess:
+    dnsConfig:
+      subdomain: "cpc-c3-ss"
+  dependencies:
+    schemaRegistryClusterRefs:
+    - name: schemaregistry-ss
+    connectClusterRefs:
+    - name: connect-ss
+
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: KafkaCluster
+metadata:
+  name: kafka-ss
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents Kafka cluster."
+spec:
+  blueprintRef:
+    name: cp-nonrbac-mtls-lb
+    namespace: cpc-system
+  k8sClusterRef:
+    name: control-plane-k8s #INSERT_K8S_NS
+    namespace: cpc-system
+  externalAccess:
+    listeners:
+      external:
+        dnsConfig:
+          bootstrapSubdomain: cpc-kafka-ss
+          brokerSubdomain: cpc-broker-ss
+    kafkaRest:
+      dnsConfig:
+        subdomain: cpc-kafka-rest-ss
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: KafkaRestProxyCluster
+metadata:
+  name: kafkarestproxy-ss
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents KafkaRestProxy cluster."
+spec:
+  blueprintRef:
+    name: cp-nonrbac-mtls-lb
+    namespace: cpc-system
+  k8sClusterRef:
+    name: control-plane-k8s #INSERT_K8S_NS
+    namespace: cpc-system
+  externalAccess:
+    dnsConfig:
+      subdomain: "cpc-krc-ss"
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: KsqlDBCluster
+metadata:
+  name: ksqldb-ss
+spec:
+  blueprintRef:
+    name: cp-nonrbac-mtls-lb
+    namespace: cpc-system
+  k8sClusterRef:
+    name: control-plane-k8s #INSERT_K8S_NS
+    namespace: cpc-system
+  externalAccess:
+    dnsConfig:
+      subdomain: "cpc-kqldb-ss"
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: SchemaRegistryCluster
+metadata:
+  name: schemaregistry-ss
+spec:
+  blueprintRef:
+    name: cp-nonrbac-mtls-lb
+    namespace: cpc-system
+  k8sClusterRef:
+    name: control-plane-k8s #INSERT_K8S_NS
+    namespace: cpc-system
+  externalAccess:
+    dnsConfig:
+      subdomain: "cpc-sr-ss"
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: ZookeeperCluster
+metadata:
+  name: zookeeper-ss
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents Zookeeper cluster."
+spec:
+  blueprintRef:
+    name: cp-nonrbac-mtls-lb
+    namespace: cpc-system
+  k8sClusterRef:
+    name: control-plane-k8s #INSERT_K8S_NS
+    namespace: cpc-system

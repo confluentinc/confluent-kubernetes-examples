@@ -1,0 +1,127 @@
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: ConnectCluster
+metadata:
+  name: connect-ms
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents Connect cluster deployment in Mothership Kubernetes cluster."
+spec:
+  blueprintRef:
+    name: cp-nonrbac-mtls-lb
+    namespace: cpc-system
+  k8sClusterRef:
+    name: #INSERT_K8S_NS
+    namespace: cpc-system
+  externalAccess:
+    dnsConfig:
+      subdomain: "cpc-connect-ms"
+  build:
+    type: static
+    static:
+      plugins:
+        - name: kafka-connect-datagen
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: ControlCenterCluster
+metadata:
+  name: controlcenter-ms
+spec:
+  blueprintRef:
+    name: cp-nonrbac-mtls-lb
+    namespace: cpc-system
+  k8sClusterRef:
+    name: #INSERT_K8S_NS
+    namespace: cpc-system
+  externalAccess:
+    dnsConfig:
+      subdomain: "cpc-c3-ms"
+  dependencies:
+    schemaRegistryClusterRefs:
+    - name: schemaregistry-ms
+    - name: schemaregistry-ss
+    connectClusterRefs:
+    - name: connect-ms
+    - name: connect-ss
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: KafkaCluster
+metadata:
+  name: kafka-ms
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents Kafka cluster deployment in mothership Kubernetes cluster."
+spec:
+  blueprintRef:
+    name: cp-nonrbac-mtls-lb
+    namespace: cpc-system
+  k8sClusterRef:
+    name: #INSERT_K8S_NS
+    namespace: cpc-system
+  externalAccess:
+    listeners:
+      external:
+        dnsConfig:
+          bootstrapSubdomain: cpc-kafka-ms
+          brokerSubdomain: cpc-broker-ms
+    kafkaRest:
+      dnsConfig:
+        subdomain: cpc-kafka-rest-ms
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: KafkaRestProxyCluster
+metadata:
+  name: kafkarestproxy-ms
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents KafkaRestProxy cluster deployment in mothership Kubernetes cluster."
+spec:
+  blueprintRef:
+    name: cp-nonrbac-mtls-lb
+    namespace: cpc-system
+  k8sClusterRef:
+    name: #INSERT_K8S_NS
+    namespace: cpc-system
+  externalAccess:
+    dnsConfig:
+      subdomain: "cpc-krc-ms"
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: KsqlDBCluster
+metadata:
+  name: ksqldb-ms
+spec:
+  blueprintRef:
+    name: cp-nonrbac-mtls-lb
+    namespace: cpc-system
+  k8sClusterRef:
+    name: #INSERT_K8S_NS
+    namespace: cpc-system
+  externalAccess:
+    dnsConfig:
+      subdomain: "cpc-kqldb-ms"
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: SchemaRegistryCluster
+metadata:
+  name: schemaregistry-ms
+spec:
+  blueprintRef:
+    name: cp-nonrbac-mtls-lb
+    namespace: cpc-system
+  k8sClusterRef:
+    name: #INSERT_K8S_NS
+    namespace: cpc-system
+  externalAccess:
+    dnsConfig:
+      subdomain: "cpc-sr-ms"
+---
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: ZookeeperCluster
+metadata:
+  name: zookeeper-ms
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents Zookeeper cluster deployment in mothership Kubernetes cluster."
+spec:
+  blueprintRef:
+    name: cp-nonrbac-mtls-lb
+    namespace: cpc-system
+  k8sClusterRef:
+    name: #INSERT_K8S_NS
+    namespace: cpc-system
