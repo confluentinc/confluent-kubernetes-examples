@@ -1,0 +1,13 @@
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: CertificateStoreConfig
+metadata:
+  name: ca-key-pair-sce-5
+  namespace: cpc-system
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents certificate store configuration"
+spec:
+  sourceType: kubernetes
+  kubernetes:
+    type: secret
+    secret:
+      name: ca-key-pair-sce-5
