@@ -97,17 +97,20 @@ The Control Plane uses CA keypair to generate certificates for all the Confluent
 1. Create a secret that contains all the required credential on namespace `MY_NAMESPACE`:
 
    ```bash 
-   kubectl -n ${MY_NAMESPACE} create secret generic cpcredentials \
+   kubectl -n $MY_NAMESPACE create secret generic cpcredentials \
    --from-file=connect-client-plain.txt=$SCENARIO_BASEPATHcp-clusters/credentials/connect-client-plain.txt \
    --from-file=controlcenter-clientplain.txt=$SCENARIO_BASEPATH/cp-clusters/credentialscontrolcenter-client-plain.txt \
    --from-file=kafkarestproxy-clientplain.txt=$SCENARIO_BASEPATH/cp-clusters/credentialskafkarestproxy-client-plain.txt \
    --from-file=ksqldb-client-plain.txt=$SCENARIO_BASEPATHcp-clusters/credentials/ksqldb-client-plain.txt \
    --from-file=schemaregistry-clientplain.txt=$SCENARIO_BASEPATH/cp-clusters/credentialsschemaregistry-client-plain.txt \
-   --save-config --dry-run=client -oyaml | kubectl apply f -
+   --save-config --dry-run=client -oyaml | kubectl apply -f -
    ```
 
-1. Install CP Deployment Credential
-  `kubectl apply -f $SCENARIO_BASEPATH/cp-clusters/credentialstoreconfig.yaml -n ${MY_NAMESPACE}`
+1. Install CP Deployment Credential:
+
+   ```bash 
+   kubectl apply -f $SCENARIO_BASEPATH/cp-clusters/credentialstoreconfig.yaml -n $MY_NAMESPACE
+   ```
 
 1. Install Confluent Platform on the Control Plane cluster:
  
