@@ -98,11 +98,11 @@ The Control Plane uses CA keypair to generate certificates for all the Confluent
 
    ```bash 
    kubectl -n $MY_NAMESPACE create secret generic cpcredentials \
-   --from-file=connect-client-plain.txt=$SCENARIO_BASEPATHcp-clusters/credentials/connect-client-plain.txt \
-   --from-file=controlcenter-clientplain.txt=$SCENARIO_BASEPATH/cp-clusters/credentialscontrolcenter-client-plain.txt \
-   --from-file=kafkarestproxy-clientplain.txt=$SCENARIO_BASEPATH/cp-clusters/credentialskafkarestproxy-client-plain.txt \
-   --from-file=ksqldb-client-plain.txt=$SCENARIO_BASEPATHcp-clusters/credentials/ksqldb-client-plain.txt \
-   --from-file=schemaregistry-clientplain.txt=$SCENARIO_BASEPATH/cp-clusters/credentialsschemaregistry-client-plain.txt \
+   --from-file=connect-client-plain.txt=$SCENARIO_BASEPATH/cp-clusters/credentials/connect-client-plain.txt \
+   --from-file=controlcenter-clientplain.txt=$SCENARIO_BASEPATH/cp-clusters/credentials/controlcenter-client-plain.txt \
+   --from-file=kafkarestproxy-clientplain.txt=$SCENARIO_BASEPATH/cp-clusters/credentials/kafkarestproxy-client-plain.txt \
+   --from-file=ksqldb-client-plain.txt=$SCENARIO_BASEPATH/cp-clusters/credentials/ksqldb-client-plain.txt \
+   --from-file=schemaregistry-clientplain.txt=$SCENARIO_BASEPATH/cp-clusters/credentials/schemaregistry-client-plain.txt \
    --save-config --dry-run=client -oyaml | kubectl apply -f -
    ```
 
