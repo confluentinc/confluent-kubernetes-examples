@@ -1,0 +1,248 @@
+---
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: ConnectClusterClass
+metadata:
+  name: cp-nonrbac-saslplain-ingress-connect-standard
+  namespace: cpc-system
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents pre-set configuration to deploy CP Connect Cluster."
+spec:
+  provisioner:
+    type: cfk
+    cfk:
+      replicas: 3
+      k8s:
+        podTemplate:
+          resources:
+            requests:
+              cpu: "1"
+              memory: "2Gi"
+            limits:
+              cpu: "2"
+              memory: "4Gi"
+      connectorPlugins:
+        confluentHubPlugins:
+          - name: kafka-connect-datagen
+            owner: confluentinc
+            version: 0.5.2
+---
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: ControlCenterClusterClass
+metadata:
+  name: cp-nonrbac-saslplain-ingress-controlcenter-standard
+  namespace: cpc-system
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents pre-set configuration to deploy CP Control Center Cluster."
+spec:
+  provisioner:
+    type: cfk
+    cfk:
+      replicas: 1
+      volume:
+        data:
+          capacity: 10Gi
+---
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: KafkaClusterClass
+metadata:
+  name: cp-nonrbac-saslplain-ingress-kafka-standard
+  namespace: cpc-system
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents pre-set configuration to deploy CP Kafka Cluster."
+spec:
+  provisioner:
+    type: cfk
+    cfk:
+      replicas: 3
+      volume:
+        data:
+          capacity: 10Gi
+---
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: KafkaRestProxyClusterClass
+metadata:
+  name: cp-nonrbac-saslplain-ingress-kafkarestproxy-standard
+  namespace: cpc-system
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents pre-set configuration to deploy CP KafkaRestProxy Cluster."
+spec:
+  provisioner:
+    type: cfk
+    cfk:
+      replicas: 3
+---
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: KsqlDBClusterClass
+metadata:
+  name: cp-nonrbac-saslplain-ingress-ksqldb-standard
+  namespace: cpc-system
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents pre-set configuration to deploy CP KsqlDB Cluster."
+spec:
+  provisioner:
+    type: cfk
+    cfk:
+      replicas: 3
+      volume:
+        data:
+          capacity: 10Gi
+---
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: SchemaRegistryClusterClass
+metadata:
+  name: cp-nonrbac-saslplain-ingress-schemaregistry-standard
+  namespace: cpc-system
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents pre-set configuration to deploy CP SchemaRegistry Cluster."
+spec:
+  provisioner:
+    type: cfk
+    cfk:
+      replicas: 3
+      enableSchemaExporter: true
+---
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: ZookeeperClusterClass
+metadata:
+  name: cp-nonrbac-saslplain-ingress-zookeeper-standard
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents pre-set configuration to deploy CP Zookeeper Cluster."
+spec:
+  provisioner:
+    type: cfk
+    cfk:
+      replicas: 3
+      volume:
+        data:
+          capacity: 10Gi
+        log:
+          capacity: 10Gi
+---
+apiVersion: core.cpc.platform.confluent.io/v1beta1
+kind: ConfluentPlatformBlueprint
+metadata:
+  name: cp-nonrbac-saslplain-ingress
+  namespace: cpc-system
+  annotations:
+    cpc.platform.confluent.io/description: "This TILE represents configurations which are shared across all CP component."
+spec:
+  credentialStoreConfigRefs:
+    - name: cp-nonrbac-saslplain-ingress-bp-csc
+      namespace: cpc-system
+  certificateStoreConfigRefs:
+    - name: ca-key-pair-sce-5
+  dockerImages:
+    - registry: docker.io
+  internalCAKeyPair:
+    providerType: blueprint
+    blueprint:
+      type: custom
+      custom:
+        certificateStoreConfig:
+          name: ca-key-pair-sce-5
+  dnsConfig:
+    domain: platformops.dev.gcp.devel.cpdev.cloud
+    providerType: deployment
+    deployment:
+      subdomainRegex: cpc+
+  passwordEncoder:
+    providerType: blueprint
+    blueprint:
+      credentialStoreRefs:
+        forKafka:
+          key: kafka-pwd-encoder.txt
+          name: cp-nonrbac-saslplain-ingress-bp-csc
+        forSchemaRegistry:
+          key: sr-pwd-encoder.txt
+          name: cp-nonrbac-saslplain-ingress-bp-csc
+  confluentPlatform:
+    version: 7.2.1
+    http:
+      externalAccess:
+        type: ingress
+        ingress:
+          advertisedPort: 443
+          annotations:
+            nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+            kubernetes.io/ingress.class: nginx
+            nginx.ingress.kubernetes.io/ssl-redirect: "false"
+            ingress.kubernetes.io/ssl-passthrough: "true"
+            nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+      tlsConfig:
+        providerType: blueprint
+    kafkaListeners:
+      global:
+        externalAccessType: ingress
+      externalListener:
+        authentication:
+          type: plain
+          plain:
+            providerType: blueprint
+            blueprint:
+              credentialStoreRef:
+                key: kafka-server-listener-external-plain-users.json
+                name: cp-nonrbac-saslplain-ingress-bp-csc
+                type: json
+        externalAccess:
+          enabled: true
+          ingress:
+            advertisedPort: 443
+            annotations:
+              nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+              kubernetes.io/ingress.class: nginx
+              nginx.ingress.kubernetes.io/ssl-redirect: "false"
+              ingress.kubernetes.io/ssl-passthrough: "true"
+              nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+        tlsConfig:
+          providerType: blueprint
+      internalListener:
+        authentication:
+          type: plain
+          plain:
+            providerType: blueprint
+            blueprint:
+              credentialStoreRef:
+                key: kafka-server-listener-internal-plain-users.json
+                name: cp-nonrbac-saslplain-ingress-bp-csc
+                type: json
+        tlsConfig:
+          providerType: blueprint
+  components:
+    connectCluster:
+      classRef:
+        name: cp-nonrbac-saslplain-ingress-connect-standard
+        namespace: cpc-system
+      externalAccess:
+        enabled: true
+    controlCenterCluster:
+      classRef:
+        name: cp-nonrbac-saslplain-ingress-controlcenter-standard
+        namespace: cpc-system
+      externalAccess:
+        enabled: true
+    kafkaCluster:
+      classRef:
+        name: cp-nonrbac-saslplain-ingress-kafka-standard
+        namespace: cpc-system
+    kafkaRestProxyCluster:
+      classRef:
+        name: cp-nonrbac-saslplain-ingress-kafkarestproxy-standard
+        namespace: cpc-system
+      externalAccess:
+        enabled: true
+    ksqlDBCluster:
+      classRef:
+        name: cp-nonrbac-saslplain-ingress-ksqldb-standard
+        namespace: cpc-system
+      externalAccess:
+        enabled: true
+    schemaRegistryCluster:
+      classRef:
+        name: cp-nonrbac-saslplain-ingress-schemaregistry-standard
+        namespace: cpc-system
+      externalAccess:
+        enabled: true
+    zookeeperCluster:
+      classRef:
+        name: cp-nonrbac-saslplain-ingress-zookeeper-standard
+        namespace: cpc-system

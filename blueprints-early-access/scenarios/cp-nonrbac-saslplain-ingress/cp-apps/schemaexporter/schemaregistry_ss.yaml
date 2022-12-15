@@ -1,0 +1,22 @@
+apiVersion: cluster.cpc.platform.confluent.io/v1beta1
+kind: SchemaRegistryCluster
+metadata:
+  name: schemaregistry-ss-dev
+  namespace: cp-global-__NAMESPACE__
+spec:
+  replicas: 1
+  blueprintRef:
+    name: cp-rbac-saslplain-lb
+    namespace: cpc-system
+  credentialStoreConfigRef:
+    name: cp-csc
+  k8sClusterRef:
+    name: cpc-controlplane-k8s
+    namespace: cpc-system
+  externalAccess:
+    dnsConfig:
+      subdomain: "cpc-sr-test-dev"
+  dependencies:
+    kafkaCluster:
+      name: kafka-ss
+      namespace: __NAMESPACE__

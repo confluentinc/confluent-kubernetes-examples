@@ -1,0 +1,17 @@
+apiVersion: apps.cpc.platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: user-kafka-rb-connect
+  namespace: __NAMESPACE__
+spec:
+  principal:
+    type: user
+    name: kafka
+  clustersScopeByIds:
+    # Find the ConnectCluster is using and get the id from the status
+    # kubectl -n <NAMESPACE> cc connect-ss -oyaml
+    # follow the pattern <namespace>.<connect_cluster_name>
+    connectClusterId: __NAMESPACE__.connect-ss
+  role: SystemAdmin
+  kafkaClusterRef:
+    name: kafka-ss
