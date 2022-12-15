@@ -201,6 +201,6 @@ The Control Plane uses CA keypair to generate certificates for all the Confluent
       https://localhost:9021
       ```
 
-   Log in as the `kafka` user with the `kafka-secret` password.
+     Log in as the `kafka` user with the `kafka-secret` password.
   
 1. In Control Center, check if the `topic-foo` topic exists.
