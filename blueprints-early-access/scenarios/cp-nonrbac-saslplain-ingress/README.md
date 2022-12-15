@@ -32,6 +32,18 @@ This scenario uses the Control Plane and Data Plane you deployed in [Quick Start
 
   The above setup creates the namespace for the Blueprint system resources, `cpc-system`.
 
+1. Install Ingress controller:
+
+   ```bash
+   helm repo add nginx-stable https://helm.nginx.com/stable
+   
+   helm repo update
+   
+   helm upgrade --install my-nginx nginx-stable/nginx-ingress \
+     --set controller.publishService.enabled=true \
+     --set controller.extraArgs.enable-ssl-passthrough="true"
+   ```
+
 ## Install Blueprint
 
 ### Install Blueprint Certificate Authority (CA)
