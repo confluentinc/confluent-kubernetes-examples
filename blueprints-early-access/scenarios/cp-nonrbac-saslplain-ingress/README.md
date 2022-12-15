@@ -30,7 +30,7 @@ This scenario uses the Control Plane and Data Plane you deployed in [Quick Start
 
 1. [Deploy the Data Plane with the Agent](../quickstart-deploy/single-site-deployment.rst#deploy-local-data-plane).
 
-  The above setup creates the namespace for the Blueprint system resources, `cpc-system`.
+   The above setup creates the namespace for the Blueprint system resources, `cpc-system`.
 
 1. Install Ingress controller:
 
