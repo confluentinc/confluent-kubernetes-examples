@@ -106,7 +106,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "confluent_operator_liveness_probe_count{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}\n",
+          "expr": "confluent_operator_liveness_probe_count{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}\n",
           "format": "table",
           "interval": "",
           "legendFormat": "{{ version }}",
@@ -178,7 +178,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "histogram_quantile(0.5, sum(rate(controller_runtime_reconcile_time_seconds_bucket{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\", kubernetes_pod_name=~\"$pod_name\"}[5m])) by (le, controller))",
+          "expr": "histogram_quantile(0.5, sum(rate(controller_runtime_reconcile_time_seconds_bucket{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\", pod=~\"$pod_name\"}[5m])) by (le, controller))",
           "hide": false,
           "interval": "",
           "legendFormat": "{{controller}} ",
@@ -276,7 +276,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "ceil(sum(increase(controller_runtime_reconcile_total{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}[4m])) by (controller, result))",
+          "expr": "ceil(sum(increase(controller_runtime_reconcile_total{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}[4m])) by (controller, result))",
           "hide": false,
           "instant": false,
           "interval": "2",
@@ -375,7 +375,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "ceil(sum(increase(confluent_operator_reconcile_errors_total{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}[5m])) by (controller))",
+          "expr": "ceil(sum(increase(confluent_operator_reconcile_errors_total{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}[5m])) by (controller))",
           "hide": false,
           "interval": "",
           "legendFormat": "{{controller}} ",
@@ -487,7 +487,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(rate(rest_client_requests_total{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\",code=~\"2..\"}[5m]))",
+          "expr": "sum(rate(rest_client_requests_total{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\",code=~\"2..\"}[5m]))",
           "interval": "4",
           "intervalFactor": 1,
           "legendFormat": "2xx",
@@ -495,7 +495,7 @@
         },
         {
           "exemplar": true,
-          "expr": "sum(rate(rest_client_requests_total{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\",code=~\"3..\"}[5m]))",
+          "expr": "sum(rate(rest_client_requests_total{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\",code=~\"3..\"}[5m]))",
           "hide": false,
           "interval": "",
           "intervalFactor": 1,
@@ -504,7 +504,7 @@
         },
         {
           "exemplar": true,
-          "expr": "sum(rate(rest_client_requests_total{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\",code=~\"4..\"}[5m]))",
+          "expr": "sum(rate(rest_client_requests_total{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\",code=~\"4..\"}[5m]))",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -514,7 +514,7 @@
         },
         {
           "exemplar": true,
-          "expr": "sum(rate(rest_client_requests_total{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\",code=~\"5..\"}[5m]))",
+          "expr": "sum(rate(rest_client_requests_total{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\",code=~\"5..\"}[5m]))",
           "format": "time_series",
           "hide": false,
           "interval": "4",
@@ -571,7 +571,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": null,
-      "description": "Request latency in seconds",
+      "description": "Request latency in seconds (99th quantile)",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -613,9 +613,9 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "histogram_quantile(0.99, sum(rate(rest_client_request_latency_seconds_bucket{app=\"confluent-operator\",\nconfluent_platform=\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\",verb=\"POST\"}[5m])) by (verb, url, le))",
+          "expr": "histogram_quantile(0.99, sum(rate(confluent_operator_controller_reconcile_latency_time_seconds_bucket{app=\"confluent-operator\",confluent_platform=\"true\"}[5m])) by (controller, le))",
           "interval": "",
-          "legendFormat": "{{ verb }} {{ url }}",
+          "legendFormat": "{{controller}}",
           "refId": "A"
         }
       ],
@@ -623,298 +623,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Post Request Latency 99th Quantile",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:206",
-          "format": "s",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:207",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "description": "Request latency in seconds",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 34
-      },
-      "hiddenSeries": false,
-      "id": 22,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.3",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "histogram_quantile(0.99, sum(rate(rest_client_request_latency_seconds_bucket{app=\"confluent-operator\",\nconfluent_platform=\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\",verb=\"GET\"}[5m])) by (verb, url, le))",
-          "interval": "",
-          "legendFormat": "{{ verb }} {{ url }}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Get Request Latency 99th Quantile",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:206",
-          "format": "s",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:207",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "description": "Request latency in seconds",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 16,
-        "w": 12,
-        "x": 12,
-        "y": 34
-      },
-      "hiddenSeries": false,
-      "id": 38,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.3",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "histogram_quantile(0.99, sum(rate(rest_client_request_latency_seconds_bucket{app=\"confluent-operator\",\nconfluent_platform=\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\",verb=\"PATCH\"}[5m])) by (verb, url, le))",
-          "interval": "",
-          "legendFormat": "{{ verb }} {{ url }}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Patch Request Latency 99th Quantile",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:206",
-          "format": "s",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:207",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "description": "Request latency in seconds",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 42
-      },
-      "hiddenSeries": false,
-      "id": 39,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.3",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "histogram_quantile(0.99, sum(rate(rest_client_request_latency_seconds_bucket{app=\"confluent-operator\",\nconfluent_platform=\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\",verb=\"PUT\"}[5m])) by (verb, url, le))",
-          "interval": "",
-          "legendFormat": "{{ verb }} {{ url }}",
-          "refId": "A"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "PUT Request Latency 99th Quantile",
+      "title": "Request Latency",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -1014,9 +723,9 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "confluent_operator_readiness_probe_count{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}",
+          "expr": "confluent_operator_readiness_probe_count{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}",
           "interval": "",
-          "legendFormat": "{{ kubernetes_pod_name }}",
+          "legendFormat": "{{ pod }}",
           "refId": "A"
         }
       ],
@@ -1110,9 +819,9 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "confluent_operator_liveness_probe_count{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}",
+          "expr": "confluent_operator_liveness_probe_count{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}",
           "interval": "",
-          "legendFormat": "{{ kubernetes_pod_name }}",
+          "legendFormat": "{{ pod }}",
           "refId": "A"
         }
       ],
@@ -1146,104 +855,6 @@
         },
         {
           "$$hashKey": "object:98",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "description": "Total number of secretRef errors per controller",
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 59
-      },
-      "hiddenSeries": false,
-      "id": 37,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.5.3",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "exemplar": true,
-          "expr": "ceil(sum(increase(confluent_operator_secret_ref_error_total{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}[5m])) by (name, namespace))",
-          "hide": false,
-          "interval": "",
-          "legendFormat": "{{name}}  - {{namespace}} ",
-          "refId": "B"
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Secret Reference Error",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:206",
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "$$hashKey": "object:207",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -1319,7 +930,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "histogram_quantile(0.99, sum(rate(workqueue_queue_duration_seconds_bucket{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}[5m])) by (name, le))",
+          "expr": "histogram_quantile(0.99, sum(rate(workqueue_queue_duration_seconds_bucket{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}[5m])) by (name, le))",
           "interval": "",
           "legendFormat": "{{ name }}",
           "refId": "A"
@@ -1416,7 +1027,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(rate(workqueue_unfinished_work_seconds{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}[5m])) by (name)",
+          "expr": "sum(rate(workqueue_unfinished_work_seconds{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}[5m])) by (name)",
           "interval": "",
           "legendFormat": "{{ name }}",
           "refId": "A"
@@ -1513,7 +1124,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(rate(workqueue_longest_running_processor_seconds{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}[5m])) by (name)",
+          "expr": "sum(rate(workqueue_longest_running_processor_seconds{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}[5m])) by (name)",
           "interval": "",
           "legendFormat": "{{ name }}",
           "refId": "A"
@@ -1610,7 +1221,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(rate(workqueue_retries_total{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}[5m])) by (name, le)",
+          "expr": "sum(rate(workqueue_retries_total{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}[5m])) by (name, le)",
           "interval": "",
           "legendFormat": "{{ name }}",
           "refId": "A"
@@ -1707,7 +1318,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "histogram_quantile(0.99, sum(rate(workqueue_work_duration_seconds_bucket{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}[5m])) by (le, name))",
+          "expr": "histogram_quantile(0.99, sum(rate(workqueue_work_duration_seconds_bucket{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}[5m])) by (le, name))",
           "hide": false,
           "interval": "",
           "legendFormat": "{{name}} ",
@@ -1805,7 +1416,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(rate(workqueue_depth{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}[5m])) by (name, le)",
+          "expr": "sum(rate(workqueue_depth{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}[5m])) by (name, le)",
           "interval": "",
           "legendFormat": "{{ name }}",
           "refId": "A"
@@ -1902,7 +1513,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(rate(workqueue_adds_total{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}[5m])) by (name, le)",
+          "expr": "sum(rate(workqueue_adds_total{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}[5m])) by (name, le)",
           "interval": "",
           "legendFormat": "{{ name }}",
           "refId": "A"
@@ -2012,14 +1623,14 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "go_memstats_mspan_inuse_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}",
+          "expr": "go_memstats_mspan_inuse_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}",
           "interval": "1",
           "legendFormat": "go_memstats_mspan_inuse_bytes",
           "refId": "A"
         },
         {
           "exemplar": true,
-          "expr": "go_memstats_mspan_sys_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}",
+          "expr": "go_memstats_mspan_sys_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}",
           "hide": false,
           "interval": "1",
           "legendFormat": "go_memstats_mspan_sys_byte",
@@ -2027,7 +1638,7 @@
         },
         {
           "exemplar": true,
-          "expr": "go_memstats_mcache_inuse_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}",
+          "expr": "go_memstats_mcache_inuse_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}",
           "hide": false,
           "interval": "1",
           "legendFormat": "go_memstats_mcache_inuse_bytes",
@@ -2035,7 +1646,7 @@
         },
         {
           "exemplar": true,
-          "expr": "go_memstats_mcache_sys_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}",
+          "expr": "go_memstats_mcache_sys_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}",
           "hide": false,
           "interval": "1",
           "legendFormat": "go_memstats_mcache_sys_bytes",
@@ -2043,7 +1654,7 @@
         },
         {
           "exemplar": true,
-          "expr": "go_memstats_buck_hash_sys_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}",
+          "expr": "go_memstats_buck_hash_sys_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}",
           "hide": false,
           "interval": "1",
           "legendFormat": "go_memstats_buck_hash_sys_bytes",
@@ -2051,7 +1662,7 @@
         },
         {
           "exemplar": true,
-          "expr": "go_memstats_gc_sys_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}",
+          "expr": "go_memstats_gc_sys_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}",
           "hide": false,
           "interval": "1",
           "legendFormat": "go_memstats_gc_sys_bytes",
@@ -2059,7 +1670,7 @@
         },
         {
           "exemplar": true,
-          "expr": "go_memstats_other_sys_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"} -  go_memstats_other_sys_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}",
+          "expr": "go_memstats_other_sys_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"} -  go_memstats_other_sys_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}",
           "hide": false,
           "interval": "1",
           "legendFormat": "Other runtime allocation",
@@ -2067,7 +1678,7 @@
         },
         {
           "exemplar": true,
-          "expr": "go_memstats_next_gc_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}",
+          "expr": "go_memstats_next_gc_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}",
           "hide": false,
           "interval": "1",
           "legendFormat": "go_memstats_next_gc_bytes",
@@ -2164,14 +1775,14 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "go_memstats_heap_alloc_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}",
+          "expr": "go_memstats_heap_alloc_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}",
           "interval": "1",
           "legendFormat": "go_memstats_heap_alloc_bytes",
           "refId": "A"
         },
         {
           "exemplar": true,
-          "expr": "go_memstats_heap_sys_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}",
+          "expr": "go_memstats_heap_sys_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}",
           "hide": false,
           "interval": "1",
           "legendFormat": "go_memstats_heap_sys_bytes",
@@ -2179,7 +1790,7 @@
         },
         {
           "exemplar": true,
-          "expr": "go_memstats_heap_idle_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}",
+          "expr": "go_memstats_heap_idle_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}",
           "hide": false,
           "interval": "1",
           "legendFormat": "go_memstats_heap_idle_bytes",
@@ -2187,7 +1798,7 @@
         },
         {
           "exemplar": true,
-          "expr": "go_memstats_heap_inuse_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}",
+          "expr": "go_memstats_heap_inuse_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}",
           "hide": false,
           "interval": "1",
           "legendFormat": "go_memstats_heap_inuse_bytes",
@@ -2195,7 +1806,7 @@
         },
         {
           "exemplar": true,
-          "expr": "go_memstats_heap_released_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}",
+          "expr": "go_memstats_heap_released_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}",
           "hide": false,
           "interval": "1",
           "legendFormat": "go_memstats_heap_released_bytes",
@@ -2292,14 +1903,14 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "go_memstats_stack_inuse_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}",
+          "expr": "go_memstats_stack_inuse_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}",
           "interval": "1",
           "legendFormat": "go_memstats_stack_inuse_bytes",
           "refId": "A"
         },
         {
           "exemplar": true,
-          "expr": "go_memstats_stack_sys_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}",
+          "expr": "go_memstats_stack_sys_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}",
           "hide": false,
           "interval": "1",
           "legendFormat": "go_memstats_stack_sys_bytes",
@@ -2396,7 +2007,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "go_memstats_sys_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}",
+          "expr": "go_memstats_sys_bytes{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}",
           "format": "time_series",
           "instant": false,
           "interval": "",
@@ -2495,7 +2106,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "rate(go_memstats_mallocs_total{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}[5m])",
+          "expr": "rate(go_memstats_mallocs_total{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}[5m])",
           "interval": "1",
           "legendFormat": "go_memstats_mallocs_total",
           "refId": "A"
@@ -2591,7 +2202,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "rate(go_memstats_lookups_total{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}[2m])",
+          "expr": "rate(go_memstats_lookups_total{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}[2m])",
           "interval": "1",
           "legendFormat": "go_memstats_lookups_total",
           "refId": "A"
@@ -2687,7 +2298,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "go_goroutines{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}",
+          "expr": "go_goroutines{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}",
           "interval": "1",
           "legendFormat": "go_goroutines",
           "refId": "A"
@@ -2784,7 +2395,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(rate(go_gc_duration_seconds_sum{app=\"confluent-operator\",confluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}[5m])) / sum(rate(go_gc_duration_seconds_count{app=\"confluent-operator\",confluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}[5m]))",
+          "expr": "sum(rate(go_gc_duration_seconds_sum{app=\"confluent-operator\",confluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}[5m])) / sum(rate(go_gc_duration_seconds_count{app=\"confluent-operator\",confluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}[5m]))",
           "instant": false,
           "interval": "",
           "legendFormat": "gc-duration-mean",
@@ -2881,7 +2492,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "rate(go_memstats_alloc_bytes_total{app=\"confluent-operator\",\nconfluent_platform=~\"true\",kubernetes_namespace=~\"$namespace\",kubernetes_pod_name=~\"$pod_name\"}[2m])",
+          "expr": "rate(go_memstats_alloc_bytes_total{app=\"confluent-operator\",\nconfluent_platform=~\"true\",namespace=~\"$namespace\",pod=~\"$pod_name\"}[2m])",
           "interval": "1",
           "legendFormat": "go_memstats_alloc_bytes_total",
           "refId": "A"
@@ -2941,7 +2552,7 @@
         "allValue": null,
         "current": {},
         "datasource": "${DS_PROMETHEUS}",
-        "definition": "label_values(kube_pod_labels{label_app=\"confluent-operator\"}, kubernetes_namespace)",
+        "definition": "label_values(kube_pod_labels{pod=~\"confluent-operator.*\"}, namespace)",
         "description": null,
         "error": null,
         "hide": 0,
@@ -2951,7 +2562,7 @@
         "name": "namespace",
         "options": [],
         "query": {
-          "query": "label_values(kube_pod_labels{label_app=\"confluent-operator\"}, kubernetes_namespace)",
+          "query": "label_values(kube_pod_labels{pod=~\"confluent-operator.*\"}, namespace)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 2,
@@ -2968,7 +2579,7 @@
         "allValue": null,
         "current": {},
         "datasource": "${DS_PROMETHEUS}",
-        "definition": "label_values(controller_runtime_reconcile_time_seconds_bucket{confluent_platform=\"true\",app_kubernetes_io_name=\"confluent-operator\", kubernetes_namespace=\"$namespace\"}, kubernetes_pod_name)",
+        "definition": "label_values(controller_runtime_reconcile_time_seconds_bucket{confluent_platform=\"true\",app_kubernetes_io_name=\"confluent-operator\", namespace=\"$namespace\"}, pod)",
         "description": null,
         "error": null,
         "hide": 0,
@@ -2978,7 +2589,7 @@
         "name": "pod_name",
         "options": [],
         "query": {
-          "query": "label_values(controller_runtime_reconcile_time_seconds_bucket{confluent_platform=\"true\",app_kubernetes_io_name=\"confluent-operator\", kubernetes_namespace=\"$namespace\"}, kubernetes_pod_name)",
+          "query": "label_values(controller_runtime_reconcile_time_seconds_bucket{confluent_platform=\"true\",app_kubernetes_io_name=\"confluent-operator\", namespace=\"$namespace\"}, pod)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 2,
