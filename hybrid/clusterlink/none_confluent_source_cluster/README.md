@@ -47,14 +47,9 @@ openssl req -new -key $TUTORIAL_HOME/ca-key.pem -x509 \
 ```
 Then, provide the certificate authority as a Kubernetes secret ca-pair-sslcerts
 ```
-kubectl -n source create secret tls ca-pair-sslcerts \
-    --cert=$TUTORIAL_HOME/ca.pem \
-    --key=$TUTORIAL_HOME/ca-key.pem 
-
 kubectl -n destination create secret tls ca-pair-sslcerts \
     --cert=$TUTORIAL_HOME/ca.pem \
     --key=$TUTORIAL_HOME/ca-key.pem   
-
 ```
 
 #### deploy source zookeeper, kafka cluster and topic `demo` in namespace `source`
@@ -84,20 +79,8 @@ kubectl -n destination create secret generic password-encoder-secret \
 ```
 #### deploy destination zookeeper and kafka cluster in namespace `destination`
 
+```
     kubectl apply -f $TUTORIAL_HOME/zk-kafka-destination.yaml
-
-### Create TLS Secret to connect Source Cluster using PKCS8 Key format.
-
-#### convert key to PKCS8 format
-```
-openssl pkcs8 -in $TUTORIAL_HOME../../../assets/certs/component-certs/generated/kafka-server-key.pem -topk8 -nocrypt -out $TUTORIAL_HOME../../../assets/certs/component-certs/generated/kafka-server-key-pkcs8.pem
-```
-#### Create client secret
-```
-kubectl -n destination create secret generic source-tls-secret \
-    --from-file=fullchain.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/kafka-server.pem \
-    --from-file=cacerts.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/cacerts.pem \
-    --from-file=privkey.pem=$TUTORIAL_HOME../../../assets/certs/component-certs/generated/kafka-server-key-pkcs8.pem
 ```
 
 After the Kafka cluster is in running state, create cluster link between source and destination. Cluster link will be created in the destination cluster
@@ -105,7 +88,7 @@ After the Kafka cluster is in running state, create cluster link between source 
 ### Create a topic on the source cluster and produce some data
 
 ```
-kubectl  -n destination exec -it notcflt  -- bash
+kubectl -n destination exec -it notcflt  -- bash
 /opt/kafka_2.13-2.6.0/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --partitions 3 --replication-factor 1  --topic demo
 seq 1000 | /opt/kafka_2.13-2.6.0/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic demo
 ```
@@ -118,7 +101,9 @@ You will need to keep the cluster ID from the source cluster:
 use the above value in the field `clusterID` line 13 in file `$TUTORIAL_HOME/clusterlink.yaml`.  
 
 #### create clusterlink between source and destination
+```
     kubectl apply -f $TUTORIAL_HOME/clusterlink.yaml
+```
 
 ### Run test
 
