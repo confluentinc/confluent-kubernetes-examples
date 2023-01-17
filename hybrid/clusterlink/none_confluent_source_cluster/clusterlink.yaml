@@ -1,0 +1,15 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: ClusterLink
+metadata:
+  name: clusterlink-cflt
+  namespace: destination
+spec:
+  destinationKafkaCluster:
+    kafkaRestClassRef:
+      name: destination-kafka-rest
+      namespace: destination
+  sourceKafkaCluster:
+    bootstrapEndpoint: cflt:9092
+    clusterID: 3Plt-pdZS5KQTBl-wIcLSw
+  mirrorTopics:
+  - name: demo
