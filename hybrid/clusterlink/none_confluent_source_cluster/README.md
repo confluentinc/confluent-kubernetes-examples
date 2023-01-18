@@ -161,11 +161,56 @@ kafka-console-producer --topic demo --bootstrap-server kafka.destination.svc.clu
 >[2023-01-18 11:10:59,329] ERROR Error when sending message to topic demo with key: null, value: 3 bytes with error: (org.apache.kafka.clients.producer.internals.ErrorLoggingCallback)
 org.apache.kafka.common.errors.InvalidRequestException: Cannot append records to read-only mirror topic 'demo'
 ```
+### Filter using
+
+Create a set of topics (filterdemo 1-5):  
+```
+kubectl -n destination exec -it notcflt  -- bash
+for i in {1..5}; do /opt/kafka_2.13-3.3.1/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --partitions 3 --replication-factor 1  --topic filterdemo$i; done
+for i in {1..5}; do seq 1000 | /opt/kafka_2.13-3.3.1/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic filterdemo$i; done
+```
+Verify that there are messages in the source topic: 
+```
+/opt/kafka_2.13-3.3.1/bin/kafka-console-consumer.sh --from-beginning --topic filterdemo5 --bootstrap-server localhost:9092 
+```  
+First create a Cluster Link with autoCreateTopics disabled:
+
+```
+  mirrorTopicOptions:
+    autoCreateTopics: 
+      enabled: false
+      topicFilters: 
+        - filterType: INCLUDE
+          name: filterdemo
+          patternType: PREFIXED
+    prefix: "dest-"
+```
+
+```
+kubectl -n destination apply -f $TUTORIAL_HOME/clusterlinkfilter-disabled.yaml
+kubectl -n destination get cl
+```
+
+Notice that nothing is being created.
+Now change to `enabled: true`, wait 5 minutes (default metadata duration): 
+```
+kubectl -n destination apply -f $TUTORIAL_HOME/clusterlinkfilter-enabled.yaml
+```
+Check for the topics on the destination cluster: 
+```
+kafka-topics --bootstrap-server kafka.destination.svc.cluster.local:9071 --command-config /tmp/kafka.properties --list
+```
+Once the topics are there, consume from the destination topics:  
+```
+kafka-console-consumer --from-beginning --topic dest-filterdemo5  --bootstrap-server kafka.destination.svc.cluster.local:9071  --consumer.config /tmp/kafka.properties
+```
+
 
 ### Tear down 
 
 ```
 kubectl -n destination delete -f $TUTORIAL_HOME/clusterlink.yaml
+kubectl -n destination delete -f $TUTORIAL_HOME/clusterlinkfilter-enabled.yaml
 kubectl -n destination delete -f $TUTORIAL_HOME/zk-kafka-destination.yaml
 kubectl -n destination delete secret password-encoder-secret
 kubectl -n destination delete secret rest-credential

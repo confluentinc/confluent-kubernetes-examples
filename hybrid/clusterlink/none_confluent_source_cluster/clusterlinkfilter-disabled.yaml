@@ -1,7 +1,7 @@
 apiVersion: platform.confluent.io/v1beta1
 kind: ClusterLink
 metadata:
-  name: clusterlink-cflt
+  name: clusterlink-cflt-filter
   namespace: destination
 spec:
   destinationKafkaCluster:
@@ -11,5 +11,11 @@ spec:
   sourceKafkaCluster:
     bootstrapEndpoint: notcflt.destination.svc.cluster.local:9092
     clusterID: XqsWIFY8TcqYbIr_YMxJ2g
-  mirrorTopics:
-  - name: demo
+  mirrorTopicOptions:
+    autoCreateTopics: 
+      enabled: false
+      topicFilters: 
+        - filterType: INCLUDE
+          name: filterdemo
+          patternType: PREFIXED
+    prefix: "dest-"
