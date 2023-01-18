@@ -56,8 +56,8 @@ kubectl -n destination create secret tls ca-pair-sslcerts \
 
 ```
 kubectl -n destination exec -it notcflt  -- bash
-/opt/kafka_2.13-2.6.0/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --partitions 3 --replication-factor 1  --topic demo
-seq 1000 | /opt/kafka_2.13-2.6.0/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic demo
+/opt/kafka_2.13-3.3.1/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --partitions 3 --replication-factor 1  --topic demo
+seq 1000 | /opt/kafka_2.13-3.3.1/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic demo
 ```
 
 You will need to keep the cluster ID from the source cluster:  

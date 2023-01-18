@@ -10,6 +10,6 @@ spec:
       namespace: destination
   sourceKafkaCluster:
     bootstrapEndpoint: notcflt.destination.svc.cluster.local:9092
-    clusterID: uvFK80CBQpOqUuEmBViPDQ
+    clusterID: JhRCpEDwQ3mhH2ftOUvOcQ
   mirrorTopics:
   - name: demo
