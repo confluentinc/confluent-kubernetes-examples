@@ -9,7 +9,7 @@ spec:
       name: destination-kafka-rest
       namespace: destination
   sourceKafkaCluster:
-    bootstrapEndpoint: cflt:9092
-    clusterID: 3Plt-pdZS5KQTBl-wIcLSw
+    bootstrapEndpoint: notcflt.destination.svc.cluster.local:9092
+    clusterID: uvFK80CBQpOqUuEmBViPDQ
   mirrorTopics:
   - name: demo

@@ -1,14 +1,14 @@
 ## ClusterLink Setup
 
 ### Kafka Cluster with Mutual TLS Authentication
-In this example, source is running without any security and destination kafka run in mutual TLS mode.
+In this example, source is running opensource kafka without any security and destination Confluent Server run in mutual TLS mode.
 
 ## Set up Pre-requisites
 Set the tutorial directory for this tutorial under the directory you downloaded
 the tutorial files:
 
 ```
-export TUTORIAL_HOME=<Tutorial directory>/hybrid/clusterlink/none_confluent_source_cluster
+export TUTORIAL_HOME=$PWD/hybrid/clusterlink/none_confluent_source_cluster
 ```
 
 ```
@@ -31,12 +31,11 @@ kubectl -n destination create secret generic credential \
     --from-file=basic.txt=$TUTORIAL_HOME/creds-basic-users.txt
 ```
 
-### Source Cluster Deployment
-### create required secrets
+### Source Cluster Deployment  
 ```
 kubectl -n destination apply -f $TUTORIAL_HOME/zk-kafka-source.yaml
 ```
-
+### create required secrets  
 Generate a CA pair to use in this tutorial:
 ```
 openssl genrsa -out $TUTORIAL_HOME/ca-key.pem 2048
@@ -45,17 +44,28 @@ openssl req -new -key $TUTORIAL_HOME/ca-key.pem -x509 \
   -out $TUTORIAL_HOME/ca.pem \
   -subj "/C=US/ST=CA/L=MountainView/O=Confluent/OU=Operator/CN=TestCA"
 ```
-Then, provide the certificate authority as a Kubernetes secret ca-pair-sslcerts
+Then, provide the certificate authority as a Kubernetes secret ca-pair-sslcerts  
+
 ```
 kubectl -n destination create secret tls ca-pair-sslcerts \
     --cert=$TUTORIAL_HOME/ca.pem \
     --key=$TUTORIAL_HOME/ca-key.pem   
 ```
 
-#### deploy source zookeeper, kafka cluster and topic `demo` in namespace `source`
+### Create a topic on the source cluster and produce some data
+
 ```
-kubectl apply -n destination -f $TUTORIAL_HOME/zk-kafka-source.yaml
+kubectl -n destination exec -it notcflt  -- bash
+/opt/kafka_2.13-2.6.0/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --partitions 3 --replication-factor 1  --topic demo
+seq 1000 | /opt/kafka_2.13-2.6.0/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic demo
 ```
+
+You will need to keep the cluster ID from the source cluster:  
+```
+ grep cluster /tmp/kafka-logs/meta.properties | cut -d "=" -f 2
+```  
+
+Use the above value in the field `clusterID` line 13 in file `$TUTORIAL_HOME/clusterlink.yaml`.  
 
 ### Destination Cluster Deployment
 #### create required secrets
@@ -80,51 +90,66 @@ kubectl -n destination create secret generic password-encoder-secret \
 #### deploy destination zookeeper and kafka cluster in namespace `destination`
 
 ```
-    kubectl apply -f $TUTORIAL_HOME/zk-kafka-destination.yaml
+kubectl apply -f $TUTORIAL_HOME/zk-kafka-destination.yaml
 ```
 
-After the Kafka cluster is in running state, create cluster link between source and destination. Cluster link will be created in the destination cluster
-
-### Create a topic on the source cluster and produce some data
+After the Kafka cluster is in running state, create cluster link between source and destination. Cluster link will be created in the destination cluster.
 
 ```
-kubectl -n destination exec -it notcflt  -- bash
-/opt/kafka_2.13-2.6.0/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --partitions 3 --replication-factor 1  --topic demo
-seq 1000 | /opt/kafka_2.13-2.6.0/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic demo
+kubectl -n destination get pods     
 ```
-
-You will need to keep the cluster ID from the source cluster:  
-```
- grep cluster /tmp/kafka-logs/meta.properties | cut -d "=" -f 2
-```  
-
-use the above value in the field `clusterID` line 13 in file `$TUTORIAL_HOME/clusterlink.yaml`.  
 
 #### create clusterlink between source and destination
 ```
-    kubectl apply -f $TUTORIAL_HOME/clusterlink.yaml
+kubectl apply -f $TUTORIAL_HOME/clusterlink.yaml
+kubectl -n destination get cl     
 ```
 
 ### Run test
 
 #### open a new terminal and exec into destination kafka pod
-    kubectl -n destination exec kafka-0 -it -- bash
+```
+kubectl -n destination exec kafka-0 -it -- bash
+```
 
 #### create kafka.properties for destination kafka cluster
-    cat <<EOF > /tmp/kafka.properties
-    bootstrap.servers=kafka.destination.svc.cluster.local:9071
-    security.protocol=SSL
-    ssl.truststore.location=/mnt/sslcerts/truststore.p12
-    ssl.truststore.password=mystorepassword
-    ssl.keystore.location=/mnt/sslcerts/keystore.p12
-    ssl.keystore.password=mystorepassword
-    EOF
+
+```
+cat <<EOF > /tmp/kafka.properties
+bootstrap.servers=kafka.destination.svc.cluster.local:9071
+security.protocol=SSL
+ssl.truststore.location=/mnt/sslcerts/truststore.p12
+ssl.truststore.password=mystorepassword
+ssl.keystore.location=/mnt/sslcerts/keystore.p12
+ssl.keystore.password=mystorepassword
+EOF
+```
 
 #### validate topic is created in destination kafka cluster
-    kafka-topics --describe --topic demo --bootstrap-server kafka.destination.svc.cluster.local:9071 --command-config /tmp/kafka.properties
+
+```
+kafka-topics --describe --topic demo --bootstrap-server kafka.destination.svc.cluster.local:9071 --command-config /tmp/kafka.properties
+```
 
 #### consume in destination kafka cluster and confirm message delivery in destination cluster
 
-    kafka-console-consumer --from-beginning --topic demo --bootstrap-server  kafka.destination.svc.cluster.local:9071  --consumer.config /tmp/kafka.properties
+```
+kafka-console-consumer --from-beginning --topic demo --bootstrap-server kafka.destination.svc.cluster.local:9071  --consumer.config /tmp/kafka.properties
+```
 
 
+### Tear down 
+
+```
+kubectl -n destination delete -f $TUTORIAL_HOME/clusterlink.yaml
+kubectl -n destination delete -f $TUTORIAL_HOME/zk-kafka-destination.yaml
+kubectl -n destination delete secret password-encoder-secret
+kubectl -n destination delete secret rest-credential
+kubectl -n destination delete secret destination-tls-group1
+kubectl -n destination delete secret destination-tls-zk1
+kubectl -n destination delete secret ca-pair-sslcerts
+kubectl -n destination delete secret credential
+kubectl -n destination delete -f $TUTORIAL_HOME/zk-kafka-source.yaml
+kubectl delete ns destination
+helm -n default delete confluent-operator
+```

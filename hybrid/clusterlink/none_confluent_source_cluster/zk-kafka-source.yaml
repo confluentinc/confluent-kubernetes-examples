@@ -3,7 +3,7 @@ kind: Pod
 metadata:
   name: notcflt
   labels:
-    app.kubernetes.io/name: proxy
+    app.kubernetes.io/name: notcflt
 spec:
   containers:
   - name: notcflt
@@ -18,7 +18,7 @@ metadata:
   name: notcflt
 spec:
   selector:
-    app.kubernetes.io/name: proxy
+    app.kubernetes.io/name: notcflt
   ports:
   - name: listener
     protocol: TCP
