@@ -137,6 +137,30 @@ kafka-topics --describe --topic demo --bootstrap-server kafka.destination.svc.cl
 kafka-console-consumer --from-beginning --topic demo --bootstrap-server kafka.destination.svc.cluster.local:9071  --consumer.config /tmp/kafka.properties
 ```
 
+### Commands to be used on the Confluent server if needed  
+```
+kubectl -n destination exec kafka-0 -it -- bash
+cat <<EOF > /tmp/kafka.properties
+bootstrap.servers=kafka.destination.svc.cluster.local:9071
+security.protocol=SSL
+ssl.truststore.location=/mnt/sslcerts/truststore.p12
+ssl.truststore.password=mystorepassword
+ssl.keystore.location=/mnt/sslcerts/keystore.p12
+ssl.keystore.password=mystorepassword
+EOF
+kafka-cluster-links --bootstrap-server kafka.destination.svc.cluster.local:9071 --command-config /tmp/kafka.properties --list
+kafka-cluster-links --bootstrap-server kafka.destination.svc.cluster.local:9071 --command-config /tmp/kafka.properties --list --link clusterlink-cflt --include-topics
+kafka-replica-status --bootstrap-server kafka.destination.svc.cluster.local:9071 --admin.config /tmp/kafka.properties --topics demo --include-mirror
+kafka-mirrors --describe --topics demo  --bootstrap-server kafka.destination.svc.cluster.local:9071 --command-config /tmp/kafka.properties
+```
+
+Check it's a read only:  
+```
+kafka-console-producer --topic demo --bootstrap-server kafka.destination.svc.cluster.local:9071 --producer.config /tmp/kafka.properties
+>test
+>[2023-01-18 11:10:59,329] ERROR Error when sending message to topic demo with key: null, value: 3 bytes with error: (org.apache.kafka.clients.producer.internals.ErrorLoggingCallback)
+org.apache.kafka.common.errors.InvalidRequestException: Cannot append records to read-only mirror topic 'demo'
+```
 
 ### Tear down 
 
