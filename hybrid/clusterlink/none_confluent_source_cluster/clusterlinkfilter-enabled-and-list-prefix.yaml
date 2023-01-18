@@ -16,8 +16,9 @@ spec:
       enabled: true
       topicFilters: 
         - filterType: INCLUDE
-          name: newfilter
+          name: newfilterdemo
           patternType: PREFIXED
     prefix: "merge-dest-"
   mirrorTopics:
-  - name: wormtopic
+  - name: merge-dest-atopic # must match prefix as a name https://docs.confluent.io/operator/current/co-link-clusters.html#create-a-mirror-topic
+    sourceTopicName: atopic

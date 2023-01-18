@@ -205,12 +205,75 @@ Once the topics are there, consume from the destination topics:
 kafka-console-consumer --from-beginning --topic dest-filterdemo5  --bootstrap-server kafka.destination.svc.cluster.local:9071  --consumer.config /tmp/kafka.properties
 ```
 
+## Filter and topic list together 
+
+### With prefix 
+If you're using `prefix` you must include `sourceTopicName` as well. 
+
+```
+  mirrorTopics:
+  - name: merge-dest-atopic # must match prefix as a name https://docs.confluent.io/operator/current/co-link-clusters.html#create-a-mirror-topic
+    sourceTopicName: atopic
+```
+
+Create a set of topics (newfilterdemo 1-5):  
+```
+kubectl -n destination exec -it notcflt  -- bash
+for i in {1..5}; do /opt/kafka_2.13-3.3.1/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --partitions 3 --replication-factor 1 --topic newfilterdemo$i; done
+for i in {1..5}; do seq 1000 | /opt/kafka_2.13-3.3.1/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic newfilterdemo$i; done
+
+/opt/kafka_2.13-3.3.1/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --partitions 3 --replication-factor 1 --topic atopic
+seq 1000 | /opt/kafka_2.13-3.3.1/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic atopic
+
+```
+Verify that there are messages in the source topic: 
+```
+/opt/kafka_2.13-3.3.1/bin/kafka-console-consumer.sh --from-beginning --topic newfilterdemo1 --bootstrap-server localhost:9092 
+```
+
+Apply the cluster link: 
+```
+kubectl -n destination apply -f $TUTORIAL_HOME/clusterlinkfilter-enabled-and-list-prefix.yaml
+```
+Check the topics on the destination cluster. 
+
+### Without prefix
+
+If you're **NOT** using `prefix` pass the change like so: 
+
+```
+  mirrorTopics:
+  - name: nopffilterdemo
+```
+Create a set of topics (newfilterdemo 1-5):  
+```
+kubectl -n destination exec -it notcflt  -- bash
+for i in {1..5}; do /opt/kafka_2.13-3.3.1/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --partitions 3 --replication-factor 1 --topic nopffilterdemo$i; done
+for i in {1..5}; do seq 1000 | /opt/kafka_2.13-3.3.1/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic nopffilterdemo$i; done
+
+/opt/kafka_2.13-3.3.1/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --partitions 3 --replication-factor 1 --topic npfatopic
+seq 1000 | /opt/kafka_2.13-3.3.1/bin/kafka-console-producer.sh --broker-list localhost:9092 --topic npfatopic
+
+```
+Verify that there are messages in the source topic: 
+```
+/opt/kafka_2.13-3.3.1/bin/kafka-console-consumer.sh --from-beginning --topic nopffilterdemo5 --bootstrap-server localhost:9092 
+```
+
+Apply the cluster link: 
+```
+kubectl -n destination apply -f $TUTORIAL_HOME/clusterlinkfilter-enabled-and-list-noprefix.yaml
+```
+Check the topics on the destination cluster. 
+
 
 ### Tear down 
 
 ```
 kubectl -n destination delete -f $TUTORIAL_HOME/clusterlink.yaml
 kubectl -n destination delete -f $TUTORIAL_HOME/clusterlinkfilter-enabled.yaml
+kubectl -n destination delete -f $TUTORIAL_HOME/clusterlinkfilter-enabled-and-list-prefix.yaml
+kubectl -n destination delete -f $TUTORIAL_HOME/clusterlinkfilter-enabled-and-list-noprefix.yaml
 kubectl -n destination delete -f $TUTORIAL_HOME/zk-kafka-destination.yaml
 kubectl -n destination delete secret password-encoder-secret
 kubectl -n destination delete secret rest-credential
