@@ -192,7 +192,7 @@ kubectl -n destination get cl
 ```
 
 Notice that nothing is being created.
-Now change to `enabled: true`, wait 5 minutes (default metadata duration): 
+Now change to `enabled: true`, wait 5 minutes ([default metadata duration](https://docs.confluent.io/platform/current/multi-dc-deployments/cluster-linking/topic-data-sharing.html#change-the-source-topics-partitions)): 
 ```
 kubectl -n destination apply -f $TUTORIAL_HOME/clusterlinkfilter-enabled.yaml
 ```
