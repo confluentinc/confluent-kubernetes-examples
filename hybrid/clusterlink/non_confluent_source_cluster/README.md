@@ -45,7 +45,7 @@ Use the above value in the field `clusterID` line 13 in file `$TUTORIAL_HOME/clu
 
 ### Destination Cluster Deployment
 
-### create required secrets  
+### Create required secrets  
 
 ```
 kubectl -n destination create secret generic credential \
@@ -87,7 +87,7 @@ kubectl -n destination create secret generic password-encoder-secret \
     --from-file=password-encoder.txt=$TUTORIAL_HOME/password-encoder-secret.txt
  
 ```
-#### deploy destination zookeeper and kafka cluster in namespace `destination`
+#### Deploy destination zookeeper and kafka cluster in namespace `destination`
 
 ```
 kubectl apply -f $TUTORIAL_HOME/zk-kafka-destination.yaml
@@ -99,7 +99,7 @@ After the Kafka cluster is in running state, create cluster link between source 
 kubectl -n destination get pods     
 ```
 
-#### create clusterlink between source and destination
+#### Create clusterlink between source and destination
 ```
 kubectl apply -f $TUTORIAL_HOME/clusterlink.yaml
 kubectl -n destination get cl     
@@ -107,12 +107,12 @@ kubectl -n destination get cl
 
 ### Run test
 
-#### open a new terminal and exec into destination kafka pod
+#### Open a new terminal and exec into destination kafka pod
 ```
 kubectl -n destination exec kafka-0 -it -- bash
 ```
 
-#### create kafka.properties for destination kafka cluster
+#### Create kafka.properties for destination kafka cluster
 
 ```
 cat <<EOF > /tmp/kafka.properties
@@ -125,13 +125,13 @@ ssl.keystore.password=mystorepassword
 EOF
 ```
 
-#### validate topic is created in destination kafka cluster
+#### Validate topic is created in destination kafka cluster
 
 ```
 kafka-topics --describe --topic demo --bootstrap-server kafka.destination.svc.cluster.local:9071 --command-config /tmp/kafka.properties
 ```
 
-#### consume in destination kafka cluster and confirm message delivery in destination cluster
+#### Consume in destination kafka cluster and confirm message delivery in destination cluster
 
 ```
 kafka-console-consumer --from-beginning --topic demo --bootstrap-server kafka.destination.svc.cluster.local:9071  --consumer.config /tmp/kafka.properties
