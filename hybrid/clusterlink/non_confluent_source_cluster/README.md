@@ -8,7 +8,7 @@ Set the tutorial directory for this tutorial under the directory you downloaded
 the tutorial files:
 
 ```
-export TUTORIAL_HOME=$PWD/hybrid/clusterlink/none_confluent_source_cluster
+export TUTORIAL_HOME=$PWD/hybrid/clusterlink/non_confluent_source_cluster
 ```
 
 ```
@@ -23,36 +23,12 @@ helm upgrade --install confluent-operator \
   --namespace default --set namespaced=false
 ```
 
-### create required secrets
-```
-kubectl -n destination create secret generic credential \
-    --from-file=plain-users.json=$TUTORIAL_HOME/creds-kafka-sasl-users.json \
-    --from-file=plain.txt=$TUTORIAL_HOME/creds-client-kafka-sasl-user.txt \
-    --from-file=basic.txt=$TUTORIAL_HOME/creds-basic-users.txt
-```
-
 ### Source Cluster Deployment  
 ```
 kubectl -n destination apply -f $TUTORIAL_HOME/zk-kafka-source.yaml
 ```
-### create required secrets  
-Generate a CA pair to use in this tutorial:
-```
-openssl genrsa -out $TUTORIAL_HOME/ca-key.pem 2048
-openssl req -new -key $TUTORIAL_HOME/ca-key.pem -x509 \
-  -days 1000 \
-  -out $TUTORIAL_HOME/ca.pem \
-  -subj "/C=US/ST=CA/L=MountainView/O=Confluent/OU=Operator/CN=TestCA"
-```
-Then, provide the certificate authority as a Kubernetes secret ca-pair-sslcerts  
 
-```
-kubectl -n destination create secret tls ca-pair-sslcerts \
-    --cert=$TUTORIAL_HOME/ca.pem \
-    --key=$TUTORIAL_HOME/ca-key.pem   
-```
-
-### Create a topic on the source cluster and produce some data
+#### Create a topic on the source cluster and produce some data
 
 ```
 kubectl -n destination exec -it notcflt  -- bash
@@ -68,7 +44,31 @@ You will need to keep the cluster ID from the source cluster:
 Use the above value in the field `clusterID` line 13 in file `$TUTORIAL_HOME/clusterlink.yaml`.  
 
 ### Destination Cluster Deployment
-#### create required secrets
+
+### create required secrets  
+
+```
+kubectl -n destination create secret generic credential \
+    --from-file=plain-users.json=$TUTORIAL_HOME/creds-kafka-sasl-users.json \
+    --from-file=plain.txt=$TUTORIAL_HOME/creds-client-kafka-sasl-user.txt \
+    --from-file=basic.txt=$TUTORIAL_HOME/creds-basic-users.txt
+```
+
+Generate a CA pair to use in this tutorial:
+```
+openssl genrsa -out $TUTORIAL_HOME/ca-key.pem 2048
+openssl req -new -key $TUTORIAL_HOME/ca-key.pem -x509 \
+  -days 1000 \
+  -out $TUTORIAL_HOME/ca.pem \
+  -subj "/C=US/ST=CA/L=MountainView/O=Confluent/OU=Operator/CN=TestCA"
+```
+Then, provide the certificate authority as a Kubernetes secret ca-pair-sslcerts  
+```
+kubectl -n destination create secret tls ca-pair-sslcerts \
+    --cert=$TUTORIAL_HOME/ca.pem \
+    --key=$TUTORIAL_HOME/ca-key.pem   
+```
+
 ```
 kubectl -n destination create secret generic destination-tls-zk1 \
     --from-file=fullchain.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/zookeeper-server.pem \
