@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: notcflt
+  labels:
+    app.kubernetes.io/name: notcflt
+spec:
+  containers:
+  - name: notcflt
+    image: mosheblumberg/zookeeper-kafka:3.3.1
+    ports:
+      - containerPort: 9092
+        name: listener
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notcflt
+spec:
+  selector:
+    app.kubernetes.io/name: notcflt
+  ports:
+  - name: listener
+    protocol: TCP
+    port: 9092
+    targetPort: 9092

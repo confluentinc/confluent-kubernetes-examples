@@ -1,0 +1,24 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: ClusterLink
+metadata:
+  name: clusterlink-cflt-filterandlist
+  namespace: destination
+spec:
+  destinationKafkaCluster:
+    kafkaRestClassRef:
+      name: destination-kafka-rest
+      namespace: destination
+  sourceKafkaCluster:
+    bootstrapEndpoint: notcflt.destination.svc.cluster.local:9092
+    clusterID: XqsWIFY8TcqYbIr_YMxJ2g
+  mirrorTopicOptions:
+    autoCreateTopics: 
+      enabled: true
+      topicFilters: 
+        - filterType: INCLUDE
+          name: newfilterdemo
+          patternType: PREFIXED
+    prefix: "merge-dest-"
+  mirrorTopics:
+  - name: merge-dest-atopic # must match prefix as a name https://docs.confluent.io/operator/current/co-link-clusters.html#create-a-mirror-topic
+    sourceTopicName: atopic
