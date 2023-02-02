@@ -18,7 +18,7 @@ Set the tutorial directory for this tutorial under the directory you downloaded
 the tutorial files:
 
 ```   
-export TUTORIAL_HOME=<Tutorial directory>/openshift-security
+export TUTORIAL_HOME=<Tutorial directory>/security/openshift-security
 ```
 
 ## Recommended: Install Confluent for Kubernetes using default SCC policy

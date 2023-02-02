@@ -34,7 +34,7 @@ the tutorial files:
 
 ::
    
-  export TUTORIAL_HOME=<Tutorial directory>/plaintext-ldaps-auth-control-center
+  export TUTORIAL_HOME=<Tutorial directory>/security/plaintext-ldaps-auth-control-center
 
 ===============================
 Deploy Confluent for Kubernetes

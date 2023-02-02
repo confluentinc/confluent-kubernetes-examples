@@ -25,7 +25,7 @@ the tutorial files:
 
 ::
    
-  export TUTORIAL_HOME=<Tutorial directory>/production-secure-deploy-auto-gen-certs
+  export TUTORIAL_HOME=<Tutorial directory>/security/production-secure-deploy-auto-gen-certs
   
 ===============================
 Deploy Confluent for Kubernetes

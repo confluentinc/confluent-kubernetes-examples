@@ -33,7 +33,7 @@ the tutorial files:
 
 ::
    
-  export TUTORIAL_HOME=<Tutorial directory>/plaintext-basic-auth-control-Center
+  export TUTORIAL_HOME=<Tutorial directory>/security/plaintext-basic-auth-control-Center
 
 ===============================
 Deploy Confluent for Kubernetes

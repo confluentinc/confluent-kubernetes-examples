@@ -27,7 +27,7 @@ the tutorial files:
 
 ::
    
-  export TUTORIAL_HOME=<Tutorial directory>/production-secure-deploy
+  export TUTORIAL_HOME=<Tutorial directory>/security/production-secure-deploy
   
 ===============================
 Deploy Confluent for Kubernetes
