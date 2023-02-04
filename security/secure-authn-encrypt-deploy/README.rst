@@ -34,7 +34,7 @@ the tutorial files:
 
 ::
    
-  export TUTORIAL_HOME=<Tutorial directory>/secure-authn-encrypt-deploy
+  export TUTORIAL_HOME=<Tutorial directory>/security/secure-authn-encrypt-deploy
 
 ===============================
 Deploy Confluent for Kubernetes

@@ -38,7 +38,7 @@ the tutorial files:
 
 ::
    
-  export TUTORIAL_HOME=<Tutorial directory>/plaintext-basic-auth-Connect
+  export TUTORIAL_HOME=<Tutorial directory>/security/plaintext-basic-auth-Connect
 
 ===============================
 Deploy Confluent for Kubernetes
