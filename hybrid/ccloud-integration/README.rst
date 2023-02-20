@@ -1,7 +1,7 @@
-Deploy Control Center Confluent Rest Proxy Connectors and ksqlDB using managed Confluent Cloud Kafka
+Deploy Control Center, Confluent Rest Proxy, ksqlDB, Connect, and Connectors using managed Confluent Cloud Kafka
 ================================================================
 
-You can use Confluent for Kubernetes to deploy and manage Control Center Confluent Rest Proxy Connectors and ksqlDB
+You can use Confluent for Kubernetes to deploy and manage Control Center, Confluent Rest Proxy, ksqlDB, Connect, and Connectors
 against a Confluent Cloud Kafka and Schema Registry.
 
 Before continuing with the scenario, ensure that you have set up the
