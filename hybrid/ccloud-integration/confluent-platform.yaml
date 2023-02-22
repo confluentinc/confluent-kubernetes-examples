@@ -30,6 +30,28 @@ spec:
         basic:
           secretRef: cloud-sr-access
 ---
+# Example to connect self-manged Schema Registry to Confluent Cloud
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-schema-registry:7.3.0
+    init: confluentinc/confluent-init-container:2.5.0
+  dependencies:
+    kafka:
+      bootstrapEndpoint: <cloudKafka_url>:9092
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: cloud-plain
+      tls:
+        enabled: true
+        ignoreTrustStoreConfig: true
+---
 apiVersion: platform.confluent.io/v1beta1
 kind: KsqlDB
 metadata:
@@ -114,6 +136,10 @@ metadata:
   name: kafkarestproxy
   namespace: confluent
 spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-kafka-rest:7.3.0
+    init: confluentinc/confluent-init-container:2.5.0
   dependencies:
     kafka:
       bootstrapEndpoint: <cloudKafka_url>:9092
@@ -130,7 +156,4 @@ spec:
         type: basic
         basic:
           secretRef: cloud-sr-access
-  image:
-    application: confluentinc/cp-kafka-rest:7.3.0
-    init: confluentinc/confluent-init-container:2.5.0
-  replicas: 1
+
