@@ -1,0 +1,19 @@
+{{- if not .Values.licenseSecretRef }}
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app: {{ include "confluent-operator.name" . }}
+    app.kubernetes.io/name: {{ include "confluent-operator.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: "confluent-operator"
+    helm.sh/chart: {{ include "confluent-operator.chart" . }}
+  namespace: {{ .Release.Namespace }}
+  name: confluent-operator-licensing
+type: Opaque
+data:
+  {{- if .Values.licenseKey }}
+  license.txt: {{ .Values.licenseKey | b64enc }}
+  {{- end }}
+{{- end }}

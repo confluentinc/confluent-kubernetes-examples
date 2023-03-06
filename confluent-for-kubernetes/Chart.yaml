@@ -1,0 +1,16 @@
+apiVersion: v1
+appVersion: 2.5.1
+description: A Helm chart to deploy Confluent for Kubernetes
+home: https://www.confluent.io/
+keywords:
+- Confluent
+- Confluent Operator
+- Confluent Platform
+- CFK
+maintainers:
+- email: operator@confluent.io
+  name: Confluent Operator
+name: confluent-for-kubernetes
+sources:
+- https://docs.confluent.io/current/index.html
+version: 0.581.34

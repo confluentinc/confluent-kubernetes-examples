@@ -1,0 +1,4 @@
+                                              The Confluent Operator
+
+The Confluent Operator brings the component (Confluent Services) specific controllers for kubernetes by providing components specific Custom Resource
+Definition (CRD) as well as managing other Confluent Platform services

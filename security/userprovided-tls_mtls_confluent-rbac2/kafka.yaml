@@ -1,0 +1,62 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server:7.3.0
+    init: confluentinc/confluent-init-container:2.5.0
+  dataVolumeCapacity: 10Gi
+  listeners:
+        # Will use the certificates in the parent secretRef tls-kafka
+    external:
+      authentication:
+        type: ldap
+  authorization:
+    type: simple
+    superUsers:
+    - User:kafka
+  services:
+    mds:
+      tokenKeyPair:
+        secretRef: mds-token
+      provider:
+        type: ldap
+        ldap:
+          address: ldap://ldap.confluent.svc.cluster.local:389
+          authentication:
+            type: simple
+            simple:
+              secretRef: credential
+          configurations:
+            groupNameAttribute: cn
+            groupObjectClass: group
+            groupMemberAttribute: member
+            groupMemberAttributePattern: CN=(.*),DC=test,DC=com
+            groupSearchBase: dc=test,dc=com
+            userNameAttribute: cn
+            userMemberOfAttributePattern: CN=(.*),DC=test,DC=com
+            userObjectClass: organizationalRole
+            userSearchBase: dc=test,dc=com
+  dependencies:
+    kafkaRest:
+      authentication:
+        type: bearer
+        bearer:
+          secretRef: mds-client
+    zookeeper:
+      endpoint: zookeeper.confluent.svc.cluster.local:2181
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: default
+  namespace: confluent
+spec:
+  kafkaRest:
+    authentication:
+      type: bearer
+      bearer:
+        secretRef: rest-credential

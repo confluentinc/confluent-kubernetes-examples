@@ -1,0 +1,165 @@
+{{- if .Values.rbac }}
+{{- $clusterRole := or (not .Values.namespaced) (gt (len .Values.namespaceList) 0)}}
+apiVersion: rbac.authorization.k8s.io/v1
+{{- if not $clusterRole }}
+kind: Role
+{{- else }}
+kind: ClusterRole
+{{- end }}
+metadata:
+  labels:
+    app: {{ include "confluent-operator.name" . }}
+    app.kubernetes.io/name: {{ include "confluent-operator.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: "confluent-operator"
+    helm.sh/chart: {{ include "confluent-operator.chart" . }}
+  name: {{ .Values.name }}
+  {{- if not $clusterRole }}
+  namespace: {{ .Release.Namespace }}
+  {{- end }}
+rules:
+- apiGroups:
+  - platform.confluent.io
+  resources:
+  - '*'
+  verbs:
+  - '*'
+- apiGroups:
+  - policy
+  resources:
+  - poddisruptionbudgets
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+{{- if .Values.clusterRole.openshift }}
+- apiGroups:
+  - route.openshift.io
+  resources:
+  - routes
+  - routes/custom-host
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+{{- end }}
+- apiGroups:
+  - apps
+  resources:
+  - statefulsets
+  - statefulsets/scale
+  - statefulsets/status
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - persistentvolumeclaims
+  - secrets
+  - secrets/finalizers
+  - pods
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+{{- if gt (int (.Values.replicas)) 1 }}
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - create
+  - get
+  - update
+{{- end }}
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  - ingresses/status
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+{{- if $clusterRole }}
+  - list
+  - watch
+{{- end }}
+{{- if .Values.webhooks.enabled }}
+# Webhook configurations are cluster scoped
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app: {{ include "confluent-operator.name" . }}
+    app.kubernetes.io/name: {{ include "confluent-operator.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: "confluent-operator"
+    helm.sh/chart: {{ include "confluent-operator.chart" . }}
+  name: {{ .Values.name }}-webhook-{{ .Release.Namespace }}
+rules:
+  - apiGroups:
+      - admissionregistration.k8s.io
+    resources:
+      - validatingwebhookconfigurations
+    verbs:
+      - get
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - persistentvolumes
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+    verbs:
+      - get
+      - list
+      - watch
+{{- end }}
+{{- end }}

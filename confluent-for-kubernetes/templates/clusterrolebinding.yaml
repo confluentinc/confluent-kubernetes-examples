@@ -1,0 +1,56 @@
+{{- if .Values.rbac }}
+{{- $clusterRoleBinding := or (not .Values.namespaced) (gt (len .Values.namespaceList) 0)}}
+{{- if not $clusterRoleBinding  }}
+kind: RoleBinding
+{{- else }}
+kind: ClusterRoleBinding
+{{- end }}
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  labels:
+    app: {{ include "confluent-operator.name" . }}
+    app.kubernetes.io/name: {{ include "confluent-operator.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: "confluent-operator"
+    helm.sh/chart: {{ include "confluent-operator.chart" . }}
+  name: {{ .Values.name }}
+  {{- if not $clusterRoleBinding  }}
+  namespace: {{ .Release.Namespace }}
+  {{- end }}
+subjects:
+- kind: ServiceAccount
+  name: {{ template "confluent-operator.service-account" . }}
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  {{- if not $clusterRoleBinding }}
+  kind: Role
+  {{- else }}
+  kind: ClusterRole
+  {{- end }}
+  name: {{ .Values.name }}
+  apiGroup: rbac.authorization.k8s.io
+# Webhook configurations are cluster scoped
+{{- if and (.Values.webhooks.enabled) }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app: {{ include "confluent-operator.name" . }}
+    app.kubernetes.io/name: {{ include "confluent-operator.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: "confluent-operator"
+    helm.sh/chart: {{ include "confluent-operator.chart" . }}
+  name: {{ .Values.name }}-webhook-{{ .Release.Namespace }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "confluent-operator.service-account" . }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ .Values.name }}-webhook-{{ .Release.Namespace }}
+  apiGroup: rbac.authorization.k8s.io
+  {{- end }}
+{{- end }}
