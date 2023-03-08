@@ -1,0 +1,16 @@
+# rolebinding `connect-0` gives user `connect` the role 
+# `SecurityAdmin` for cluster `connect` in namespace `confluent`
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: connect-0
+  namespace: confluent
+spec:
+  # The Connect cluster is named `connect` and is deployed in the namespace `confluent`
+  # The Connect cluster id naming pattern is: <namespace>.<connect-cluster-name>
+  clustersScopeByIds:
+    connectClusterId: confluent.connect
+  principal:
+    type: user
+    name: connect
+  role: SecurityAdmin
