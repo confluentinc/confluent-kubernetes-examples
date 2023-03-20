@@ -95,6 +95,21 @@ As a result, the Ingress resource should include rules that look something like 
                   number: 9073
 ```
 
+## Schema Registry Options
+
+Schema registry can be deployed in either active-passive mode or not. In active-passive, the schema registries in different regions need to communicate with each other so they can forward requests to the leader.
+
+To deploy in active-passive mode, the following requirements have to be met:
+
+1. Communication between schema registries done through external listener
+  - Set the server configOverride `inter.instance.listener.name=EXTERNAL`
+
+2. External access has to be defined on the external listener, and must be using loadBalancer. **Other methods not supported because active-passive schema registry forces port 8081**
+  - Set up `spec.listeners.external.externalAccess` to use a load balancer
+
+3. Schema registry is able to elect a leader
+  - Set the server configOverride `leader.eligibility=false` on passive cluster which shouldn't include the leader, and `true` on at least one (default `true`)
+
 ## Setup - Deploy Confluent for Kubernetes
 
 `export TUTORIAL_HOME=confluent-kubernetes-examples/hybrid/multi-region-clusters/external-access`
