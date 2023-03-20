@@ -13,12 +13,15 @@ kubectl create ns west --context mrc-west
 helm repo add confluentinc https://packages.confluent.io/helm
 
 # Install Confluent For Kubernetes
-helm upgrade --install cfk-operator confluentinc/confluent-for-kubernetes -n central --kube-context mrc-central
-helm upgrade --install cfk-operator confluentinc/confluent-for-kubernetes -n east --kube-context mrc-east
-helm upgrade --install cfk-operator confluentinc/confluent-for-kubernetes -n west --kube-context mrc-west
+# helm upgrade --install cfk-operator confluentinc/confluent-for-kubernetes -n central --values "$TUTORIAL_HOME"/values.yaml --kube-context mrc-central
+# helm upgrade --install cfk-operator confluentinc/confluent-for-kubernetes -n east --values "$TUTORIAL_HOME"/values.yaml --kube-context mrc-east
+# helm upgrade --install cfk-operator confluentinc/confluent-for-kubernetes -n west --values "$TUTORIAL_HOME"/values.yaml --kube-context mrc-west
 
 # Deploy OpenLdap
-helm upgrade --install -f "$TUTORIAL_HOME"/../../assets/openldap/ldaps-rbac.yaml open-ldap "$TUTORIAL_HOME"/../../assets/openldap -n central --kube-context mrc-central
+helm upgrade --install -f "$TUTORIAL_HOME"/../../../assets/openldap/ldaps-rbac.yaml open-ldap "$TUTORIAL_HOME"/../../../assets/openldap -n central --kube-context mrc-central
+
+# Create external access LB for LDAP
+kubectl apply -f "$TUTORIAL_HOME"/ldap-loadbalancer.yaml -n central --context mrc-central
 
 # Configure service account
 kubectl apply -f "$TUTORIAL_HOME"/confluent-platform/rack-awareness/service-account-rolebinding-central.yaml --context mrc-central
@@ -27,16 +30,16 @@ kubectl apply -f "$TUTORIAL_HOME"/confluent-platform/rack-awareness/service-acco
 
 # Create CFK CA TLS certificates for auto generating certs
 kubectl create secret tls ca-pair-sslcerts \
-  --cert="$TUTORIAL_HOME"/../../assets/certs/generated/ca.pem \
-  --key="$TUTORIAL_HOME"/../../assets/certs/generated/ca-key.pem \
+  --cert="$TUTORIAL_HOME"/../../../assets/certs/generated/ca.pem \
+  --key="$TUTORIAL_HOME"/../../../assets/certs/generated/ca-key.pem \
   -n central --context mrc-central
 kubectl create secret tls ca-pair-sslcerts \
-  --cert="$TUTORIAL_HOME"/../../assets/certs/generated/ca.pem \
-  --key="$TUTORIAL_HOME"/../../assets/certs/generated/ca-key.pem \
+  --cert="$TUTORIAL_HOME"/../../../assets/certs/generated/ca.pem \
+  --key="$TUTORIAL_HOME"/../../../assets/certs/generated/ca-key.pem \
   -n east --context mrc-east
 kubectl create secret tls ca-pair-sslcerts \
-  --cert="$TUTORIAL_HOME"/../../assets/certs/generated/ca.pem \
-  --key="$TUTORIAL_HOME"/../../assets/certs/generated/ca-key.pem \
+  --cert="$TUTORIAL_HOME"/../../../assets/certs/generated/ca.pem \
+  --key="$TUTORIAL_HOME"/../../../assets/certs/generated/ca-key.pem \
   -n west --context mrc-west
 
 # Configure credentials for Authentication and Authorization
@@ -62,18 +65,31 @@ kubectl create secret generic credential \
   --from-file=ldap.txt="$TUTORIAL_HOME"/confluent-platform/credentials/ldap-client.txt \
   -n west --context mrc-west
 
+# Configure credentials for kafka metric reporter (using replication credentials)
+kubectl create secret generic metric-creds \
+  --from-file=plain.txt=$TUTORIAL_HOME/confluent-platform/credentials/metric-users-client.txt \
+  -n central --context mrc-central
+
+kubectl create secret generic metric-creds \
+  --from-file=plain.txt=$TUTORIAL_HOME/confluent-platform/credentials/metric-users-client.txt \
+  -n east --context mrc-east
+
+kubectl create secret generic metric-creds \
+  --from-file=plain.txt=$TUTORIAL_HOME/confluent-platform/credentials/metric-users-client.txt \
+  -n west --context mrc-west
+
 # Create Kubernetes secret object for MDS:
 kubectl create secret generic mds-token \
-  --from-file=mdsPublicKey.pem="$TUTORIAL_HOME"/../../assets/certs/mds-publickey.txt \
-  --from-file=mdsTokenKeyPair.pem="$TUTORIAL_HOME"/../../assets/certs/mds-tokenkeypair.txt \
+  --from-file=mdsPublicKey.pem="$TUTORIAL_HOME"/../../../assets/certs/mds-publickey.txt \
+  --from-file=mdsTokenKeyPair.pem="$TUTORIAL_HOME"/../../../assets/certs/mds-tokenkeypair.txt \
   -n central --context mrc-central
 kubectl create secret generic mds-token \
-  --from-file=mdsPublicKey.pem="$TUTORIAL_HOME"/../../assets/certs/mds-publickey.txt \
-  --from-file=mdsTokenKeyPair.pem="$TUTORIAL_HOME"/../../assets/certs/mds-tokenkeypair.txt \
+  --from-file=mdsPublicKey.pem="$TUTORIAL_HOME"/../../../assets/certs/mds-publickey.txt \
+  --from-file=mdsTokenKeyPair.pem="$TUTORIAL_HOME"/../../../assets/certs/mds-tokenkeypair.txt \
   -n east --context mrc-east
 kubectl create secret generic mds-token \
-  --from-file=mdsPublicKey.pem="$TUTORIAL_HOME"/../../assets/certs/mds-publickey.txt \
-  --from-file=mdsTokenKeyPair.pem="$TUTORIAL_HOME"/../../assets/certs/mds-tokenkeypair.txt \
+  --from-file=mdsPublicKey.pem="$TUTORIAL_HOME"/../../../assets/certs/mds-publickey.txt \
+  --from-file=mdsTokenKeyPair.pem="$TUTORIAL_HOME"/../../../assets/certs/mds-tokenkeypair.txt \
   -n west --context mrc-west
 
 # Create Kafka RBAC credential
