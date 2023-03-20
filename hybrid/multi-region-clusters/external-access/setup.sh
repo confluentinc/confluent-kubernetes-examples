@@ -13,9 +13,9 @@ kubectl create ns west --context mrc-west
 helm repo add confluentinc https://packages.confluent.io/helm
 
 # Install Confluent For Kubernetes
-# helm upgrade --install cfk-operator confluentinc/confluent-for-kubernetes -n central --values "$TUTORIAL_HOME"/values.yaml --kube-context mrc-central
-# helm upgrade --install cfk-operator confluentinc/confluent-for-kubernetes -n east --values "$TUTORIAL_HOME"/values.yaml --kube-context mrc-east
-# helm upgrade --install cfk-operator confluentinc/confluent-for-kubernetes -n west --values "$TUTORIAL_HOME"/values.yaml --kube-context mrc-west
+helm upgrade --install cfk-operator confluentinc/confluent-for-kubernetes -n central --values "$TUTORIAL_HOME"/values.yaml --kube-context mrc-central
+helm upgrade --install cfk-operator confluentinc/confluent-for-kubernetes -n east --values "$TUTORIAL_HOME"/values.yaml --kube-context mrc-east
+helm upgrade --install cfk-operator confluentinc/confluent-for-kubernetes -n west --values "$TUTORIAL_HOME"/values.yaml --kube-context mrc-west
 
 # Deploy OpenLdap
 helm upgrade --install -f "$TUTORIAL_HOME"/../../../assets/openldap/ldaps-rbac.yaml open-ldap "$TUTORIAL_HOME"/../../../assets/openldap -n central --kube-context mrc-central
