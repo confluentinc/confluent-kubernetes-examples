@@ -25,7 +25,7 @@ In this tutorial, the configurations will be using LoadBalancer for all external
 If RBAC is enabled, the `kafka.spec.listeners.replication.externalAccess` field will also be used to create a token listener. This is handled differently in each of the external access types (expected URLs can also be seen in the status under token/replication listener) -
 
 ### NodePort
-With an offset of 30000 and replicas = 3, the bootstrap services will use ports 30000/30001 for replication and token. Then the ports will alternate betwen replication/token. So replication listener is on 30003/30005/30007, and token listener is on 30002/30004/30006.
+With an offset of 30000 and replicas = 3, the bootstrap services will use ports 30000/30001 for replication and token. Then the ports will alternate betwen replication/token. So replication listener is on 30002/30004/30006, and token listener is on 30003/30005/30007.
 
 ### StaticForPortBasedRouting
 Similar to node port, with an offset of 9094 and replicas = 3, the bootstrap service will use port 9093. Then the ports will alternate between replication/token. So replication listener is on 9094/9096/9098, and token listener is on 9095/9097/9099.
