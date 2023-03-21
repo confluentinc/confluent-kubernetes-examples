@@ -124,12 +124,13 @@ Provide custom TLS secret
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Due to the following known issues, ksqldb can not use auto-generated certificates for Confluent Cloud and Control Center can not use auto-generated certificates for MDS or Confluent Cloud Schema Registry:
-#. [ksqldb can not use auto-generated certificates for ccloud](https://docs.confluent.io/operator/current/co-troubleshooting.html#issue-ksqldb-cannot-use-auto-generated-certificates-for-ccloud)
-#. [control center cannot use auto-generated certificates for mds or ccloud sr](https://docs.confluent.io/operator/current/co-troubleshooting.html#issue-c3-cannot-use-auto-generated-certificates-for-mds-or-ccloud-sr)
+
+#. `ksqldb can not use auto-generated certificates for ccloud <https://docs.confluent.io/operator/current/co-troubleshooting.html#issue-ksqldb-cannot-use-auto-generated-certificates-for-ccloud>`
+#. [control center cannot use auto-generated certificates for mds or ccloud sr <https://docs.confluent.io/operator/current/co-troubleshooting.html#issue-c3-cannot-use-auto-generated-certificates-for-mds-or-ccloud-sr>` 
 
 As a workaround, a custom TLS secret with Let's encrypt root CA needs to be used in the Control Center or ksqldb custom resource file.
 
-#. Download the Let's Encrypt root CA in PEM format
+#. Download the `Let's Encrypt root CA <https://letsencrypt.org/certificates/>` in PEM format
 #. Add the Let's Encrypt root CA to the certificate authority ca.pem file. List the certificates by simply concatenating them, one below the other, for example:
    ::
 
