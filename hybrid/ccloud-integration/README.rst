@@ -125,12 +125,12 @@ Provide custom TLS secret
 
 Due to the following known issues, ksqldb can not use auto-generated certificates for Confluent Cloud and Control Center can not use auto-generated certificates for MDS or Confluent Cloud Schema Registry:
 
-#. `ksqldb can not use auto-generated certificates for ccloud <https://docs.confluent.io/operator/current/co-troubleshooting.html#issue-ksqldb-cannot-use-auto-generated-certificates-for-ccloud>`
-#. [control center cannot use auto-generated certificates for mds or ccloud sr <https://docs.confluent.io/operator/current/co-troubleshooting.html#issue-c3-cannot-use-auto-generated-certificates-for-mds-or-ccloud-sr>` 
+#. `ksqldb can not use auto-generated certificates for ccloud <https://docs.confluent.io/operator/current/co-troubleshooting.html#issue-ksqldb-cannot-use-auto-generated-certificates-for-ccloud>`_
+#. `control center cannot use auto-generated certificates for mds or ccloud sr <https://docs.confluent.io/operator/current/co-troubleshooting.html#issue-c3-cannot-use-auto-generated-certificates-for-mds-or-ccloud-sr>`_
 
 As a workaround, a custom TLS secret with Let's encrypt root CA needs to be used in the Control Center or ksqldb custom resource file.
 
-#. Download the `Let's Encrypt root CA <https://letsencrypt.org/certificates/>` in PEM format
+#. Download the `Let's Encrypt root CA <https://letsencrypt.org/certificates/>`_ in PEM format
 #. Add the Let's Encrypt root CA to the certificate authority ca.pem file. List the certificates by simply concatenating them, one below the other, for example:
    ::
 
@@ -141,7 +141,7 @@ As a workaround, a custom TLS secret with Let's encrypt root CA needs to be used
      ...
      -----END CERTIFICATE-----
 
-#. Create a [custom-secret](https://docs.confluent.io/operator/current/co-network-encryption.html#provide-tls-keys-and-certificates-in-pem-format) with ca.pem, server.pem and server-key.pem, and use this custom-secret in the Control Center/ksqldb custom resource file as required.
+#. Create a `custom-secret <https://docs.confluent.io/operator/current/co-network-encryption.html#provide-tls-keys-and-certificates-in-pem-format>`_ with ca.pem, server.pem and server-key.pem, and use this custom-secret in the Control Center/ksqldb custom resource file as required.
    ::
 
      kubectl create secret generic custom-secret \
