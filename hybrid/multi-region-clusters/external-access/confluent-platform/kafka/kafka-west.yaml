@@ -27,7 +27,7 @@ spec:
         jaasConfig:
           secretRef: credential
         type: digest
-      endpoint: zk-central-bs.platformops.dev.gcp.devel.cpdev.cloud:2182,zk-east-bs.platformops.dev.gcp.devel.cpdev.cloud:2182,zookeeper.west.svc.cluster.local:2182/mrc
+      endpoint: zk-central.platformops.dev.gcp.devel.cpdev.cloud:2182,zk-east.platformops.dev.gcp.devel.cpdev.cloud:2182,zookeeper.west.svc.cluster.local:2182/mrc
       tls:
         enabled: true
   image:
@@ -75,6 +75,14 @@ spec:
   replicas: 2
   services:
     mds:
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          domain: platformops.dev.gcp.devel.cpdev.cloud
+          prefix: mds-west
+          advertisedURL:
+            enabled: true
+            prefix: mds-west
       provider:
         ldap:
           address: ldap://ldap-central.platformops.dev.gcp.devel.cpdev.cloud:389

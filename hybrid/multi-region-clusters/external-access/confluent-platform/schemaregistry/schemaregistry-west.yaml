@@ -43,6 +43,8 @@ spec:
           prefix: sr-west
           domain: platformops.dev.gcp.devel.cpdev.cloud
         type: loadBalancer
+      tls:
+        enabled: true
   image:
     pullSecretRef:
       - cp-registry

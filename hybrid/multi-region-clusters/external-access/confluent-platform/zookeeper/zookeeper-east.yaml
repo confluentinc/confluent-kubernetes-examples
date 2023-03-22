@@ -13,18 +13,17 @@ spec:
       advertisedURL:
         enabled: true
         prefix: zk-east
-      prefix: zk-east-bs
+      prefix: zk-east
   authentication:
     jaasConfig:
       secretRef: credential
     type: digest
-  configOverrides:
-    peers:
-      - server.0=zk-central0.platformops.dev.gcp.devel.cpdev.cloud:2888:3888
-      - server.10=zookeeper-0.zookeeper.east.svc.cluster.local:2888:3888
-      - server.11=zookeeper-1.zookeeper.east.svc.cluster.local:2888:3888
-      - server.20=zk-west0.platformops.dev.gcp.devel.cpdev.cloud:2888:3888
-      - server.21=zk-west1.platformops.dev.gcp.devel.cpdev.cloud:2888:3888
+  peers:
+    - server.0=zk-central0.platformops.dev.gcp.devel.cpdev.cloud:2888:3888
+    - server.10=zookeeper-0.zookeeper.east.svc.cluster.local:2888:3888
+    - server.11=zookeeper-1.zookeeper.east.svc.cluster.local:2888:3888
+    - server.20=zk-west0.platformops.dev.gcp.devel.cpdev.cloud:2888:3888
+    - server.21=zk-west1.platformops.dev.gcp.devel.cpdev.cloud:2888:3888
   dataVolumeCapacity: 10Gi
   image:
     application: confluentinc/cp-zookeeper:7.3.0

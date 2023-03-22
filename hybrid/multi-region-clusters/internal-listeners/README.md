@@ -69,7 +69,7 @@ RBAC.
 
 ```
 # Deploy OpenLDAP
-helm upgrade --install -f $TUTORIAL_HOME/../../assets/openldap/ldaps-rbac.yaml open-ldap $TUTORIAL_HOME/../../assets/openldap -n central --kube-context mrc-central
+helm upgrade --install -f $TUTORIAL_HOME/../../../assets/openldap/ldaps-rbac.yaml open-ldap $TUTORIAL_HOME/../../../assets/openldap -n central --kube-context mrc-central
 
 # Validate that OpenLDAP is running:
 kubectl get pods -n central --context mrc-central
@@ -103,18 +103,18 @@ For the purposes of this example, we will use CFKs auto-generated certs feature.
 #### Provide operator CA TLS certificates for auto generating certs
 ```
 kubectl create secret tls ca-pair-sslcerts \
-  --cert=$TUTORIAL_HOME/../../assets/certs/generated/ca.pem \
-  --key=$TUTORIAL_HOME/../../assets/certs/generated/ca-key.pem \
+  --cert=$TUTORIAL_HOME/../../../assets/certs/generated/ca.pem \
+  --key=$TUTORIAL_HOME/../../../assets/certs/generated/ca-key.pem \
   -n central --context mrc-central
 
 kubectl create secret tls ca-pair-sslcerts \
-  --cert=$TUTORIAL_HOME/../../assets/certs/generated/ca.pem \
-  --key=$TUTORIAL_HOME/../../assets/certs/generated/ca-key.pem \
+  --cert=$TUTORIAL_HOME/../../../assets/certs/generated/ca.pem \
+  --key=$TUTORIAL_HOME/../../../assets/certs/generated/ca-key.pem \
   -n east --context mrc-east
   
 kubectl create secret tls ca-pair-sslcerts \
-  --cert=$TUTORIAL_HOME/../../assets/certs/generated/ca.pem \
-  --key=$TUTORIAL_HOME/../../assets/certs/generated/ca-key.pem \
+  --cert=$TUTORIAL_HOME/../../../assets/certs/generated/ca.pem \
+  --key=$TUTORIAL_HOME/../../../assets/certs/generated/ca-key.pem \
   -n west --context mrc-west
 ```
 
@@ -165,18 +165,18 @@ kubectl create secret generic credential \
 #### Kubernetes secret object for MDS:
 ```
 kubectl create secret generic mds-token \
-  --from-file=mdsPublicKey.pem=$TUTORIAL_HOME/../../assets/certs/mds-publickey.txt \
-  --from-file=mdsTokenKeyPair.pem=$TUTORIAL_HOME/../../assets/certs/mds-tokenkeypair.txt \
+  --from-file=mdsPublicKey.pem=$TUTORIAL_HOME/../../../assets/certs/mds-publickey.txt \
+  --from-file=mdsTokenKeyPair.pem=$TUTORIAL_HOME/../../../assets/certs/mds-tokenkeypair.txt \
   -n central --context mrc-central
   
 kubectl create secret generic mds-token \
-  --from-file=mdsPublicKey.pem=$TUTORIAL_HOME/../../assets/certs/mds-publickey.txt \
-  --from-file=mdsTokenKeyPair.pem=$TUTORIAL_HOME/../../assets/certs/mds-tokenkeypair.txt \
+  --from-file=mdsPublicKey.pem=$TUTORIAL_HOME/../../../assets/certs/mds-publickey.txt \
+  --from-file=mdsTokenKeyPair.pem=$TUTORIAL_HOME/../../../assets/certs/mds-tokenkeypair.txt \
   -n east --context mrc-east
   
 kubectl create secret generic mds-token \
-  --from-file=mdsPublicKey.pem=$TUTORIAL_HOME/../../assets/certs/mds-publickey.txt \
-  --from-file=mdsTokenKeyPair.pem=$TUTORIAL_HOME/../../assets/certs/mds-tokenkeypair.txt \
+  --from-file=mdsPublicKey.pem=$TUTORIAL_HOME/../../../assets/certs/mds-publickey.txt \
+  --from-file=mdsTokenKeyPair.pem=$TUTORIAL_HOME/../../../assets/certs/mds-tokenkeypair.txt \
   -n west --context mrc-west
 ```
 #### Kafka RBAC credential
