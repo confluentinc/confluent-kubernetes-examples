@@ -96,10 +96,12 @@ spec:
             groupNameAttribute: cn
             groupObjectClass: group
             groupSearchBase: dc=test,dc=com
+            groupSearchScope: 1
             userMemberOfAttributePattern: CN=(.*),DC=test,DC=com
             userNameAttribute: cn
             userObjectClass: organizationalRole
             userSearchBase: dc=test,dc=com
+            userSearchScope: 1
         type: ldap
       tls:
         enabled: true
