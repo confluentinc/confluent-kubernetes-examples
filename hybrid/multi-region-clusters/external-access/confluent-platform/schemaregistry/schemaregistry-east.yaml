@@ -43,8 +43,6 @@ spec:
           prefix: sr-east
           domain: platformops.dev.gcp.devel.cpdev.cloud
         type: loadBalancer
-      tls:
-        enabled: true
   image:
     application: confluentinc/cp-schema-registry:7.4.0
     init: confluentinc/confluent-init-container:2.6.0
