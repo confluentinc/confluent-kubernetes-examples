@@ -10,7 +10,7 @@
 ![monitoring3](img/monitoring-3.png)
 
 
-# Steps
+# Steps to create
 
 ## 1. Run Confluent Platform
 
@@ -120,3 +120,26 @@ and paste the contents of `grafana-dashboard.json` into the textarea below and c
 
 ![grafana dashboard import page](img/grafana-dashboard-import.png)
 
+```
+Note: Since volume is not persistent, the dashboard will be removed when the pod restarts. 
+```
+
+# Steps to destroy
+
+```sh
+k delete -f grafana-service.yml
+k delete -f grafana-deployment.yml -n monitoring
+k delete -f grafana-datasource-config.yml -n monitoring
+
+k delete -f prometheus-service.yml -n monitoring
+k delete -f prometheus-deployment.yml -n monitoring
+k delete -f prometheus-config-map.yml -n monitoring
+k delete -f prometheus-rbac.yml
+
+# if optionally created
+k delete -f grafana-volume.yml -n monitoring
+k delete -f prometheus-volume.yml -n monitoring
+
+
+k delete namespace monitoring
+```
