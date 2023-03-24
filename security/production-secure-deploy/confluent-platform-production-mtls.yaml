@@ -78,16 +78,17 @@ spec:
               secretRef: credential
           configurations:
             groupNameAttribute: cn
-            groupObjectClass: group
-            groupMemberAttribute: member
-            groupMemberAttributePattern: CN=(.*),DC=test,DC=com
+            groupObjectClass: posixGroup
+            groupMemberAttribute: memberUid
+            groupMemberAttributePattern: cn=(.*),ou=users,dc=test,dc=com
             groupSearchBase: dc=test,dc=com
-            groupSearchScope: 1
+            groupSearchScope: 2
             userNameAttribute: cn
             userMemberOfAttributePattern: CN=(.*),DC=test,DC=com
-            userObjectClass: organizationalRole
+            userObjectClass: top
             userSearchBase: dc=test,dc=com
-            userSearchScope: 1
+            userSearchFilter: (|(objectClass=organizationalRole)(objectClass=posixAccount))
+            userSearchScope: 2
   dependencies:
     kafkaRest:
       authentication:

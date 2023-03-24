@@ -72,3 +72,14 @@ spec:
   #kafkaRestClassRef:
   # name: default
 ---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: mds-admin
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: mds
+  role: SystemAdmin
+---
