@@ -1,0 +1,21 @@
+# rolebinding `connect-1` gives user `connect` the role 
+# `ResourceOwner` for: 
+# - consumer group named `prod.connect`
+# - topics prefixed with `prod.connect-`
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: connect-1
+  namespace: confluent
+spec:
+  principal:
+    name: connect
+    type: user
+  resourcePatterns:
+  - name: prod.connect
+    patternType: LITERAL
+    resourceType: Group
+  - name: prod.connect-
+    patternType: PREFIXED
+    resourceType: Topic
+  role: ResourceOwner
