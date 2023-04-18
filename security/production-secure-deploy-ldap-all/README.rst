@@ -335,8 +335,10 @@ TEST
 
 Test via CLI
 ^^^^^^^^^^^^
+#. Using the port node 
 
    ::
+   
      kubectl  exec kafka-2 -it -- bash             
      
      # kafka user 
