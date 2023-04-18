@@ -45,32 +45,11 @@ spec:
           host: mb-dest.aws.rohits.dev
           nodePortOffset: 30000
       authentication:
-        # type: plain
-        # jaasConfig:
-        #   secretRef: credential
         type: ldap
         jaasConfig:
           secretRef: credential
       tls:
         enabled: true
-  # identityProvider:
-  #   type: ldap
-  #   ldap:
-  #     address: ldap://ldap.confluent.svc.cluster.local:389
-  #     authentication:
-  #       type: simple
-  #       simple:
-  #         secretRef: credential
-  #     configurations:
-  #       groupNameAttribute: cn
-  #       groupObjectClass: group
-  #       groupMemberAttribute: member
-  #       groupMemberAttributePattern: CN=(.*),DC=test,DC=com
-  #       groupSearchBase: dc=test,dc=com
-  #       userNameAttribute: cn
-  #       userMemberOfAttributePattern: CN=(.*),DC=test,DC=com
-  #       userObjectClass: organizationalRole
-  #       userSearchBase: dc=test,dc=com
   authorization:
     type: rbac
     superUsers:
@@ -91,7 +70,7 @@ spec:
         type: nodePort
         nodePort:
           host: mb-dest.aws.rohits.dev
-          nodePortOffset: 30300
+          nodePortOffset: 30200
       provider:
         type: ldap
         ldap:
@@ -126,6 +105,167 @@ spec:
         enabled: true
 ---
 apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+  namespace: confluent
+spec:
+  replicas: 2
+  image:
+    application: confluentinc/cp-server-connect:7.3.0
+    init: confluentinc/confluent-init-container:2.5.0
+  tls:
+    secretRef: tls-group1
+  externalAccess:
+    type: nodePort
+    nodePort:
+      host: mb-dest.aws.rohits.dev
+      nodePortOffset: 30300
+  authorization:
+    type: rbac
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+    mds:
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tokenKeyPair:
+        secretRef: mds-token
+      authentication:
+        type: bearer
+        bearer:
+          secretRef: connect-mds-client
+      tls:
+        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-schema-registry:7.3.0
+    init: confluentinc/confluent-init-container:2.5.0
+  tls:
+    secretRef: tls-group1
+  externalAccess:
+    type: nodePort
+    nodePort:
+      host: mb-dest.aws.rohits.dev
+      nodePortOffset: 30400
+  authorization:
+    type: rbac
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+    mds:
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tokenKeyPair:
+        secretRef: mds-token
+      authentication:
+        type: bearer
+        bearer:
+          secretRef: sr-mds-client
+      tls:
+        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestProxy
+metadata:
+  name: kafkarestproxy
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-kafka-rest:7.3.0
+    init: confluentinc/confluent-init-container:2.5.0
+  tls:
+    secretRef: tls-group1
+  externalAccess:
+    type: nodePort
+    nodePort:
+      host: mb-dest.aws.rohits.dev
+      nodePortOffset: 30500
+  authorization:
+    type: rbac
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+    mds:
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tokenKeyPair:
+        secretRef: mds-token
+      authentication:
+        type: bearer
+        bearer:
+          secretRef: krp-mds-client
+      tls:
+        enabled: true
+    schemaRegistry:
+      url: https://schemaregistry.confluent.svc.cluster.local:8081
+      tls:
+        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KsqlDB
+metadata:
+  name: ksqldb
+  namespace: confluent
+spec:
+  replicas: 2
+  image:
+    application: confluentinc/cp-ksqldb-server:7.3.0
+    init: confluentinc/confluent-init-container:2.5.0
+  dataVolumeCapacity: 10Gi
+  authorization:
+    type: rbac
+  externalAccess:
+    type: nodePort
+    nodePort:
+      host: mb-dest.aws.rohits.dev
+      nodePortOffset: 30600
+  tls:
+    secretRef: tls-group1
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+    mds:
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tokenKeyPair:
+        secretRef: mds-token
+      authentication:
+        type: bearer
+        bearer:
+          secretRef: ksqldb-mds-client
+      tls:
+        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
 kind: ControlCenter
 metadata:
   name: controlcenter
@@ -148,7 +288,7 @@ spec:
     type: nodePort
     nodePort:
       host: mb-dest.aws.rohits.dev
-      nodePortOffset: 30200
+      nodePortOffset: 30700
   tls:
     secretRef: tls-group1
   dependencies:

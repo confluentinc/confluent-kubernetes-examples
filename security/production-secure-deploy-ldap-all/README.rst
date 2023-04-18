@@ -338,7 +338,7 @@ Test via CLI
 #. Using the port node 
 
    ::
-   
+
      kubectl  exec kafka-2 -it -- bash             
      
      # kafka user 
@@ -399,7 +399,8 @@ Test via CLI
      kafka-topics --bootstrap-server mb-dest.aws.rohits.dev:30000 --command-config /tmp/kafkaSASL_SSL.properties  --list
      
 
-
+    You can also query endpoint of connect:
+    % curl -X GET -k -u connect:connect-secret https://mb-dest.aws.rohits.dev:30300 
 
 
 
