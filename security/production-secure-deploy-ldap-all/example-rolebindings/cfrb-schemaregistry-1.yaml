@@ -1,0 +1,27 @@
+# rolebinding `schemaregistry-1` gives user `sr` the `ResourceOwner` role
+# for the following resources:
+# - topic `_confluent-license`
+# - topic `_schemas_schemaregistry_confluent`
+# - consumer group named `id_schemaregistry_confluent`
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: schemaregistry-1
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: sr
+  resourcePatterns:
+  - name: _confluent-license
+    patternType: LITERAL
+    resourceType: Topic
+  # The schemas topic is named: _schemas_<sr-cluster-name>_<namespace>
+  - name: _schemas_schemaregistry_confluent
+    patternType: LITERAL
+    resourceType: Topic
+  # The Schema Registry consumer group is: id_<sr-cluster-name>_<namespace>
+  - name: id_schemaregistry_confluent
+    patternType: LITERAL
+    resourceType: Group
+  role: ResourceOwner
