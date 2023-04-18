@@ -336,67 +336,66 @@ TEST
 Test via CLI
 ^^^^^^^^^^^^
 
-```
-kubectl  exec kafka-2 -it -- bash             
-
-# kafka user 
-cat <<EOF > /tmp/kafka_kafka_user_.properties
-sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=kafka password=kafka-secret;
-sasl.mechanism=PLAIN
-security.protocol=SASL_SSL
-ssl.truststore.location=/mnt/sslcerts/truststore.p12
-ssl.truststore.password=mystorepassword
-EOF
-
-kafka-topics --bootstrap-server kafka.confluent.svc.cluster.local:9071 --command-config /tmp/kafka_kafka_user_.properties --list
-
-# testadmin (RBAC via the apply yaml steps before)
-
-cat <<EOF > /tmp/kafka_testadmin_user_.properties
-sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=testadmin password=testadmin;
-sasl.mechanism=PLAIN
-security.protocol=SASL_SSL
-ssl.truststore.location=/mnt/sslcerts/truststore.p12
-ssl.truststore.password=mystorepassword
-EOF
-
-kafka-topics --bootstrap-server kafka.confluent.svc.cluster.local:9071 --command-config /tmp/kafka_testadmin_user_.properties --list
-
-
-Local: 
-
- kubectl cp confluent/kafka-0:/mnt/sslcerts/..data/truststore.p12 /tmp/truststore.p12
- kubectl cp confluent/kafka-0:/mnt/sslcerts/..data/keystore.p12  /tmp/keystore.p12
-
-(expect - tar: Removing leading `/' from member names )
-
-# kafka user 
-
-
-cat <<EOF > /tmp/kafka_kafka_user_.properties
-sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=kafka password=kafka-secret;
-sasl.mechanism=PLAIN
-security.protocol=SASL_SSL
-ssl.truststore.location=/tmp/truststore.p12
-ssl.truststore.password=mystorepassword
-EOF
-
-kafka-topics --bootstrap-server mb-dest.aws.rohits.dev:30000 --command-config /tmp/kafkaSASL_SSL.properties  --list
-
-# testadmin (RBAC via the apply yaml steps before)
-
-
-cat <<EOF > /tmp/kafka_testadmin_user_.properties
-sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=testadmin password=testadmin;
-sasl.mechanism=PLAIN
-security.protocol=SASL_SSL
-ssl.truststore.location=/tmp/truststore.p12
-ssl.truststore.password=mystorepassword
-EOF
-
-kafka-topics --bootstrap-server mb-dest.aws.rohits.dev:30000 --command-config /tmp/kafkaSASL_SSL.properties  --list
-```
-
+   ::
+     kubectl  exec kafka-2 -it -- bash             
+     
+     # kafka user 
+     cat <<EOF > /tmp/kafka_kafka_user_.properties
+     sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=kafka password=kafka-secret;
+     sasl.mechanism=PLAIN
+     security.protocol=SASL_SSL
+     ssl.truststore.location=/mnt/sslcerts/truststore.p12
+     ssl.truststore.password=mystorepassword
+     EOF
+     
+     kafka-topics --bootstrap-server kafka.confluent.svc.cluster.local:9071 --command-config /tmp/kafka_kafka_user_.properties --list
+     
+     # testadmin (RBAC via the apply yaml steps before)
+     
+     cat <<EOF > /tmp/kafka_testadmin_user_.properties
+     sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=testadmin password=testadmin;
+     sasl.mechanism=PLAIN
+     security.protocol=SASL_SSL
+     ssl.truststore.location=/mnt/sslcerts/truststore.p12
+     ssl.truststore.password=mystorepassword
+     EOF
+     
+     kafka-topics --bootstrap-server kafka.confluent.svc.cluster.local:9071 --command-config /tmp/kafka_testadmin_user_.properties --list
+     
+     
+     Local: 
+     
+      kubectl cp confluent/kafka-0:/mnt/sslcerts/..data/truststore.p12 /tmp/truststore.p12
+      kubectl cp confluent/kafka-0:/mnt/sslcerts/..data/keystore.p12  /tmp/keystore.p12
+     
+     (expect - tar: Removing leading `/' from member names )
+     
+     # kafka user 
+     
+     
+     cat <<EOF > /tmp/kafka_kafka_user_.properties
+     sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=kafka password=kafka-secret;
+     sasl.mechanism=PLAIN
+     security.protocol=SASL_SSL
+     ssl.truststore.location=/tmp/truststore.p12
+     ssl.truststore.password=mystorepassword
+     EOF
+     
+     kafka-topics --bootstrap-server mb-dest.aws.rohits.dev:30000 --command-config /tmp/kafkaSASL_SSL.properties  --list
+     
+     # testadmin (RBAC via the apply yaml steps before)
+     
+     
+     cat <<EOF > /tmp/kafka_testadmin_user_.properties
+     sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=testadmin password=testadmin;
+     sasl.mechanism=PLAIN
+     security.protocol=SASL_SSL
+     ssl.truststore.location=/tmp/truststore.p12
+     ssl.truststore.password=mystorepassword
+     EOF
+     
+     kafka-topics --bootstrap-server mb-dest.aws.rohits.dev:30000 --command-config /tmp/kafkaSASL_SSL.properties  --list
+     
 
 
 
