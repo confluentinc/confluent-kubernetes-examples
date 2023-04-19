@@ -1,5 +1,5 @@
-Production recommended secure setup
-===================================
+Production secured setup LDAP on all Broker's listeners
+=======================================================
 
 Confluent recommends these security mechanisms for a production deployment:
 
@@ -13,7 +13,7 @@ Confluent recommends these security mechanisms for a production deployment:
 
 - Enable TLS for network encryption - both internal (between CP components) and external (Clients to CP components)
 
-In this deployment scenario, we will set this up, choosing SASL/LDAP for authentication, using user provided custom certificates.
+In this deployment scenario, we will setup CP components SASL/LDAP for authentication, using user provided custom certificates.
 
 Before continuing with the scenario, ensure that you have set up the
 `prerequisites </README.md#prerequisites>`_.
@@ -27,7 +27,7 @@ the tutorial files:
 
 ::
    
-  export TUTORIAL_HOME=<Tutorial directory>/security/production-secure-deploy-ldap-all
+  export TUTORIAL_HOME=<Tutorial directory>/security/production-secure-deploy-ldap-rbac-all
   
 ===============================
 Deploy Confluent for Kubernetes
@@ -213,10 +213,10 @@ The CR configuration file contains a custom resource specification for each
 Confluent Platform component, including replicas, image to use, resource
 allocations.
 
-Edit the Confluent Platform CR file: ``$TUTORIAL_HOME/confluent-platform.yaml``
+Edit the Confluent Platform CR file: ``$TUTORIAL_HOME/confluent-platform-production.yaml``
 
 Specifically, note that external accesses to Confluent Platform components are
-configured using the Load Balance services.
+configured using the nodePort services.
 
 The Kafka section of the file is set as follow for Node Port access:
 
@@ -228,7 +228,7 @@ The Kafka section of the file is set as follow for Node Port access:
         externalAccess:
           type: nodePort
           nodePort:
-            host: hostname
+            host: <hostname>
             nodePortOffset: 30000
 
 Component section of the file is set as follows for Node Port access:
@@ -239,7 +239,7 @@ Component section of the file is set as follows for Node Port access:
     externalAccess:
       type: nodePort
       nodePort:
-        host: hostname
+        host: <hostname>
         nodePortOffset: 30200
 
 
@@ -335,7 +335,7 @@ TEST
 
 Test via CLI
 ^^^^^^^^^^^^
-#. Using the port node 
+#. Using the one of the kafka pods
 
    ::
 
@@ -365,14 +365,16 @@ Test via CLI
      kafka-topics --bootstrap-server kafka.confluent.svc.cluster.local:9071 --command-config /tmp/kafka_testadmin_user_.properties --list
      
      
-     Local: 
+#. Using the port node 
+
+   ::
      
-      kubectl cp confluent/kafka-0:/mnt/sslcerts/..data/truststore.p12 /tmp/truststore.p12
-      kubectl cp confluent/kafka-0:/mnt/sslcerts/..data/keystore.p12  /tmp/keystore.p12
+    kubectl cp confluent/kafka-0:/mnt/sslcerts/..data/truststore.p12 /tmp/truststore.p12
+    kubectl cp confluent/kafka-0:/mnt/sslcerts/..data/keystore.p12  /tmp/keystore.p12
      
-     (expect - tar: Removing leading `/' from member names )
+    (expect - tar: Removing leading `/' from member names )
      
-     # kafka user 
+    # kafka user 
      
      
      cat <<EOF > /tmp/kafka_kafka_user_.properties
@@ -383,24 +385,24 @@ Test via CLI
      ssl.truststore.password=mystorepassword
      EOF
      
-     kafka-topics --bootstrap-server mb-dest.aws.rohits.dev:30000 --command-config /tmp/kafkaSASL_SSL.properties  --list
+    kafka-topics --bootstrap-server mb-dest.aws.rohits.dev:30000 --command-config /tmp/kafkaSASL_SSL.properties  --list
      
-     # testadmin (RBAC via the apply yaml steps before)
+    # testadmin (RBAC via the apply yaml steps before)
      
      
-     cat <<EOF > /tmp/kafka_testadmin_user_.properties
-     sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=testadmin password=testadmin;
-     sasl.mechanism=PLAIN
-     security.protocol=SASL_SSL
-     ssl.truststore.location=/tmp/truststore.p12
-     ssl.truststore.password=mystorepassword
-     EOF
+    cat <<EOF > /tmp/kafka_testadmin_user_.properties
+    sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=testadmin password=testadmin;
+    sasl.mechanism=PLAIN
+    security.protocol=SASL_SSL
+    ssl.truststore.location=/tmp/truststore.p12
+    ssl.truststore.password=mystorepassword
+    EOF
      
-     kafka-topics --bootstrap-server mb-dest.aws.rohits.dev:30000 --command-config /tmp/kafkaSASL_SSL.properties  --list
+    kafka-topics --bootstrap-server mb-dest.aws.rohits.dev:30000 --command-config /tmp/kafkaSASL_SSL.properties  --list
      
 
-    You can also query endpoint of connect:
-    % curl -X GET -k -u connect:connect-secret https://mb-dest.aws.rohits.dev:30300 
+  You can also query endpoint of connect:
+  % curl -X GET -k -u connect:connect-secret https://mb-dest.aws.rohits.dev:30300 
 
 
 
