@@ -142,13 +142,13 @@ Provide authentication credentials
    ::
    
      kubectl create secret generic credential \
-       --from-file=plain-users.json=$TUTORIAL_HOME/creds-kafka-sasl-users.json \
-       --from-file=digest-users.json=$TUTORIAL_HOME/creds-zookeeper-sasl-digest-users.json \
-       --from-file=digest.txt=$TUTORIAL_HOME/creds-kafka-zookeeper-credentials.txt \
-       --from-file=plain.txt=$TUTORIAL_HOME/creds-client-kafka-sasl-user.txt \
-       --from-file=basic.txt=$TUTORIAL_HOME/creds-control-center-users.txt \
-       --from-file=plain-interbroker.txt=$TUTORIAL_HOME/creds-client-kafka-sasl-user.txt \
-       --from-file=ldap.txt=$TUTORIAL_HOME/ldap.txt \
+       --from-file=plain-users.json=$TUTORIAL_HOME/creds/creds-kafka-sasl-users.json \
+       --from-file=digest-users.json=$TUTORIAL_HOME/creds/creds-zookeeper-sasl-digest-users.json \
+       --from-file=digest.txt=$TUTORIAL_HOME/creds/creds-kafka-zookeeper-credentials.txt \
+       --from-file=plain.txt=$TUTORIAL_HOME/creds/creds-client-kafka-sasl-user.txt \
+       --from-file=basic.txt=$TUTORIAL_HOME/creds/creds-control-center-users.txt \
+       --from-file=plain-interbroker.txt=$TUTORIAL_HOME/creds/creds-client-kafka-sasl-user.txt \
+       --from-file=ldap.txt=$TUTORIAL_HOME/creds/ldap.txt \
        --namespace confluent
 
    In this tutorial, we use one credential for authenticating all client and
@@ -171,32 +171,32 @@ Provide RBAC principal credentials
    
      # Kafka RBAC credential
      kubectl create secret generic mds-client \
-       --from-file=bearer.txt=$TUTORIAL_HOME/bearer.txt \
+       --from-file=bearer.txt=$TUTORIAL_HOME/creds/bearer.txt \
        --namespace confluent
      # Control Center RBAC credential
      kubectl create secret generic c3-mds-client \
-       --from-file=bearer.txt=$TUTORIAL_HOME/c3-mds-client.txt \
+       --from-file=bearer.txt=$TUTORIAL_HOME/creds/c3-mds-client.txt \
        --namespace confluent
      # Connect RBAC credential
      kubectl create secret generic connect-mds-client \
-       --from-file=bearer.txt=$TUTORIAL_HOME/connect-mds-client.txt \
+       --from-file=bearer.txt=$TUTORIAL_HOME/creds/connect-mds-client.txt \
        --namespace confluent
      # Schema Registry RBAC credential
      kubectl create secret generic sr-mds-client \
-       --from-file=bearer.txt=$TUTORIAL_HOME/sr-mds-client.txt \
+       --from-file=bearer.txt=$TUTORIAL_HOME/creds/sr-mds-client.txt \
        --namespace confluent
      # ksqlDB RBAC credential
      kubectl create secret generic ksqldb-mds-client \
-       --from-file=bearer.txt=$TUTORIAL_HOME/ksqldb-mds-client.txt \
+       --from-file=bearer.txt=$TUTORIAL_HOME/creds/ksqldb-mds-client.txt \
        --namespace confluent
      # Kafka Rest Proxy RBAC credential
      kubectl create secret generic krp-mds-client \
-       --from-file=bearer.txt=$TUTORIAL_HOME/krp-mds-client.txt \
+       --from-file=bearer.txt=$TUTORIAL_HOME/creds/krp-mds-client.txt \
        --namespace confluent
      # Kafka REST credential
      kubectl create secret generic rest-credential \
-       --from-file=bearer.txt=$TUTORIAL_HOME/bearer.txt \
-       --from-file=basic.txt=$TUTORIAL_HOME/bearer.txt \
+       --from-file=bearer.txt=$TUTORIAL_HOME/creds/bearer.txt \
+       --from-file=basic.txt=$TUTORIAL_HOME/creds/bearer.txt \
        --namespace confluent
 
 ============================
@@ -342,7 +342,7 @@ Test via CLI
      kubectl  exec kafka-2 -it -- bash             
      
      # kafka user 
-     cat <<EOF > /tmp/kafka_kafka_user_.properties
+     cat <<EOF > /tmp/kafka_kafka_user.properties
      sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=kafka password=kafka-secret;
      sasl.mechanism=PLAIN
      security.protocol=SASL_SSL
@@ -350,11 +350,11 @@ Test via CLI
      ssl.truststore.password=mystorepassword
      EOF
      
-     kafka-topics --bootstrap-server kafka.confluent.svc.cluster.local:9071 --command-config /tmp/kafka_kafka_user_.properties --list
+     kafka-topics --bootstrap-server kafka.confluent.svc.cluster.local:9071 --command-config /tmp/kafka_kafka_user.properties --list
      
      # testadmin (RBAC via the apply yaml steps before)
      
-     cat <<EOF > /tmp/kafka_testadmin_user_.properties
+     cat <<EOF > /tmp/kafka_testadmin_user.properties
      sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=testadmin password=testadmin;
      sasl.mechanism=PLAIN
      security.protocol=SASL_SSL
@@ -362,9 +362,21 @@ Test via CLI
      ssl.truststore.password=mystorepassword
      EOF
      
-     kafka-topics --bootstrap-server kafka.confluent.svc.cluster.local:9071 --command-config /tmp/kafka_testadmin_user_.properties --list
+     kafka-topics --bootstrap-server kafka.confluent.svc.cluster.local:9071 --command-config /tmp/kafka_testadmin_user.properties --list
+
+     # Test a user does did not get authorization yet: james
      
-     
+     cat <<EOF > /tmp/kafka_james_user.properties
+     sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=james password=james-secret;
+     sasl.mechanism=PLAIN
+     security.protocol=SASL_SSL
+     ssl.truststore.location=/mnt/sslcerts/truststore.p12
+     ssl.truststore.password=mystorepassword
+     EOF
+      
+     kafka-topics --bootstrap-server kafka.confluent.svc.cluster.local:9071 --command-config /tmp/kafka_james_user.properties  --list
+          
+
 #. Using the port node 
 
    ::
@@ -377,7 +389,7 @@ Test via CLI
     # kafka user 
      
      
-     cat <<EOF > /tmp/kafka_kafka_user_.properties
+     cat <<EOF > /tmp/kafka_kafka_user.properties
      sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=kafka password=kafka-secret;
      sasl.mechanism=PLAIN
      security.protocol=SASL_SSL
@@ -385,24 +397,35 @@ Test via CLI
      ssl.truststore.password=mystorepassword
      EOF
      
-    kafka-topics --bootstrap-server mb-dest.aws.rohits.dev:30000 --command-config /tmp/kafkaSASL_SSL.properties  --list
+     kafka-topics --bootstrap-server mb-dest.aws.rohits.dev:30000 --command-config /tmp/kafka_kafka_user.properties  --list
+      
+     # testadmin (RBAC via the apply yaml steps before)
+      
+      
+     cat <<EOF > /tmp/kafka_testadmin_user.properties
+     sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=testadmin password=testadmin;
+     sasl.mechanism=PLAIN
+     security.protocol=SASL_SSL
+     ssl.truststore.location=/tmp/truststore.p12
+     ssl.truststore.password=mystorepassword
+     EOF
+      
+     kafka-topics --bootstrap-server mb-dest.aws.rohits.dev:30000 --command-config /tmp/kafka_testadmin_user.properties  --list
+      
+     # Test a user does did not get authorization yet: james
+ 
+     cat <<EOF > /tmp/kafka_james_user.properties
+     sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=james password=james-secret;
+     sasl.mechanism=PLAIN
+     security.protocol=SASL_SSL
+     ssl.truststore.location=/tmp/truststore.p12
+     ssl.truststore.password=mystorepassword
+     EOF
      
-    # testadmin (RBAC via the apply yaml steps before)
+    kafka-topics --bootstrap-server mb-dest.aws.rohits.dev:30000 --command-config /tmp/kafka_james_user.properties  --list
      
-     
-    cat <<EOF > /tmp/kafka_testadmin_user_.properties
-    sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=testadmin password=testadmin;
-    sasl.mechanism=PLAIN
-    security.protocol=SASL_SSL
-    ssl.truststore.location=/tmp/truststore.p12
-    ssl.truststore.password=mystorepassword
-    EOF
-     
-    kafka-topics --bootstrap-server mb-dest.aws.rohits.dev:30000 --command-config /tmp/kafkaSASL_SSL.properties  --list
-     
-
-  You can also query endpoint of connect:
-  % curl -X GET -k -u connect:connect-secret https://mb-dest.aws.rohits.dev:30300 
+    You can also query endpoint of connect:
+    curl -X GET -k -u connect:connect-secret https://mb-dest.aws.rohits.dev:30300 
 
 
 
@@ -502,14 +525,14 @@ After updating the list of users, you'll update the Kubernetes secret.
 
 ::
 
-  kubectl --namespace confluent create secret generic credential \
-      --from-file=plain-users.json=$TUTORIAL_HOME/creds-kafka-sasl-users.json \
-      --from-file=digest-users.json=$TUTORIAL_HOME/creds-zookeeper-sasl-digest-users.json \
-      --from-file=digest.txt=$TUTORIAL_HOME/creds-kafka-zookeeper-credentials.txt \
-      --from-file=plain.txt=$TUTORIAL_HOME/creds-client-kafka-sasl-user.txt \
-      --from-file=basic.txt=$TUTORIAL_HOME/creds-control-center-users.txt \
-      --from-file=plain-interbroker.txt=$TUTORIAL_HOME/creds-client-kafka-sasl-user.txt \
-      --from-file=ldap.txt=$TUTORIAL_HOME/ldap.txt \
+  kubectl create secret generic credential \
+    --from-file=plain-users.json=$TUTORIAL_HOME/creds/creds-kafka-sasl-users.json \
+    --from-file=digest-users.json=$TUTORIAL_HOME/creds/creds-zookeeper-sasl-digest-users.json \
+    --from-file=digest.txt=$TUTORIAL_HOME/creds/creds-kafka-zookeeper-credentials.txt \
+    --from-file=plain.txt=$TUTORIAL_HOME/creds/creds-client-kafka-sasl-user.txt \
+    --from-file=basic.txt=$TUTORIAL_HOME/creds/creds-control-center-users.txt \
+    --from-file=plain-interbroker.txt=$TUTORIAL_HOME/creds/creds-client-kafka-sasl-user.txt \
+    --from-file=ldap.txt=$TUTORIAL_HOME/creds/ldap.txt \
       --save-config --dry-run=client -oyaml | kubectl apply -f -
 
 In this above CLI command, you are generating the YAML for the secret, and applying it as an update to the existing secret ``credential``.
