@@ -397,7 +397,7 @@ Test via CLI
      ssl.truststore.password=mystorepassword
      EOF
      
-     kafka-topics --bootstrap-server mb-dest.aws.rohits.dev:30000 --command-config /tmp/kafka_kafka_user.properties  --list
+     kafka-topics --bootstrap-server <host>:30000 --command-config /tmp/kafka_kafka_user.properties  --list
       
      # testadmin (RBAC via the apply yaml steps before)
       
@@ -410,7 +410,7 @@ Test via CLI
      ssl.truststore.password=mystorepassword
      EOF
       
-     kafka-topics --bootstrap-server mb-dest.aws.rohits.dev:30000 --command-config /tmp/kafka_testadmin_user.properties  --list
+     kafka-topics --bootstrap-server <host>:30000 --command-config /tmp/kafka_testadmin_user.properties  --list
       
      # Test a user does did not get authorization yet: james
  
@@ -422,10 +422,10 @@ Test via CLI
      ssl.truststore.password=mystorepassword
      EOF
      
-    kafka-topics --bootstrap-server mb-dest.aws.rohits.dev:30000 --command-config /tmp/kafka_james_user.properties  --list
+    kafka-topics --bootstrap-server <host>:30000 --command-config /tmp/kafka_james_user.properties  --list
      
     You can also query endpoint of connect:
-    curl -X GET -k -u connect:connect-secret https://mb-dest.aws.rohits.dev:30300 
+    curl -X GET -k -u connect:connect-secret https://<host>:30300 
 
 
 
