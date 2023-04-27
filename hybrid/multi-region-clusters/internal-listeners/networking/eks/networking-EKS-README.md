@@ -31,7 +31,7 @@ This is the architecture you'll achieve on Elastic Kubernetes Service (EKS):
 In this section, you'll configure the required networking between three Elastic Kubernetes Service (EKS) clusters, where 
 each EKS cluster is in a different AWS region.
 
-export TUTORIAL_HOME=<Tutorial directory>/hybrid/multi-region-clusters
+`export TUTORIAL_HOME=<Tutorial directory>/hybrid/multi-region-clusters/internal-listeners`
 
 ## Create clusters
 
@@ -307,7 +307,7 @@ You'll validate that the networking is set up correctly by pinging across region
 Run the `network_test.sh` script that validates the network connectivity between regions and also checks the DNS forwarding.
 
 ```
-./hybrid/multi-region-clusters/networking/network-test/network_test.sh
+$TUTORIAL_HOME/networking/network-test/network_test.sh
 Creating test pods to run network tests
 statefulset.apps/busybox created
 service/busybox created
