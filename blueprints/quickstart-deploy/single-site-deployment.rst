@@ -46,7 +46,7 @@ Prepare
 
    .. sourcecode:: bash
 
-      export TUTORIAL_HOME=<CFK examples directory>/confluent-kubernetes-examples/blueprints-early-access/scenarios/quickstart-deploy
+      export TUTORIAL_HOME=<CFK examples directory>/blueprints/quickstart-deploy
         
 .. _deploy-control-plane: 
 
@@ -93,24 +93,6 @@ following steps:
         -reqexts v3_ca \
         -config openssl.cnf
 
-#. Create the Webhook certificate secret. ``webhooks-tls`` is used in this
-   tutorial:
-      
-   .. sourcecode:: bash
-
-      $TUTORIAL_HOME/scripts/generate-keys.sh cpc-system /tmp
-
-   .. sourcecode:: bash
-    
-      kubectl create secret generic webhooks-tls \
-          --from-file=ca.crt=/tmp/cpc-ca.pem \
-          --from-file=tls.crt=/tmp/server.pem \
-          --from-file=tls.key=/tmp/server-key.pem \
-          --namespace cpc-system \
-          --context control-plane \
-          --save-config --dry-run=client -oyaml | \
-          kubectl apply -f -                     
- 
 #. Install the Orchestrator Helm chart:
 
    .. sourcecode:: bash
@@ -120,12 +102,11 @@ following steps:
 
    .. sourcecode:: bash
 
-      helm upgrade --install cpc-orchestrator confluentinc/cpc-orchestrator \
-        --set image.pullPolicy="IfNotPresent" \
-        --set debug=true \
+      helm upgrade --install confluent-orchestrator confluentinc/cfk-blueprint \
+        --set orchestrator.enabled=true \
         --namespace cpc-system \
         --kube-context control-plane 
-
+        
 .. _deploy-local-data-plane: 
 
 Deploy Local Data Plane
@@ -138,13 +119,12 @@ where the Control Plane is installed.
    
    .. sourcecode:: bash
 
-      helm upgrade --install cpc-agent confluentinc/cpc-agent \
-        --set image.pullPolicy="IfNotPresent" \
-        --namespace cpc-system \
-        --set mode=Local \
-        --set debug=true \
-        --kube-context control-plane 
-
+      helm upgrade --install confluent-agent confluentinc/cfk-blueprint \
+       --set agent.mode=Local \
+       —-set agent.enabled=true \
+       --namespace cpc-system \
+       --kube-context control-plane 
+ 
 #. Register the Data Plane Kubernetes cluster.
    
    #. Get the Kubernetes ID:
