@@ -7,8 +7,8 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-zookeeper:7.3.0
-    init: confluentinc/confluent-init-container:2.5.0
+    application: confluentinc/cp-zookeeper:7.4.0
+    init: confluentinc/confluent-init-container:2.6.0
   dataVolumeCapacity: 10Gi
   logVolumeCapacity: 10Gi
   # Configure to have TLS encryption, and use auto-generated server certs
@@ -38,8 +38,8 @@ spec:
         enabled: true
         secretRef: kafka-tls
   image:
-    application: confluentinc/cp-server:7.3.0
-    init: confluentinc/confluent-init-container:2.5.0
+    application: confluentinc/cp-server:7.4.0
+    init: confluentinc/confluent-init-container:2.6.0
   dataVolumeCapacity: 10Gi
 ---
 apiVersion: platform.confluent.io/v1beta1
@@ -53,8 +53,8 @@ spec:
   tls:
     secretRef: kafka-tls
   image:
-    application: confluentinc/cp-schema-registry:7.3.0
-    init: confluentinc/confluent-init-container:2.5.0
+    application: confluentinc/cp-schema-registry:7.4.0
+    init: confluentinc/confluent-init-container:2.6.0
   dependencies:
     kafka:
       bootstrapEndpoint: kafka.destination.svc.cluster.local:9071
@@ -75,8 +75,8 @@ spec:
     secretRef: kafka-tls
   image:
     # Use the `cp-enterprise-replicator-operator` Docker image, that contains the Replicator jars
-    application: confluentinc/cp-enterprise-replicator:7.3.0
-    init: confluentinc/confluent-init-container:2.5.0
+    application: confluentinc/cp-enterprise-replicator:7.4.0
+    init: confluentinc/confluent-init-container:2.6.0
   podTemplate:
     envVars:
       # The  Confluent Replicator Monitoring Extension allows for detailed metrics from Replicator tasks to be 
@@ -84,7 +84,7 @@ spec:
       # You'll need to update the version string in replicate-test-extension-<version>.jar based on what 
       # CP version you are using
       - name: CLASSPATH
-        value: /usr/share/java/kafka-connect-replicator/replicator-rest-extension-7.3.0.jar
+        value: /usr/share/java/kafka-connect-replicator/replicator-rest-extension-7.4.0.jar
   configOverrides:
     # When the Connect distributed cluster hosting Replicator has a REST endpoint with SSL encryption 
     # enabled, you must configure security properties for the SSL keystore and truststore used by the 
@@ -115,8 +115,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-enterprise-control-center:7.3.0
-    init: confluentinc/confluent-init-container:2.5.0
+    application: confluentinc/cp-enterprise-control-center:7.4.0
+    init: confluentinc/confluent-init-container:2.6.0
   dataVolumeCapacity: 10Gi
   tls:
     secretRef: kafka-tls

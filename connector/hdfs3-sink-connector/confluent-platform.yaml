@@ -9,8 +9,8 @@ spec:
     globalLicense: true
   replicas: 3
   image:
-    application: confluentinc/cp-zookeeper:7.3.0
-    init: confluentinc/confluent-init-container:2.5.0
+    application: confluentinc/cp-zookeeper:7.4.0
+    init: confluentinc/confluent-init-container:2.6.0
   dataVolumeCapacity: 10Gi
   logVolumeCapacity: 10Gi
 ---
@@ -22,8 +22,8 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-server:7.3.0
-    init: confluentinc/confluent-init-container:2.5.0
+    application: confluentinc/cp-server:7.4.0
+    init: confluentinc/confluent-init-container:2.6.0
   dataVolumeCapacity: 10Gi
   metricReporter:
      enabled: true
@@ -36,8 +36,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-server-connect:7.3.0
-    init: confluentinc/confluent-init-container:2.5.0
+    application: confluentinc/cp-server-connect:7.4.0
+    init: confluentinc/confluent-init-container:2.6.0
   build:
     type: onDemand
     onDemand:
@@ -66,5 +66,5 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-schema-registry:7.3.0
-    init: confluentinc/confluent-init-container:2.5.0
+    application: confluentinc/cp-schema-registry:7.4.0
+    init: confluentinc/confluent-init-container:2.6.0
