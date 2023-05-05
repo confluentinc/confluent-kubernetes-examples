@@ -121,7 +121,7 @@ where the Control Plane is installed.
 
       helm upgrade --install confluent-agent confluentinc/cfk-blueprint \
        --set agent.mode=Local \
-       —-set agent.enabled=true \
+       --set agent.enabled=true \
        --namespace cpc-system \
        --kube-context control-plane 
  
