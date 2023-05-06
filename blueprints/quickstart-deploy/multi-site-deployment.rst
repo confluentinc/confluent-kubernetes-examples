@@ -48,7 +48,7 @@ Prepare
 
    .. sourcecode:: bash
 
-      export TUTORIAL_HOME=<CFK examples directory>/confluent-kubernetes-examples/blueprints-early-access/scenarios/quickstart-deploy
+      export TUTORIAL_HOME=<CFK examples directory>/confluent-kubernetes-examples/blueprints/quickstart-deploy
         
 .. _deploy-control-plane: 
 
@@ -153,11 +153,16 @@ Kubernetes cluster from the Control Plane cluster.
 
       $TUTORIAL_HOME/scripts/kubeconfig_generate.sh control-plane-sa cpc-system /tmp
 
-#. In the Data Plane, create the KubeConfig secret:
-   
+#. Create a namespace for the Blueprint system resources. ``cpc-system`` is used 
+   in these examples:
+
    .. sourcecode:: bash
-   
-      kubectl config use-context data-plane
+
+      kubectl create namespace cpc-system --context data-plane
+
+#. In the Data Plane, create the KubeConfig secret:
+
+   .. sourcecode:: bash
 
       kubectl create secret generic control-plane-kubeconfig \
         --from-file=kubeconfig=/tmp/kubeconfig \
@@ -165,25 +170,18 @@ Kubernetes cluster from the Control Plane cluster.
         --namespace cpc-system \
         --save-config --dry-run=client -oyaml | kubectl apply -f -
 
-#. In the Data Plane, install the Agent.
+#. In the Data Plane, install the Agent Helm chart in the ``Remote`` mode:
 
-   #. Create the namespace for the Blueprint system resources:
+   .. sourcecode:: bash
 
-      .. sourcecode:: bash 
-      
-         kubectl create namespace cpc-system --context data-plane
-
-   #. Install the Agent Helm chart in the ``Remote`` mode:
-
-      .. sourcecode:: bash
-
-         helm upgrade --install cpc-agent confluentinc/cpc-agent \
-           --set image.pullPolicy="IfNotPresent" \
-           --set mode=Remote \
-           --set remoteKubeConfig.secretRef=control-plane-kubeconfig \
-           --set debug=true \
-           --kube-context data-plane \
-           --namespace cpc-system
+      helm upgrade --install confluent-agent confluentinc/cpc-agent \
+        --set image.pullPolicy="IfNotPresent" \
+        --set mode=Remote \
+        --set agent.enabled=true \
+        --set remoteKubeConfig.secretRef=control-plane-kubeconfig \
+        --set debug=true \
+        --kube-context data-plane \
+        --namespace cpc-system
 
 #. In the Data Plane, install the CFK Helm chart in the cluster mode 
    (``--set namespaced=false``):
@@ -192,6 +190,7 @@ Kubernetes cluster from the Control Plane cluster.
 
       helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes \
         --set namespaced="false" \
+        --set operator.enabled=true \
         --set debug=true \
         --kube-context data-plane \
         --namespace cpc-system
@@ -252,6 +251,7 @@ From the Control Plane cluster, deploy Confluent Platform.
    .. sourcecode:: bash
 
       kubectl apply -f $TUTORIAL_HOME/deployment/data-plane/confluentplatform_dev.yaml \
+        --namespace org-confluent \
         --context control-plane
 
    The Confluent components are installed into the ``confluent-dev`` namespace
