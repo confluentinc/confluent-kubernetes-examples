@@ -10,7 +10,7 @@ This scenario uses the Control Plane and Data Plane you deployed in [Quick Start
 - Set the home directory for this tutorial:
 
   ```bash
-  export SCENARIO_BASEPATH=<CFK examples directory>/confluent-kubernetes-examples/blueprints-early-access/scenario/cp-nonrbac-saslplain-lb
+  export SCENARIO_BASEPATH=<CFK examples directory>/confluent-kubernetes-examples/blueprints/cp-nonrbac-saslplain-lb
   ```
 - Set the namespace to deploy Confluent Platform in:
 
