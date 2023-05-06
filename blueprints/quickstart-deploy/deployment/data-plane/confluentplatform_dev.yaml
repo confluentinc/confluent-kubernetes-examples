@@ -11,7 +11,7 @@ spec:
     name: standard
     namespace: cpc-system
   resourceMetadata:
-    overrideName: zookeeper-dev
+    overrideName: zookeeper
     overrideNamespace: confluent-dev
 ---
 apiVersion: cluster.cpc.platform.confluent.io/v1beta1
@@ -27,7 +27,7 @@ spec:
     name: standard
     namespace: cpc-system
   resourceMetadata:
-    overrideName: kafka-dev
+    overrideName: kafka
     overrideNamespace: confluent-dev
 ---
 apiVersion: cluster.cpc.platform.confluent.io/v1beta1
@@ -42,7 +42,7 @@ spec:
     name: standard
     namespace: cpc-system
   resourceMetadata:
-    overrideName: schemaregistry-dev
+    overrideName: schemaregistry
     overrideNamespace: confluent-dev
 ---
 apiVersion: cluster.cpc.platform.confluent.io/v1beta1
@@ -57,7 +57,7 @@ spec:
     name: standard
     namespace: cpc-system
   resourceMetadata:
-    overrideName: connect-dev
+    overrideName: connect
     overrideNamespace: confluent-dev
 ---
 apiVersion: cluster.cpc.platform.confluent.io/v1beta1
@@ -72,7 +72,7 @@ spec:
     name: standard
     namespace: cpc-system
   resourceMetadata:
-    overrideName: ksqldb-dev
+    overrideName: ksqldb
     overrideNamespace: confluent-dev
 ---
 apiVersion: cluster.cpc.platform.confluent.io/v1beta1
@@ -87,5 +87,5 @@ spec:
     name: standard
     namespace: cpc-system
   resourceMetadata:
-    overrideName: controlcenter-dev
+    overrideName: controlcenter
     overrideNamespace: confluent-dev
