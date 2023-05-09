@@ -203,9 +203,7 @@ Deploy Confluent Platform in Local Data Plane
 
    #. Navigate to Control Center in a browser and check the cluster:
 
-      .. sourcecode:: bash
-
-         http://localhost:9021
+      `http://localhost:9021 <http://localhost:9021>`__
 
 #. Uninstall Confluent Platform:
 

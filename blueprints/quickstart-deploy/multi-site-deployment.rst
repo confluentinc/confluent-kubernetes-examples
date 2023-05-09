@@ -101,24 +101,6 @@ following steps:
         -reqexts v3_ca \
         -config openssl.cnf
 
-#. Create the Webhook certificate secret. ``webhooks-tls`` is used in this 
-   tutorial:
-      
-   .. sourcecode:: bash
-
-      $TUTORIAL_HOME/scripts/generate-keys.sh cpc-system /tmp
-      
-   .. sourcecode:: bash
-    
-      kubectl create secret generic webhooks-tls \
-          --from-file=ca.crt=/tmp/cpc-ca.pem \
-          --from-file=tls.crt=/tmp/server.pem \
-          --from-file=tls.key=/tmp/server-key.pem \
-          --namespace cpc-system \
-          --context control-plane \
-          --save-config --dry-run=client -oyaml | \
-          kubectl apply -f -                     
- 
 #. Install the Orchestrator Helm chart:
 
    .. sourcecode:: bash
@@ -142,6 +124,13 @@ Deploy Remote Data Plane
 In the remote deployment mode, the Data Plane is installed in a different
 Kubernetes cluster from the Control Plane cluster.
 
+#. Create a namespace for the Blueprint system resources. ``cpc-system`` is used 
+   in these examples:
+
+   .. sourcecode:: bash
+
+      kubectl create namespace cpc-system --context data-plane
+
 #. In the Control Plane, generate the Kubeconfig for the Agent to communicate 
    with the Orchestrator:
 
@@ -152,13 +141,6 @@ Kubernetes cluster from the Control Plane cluster.
    .. sourcecode:: bash
 
       $TUTORIAL_HOME/scripts/kubeconfig_generate.sh control-plane-sa cpc-system /tmp
-
-#. Create a namespace for the Blueprint system resources. ``cpc-system`` is used 
-   in these examples:
-
-   .. sourcecode:: bash
-
-      kubectl create namespace cpc-system --context data-plane
 
 #. In the Data Plane, create the KubeConfig secret:
 
@@ -174,7 +156,7 @@ Kubernetes cluster from the Control Plane cluster.
 
    .. sourcecode:: bash
 
-      helm upgrade --install confluent-agent confluentinc/cpc-agent \
+      helm upgrade --install confluent-agent-remote confluentinc/cpc-agent \
         --set image.pullPolicy="IfNotPresent" \
         --set mode=Remote \
         --set agent.enabled=true \
@@ -273,9 +255,7 @@ From the Control Plane cluster, deploy Confluent Platform.
 
    #. Navigate to Control Center in a browser and check the cluster:
 
-      .. sourcecode:: bash
-
-         http://localhost:9021
+      `http://localhost:9021 <http://localhost:9021>`__
 
 #. In the Control Plane, uninstall Confluent Platform:
 
