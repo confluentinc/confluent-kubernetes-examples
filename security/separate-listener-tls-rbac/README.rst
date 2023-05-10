@@ -6,7 +6,7 @@ In this deployment scenario, we'll choose SASL/Plain for authentication and conf
 You'll need to provide a certificate authority certificate for CFK to auto-generate the component certificates.
 Specifically, you will set up mds(confluent metadata server) to use separate certs internal and external communication, so that you do not mix external and internal domains in the certificate SAN.
 
-This feature is supported for mds starting in CFK 2.6.0 and Confluent Platform 7.4.0 release.
+[Separate TLS certificates for internal and external communications](https://docs.confluent.io/operator/current/co-network-encryption.html#co-configure-separate-certificates) feature is supported for ksqlDB, Schema Registry, MDS, and Kafka REST services, starting in CFK 2.6.0 and Confluent Platform 7.4.0 release.
 
 ==================================
 Set the current tutorial directory
@@ -238,7 +238,7 @@ Deploy Confluent Platform
 
    ::
 
-     kubectl apply -f $TUTORIAL_HOME/confluent-platform-mds-separate-listener.yaml  --namespace confluent
+     kubectl apply -f $TUTORIAL_HOME/confluent-platform-mds-separate-listener.yaml
 
 #. Check that all Confluent Platform resources are deployed:
 
@@ -274,7 +274,7 @@ Create Control Center Role Binding for a Control Center ``testadmin`` user.
 
 ::
 
-  kubectl apply -f $TUTORIAL_HOME/controlcenter-testadmin-rolebindings.yaml --namespace confluent
+  kubectl apply -f $TUTORIAL_HOME/controlcenter-testadmin-rolebindings.yaml
 
 ========
 Validate
@@ -312,7 +312,11 @@ Tear down
   
 ::
 
-  kubectl delete -f $TUTORIAL_HOME/controlcenter-testadmin-rolebindings.yaml --namespace confluent
+  kubectl delete -f $TUTORIAL_HOME/controlcenter-testadmin-rolebindings.yaml
+
+::
+
+  kubectl delete -f $TUTORIAL_HOME/confluent-platform-mds-separate-listener.yaml
 
 ::
 
