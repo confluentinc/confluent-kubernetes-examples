@@ -64,7 +64,7 @@ spec:
       listeners:
         internal:
           # Since no secretRef is specified, the mds internal listener
-          # tls will piggyback mds.tls which also has no secretRef is specified,
+          # tls will piggyback mds.tls which also has no secretRef specified,
           # so the Kafka auto-generated tls configuration will be used for this listener.
           tls:
             enabled: true

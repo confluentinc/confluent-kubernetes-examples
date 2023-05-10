@@ -4,7 +4,7 @@ In this workflow scenario, you'll set up a Confluent Platform cluster with
 full TLS network encryption. Specifically, you will set up embededKafkaRest, schema-registry and ksqldb to use 
 separate certs internal and external communication, so that you do not mix external and internal domains in the certificate SAN.
 
-This feature is supported for ksqlDB and Schema Registry, starting in CFK 2.6.0 and Confluent Platform 7.4.0 release.
+[Separate TLS certificates for internal and external communications](https://docs.confluent.io/operator/current/co-network-encryption.html#co-configure-separate-certificates) feature is supported for ksqlDB, Schema Registry, MDS, and Kafka REST services, starting in CFK 2.6.0 and Confluent Platform 7.4.0 release.
 
 ## Set the current tutorial directory
 
@@ -16,7 +16,9 @@ export TUTORIAL_HOME=<Github repo directory>/security/separate-listener-tls
 
 ## Deploy Confluent for Kubernetes
 
-This workflow scenario assumes you are using the namespace `confluent`.
+This workflow scenario assumes you are using the namespace `confluent`. You can create `confluent` namespace by running command `kubectl create namespace confluent`.
+
+
 
 Set up the Helm Chart:
 
@@ -119,7 +121,7 @@ kubectl create secret generic tls-ksqldb \
 
 ## Deploy Confluent Platform
 
-note that external accesses to Confluent Platform components are configured using the Load Balance services.
+Note that external accesses to Confluent Platform components are configured using the Load Balance services.
 ``` 
 spec:
   listeners:
