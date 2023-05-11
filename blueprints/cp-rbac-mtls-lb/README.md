@@ -106,7 +106,7 @@ To create the required CA, run the following commands:
 1. Install the Blueprint:
 
    ```bash
-   kubectl apply -f $SCENARIO_BASEPATH/blueprint/blueprint.yaml -- namespace cpc-system
+   kubectl apply -f $SCENARIO_BASEPATH/blueprint/blueprint.yaml --namespace cpc-system
    ```
    
 ## Deploy Confluent Platform in Single Site Deployment
