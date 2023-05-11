@@ -179,8 +179,6 @@ spec:
         userSearchBase: dc=test,dc=com
   metaDataService:
     identityProviderType: ldap
-    tlsConfig:
-      providerType: blueprint
     tokenKeyPair:
       tokenKey:
         providerType: blueprint
