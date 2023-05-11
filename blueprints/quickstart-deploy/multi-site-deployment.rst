@@ -110,12 +110,11 @@ following steps:
 
    .. sourcecode:: bash
 
-      helm upgrade --install cpc-orchestrator confluentinc/cpc-orchestrator \
-        --set image.pullPolicy="IfNotPresent" \
-        --set debug=true \
+      helm upgrade --install cpc-orchestrator confluentinc/cfk-blueprint \
+        --set orchestrator.enabled=true \
         --namespace cpc-system \
-        --kube-context control-plane 
-
+        --kube-context control-plane
+  
 .. _deploy-remote-data-plane: 
 
 Deploy Remote Data Plane 
@@ -149,19 +148,16 @@ Kubernetes cluster from the Control Plane cluster.
       kubectl create secret generic control-plane-kubeconfig \
         --from-file=kubeconfig=/tmp/kubeconfig \
         --context data-plane \
-        --namespace cpc-system \
-        --save-config --dry-run=client -oyaml | kubectl apply -f -
-
+        --namespace cpc-system 
+        
 #. In the Data Plane, install the Agent Helm chart in the ``Remote`` mode:
 
    .. sourcecode:: bash
 
-      helm upgrade --install confluent-agent-remote confluentinc/cpc-agent \
-        --set image.pullPolicy="IfNotPresent" \
+      helm upgrade --install confluent-agent confluentinc/cfk-blueprint \
         --set mode=Remote \
         --set agent.enabled=true \
         --set remoteKubeConfig.secretRef=control-plane-kubeconfig \
-        --set debug=true \
         --kube-context data-plane \
         --namespace cpc-system
 
@@ -172,8 +168,6 @@ Kubernetes cluster from the Control Plane cluster.
 
       helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes \
         --set namespaced="false" \
-        --set operator.enabled=true \
-        --set debug=true \
         --kube-context data-plane \
         --namespace cpc-system
 
@@ -188,14 +182,21 @@ Kubernetes cluster from the Control Plane cluster.
    #. Edit ``$TUTORIAL_HOME/registration/data-plane-k8s.yaml`` and set 
       ``spec.k8sID`` to the Kubernetes ID from the previous step.
       
-   #. In the Control Plane, create the KubernetesCluster and the HealthCheck 
-      custom resource (CR):
+   #. In the Control Plane, register the Kubernetes cluster and the Health Check 
+      by creating the KubernetesCluster and the HealthCheck custom resources 
+      (CRs):
    
       .. sourcecode:: bash
 
          kubectl apply -f $TUTORIAL_HOME/registration/data-plane-k8s.yaml \
-           --context control-plane
+           --context control-plane --namespace cpc-system
 
+   #. Verify that the Agent is up and running:
+   
+      .. sourcecode:: bash
+
+         kubectl get cpcHealthCheck \
+           --context control-plane --namespace cpc-system
 
 .. _deploy-blueprint: 
 
@@ -207,7 +208,7 @@ Deploy the Blueprint and the Confluent cluster class CRs:
 .. sourcecode:: bash
 
    kubectl apply -f $TUTORIAL_HOME/deployment/confluentplatform_blueprint.yaml \
-     --context control-plane
+     --context control-plane --namespace cpc-system
 
 
 .. _deploy-remote-cp:
@@ -262,17 +263,5 @@ From the Control Plane cluster, deploy Confluent Platform.
    .. sourcecode:: bash
 
       kubectl delete -f $TUTORIAL_HOME/deployment/data-plane/confluentplatform_dev.yaml \
-        --context control-plane
+        --context control-plane --namespace org-confluent
 
-Troubleshoot
--------------
-
-* To check the states of the Operator and the Agent, run:
-
-  .. sourcecode:: bash 
-
-     kubectl get agent cpc-agent-install --namespace cpc-system --context control-plane -oyaml
-     
-  .. sourcecode:: bash 
-
-     kubectl get cpchealthcheck --namespace cpc-system --context control-plane

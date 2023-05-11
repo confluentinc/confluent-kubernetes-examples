@@ -143,7 +143,14 @@ where the Control Plane is installed.
       .. sourcecode:: bash
 
          kubectl apply -f $TUTORIAL_HOME/registration/control-plane-k8s.yaml \
-           --context control-plane
+           --context control-plane --namespace cpc-system
+           
+   #. Verify that the Agent is up and running:
+   
+      .. sourcecode:: bash
+
+         kubectl get cpcHealthCheck \
+           --context control-plane --namespace cpc-system
 
 #. Install the CFK Helm chart in the cluster mode (``--set namespaced=false``):
   
@@ -151,7 +158,6 @@ where the Control Plane is installed.
 
       helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes \
         --set namespaced="false" \
-        --set debug=true \
         --namespace cpc-system \
         --kube-context control-plane 
 
@@ -165,7 +171,7 @@ Deploy the Blueprint and the Confluent cluster class CRs:
 .. sourcecode:: bash
 
    kubectl apply -f $TUTORIAL_HOME/deployment/confluentplatform_blueprint.yaml \
-     --context control-plane
+     --context control-plane --namespace cpc-system
 
 .. _deploy-local-cp:
 
@@ -213,15 +219,3 @@ Deploy Confluent Platform in Local Data Plane
         --namespace org-confluent \
         --context control-plane
 
-Troubleshoot
--------------
-
-* To check the state of the Operator and the Agent, run:
-
-  .. sourcecode:: bash 
-
-     kubectl get agent cpc-agent-install --namespace cpc-system -oyaml
-     
-  .. sourcecode:: bash 
-
-     kubectl get cpchealthcheck --namespace cpc-system
