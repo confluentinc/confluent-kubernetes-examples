@@ -139,7 +139,11 @@ Kubernetes cluster from the Control Plane cluster.
       
    .. sourcecode:: bash
 
-      $TUTORIAL_HOME/scripts/kubeconfig_generate.sh control-plane-sa cpc-system /tmp
+      $TUTORIAL_HOME/scripts/kubeconfig_generate.sh \
+        --name control-plane-sa \
+        --namespace cpc-system \
+        --kube-output-dir /tmp \
+        --regenerate
 
 #. In the Data Plane, create the KubeConfig secret:
 
