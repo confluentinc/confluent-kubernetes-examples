@@ -11,9 +11,9 @@ spec:
   sourceKafkaCluster:
     tls:
       enabled: true
-      secretRef: ccloud-tls-certs
-    bootstrapEndpoint: pkc-ep9mm.us-east-2.aws.confluent.cloud:9092 
-    clusterID: lkc-v2n5p
+      secretRef: source-tls-ccloud
+    bootstrapEndpoint: <bootstrap-endpoint> 
+    clusterID: <cluster-id>
     authentication:
       type: plain
       jaasConfigPassThrough:
