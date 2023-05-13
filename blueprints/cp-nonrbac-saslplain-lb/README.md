@@ -169,7 +169,7 @@ The Control Plane uses CA keypair to generate certificates for all the Confluent
    1. Navigate to Control Center in a browser and check the cluster:
 
       ```bash
-      https://localhost:9021
+      http://localhost:9021
       ```
 
    Log in as the `kafka` user with the `kafka-secret` password.
