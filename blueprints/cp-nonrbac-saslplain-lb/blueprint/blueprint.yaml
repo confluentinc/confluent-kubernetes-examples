@@ -162,8 +162,6 @@ spec:
         type: loadBalancer
         loadBalancer:
           advertisedPort: 8443
-      tlsConfig:
-        providerType: blueprint
     kafkaListeners:
       global:
         externalAccessType: loadBalancer
@@ -181,8 +179,6 @@ spec:
           enabled: true
           loadBalancer:
             advertisedPort: 8443
-        tlsConfig:
-          providerType: blueprint
       internalListener:
         authentication:
           type: plain
@@ -193,8 +189,6 @@ spec:
                 key: kafka-server-listener-internal-plain-users.json
                 name: cp-nonrbac-saslplain-lb-bp-csc
                 type: json
-        tlsConfig:
-          providerType: blueprint
   components:
     connectCluster:
       classRef:
