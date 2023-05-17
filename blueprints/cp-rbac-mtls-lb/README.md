@@ -40,7 +40,7 @@ This repo includes a Helm chart for OpenLdap. The chart `values.yaml` includes t
 1. Deploy OpenLdap:
 
    ```bash
-   helm upgrade --install -f $SCENARIO_BASEPATH/../../../assets/openldap/ldaps-rbac.yaml test-ldap    $SCENARIO_BASEPATH/../../../assets/openldap --namespace cpc-system
+   helm upgrade --install -f $SCENARIO_BASEPATH/../../assets/openldap/ldaps-rbac.yaml test-ldap $SCENARIO_BASEPATH/../../assets/openldap --namespace cpc-system
    ```
 
 1. Validate that OpenLDAP is running:
@@ -242,9 +242,7 @@ To create the required CA, run the following commands:
 
    1. Navigate to Control Center in a browser and check the cluster:
 
-      ```bash
-      https://localhost:9021
-      ```   
+      [https://localhost:9021](https://localhost:9021)
 
    Log in as the `kafka` user with the `kafka-secret` password.
 
