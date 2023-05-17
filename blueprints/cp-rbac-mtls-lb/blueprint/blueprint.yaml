@@ -136,10 +136,7 @@ spec:
   internalCAKeyPair:
     providerType: blueprint
     blueprint:
-      type: custom
-      custom:
-        certificateStoreConfig:
-          name: ca-key-pair-sce-2
+      type: auto
   dnsConfig:
     domain: # Set this to the value of your Kubernetes domain, $DOMAIN
     providerType: deployment
