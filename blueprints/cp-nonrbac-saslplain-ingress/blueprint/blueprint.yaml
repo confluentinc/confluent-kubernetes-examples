@@ -136,12 +136,9 @@ spec:
   internalCAKeyPair:
     providerType: blueprint
     blueprint:
-      type: custom
-      custom:
-        certificateStoreConfig:
-          name: ca-key-pair-sce-5
+      type: auto
   dnsConfig:
-    domain: platformops.dev.gcp.devel.cpdev.cloud
+    domain: # Replace this.
     providerType: deployment
     deployment:
       subdomainRegex: cpc+
@@ -156,7 +153,7 @@ spec:
           key: sr-pwd-encoder.txt
           name: cp-nonrbac-saslplain-ingress-bp-csc
   confluentPlatform:
-    version: 7.2.1
+    version: 7.4.0
     http:
       externalAccess:
         type: ingress
