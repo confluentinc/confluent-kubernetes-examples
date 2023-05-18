@@ -159,9 +159,9 @@ Kubernetes cluster from the Control Plane cluster.
    .. sourcecode:: bash
 
       helm upgrade --install confluent-agent confluentinc/cfk-blueprint \
-        --set mode=Remote \
+        --set agent.mode=Remote \
         --set agent.enabled=true \
-        --set remoteKubeConfig.secretRef=control-plane-kubeconfig \
+        --set agent.remoteKubeConfig.secretRef=control-plane-kubeconfig \
         --kube-context data-plane \
         --namespace cpc-system
 
