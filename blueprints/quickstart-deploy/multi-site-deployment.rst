@@ -115,6 +115,15 @@ following steps:
         --namespace cpc-system \
         --kube-context control-plane
   
+#. Install the CFK Helm chart in the Control Plane: 
+
+   .. sourcecode:: bash
+
+      helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes \
+        --set namespaced="false" \
+        --kube-context control-plane \
+        --namespace cpc-system
+
 .. _deploy-remote-data-plane: 
 
 Deploy Remote Data Plane 
