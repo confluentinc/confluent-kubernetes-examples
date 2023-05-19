@@ -61,7 +61,7 @@ openssl s_client -showcerts -servername pkc-xxxx.eastus.azure.confluent.cloud -c
 ```
 kubectl -n destination create secret generic source-tls-ccloud \
     --from-file=fullchain.pem=$TUTORIAL_HOME/fullchain.pem \
-    --from-file=cacerts.pem=$TUTORIAL_HOME/cacerts.pem 
+    --from-file=cacerts.pem=$TUTORIAL_HOME/cacert.pem 
     
 ```
 #### create password encoder secret
@@ -94,7 +94,27 @@ clusterID: lkc-yyyyy
 
 ### Verify Cluster Linking is working in destination cluster
 
-#### exec into destination kafka pod
+#### Check if all Confluent resources are up and running
+
+```
+kubectl get confluent -n destination
+
+NAME                                                   ID                       STATUS    DESTCLUSTERID            SRCCLUSTERID   MIRRORTOPICCOUNT   AGE
+clusterlink.platform.confluent.io/clusterlinkus-demo   xxxxxx-yyyyyy   CREATED   <dest-cluster-id>   lkc-xxxxx     1                  5m5s
+
+NAME                                REPLICAS   READY   STATUS    AGE
+kafka.platform.confluent.io/kafka   3          3       RUNNING   11m
+
+NAME                                        REPLICAS   READY   STATUS    AGE
+zookeeper.platform.confluent.io/zookeeper   3          3       RUNNING   11m
+
+NAME                                                          AGE
+kafkarestclass.platform.confluent.io/destination-kafka-rest   11m
+```
+
+Look for `clusterlink.platform.confluent.io/clusterlinkus-demo` in the output above and verify it's in good running state.
+
+#### Open a terminal access into the destination kafka pod
     kubectl -n destination exec kafka-0 -it -- bash
 
 #### produce a message in the Confluent Cloud topic
@@ -104,3 +124,14 @@ Go the UI and produce a message into the topic called demo.
 
     kafka-console-consumer --from-beginning --topic demo --bootstrap-server  kafka.destination.svc.cluster.local:9071 
 
+## Tear Down
+
+```
+kubectl delete -f $TUTORIAL_HOME/clusterlink-ccloud-to-cfk.yaml
+kubectl delete clusterlink.platform.confluent.io/clusterlinkus-demo
+kubectl delete -f $TUTORIAL_HOME/zk-kafka-destination.yaml
+kubectl delete secret rest-credential -n destination
+kubectl delete secret password-encoder-secret -n destination
+kubectl delete secret source-tls-ccloud -n destination
+kubectl delete secret ccloud-credential -n destination
+```
