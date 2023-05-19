@@ -23,7 +23,7 @@ Deploy Confluent for Kubernetes (CFK) in `destination` namespace.
 
 ```
 helm upgrade --install confluent-operator \
-  confluentinc/confluent-for-kubernetes 
+  confluentinc/confluent-for-kubernetes -n destination
 ```
 
 ### create a JAAS config ccloud-jaas.conf with API-KEY/SECRET credentials for Confluent Cloud
