@@ -22,9 +22,12 @@ spec:
   image:
     application: confluentinc/cp-server:7.4.0
     init: confluentinc/confluent-init-container:2.6.0
-  dataVolumeCapacity: 10Gi
+  dataVolumeCapacity: 100Gi
   passwordEncoder:
     secretRef: password-encoder-secret
+  dependencies:
+    zookeeper:
+      endpoint: zookeeper.destination.svc.cluster.local:2181
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: KafkaRestClass
@@ -40,5 +43,3 @@ spec:
       type: basic
       basic:
         secretRef: rest-credential
----
-
