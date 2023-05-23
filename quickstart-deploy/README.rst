@@ -109,7 +109,7 @@ For example, the Kafka section of the file is as follows:
       enabled: true
     dependencies:
       zookeeper:
-        endpoint: http://zookeeper.confluent.svc.cluster.local:2181
+        endpoint: zookeeper.confluent.svc.cluster.local:2181
   ---
   
 =========================
