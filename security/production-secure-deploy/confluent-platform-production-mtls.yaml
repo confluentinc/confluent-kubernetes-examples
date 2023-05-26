@@ -294,7 +294,7 @@ spec:
     kafka:
       bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
       authentication:
-        type: mtls
+        type: plain
       tls:
         enabled: true
     mds:
