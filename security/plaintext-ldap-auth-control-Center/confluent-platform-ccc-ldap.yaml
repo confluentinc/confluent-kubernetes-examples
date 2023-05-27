@@ -3,9 +3,9 @@ apiVersion: platform.confluent.io/v1beta1
 kind: Zookeeper
 metadata:
   name: zookeeper
-  namespace: confluent
+  namespace: operator
 spec:
-  replicas: 3
+  replicas: 1
   image:
     application: confluentinc/cp-zookeeper:7.4.0
     init: confluentinc/confluent-init-container:2.6.0
@@ -16,9 +16,9 @@ apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
 metadata:
   name: kafka
-  namespace: confluent
+  namespace: operator
 spec:
-  replicas: 3
+  replicas: 1
   image:
     application: confluentinc/cp-server:7.4.0
     init: confluentinc/confluent-init-container:2.6.0
@@ -30,7 +30,7 @@ apiVersion: platform.confluent.io/v1beta1
 kind: Connect
 metadata:
   name: connect
-  namespace: confluent
+  namespace: operator
 spec:
   replicas: 1
   image:
@@ -44,7 +44,7 @@ apiVersion: platform.confluent.io/v1beta1
 kind: KsqlDB
 metadata:
   name: ksqldb
-  namespace: confluent
+  namespace: operator
 spec:
   replicas: 1
   image:
@@ -56,13 +56,18 @@ apiVersion: platform.confluent.io/v1beta1
 kind: ControlCenter
 metadata:
   name: controlcenter
-  namespace: confluent
+  namespace: operator
 spec:
-  license:
-    globalLicense: true
   configOverrides:
+    server:
+      - confluent.controlcenter.internal.topics.replication=1
+      - confluent.controlcenter.command.topic.replication=1
+      - confluent.metrics.topic.replication=1
+      - confluent.monitoring.interceptor.topic.replication=1
+      - confluent.controlcenter.auth.session.expiration.ms=60000
     log4j: 
       - log4j.rootLogger=DEBUG, stdout
+      - log4j.logger.io.confluent.controlcenter.rest=TRACE, stdout
   replicas: 1
   image:
     application: confluentinc/cp-enterprise-control-center:7.4.0
@@ -77,7 +82,7 @@ spec:
         useLdaps : "false"
         debug: "true"
         contextFactory: "com.sun.jndi.ldap.LdapCtxFactory"
-        hostname: "ldap.confluent.svc.cluster.local"
+        hostname: "ldap.operator.svc.cluster.local"
         port: "389"
         bindDn: "cn=admin,dc=test,dc=com"
         bindPassword: "confluentrox"
@@ -95,19 +100,19 @@ spec:
 
   dependencies:
     schemaRegistry:
-      url: http://schemaregistry.confluent.svc.cluster.local:8081
+      url: http://schemaregistry.operator.svc.cluster.local:8081
     ksqldb:
     - name: ksqldb
-      url: http://ksqldb.confluent.svc.cluster.local:8088
+      url: http://ksqldb.operator.svc.cluster.local:8088
     connect:
     - name: connect
-      url: http://connect.confluent.svc.cluster.local:8083
+      url: http://connect.operator.svc.cluster.local:8083
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: SchemaRegistry
 metadata:
   name: schemaregistry
-  namespace: confluent
+  namespace: operator
 spec:
   replicas: 1
   image:
@@ -118,11 +123,11 @@ apiVersion: platform.confluent.io/v1beta1
 kind: KafkaRestProxy
 metadata:
   name: kafkarestproxy
-  namespace: confluent
+  namespace: operator
 spec:
   dependencies:
     schemaRegistry:
-      url: http://schemaregistry.confluent.svc.cluster.local:8081
+      url: http://schemaregistry.operator.svc.cluster.local:8081
   image:
     application: confluentinc/cp-kafka-rest:7.4.0
     init: confluentinc/confluent-init-container:2.6.0
