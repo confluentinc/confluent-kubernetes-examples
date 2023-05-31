@@ -7,8 +7,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-zookeeper:7.4.0
-    init: confluentinc/confluent-init-container:2.6.0
+    application: confluentinc/cp-zookeeper:7.1.7
+    init: confluentinc/confluent-init-container:2.4.0
   dataVolumeCapacity: 10Gi
   logVolumeCapacity: 10Gi
 ---
@@ -20,8 +20,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-server:7.4.0
-    init: confluentinc/confluent-init-container:2.6.0
+    application: confluentinc/cp-server:7.1.7
+    init: confluentinc/confluent-init-container:2.4.0
   dataVolumeCapacity: 10Gi
   metricReporter:
     enabled: true
@@ -34,8 +34,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-server-connect:7.4.0
-    init: confluentinc/confluent-init-container:2.6.0
+    application: confluentinc/cp-server-connect:7.1.7
+    init: confluentinc/confluent-init-container:2.4.0
   dependencies:
     kafka:
       bootstrapEndpoint: kafka:9071
@@ -48,8 +48,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-ksqldb-server:7.4.0
-    init: confluentinc/confluent-init-container:2.6.0
+    application: confluentinc/cp-ksqldb-server:7.1.7
+    init: confluentinc/confluent-init-container:2.4.0
   dataVolumeCapacity: 10Gi
 ---
 apiVersion: platform.confluent.io/v1beta1
@@ -65,21 +65,21 @@ spec:
       - confluent.metrics.topic.replication=1
       - confluent.monitoring.interceptor.topic.replication=1
       - confluent.controlcenter.auth.session.expiration.ms=60000
-    log4j: 
+    log4j:
       - log4j.rootLogger=DEBUG, stdout
       - log4j.logger.io.confluent.controlcenter.rest=TRACE, stdout
   replicas: 1
   image:
-    application: confluentinc/cp-enterprise-control-center:7.4.0
-    init: confluentinc/confluent-init-container:2.6.0
+    application: confluentinc/cp-enterprise-control-center:7.1.7
+    init: confluentinc/confluent-init-container:2.4.0
   dataVolumeCapacity: 10Gi
   authentication:
     type: ldap
     ldap:
-      roles: [c3users,readonlyusers]
+      roles: [c3users, readonlyusers]
       restrictedRoles: [readonlyusers]
       property:
-        useLdaps : "false"
+        useLdaps: "false"
         debug: "true"
         contextFactory: "com.sun.jndi.ldap.LdapCtxFactory"
         hostname: "ldap.operator.svc.cluster.local"
@@ -89,24 +89,24 @@ spec:
         authenticationMethod: "simple"
         forceBindingLogin: "false"
         userBaseDn: "ou=users,dc=test,dc=com"
-        userObjectClass: "inetOrgPerson" 
+        userObjectClass: "inetOrgPerson"
         userRdnAttribute: "uid"
         userIdAttribute: "cn"
         roleBaseDn: "ou=groups,dc=test,dc=com"
         roleNameAttribute: "cn"
         roleMemberAttribute: "memberUid"
-        roleObjectClass: "posixGroup" 
+        roleObjectClass: "posixGroup"
         userPasswordAttribute: "userPassword"
 
   dependencies:
     schemaRegistry:
       url: http://schemaregistry.operator.svc.cluster.local:8081
     ksqldb:
-    - name: ksqldb
-      url: http://ksqldb.operator.svc.cluster.local:8088
+      - name: ksqldb
+        url: http://ksqldb.operator.svc.cluster.local:8088
     connect:
-    - name: connect
-      url: http://connect.operator.svc.cluster.local:8083
+      - name: connect
+        url: http://connect.operator.svc.cluster.local:8083
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: SchemaRegistry
@@ -116,8 +116,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-schema-registry:7.4.0
-    init: confluentinc/confluent-init-container:2.6.0
+    application: confluentinc/cp-schema-registry:7.1.7
+    init: confluentinc/confluent-init-container:2.4.0
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: KafkaRestProxy
@@ -129,6 +129,6 @@ spec:
     schemaRegistry:
       url: http://schemaregistry.operator.svc.cluster.local:8081
   image:
-    application: confluentinc/cp-kafka-rest:7.4.0
-    init: confluentinc/confluent-init-container:2.6.0
+    application: confluentinc/cp-kafka-rest:7.1.7
+    init: confluentinc/confluent-init-container:2.4.0
   replicas: 1
