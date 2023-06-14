@@ -1,4 +1,4 @@
-kafka-server-domain.json{
+{
   "CN": "kafka",
   "hosts": [
     "*.mydomain.com"
