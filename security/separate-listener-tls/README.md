@@ -87,13 +87,13 @@ cfssl gencert -ca=$TUTORIAL_HOME/externalCacerts.pem \
 cfssl gencert -ca=$TUTORIAL_HOME/externalCacerts.pem \
 -ca-key=$TUTORIAL_HOME/externalRootCAkey.pem \
 -config=$TUTORIAL_HOME/../../assets/certs/ca-config.json \
--profile=server $TUTORIAL_HOME/kafka-server-domain.json | cfssljson -bare $TUTORIAL_HOME/sr-server
+-profile=server $TUTORIAL_HOME/sr-server-domain.json | cfssljson -bare $TUTORIAL_HOME/sr-server
 
 # Create Ksqldb server certificates
 cfssl gencert -ca=$TUTORIAL_HOME/externalCacerts.pem \
 -ca-key=$TUTORIAL_HOME/externalRootCAkey.pem \
 -config=$TUTORIAL_HOME/../../assets/certs/ca-config.json \
--profile=server $TUTORIAL_HOME/kafka-server-domain.json | cfssljson -bare $TUTORIAL_HOME/ksqldb-server
+-profile=server $TUTORIAL_HOME/ksqldb-server-domain.json | cfssljson -bare $TUTORIAL_HOME/ksqldb-server
 
 ```
 
