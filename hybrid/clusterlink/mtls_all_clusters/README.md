@@ -174,3 +174,13 @@ After the Kafka cluster is in running state, create cluster link between source 
 
     kafka-console-consumer --from-beginning --topic demo --bootstrap-server  kafka.destination.svc.cluster.local:9071  --consumer.config /tmp/kafka.properties
 
+## Tear Down
+
+    kubectl delete -f $TUTORIAL_HOME/clusterlink-mtls.yaml
+    kubectl delete -f $TUTORIAL_HOME/zk-kafka-destination.yaml
+    kubectl delete -f $TUTORIAL_HOME/zk-kafka-source.yaml
+    kubectl -n source delete secret credential source-tls-zk source-tls-kafka rest-credential 
+    kubectl -n destination delete secret credential destination-tls-zk destination-tls-kafka source-tls-kafka rest-credential password-encoder-secret source-tls-secret
+    kubectl delete ns source
+    kubectl delete ns destination
+
