@@ -1,7 +1,7 @@
 apiVersion: platform.confluent.io/v1beta1
 kind: ClusterLink
 metadata:
-  name: clusterlinkus-demo
+  name: clusterlink-demo
   namespace: destination
 spec:
   destinationKafkaCluster:
@@ -17,6 +17,6 @@ spec:
       secretRef: source-tls-secret
     kafkaRestClassRef:
       name: source-kafka-rest
-      namespace: source
+      namespace: destination
   mirrorTopics:
   - name: demo

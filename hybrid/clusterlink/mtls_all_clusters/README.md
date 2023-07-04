@@ -8,7 +8,7 @@ Set the tutorial directory for this tutorial under the directory you downloaded
 the tutorial files:
 
 ```
-export TUTORIAL_HOME=<Tutorial directory>/hybrid/clusterlink/mtls_source_cluster
+export TUTORIAL_HOME=<Tutorial directory>/hybrid/clusterlink/mtls_all_clusters
 ```
 
 Create two namespaces, one for the source cluster components and one for the destination cluster components.
@@ -39,16 +39,19 @@ kubectl -n destination create secret generic credential \
     --from-file=plain.txt=$TUTORIAL_HOME/creds-client-kafka-sasl-user.txt \
     --from-file=basic.txt=$TUTORIAL_HOME/creds-basic-users.txt
 ```
+### create required certificates 
+
+[Follow this guide](https://github.com/confluentinc/confluent-kubernetes-examples/tree/master/assets/certs/component-certs) to created the required certificates.  
 
 ### Source Cluster Deployment
 ### create required secrets
 ```
-kubectl -n source create secret generic source-tls-zk1 \
+kubectl -n source create secret generic source-tls-zk \
     --from-file=fullchain.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/zookeeper-server.pem \
     --from-file=cacerts.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/cacerts.pem \
     --from-file=privkey.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/zookeeper-server-key.pem
 
-kubectl -n source create secret generic source-tls-group1 \
+kubectl -n source create secret generic source-tls-kafka \
     --from-file=fullchain.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/kafka-server.pem \
     --from-file=cacerts.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/cacerts.pem \
     --from-file=privkey.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/kafka-server-key.pem
@@ -86,16 +89,21 @@ kubectl apply -f $TUTORIAL_HOME/zk-kafka-source.yaml
 ### Destination Cluster Deployment
 #### create required secrets
 ```
-kubectl -n destination create secret generic destination-tls-zk1 \
+kubectl -n destination create secret generic destination-tls-zk \
     --from-file=fullchain.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/zookeeper-server.pem \
     --from-file=cacerts.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/cacerts.pem \
     --from-file=privkey.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/zookeeper-server-key.pem
 
-kubectl -n destination create secret generic destination-tls-group1 \
+kubectl -n destination create secret generic destination-tls-kafka \
     --from-file=fullchain.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/kafka-server.pem \
     --from-file=cacerts.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/cacerts.pem \
     --from-file=privkey.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/kafka-server-key.pem
-    
+
+kubectl -n destination create secret generic source-tls-kafka \
+    --from-file=fullchain.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/kafka-server.pem \
+    --from-file=cacerts.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/cacerts.pem \
+    --from-file=privkey.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/kafka-server-key.pem
+
 kubectl -n destination create secret generic rest-credential \
     --from-file=basic.txt=$TUTORIAL_HOME/rest-credential.txt
     
@@ -111,14 +119,14 @@ kubectl -n destination create secret generic password-encoder-secret \
 
 #### convert key to PKCS8 format
 ```
-openssl pkcs8 -in $TUTORIAL_HOME../../../assets/certs/component-certs/generated/kafka-server-key.pem -topk8 -nocrypt -out $TUTORIAL_HOME../../../assets/certs/component-certs/generated/kafka-server-key-pkcs8.pem
+openssl pkcs8 -in $TUTORIAL_HOME/../../../assets/certs/component-certs/generated/kafka-server-key.pem -topk8 -nocrypt -out $TUTORIAL_HOME/../../../assets/certs/component-certs/generated/kafka-server-key-pkcs8.pem
 ```
 #### Create client secret
 ```
 kubectl -n destination create secret generic source-tls-secret \
     --from-file=fullchain.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/kafka-server.pem \
     --from-file=cacerts.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/cacerts.pem \
-    --from-file=privkey.pem=$TUTORIAL_HOME../../../assets/certs/component-certs/generated/kafka-server-key-pkcs8.pem
+    --from-file=privkey.pem=$TUTORIAL_HOME/../../../assets/certs/component-certs/generated/kafka-server-key-pkcs8.pem
 ```
 
 After the Kafka cluster is in running state, create cluster link between source and destination. Cluster link will be created in the destination cluster
