@@ -112,55 +112,62 @@ kubectl -n destination create secret generic source-tls-secret \
 After the Kafka cluster is in running state, create cluster link between source and destination. Cluster link will be created in the destination cluster
 
 #### create clusterlink between source and destination
-    kubectl apply -f $TUTORIAL_HOME/clusterlink-mtls.yaml
-
+```
+kubectl apply -f $TUTORIAL_HOME/clusterlink-mtls.yaml
+```
 
 ### Run test
 
 #### exec into source kafka pod
-    kubectl -n source exec kafka-0 -it -- bash
-
+```
+kubectl -n source exec kafka-0 -it -- bash
+```
 #### create kafka.properties
-
-    cat <<EOF > /tmp/kafka.properties
-    bootstrap.servers=kafka.source.svc.cluster.local:9071
-    security.protocol=SSL
-    ssl.keystore.location=/mnt/sslcerts/keystore.p12
-    ssl.keystore.password=mystorepassword
-    ssl.truststore.location=/mnt/sslcerts/truststore.p12
-    ssl.truststore.password=mystorepassword
-    EOF
-
+```
+cat <<EOF > /tmp/kafka.properties
+bootstrap.servers=kafka.source.svc.cluster.local:9071
+security.protocol=SSL
+ssl.keystore.location=/mnt/sslcerts/keystore.p12
+ssl.keystore.password=mystorepassword
+ssl.truststore.location=/mnt/sslcerts/truststore.p12
+ssl.truststore.password=mystorepassword
+EOF
+```
 #### produce in source kafka cluster
-
-    seq 100 | kafka-console-producer --topic demo --broker-list kafka.source.svc.cluster.local:9071 --producer.config /tmp/kafka.properties
+```
+seq 100 | kafka-console-producer --topic demo --broker-list kafka.source.svc.cluster.local:9071 --producer.config /tmp/kafka.properties
+```
 #### open a new terminal and exec into destination kafka pod
-    kubectl -n destination exec kafka-0 -it -- bash
-
+```
+kubectl -n destination exec kafka-0 -it -- bash
+```
 #### create kafka.properties for destination kafka cluster
-    cat <<EOF > /tmp/kafka.properties
-    bootstrap.servers=kafka.destination.svc.cluster.local:9071
-    security.protocol=SSL
-    ssl.truststore.location=/mnt/sslcerts/truststore.p12
-    ssl.truststore.password=mystorepassword
-    ssl.keystore.location=/mnt/sslcerts/keystore.p12
-    ssl.keystore.password=mystorepassword
-    EOF
+```
+cat <<EOF > /tmp/kafka.properties
+bootstrap.servers=kafka.destination.svc.cluster.local:9071
+security.protocol=SSL
+ssl.truststore.location=/mnt/sslcerts/truststore.p12
+ssl.truststore.password=mystorepassword
+ssl.keystore.location=/mnt/sslcerts/keystore.p12
+ssl.keystore.password=mystorepassword
+EOF
+```
 
 #### validate topic is created in destination kafka cluster
-    kafka-topics --describe --topic demo --bootstrap-server kafka.destination.svc.cluster.local:9071 --command-config /tmp/kafka.properties
-
+```
+kafka-topics --describe --topic demo --bootstrap-server kafka.destination.svc.cluster.local:9071 --command-config /tmp/kafka.properties
+```
 #### consume in destination kafka cluster and confirm message delivery in destination cluster
-
-    kafka-console-consumer --from-beginning --topic demo --bootstrap-server  kafka.destination.svc.cluster.local:9071  --consumer.config /tmp/kafka.properties
-
+```
+kafka-console-consumer --from-beginning --topic demo --bootstrap-server  kafka.destination.svc.cluster.local:9071  --consumer.config /tmp/kafka.properties
+```
 ## Tear Down
-
-    kubectl delete -f $TUTORIAL_HOME/clusterlink-mtls.yaml
-    kubectl delete -f $TUTORIAL_HOME/zk-kafka-destination.yaml
-    kubectl delete -f $TUTORIAL_HOME/zk-kafka-source.yaml
-    kubectl -n source delete secret credential source-tls-zk source-tls-kafka rest-credential 
-    kubectl -n destination delete secret credential destination-tls-zk destination-tls-kafka source-tls-kafka rest-credential password-encoder-secret source-tls-secret
-    kubectl delete ns source
-    kubectl delete ns destination
-
+```
+kubectl delete -f $TUTORIAL_HOME/clusterlink-mtls.yaml
+kubectl delete -f $TUTORIAL_HOME/zk-kafka-destination.yaml
+kubectl delete -f $TUTORIAL_HOME/zk-kafka-source.yaml
+kubectl -n source delete secret credential source-tls-zk source-tls-kafka rest-credential 
+kubectl -n destination delete secret credential destination-tls-zk destination-tls-kafka source-tls-kafka rest-credential password-encoder-secret source-tls-secret
+kubectl delete ns source
+kubectl delete ns destination
+```
