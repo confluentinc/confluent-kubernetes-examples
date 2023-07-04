@@ -61,26 +61,6 @@ kubectl -n source create secret generic rest-credential \
     
 ```
 
-Generate a CA pair to use in this tutorial:
-```
-openssl genrsa -out $TUTORIAL_HOME/ca-key.pem 2048
-openssl req -new -key $TUTORIAL_HOME/ca-key.pem -x509 \
-  -days 1000 \
-  -out $TUTORIAL_HOME/ca.pem \
-  -subj "/C=US/ST=CA/L=MountainView/O=Confluent/OU=Operator/CN=TestCA"
-```
-Then, provide the certificate authority as a Kubernetes secret ca-pair-sslcerts
-```
-kubectl -n source create secret tls ca-pair-sslcerts \
-    --cert=$TUTORIAL_HOME/ca.pem \
-    --key=$TUTORIAL_HOME/ca-key.pem 
-
-kubectl -n destination create secret tls ca-pair-sslcerts \
-    --cert=$TUTORIAL_HOME/ca.pem \
-    --key=$TUTORIAL_HOME/ca-key.pem   
-
-```
-
 #### deploy source zookeeper, kafka cluster and topic `demo` in namespace `source`
 ```
 kubectl apply -f $TUTORIAL_HOME/zk-kafka-source.yaml
