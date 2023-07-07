@@ -14,7 +14,7 @@ spec:
   authentication:
     type: mtls
   tls:
-    secretRef: destination-tls-zk1
+    secretRef: destination-tls-zk
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
@@ -28,7 +28,7 @@ spec:
     init: confluentinc/confluent-init-container:2.6.0
   dataVolumeCapacity: 10Gi
   tls:
-    secretRef: destination-tls-group1
+    secretRef: destination-tls-kafka
   listeners:
     internal:
       authentication:
@@ -43,11 +43,9 @@ spec:
   services:
     kafkaRest:
       authentication:
-        type: basic
-        basic:
-          secretRef: credential
-          roles:
-            - Administrators
+        type: mtls
+      tls:
+        enabled: true
   ## dependencies are not required, will have default set
   dependencies:
     zookeeper:
@@ -68,10 +66,23 @@ spec:
   kafkaClusterRef:
     name: kafka
   kafkaRest:
-    endpoint: http://kafka.destination.svc.cluster.local:8090
+    endpoint: https://kafka.destination.svc.cluster.local:8090
     authentication:
-      type: basic
-      basic:
-        secretRef: rest-credential
+      type: mtls
+    tls: 
+      secretRef: destination-tls-kafka
 ---
-
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: source-kafka-rest
+  namespace: destination
+spec:
+  kafkaClusterRef:
+    name: kafka
+  kafkaRest:
+    endpoint: https://kafka.source.svc.cluster.local:8090
+    authentication:
+      type: mtls
+    tls: 
+      secretRef: source-tls-kafka
