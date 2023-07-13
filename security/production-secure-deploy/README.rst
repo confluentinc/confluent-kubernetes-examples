@@ -212,7 +212,7 @@ The CR configuration file contains a custom resource specification for each
 Confluent Platform component, including replicas, image to use, resource
 allocations.
 
-Edit the Confluent Platform CR file: ``$TUTORIAL_HOME/confluent-platform.yaml``
+Edit the Confluent Platform CR file: ``$TUTORIAL_HOME/confluent-platform-production.yaml``
 
 Specifically, note that external accesses to Confluent Platform components are
 configured using the Load Balance services.
