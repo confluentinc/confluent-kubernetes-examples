@@ -41,19 +41,19 @@ Rules for the Ingress resource should look similar to this, **note that we only 
             backend:
               service:
                 name: kafka-0-internal
-                port: 
+                port:
                   number: 9072
           - pathType: ImplementationSpecific
             backend:
               service:
                 name: kafka-0-internal
-                port: 
+                port:
                   number: 9073
           - pathType: ImplementationSpecific
             backend:
               service:
                 name: kafka-bootstrap
-                port: 
+                port:
                   number: 9073
 ```
 
@@ -201,7 +201,7 @@ kubectl create secret tls ca-pair-sslcerts \
   --cert=$TUTORIAL_HOME/../../../assets/certs/generated/ca.pem \
   --key=$TUTORIAL_HOME/../../../assets/certs/generated/ca-key.pem \
   -n east --context mrc-east
-  
+
 kubectl create secret tls ca-pair-sslcerts \
   --cert=$TUTORIAL_HOME/../../../assets/certs/generated/ca.pem \
   --key=$TUTORIAL_HOME/../../../assets/certs/generated/ca-key.pem \
@@ -233,7 +233,7 @@ kubectl create secret generic credential \
   --from-file=plain.txt=$TUTORIAL_HOME/confluent-platform/credentials/kafka-users-client.txt \
   --from-file=ldap.txt=$TUTORIAL_HOME/confluent-platform/credentials/ldap-client.txt \
   -n central --context mrc-central
-  
+
 kubectl create secret generic credential \
   --from-file=digest-users.json=$TUTORIAL_HOME/confluent-platform/credentials/zk-users-server.json \
   --from-file=digest.txt=$TUTORIAL_HOME/confluent-platform/credentials/zk-users-client.txt \
@@ -241,7 +241,7 @@ kubectl create secret generic credential \
   --from-file=plain.txt=$TUTORIAL_HOME/confluent-platform/credentials/kafka-users-client.txt \
   --from-file=ldap.txt=$TUTORIAL_HOME/confluent-platform/credentials/ldap-client.txt \
   -n east --context mrc-east
-  
+
 kubectl create secret generic credential \
   --from-file=digest-users.json=$TUTORIAL_HOME/confluent-platform/credentials/zk-users-server.json \
   --from-file=digest.txt=$TUTORIAL_HOME/confluent-platform/credentials/zk-users-client.txt \
@@ -273,12 +273,12 @@ kubectl create secret generic mds-token \
   --from-file=mdsPublicKey.pem=$TUTORIAL_HOME/../../../assets/certs/mds-publickey.txt \
   --from-file=mdsTokenKeyPair.pem=$TUTORIAL_HOME/../../../assets/certs/mds-tokenkeypair.txt \
   -n central --context mrc-central
-  
+
 kubectl create secret generic mds-token \
   --from-file=mdsPublicKey.pem=$TUTORIAL_HOME/../../../assets/certs/mds-publickey.txt \
   --from-file=mdsTokenKeyPair.pem=$TUTORIAL_HOME/../../../assets/certs/mds-tokenkeypair.txt \
   -n east --context mrc-east
-  
+
 kubectl create secret generic mds-token \
   --from-file=mdsPublicKey.pem=$TUTORIAL_HOME/../../../assets/certs/mds-publickey.txt \
   --from-file=mdsTokenKeyPair.pem=$TUTORIAL_HOME/../../../assets/certs/mds-tokenkeypair.txt \
@@ -289,11 +289,11 @@ kubectl create secret generic mds-token \
 kubectl create secret generic mds-client \
   --from-file=bearer.txt=$TUTORIAL_HOME/confluent-platform/credentials/mds-client.txt \
   -n central --context mrc-central
-  
+
 kubectl create secret generic mds-client \
   --from-file=bearer.txt=$TUTORIAL_HOME/confluent-platform/credentials/mds-client.txt \
   -n east --context mrc-east
-  
+
 kubectl create secret generic mds-client \
   --from-file=bearer.txt=$TUTORIAL_HOME/confluent-platform/credentials/mds-client.txt \
   -n west --context mrc-west
@@ -303,11 +303,11 @@ kubectl create secret generic mds-client \
 kubectl create secret generic sr-mds-client \
   --from-file=bearer.txt=$TUTORIAL_HOME/confluent-platform/credentials/sr-mds-client.txt \
   -n central --context mrc-central
-  
+
 kubectl create secret generic sr-mds-client \
   --from-file=bearer.txt=$TUTORIAL_HOME/confluent-platform/credentials/sr-mds-client.txt \
   -n east --context mrc-east
-  
+
 kubectl create secret generic sr-mds-client \
   --from-file=bearer.txt=$TUTORIAL_HOME/confluent-platform/credentials/sr-mds-client.txt \
   -n west --context mrc-west
@@ -323,11 +323,11 @@ kubectl create secret generic c3-mds-client \
 kubectl create secret generic kafka-rest-credential \
   --from-file=bearer.txt=$TUTORIAL_HOME/confluent-platform/credentials/mds-client.txt \
   -n central --context mrc-central
-  
+
 kubectl create secret generic kafka-rest-credential \
   --from-file=bearer.txt=$TUTORIAL_HOME/confluent-platform/credentials/mds-client.txt \
   -n east --context mrc-east
-  
+
 kubectl create secret generic kafka-rest-credential \
   --from-file=bearer.txt=$TUTORIAL_HOME/confluent-platform/credentials/mds-client.txt \
   -n west --context mrc-west
@@ -363,8 +363,8 @@ kubectl apply -f $TUTORIAL_HOME/confluent-platform/kafkarestclass.yaml -n west -
 ```
 
 ### Deploy Schema Registry and Control Center
-Now, you'll deploy a 5 node Schema Registry cluster - 1 replica in `central`, 2 in `east` and 2 in the `west` regions; 
-and a single instance of Control Center running in the `central` region. 
+Now, you'll deploy a 5 node Schema Registry cluster - 1 replica in `central`, 2 in `east` and 2 in the `west` regions;
+and a single instance of Control Center running in the `central` region.
 ```
 kubectl apply -f $TUTORIAL_HOME/confluent-platform/schemaregistry/schemaregistry-central.yaml --context mrc-central
 kubectl apply -f $TUTORIAL_HOME/confluent-platform/schemaregistry/schemaregistry-east.yaml --context mrc-east
@@ -498,13 +498,15 @@ org.apache.zookeeper.server.NettyServerCnxnFactory exceptionCaught - Exception c
 java.lang.NullPointerException
 ```
 
-or 
+or
 
 ```
 Have smaller server identifier, so dropping the connection
 ```
 
 Try to restart the Zookeeper leader (by deleting that pod) and wait for it to come up again.
+
+The root cause of this error is likely to be https://issues.apache.org/jira/browse/ZOOKEEPER-3988 which is fixed in Zookeeper 3.6.4 and 3.7.1/3. Upgrading to Confluent for Kubernetes 2.6.1 and Confluent Platform 7.4.1 is recommended.
 
 ### Check that Kafka is using the Zookeeper deployments
 
