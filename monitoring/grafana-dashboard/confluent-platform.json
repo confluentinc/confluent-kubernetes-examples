@@ -539,7 +539,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(container_memory_usage_bytes{pod=~\"$component_name-(\\\\d+)\"}) by (pod)",
+          "expr": "container_memory_usage_bytes{pod=~\"$component_name-(\\\\d+)\", container="$component_name"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
