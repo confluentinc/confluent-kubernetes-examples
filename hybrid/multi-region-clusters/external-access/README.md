@@ -343,7 +343,7 @@ kubectl apply -f $TUTORIAL_HOME/confluent-platform/rolebindings/c3-rolebindings.
 ```
 
 ### Deploy ZK and Kafka clusters
-Here, you'll deploy a 3 node Zookeeper cluster - one node each in the `central`, `east` and `west` regions.
+Here, you'll deploy a 5 node Zookeeper cluster - one node in the `central` region and two nodes in each of the, `east` and `west` regions.
 You'll deploy 1 Kafka cluster with 6 brokers - two in `central`, two in `east` and two in `west` regions.
 ```
 kubectl apply -f $TUTORIAL_HOME/confluent-platform/zookeeper/zookeeper-central.yaml --context mrc-central
@@ -491,29 +491,29 @@ kubectl delete ns central --context mrc-central
 
 ### Kafka not starting up
 
-If you see in the ZK logs
-
-```
-org.apache.zookeeper.server.NettyServerCnxnFactory exceptionCaught - Exception caught
-java.lang.NullPointerException
-```
-
-or
+If you see in the ZK logs:
 
 ```
 Have smaller server identifier, so dropping the connection
 ```
 
-Try to restart the Zookeeper leader (by deleting that pod) and wait for it to come up again.
+An immediate fix is to try to restart the Zookeeper leader (by deleting that pod) and wait for it to come up again.
 
-The root cause of this error is likely to be https://issues.apache.org/jira/browse/ZOOKEEPER-3988 which is fixed in Zookeeper 3.6.4 and 3.7.1/3. Upgrading to Confluent for Kubernetes 2.6.1 and Confluent Platform 7.4.1 is recommended.
+The long term solution requires mitigation of https://issues.apache.org/jira/browse/ZOOKEEPER-2938 by configuring Zookeeper to:
+
+* Bind to `0.0.0.0` instead of a DNS name
+* Have only one replica per `Zookeeper` resource
+
+You can configure multiple, separate `Zookeeper` resources in a region if required.
+
+For a complete discussion of why this topology is required see https://docs.confluent.io/operator/current/co-multi-region.html#issue-zk-does-not-start-up
 
 ### Check that Kafka is using the Zookeeper deployments
 
 Look at the ZK nodes.
 
 ```
-$ kubectl exec -it zookeeper-0 -n central -c zookeeper --context mrc-central -- bash
+$ kubectl exec -it zookeeper0-0 -n central -c zookeeper --context mrc-central -- bash
 
 bash-4.4$ zookeeper-shell 127.0.0.1:2181
 
