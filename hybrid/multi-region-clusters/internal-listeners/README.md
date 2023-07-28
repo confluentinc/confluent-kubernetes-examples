@@ -111,7 +111,7 @@ kubectl create secret tls ca-pair-sslcerts \
   --cert=$TUTORIAL_HOME/../../../assets/certs/generated/ca.pem \
   --key=$TUTORIAL_HOME/../../../assets/certs/generated/ca-key.pem \
   -n east --context mrc-east
-  
+
 kubectl create secret tls ca-pair-sslcerts \
   --cert=$TUTORIAL_HOME/../../../assets/certs/generated/ca.pem \
   --key=$TUTORIAL_HOME/../../../assets/certs/generated/ca-key.pem \
@@ -143,7 +143,7 @@ kubectl create secret generic credential \
   --from-file=plain.txt=$TUTORIAL_HOME/confluent-platform/credentials/kafka-users-client.txt \
   --from-file=ldap.txt=$TUTORIAL_HOME/confluent-platform/credentials/ldap-client.txt \
   -n central --context mrc-central
-  
+
 kubectl create secret generic credential \
   --from-file=digest-users.json=$TUTORIAL_HOME/confluent-platform/credentials/zk-users-server.json \
   --from-file=digest.txt=$TUTORIAL_HOME/confluent-platform/credentials/zk-users-client.txt \
@@ -151,7 +151,7 @@ kubectl create secret generic credential \
   --from-file=plain.txt=$TUTORIAL_HOME/confluent-platform/credentials/kafka-users-client.txt \
   --from-file=ldap.txt=$TUTORIAL_HOME/confluent-platform/credentials/ldap-client.txt \
   -n east --context mrc-east
-  
+
 kubectl create secret generic credential \
   --from-file=digest-users.json=$TUTORIAL_HOME/confluent-platform/credentials/zk-users-server.json \
   --from-file=digest.txt=$TUTORIAL_HOME/confluent-platform/credentials/zk-users-client.txt \
@@ -168,12 +168,12 @@ kubectl create secret generic mds-token \
   --from-file=mdsPublicKey.pem=$TUTORIAL_HOME/../../../assets/certs/mds-publickey.txt \
   --from-file=mdsTokenKeyPair.pem=$TUTORIAL_HOME/../../../assets/certs/mds-tokenkeypair.txt \
   -n central --context mrc-central
-  
+
 kubectl create secret generic mds-token \
   --from-file=mdsPublicKey.pem=$TUTORIAL_HOME/../../../assets/certs/mds-publickey.txt \
   --from-file=mdsTokenKeyPair.pem=$TUTORIAL_HOME/../../../assets/certs/mds-tokenkeypair.txt \
   -n east --context mrc-east
-  
+
 kubectl create secret generic mds-token \
   --from-file=mdsPublicKey.pem=$TUTORIAL_HOME/../../../assets/certs/mds-publickey.txt \
   --from-file=mdsTokenKeyPair.pem=$TUTORIAL_HOME/../../../assets/certs/mds-tokenkeypair.txt \
@@ -184,11 +184,11 @@ kubectl create secret generic mds-token \
 kubectl create secret generic mds-client \
   --from-file=bearer.txt=$TUTORIAL_HOME/confluent-platform/credentials/mds-client.txt \
   -n central --context mrc-central
-  
+
 kubectl create secret generic mds-client \
   --from-file=bearer.txt=$TUTORIAL_HOME/confluent-platform/credentials/mds-client.txt \
   -n east --context mrc-east
-  
+
 kubectl create secret generic mds-client \
   --from-file=bearer.txt=$TUTORIAL_HOME/confluent-platform/credentials/mds-client.txt \
   -n west --context mrc-west
@@ -198,11 +198,11 @@ kubectl create secret generic mds-client \
 kubectl create secret generic sr-mds-client \
   --from-file=bearer.txt=$TUTORIAL_HOME/confluent-platform/credentials/sr-mds-client.txt \
   -n central --context mrc-central
-  
+
 kubectl create secret generic sr-mds-client \
   --from-file=bearer.txt=$TUTORIAL_HOME/confluent-platform/credentials/sr-mds-client.txt \
   -n east --context mrc-east
-  
+
 kubectl create secret generic sr-mds-client \
   --from-file=bearer.txt=$TUTORIAL_HOME/confluent-platform/credentials/sr-mds-client.txt \
   -n west --context mrc-west
@@ -218,11 +218,11 @@ kubectl create secret generic c3-mds-client \
 kubectl create secret generic kafka-rest-credential \
   --from-file=bearer.txt=$TUTORIAL_HOME/confluent-platform/credentials/mds-client.txt \
   -n central --context mrc-central
-  
+
 kubectl create secret generic kafka-rest-credential \
   --from-file=bearer.txt=$TUTORIAL_HOME/confluent-platform/credentials/mds-client.txt \
   -n east --context mrc-east
-  
+
 kubectl create secret generic kafka-rest-credential \
   --from-file=bearer.txt=$TUTORIAL_HOME/confluent-platform/credentials/mds-client.txt \
   -n west --context mrc-west
@@ -238,7 +238,7 @@ kubectl apply -f $TUTORIAL_HOME/confluent-platform/rolebindings/c3-rolebindings.
 ```
 
 ### Deploy ZK and Kafka clusters
-Here, you'll deploy a 3 node Zookeeper cluster - one node each in the `central`, `east` and `west` regions.
+Here, you'll deploy a 5 node Zookeeper cluster - one node in the `central` region and two nodes in each of the, `east` and `west` regions.
 You'll deploy 1 Kafka cluster with 6 brokers - two in `central`, two in `east` and two in `west` regions.
 ```
 kubectl apply -f $TUTORIAL_HOME/confluent-platform/zookeeper/zookeeper-central.yaml --context mrc-central
@@ -258,8 +258,8 @@ kubectl apply -f $TUTORIAL_HOME/confluent-platform/kafkarestclass.yaml -n west -
 ```
 
 ### Deploy Schema Registry and Control Center
-Now, you'll deploy a 5 node Schema Registry cluster - 1 replica in `central`, 2 in `east` and 2 in the `west` regions; 
-and a single instance of Control Center running in the `central` region. 
+Now, you'll deploy a 5 node Schema Registry cluster - 1 replica in `central`, 2 in `east` and 2 in the `west` regions;
+and a single instance of Control Center running in the `central` region.
 ```
 kubectl apply -f $TUTORIAL_HOME/confluent-platform/schemaregistry/schemaregistry-central.yaml --context mrc-central
 kubectl apply -f $TUTORIAL_HOME/confluent-platform/schemaregistry/schemaregistry-east.yaml --context mrc-east
@@ -384,7 +384,7 @@ kubectl delete ns central --context mrc-central
 Look at the ZK nodes.
 
 ```
-$ kubectl exec -it zookeeper-0 -n central -c zookeeper --context mrc-central -- bash
+$ kubectl exec -it zookeeper0-0 -n central -c zookeeper --context mrc-central -- bash
 
 bash-4.4$ zookeeper-shell 127.0.0.1:2181
 
