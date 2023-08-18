@@ -43,13 +43,7 @@ spec:
         enabled: true
   metricReporter:
     enabled: true
-    bootstrapEndpoint: kafka:9071
-    tls:
-      enabled: true
-    authentication:
-      type: plain
-      jaasConfig:
-        secretRef: credential
+    bootstrapEndpoint: kafka:9092
   dependencies:
     zookeeper:
       endpoint: zookeeper.confluent.svc.cluster.local:2182
@@ -111,7 +105,7 @@ metadata:
   name: schemaregistry
   namespace: confluent
 spec:
-  replicas: 3
+  replicas: 1
   image:
     application: confluentinc/cp-schema-registry:7.4.0
     init: confluentinc/confluent-init-container:2.6.0
@@ -185,7 +179,7 @@ spec:
         enabled: true
     ksqldb:
     - name: ksql-dev
-      url: https://ksqldb-tls.confluent.svc.cluster.local:8088
+      url: https://ksqldb.confluent.svc.cluster.local:8088
       tls:
         enabled: true
     connect:
