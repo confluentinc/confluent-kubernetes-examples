@@ -154,7 +154,7 @@ spec:
           key: sr-pwd-encoder.txt
           name: cp-nonrbac-mtls-lb-bp-csc
   confluentPlatform:
-    version: 7.4.0
+    version: 7.5.0
     http:
       authentication:
         type: mtls

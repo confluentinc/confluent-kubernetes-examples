@@ -153,7 +153,7 @@ spec:
           key: sr-pwd-encoder.txt
           name: cp-nonrbac-saslplain-ingress-bp-csc
   confluentPlatform:
-    version: 7.4.0
+    version: 7.5.0
     http:
       externalAccess:
         type: ingress

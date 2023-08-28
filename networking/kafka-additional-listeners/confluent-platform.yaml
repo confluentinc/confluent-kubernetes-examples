@@ -7,8 +7,8 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-zookeeper:7.4.0
-    init: confluentinc/confluent-init-container:2.6.0
+    application: confluentinc/cp-zookeeper:7.5.0
+    init: confluentinc/confluent-init-container:2.7.0
   dataVolumeCapacity: 10Gi
   logVolumeCapacity: 10Gi
 ---
@@ -20,8 +20,8 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-server:7.4.0
-    init: confluentinc/confluent-init-container:2.6.0
+    application: confluentinc/cp-server:7.5.0
+    init: confluentinc/confluent-init-container:2.7.0
   dataVolumeCapacity: 10Gi
   listeners:
     #internal: # This will be configured by default 
@@ -62,8 +62,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-server-connect:7.4.0
-    init: confluentinc/confluent-init-container:2.6.0
+    application: confluentinc/cp-server-connect:7.5.0
+    init: confluentinc/confluent-init-container:2.7.0
   dependencies:
     kafka:
       bootstrapEndpoint: kafka:9071
@@ -77,8 +77,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-ksqldb-server:7.4.0
-    init: confluentinc/confluent-init-container:2.6.0
+    application: confluentinc/cp-ksqldb-server:7.5.0
+    init: confluentinc/confluent-init-container:2.7.0
   dataVolumeCapacity: 10Gi
 ---
 apiVersion: platform.confluent.io/v1beta1
@@ -89,8 +89,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-enterprise-control-center:7.4.0
-    init: confluentinc/confluent-init-container:2.6.0
+    application: confluentinc/cp-enterprise-control-center:7.5.0
+    init: confluentinc/confluent-init-container:2.7.0
   dataVolumeCapacity: 10Gi
   dependencies:
     schemaRegistry:
@@ -110,5 +110,5 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-schema-registry:7.4.0
-    init: confluentinc/confluent-init-container:2.6.0
+    application: confluentinc/cp-schema-registry:7.5.0
+    init: confluentinc/confluent-init-container:2.7.0
