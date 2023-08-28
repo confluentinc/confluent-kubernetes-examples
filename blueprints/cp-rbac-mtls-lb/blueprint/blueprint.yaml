@@ -190,7 +190,7 @@ spec:
             key: mds-public-key.txt
             name: cp-rbac-mtls-lb-bp-csc
   confluentPlatform:
-    version: 7.4.0
+    version: 7.5.0
     authorization:
       type: rbac
       mdsClient:
