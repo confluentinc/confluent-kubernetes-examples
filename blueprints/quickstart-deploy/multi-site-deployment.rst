@@ -25,7 +25,7 @@ Prepare
    on your local machine.
 
 #. Have the Kubernetes clusters you want to use for the Control Plane and the
-   Data Plane. Kubernetes versions 1.22+ are required.
+   Data Plane. 
    
 #. Rename the Kubernetes contexts for easy identification:
 
