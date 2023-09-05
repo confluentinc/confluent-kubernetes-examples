@@ -80,6 +80,7 @@ rules:
   - configmaps
   - events
   - persistentvolumeclaims
+  - persistentvolumes
   - secrets
   - secrets/finalizers
   - pods
