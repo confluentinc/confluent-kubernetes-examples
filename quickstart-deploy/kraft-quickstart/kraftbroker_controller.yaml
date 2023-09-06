@@ -1,0 +1,51 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: confluent
+spec:
+  dataVolumeCapacity: 10G
+  image:
+    application: docker.io/confluentinc/cp-server:7.5.0
+    init: confluentinc/confluent-init-container:2.7.0
+  replicas: 3
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  dataVolumeCapacity: 10G
+  image:
+    application: docker.io/confluentinc/cp-server:7.5.0
+    init: confluentinc/confluent-init-container:2.7.0
+  replicas: 3
+  dependencies:
+    kRaftController:
+      clusterRef:
+        name: kraftcontroller
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: krc-cfk
+  namespace: confluent
+spec:
+  kafkaClusterRef:
+    name: kafka
+  kafkaRest:
+    endpoint: http://kafka.confluent.svc.cluster.local:8090
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: demotopic
+  namespace: confluent
+spec:
+  kafkaRestClassRef:
+    name: krc-cfk
+  replicas: 3
+  partitionCount: 4
+  configs:
+    cleanup.policy: "delete"
