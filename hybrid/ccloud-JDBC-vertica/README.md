@@ -1,10 +1,10 @@
 # Kafka Connect to Confluent Cloud
 
 In this example, you'll set up the following:  
-*  Deploy a self managed MySql server for the connector to utilize  
+*  Deploy a self managed Vertica server for the connector to utilize  
 *  Self-managed Kafka Connect cluster connected to Confluent Cloud
-*  Install and manage the JDBC source connector plugin through the declarative `Connector` CRD  
-*  Install and manage the JDBC source connector plugin through the Connect REST endpoint  
+*  Install and manage the JDBC source connector plugin through the declarative `Connector` CRD using bulk mode 
+*  Install and manage the JDBC source connector plugin through the Connect REST endpoint  using timestamp+incrementing mode
 
 
 ## Set up Pre-requisites
@@ -12,7 +12,7 @@ In this example, you'll set up the following:
 Set the tutorial directory for this tutorial under the directory you downloaded the tutorial files:
 
 ```
-export TUTORIAL_HOME=<Tutorial directory>/hybrid/ccloud-JDBC-mysql
+export TUTORIAL_HOME=<Tutorial directory>/hybrid/ccloud-JDBC-vertica
 ```
 
 Create namespace
@@ -20,37 +20,46 @@ Create namespace
 ```
 kubectl create ns confluent
 ```
-### Create Mysql server 
+### Create Vertica server 
 
-We are following the [kubernetes](https://kubernetes.io/docs/tasks/run-application/run-single-instance-stateful-application/)
-
-
-```
-kubectl config set-context --current --namespace=confluent
-kubectl apply -f https://k8s.io/examples/application/mysql/mysql-pv.yaml
-kubectl apply -f https://k8s.io/examples/application/mysql/mysql-deployment.yaml
-kubectl get pods -l app=mysql
-kubectl run -it --rm --image=mysql:5.6 --restart=Never mysql-client -- mysql -h mysql -ppassword
-```
-
-Inside the shell you will create a database, table and entries:  
+Use the following deployment file to create a Vertica cluster: 
 
 ```
-CREATE DATABASE IF NOT EXISTS connect_test;
-USE connect_test;
+kubectl -n confluent apply -f $TUTORIAL_HOME/vertica-deployment.yaml
+```
 
-DROP TABLE IF EXISTS test;
+Export the Vertica pod name: 
+```
+export POD_NAME=$(kubectl -n confluent get pods -l service_vertica=vertica -o=jsonpath='{.items..metadata.name}')
+kubectl exec -it $POD_NAME -- sh
+```
+
+Inside the shell you will create a table, entries and a readonly user (using database called docker )  
+
+```
+/opt/vertica/bin/vsql -hvertica -Udbadmin
 
 
+CREATE SEQUENCE IF NOT EXISTS test_id_seq;
 CREATE TABLE IF NOT EXISTS test (
-  id serial NOT NULL PRIMARY KEY,
-  name varchar(100),
-  email varchar(200),
-  department varchar(200),
-  modified timestamp default CURRENT_TIMESTAMP NOT NULL,
-  INDEX `modified_index` (`modified`)
+   id INTEGER NOT NULL DEFAULT NEXTVAL('test_id_seq') PRIMARY KEY,
+   name VARCHAR(100),
+   email VARCHAR(200),
+   department VARCHAR(200),
+   modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+
+CREATE ROLE RO_role;
+GRANT USAGE ON SCHEMA public TO RO_role;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO RO_role;
+CREATE USER readonlymoshe IDENTIFIED BY 'password';
+GRANT RO_Role TO readonlymoshe;
+GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO RO_role;
+ALTER USER readonlymoshe DEFAULT ROLE RO_role;
+ALTER USER readonlymoshe SEARCH_PATH public;
+
+
 INSERT INTO test (name, email, department) VALUES ('alice', 'alice@abc.com', 'engineering');
 INSERT INTO test (name, email, department) VALUES ('bob', 'bob@abc.com', 'sales');
 INSERT INTO test (name, email, department) VALUES ('bob', 'bob@abc.com', 'sales');
@@ -71,7 +80,10 @@ INSERT INTO test (name, email, department) VALUES ('bob', 'bob@abc.com', 'sales'
 INSERT INTO test (name, email, department) VALUES ('bob', 'bob@abc.com', 'sales');
 INSERT INTO test (name, email, department) VALUES ('bob', 'bob@abc.com', 'sales');
 INSERT INTO test (name, email, department) VALUES ('bob', 'bob@abc.com', 'sales');
+
+COMMIT;
 ```
+
 
 
 ## Deploy Confluent for Kubernetes
@@ -98,7 +110,7 @@ kubectl get pods -n confluent
 
 ## Create Kubernetes Secrets for Confluent Cloud API Key and Confluent Cloud Schema Registry API Key
 
-Add user name and key for the hosted Confluent Platform (Cloud and Schema)
+Add username and key for the hosted Confluent Platform (Cloud and Schema)
 
 ```
 kubectl -n confluent create secret generic ccloud-credentials --from-file=plain.txt=$TUTORIAL_HOME/ccloud-credentials.txt  
@@ -106,13 +118,9 @@ kubectl -n confluent create secret generic ccloud-credentials --from-file=plain.
 kubectl -n confluent create secret generic ccloud-sr-credentials --from-file=basic.txt=$TUTORIAL_HOME/ccloud-sr-credentials.txt
 ```
 
-## Create Kubernetes Secret for the JDBC connector to pull connection URL and password for the mysql server
-
-```
- kubectl -n confluent create secret generic mysql-credential \
-  --from-file=sqlcreds.txt=$TUTORIAL_HOME/sqlcreds.txt
-```
 ## Deploy self-managed Kafka Connect connecting to Confluent Cloud
+
+In the kafka-connect.yaml file, replace schemaRegistry url and bootstrapEndpoint with your own servers.
 
 ```
 kubectl -n confluent apply -f $TUTORIAL_HOME/kafka-connect.yaml
@@ -120,7 +128,7 @@ kubectl -n confluent apply -f $TUTORIAL_HOME/kafka-connect.yaml
 ## Shell to the Connect Container  
 
 ```
-kubectl exec connect-0 -it -n confluent -- bash
+kubectl exec connectverticademo-0 -it -n confluent -- bash
 ```
 
 Create consumer properties file:  
@@ -135,13 +143,14 @@ EOF
 ```
 
 ### Create topic to load data from table into (CRD connector)
+
 ```
 kafka-topics --command-config /opt/confluentinc/etc/connect/consumer.properties \
 --bootstrap-server CCLOUD:9092  \
 --create \
 --partitions 3 \
 --replication-factor 3 \
---topic quickstart-jdbc-CRD-test
+--topic verticacrd_test
 ```
 
 ### Create topic to load data from table into (REST API endpoint connector)
@@ -152,10 +161,8 @@ kafka-topics --command-config /opt/confluentinc/etc/connect/consumer.properties 
 --create \
 --partitions 3 \
 --replication-factor 3 \
---topic quickstart-jdbc-test
+--topic verticarestapi_test
 ```
-
-
 
 ## Create Connector
 
@@ -168,26 +175,45 @@ Outside the Connect pod shell you can issue the command:
 ```
 
 ### Example for the REST API endpoint connector  
-Create jdbc source connector 
+
+Create jdbc source connector from the connect pod: 
+
+
 ```
+kubectl exec connectverticademo-0 -it -n confluent -- bash
+
+
 curl -X POST \
 -H "Content-Type: application/json" \
---data '{ "name": "quickstart-jdbc-source", "config": { "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector", "tasks.max": 1, "connection.url": "jdbc:mysql://mysql:3306/connect_test?user=root&password=password", "mode": "incrementing", "incrementing.column.name": "id", "timestamp.column.name": "modified", "topic.prefix": "quickstart-jdbc-", "poll.interval.ms": 1000 } }' \
-http://localhost:8083/connectors/
+--data '{
+    "name": "quickstart-jdbc-source-restapi",
+    "config": {
+        "connector.class": "io.confluent.connect.jdbc.JdbcSourceConnector",
+        "tasks.max": 1,
+        "connection.url": "jdbc:vertica://vertica:5433/docker",
+        "connection.password": "password",
+        "connection.user": "readonlymoshe",
+        "mode": "timestamp+incrementing",
+        "incrementing.column.name": "id",
+        "timestamp.column.name": "modified",
+        "topic.prefix": "verticarestapi_test",
+        "poll.interval.ms": "1000",
+         "query":"SELECT * FROM ( select * FROM test) subtab"
+    }
+}' http://localhost:8083/connectors/
 ```
-
 ## Validation
 
 ### Check Connector  
 Check if connector is running   
 #### CRD connector  endpoint 
 ```
-curl -X GET http://localhost:8083/connectors/mysqlviacrd/status
+curl -X GET http://localhost:8083/connectors/verticacrd/status
 ```
 
 #### REST API connector endpoint    
 ```
-curl -X GET http://localhost:8083/connectors/quickstart-jdbc-source/status
+curl -X GET http://localhost:8083/connectors/quickstart-jdbc-source-restapi/status
 ```
 ### Consume from Cloud topic
 
@@ -213,7 +239,7 @@ export SCHEMA_REGISTRY_OPTS="-Dlog4j.configuration=file:/tmp/log4j.properties"
 ```
 kafka-avro-console-consumer \
 --bootstrap-server CCLOUD:9092 \
---topic quickstart-jdbc-CRD-test \
+--topic verticacrd_test \
 --consumer.config /opt/confluentinc/etc/connect/consumer.properties \
 --property schema.registry.url=SR_URL \
 --property schema.registry.basic.auth.user.info=SR_USER:SR_SECRET \
@@ -226,7 +252,7 @@ kafka-avro-console-consumer \
 ```
 kafka-avro-console-consumer \
 --bootstrap-server CCLOUD:9092 \
---topic quickstart-jdbc-test \
+--topic verticarestapi_test \
 --consumer.config /opt/confluentinc/etc/connect/consumer.properties \
 --property schema.registry.url=SR_URL \
 --property schema.registry.basic.auth.user.info=SR_USER:SR_SECRET \
@@ -239,9 +265,7 @@ You should see the table entries.
 ## Tear down
 ```
 kubectl delete -f $TUTORIAL_HOME/kafka-connect.yaml
-kubectl delete deployment,svc mysql
-kubectl delete pvc mysql-pv-claim
-kubectl delete pv mysql-pv-volume
-kubectl delete pod mysql-client  
+kubectl delete $TUTORIAL_HOME/vertica-deployment.yaml
+helm -n confluent delete operator
 ```
 
