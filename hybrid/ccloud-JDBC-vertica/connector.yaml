@@ -1,0 +1,19 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connector
+metadata:
+  name: verticacrd
+  namespace: confluent
+spec:
+  class: "io.confluent.connect.jdbc.JdbcSourceConnector"
+  taskMax: 1
+  connectClusterRef:
+    name: connectverticademo
+  configs:
+    connection.url: "jdbc:vertica://vertica:5433/docker"
+    connection.user: "readonlymoshe"
+    connection.password: "password"
+    topic.prefix: "verticacrd_" # topic name tp create:  verticacrd_test  : prefix + table name
+    poll.interval.ms : "5000"
+    mode: "bulk"
+    table.whitelist: "test"

@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    service_vertica: vertica
+  name: vertica
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service_vertica: vertica
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        service_vertica: vertica
+    spec:
+      containers:
+        - image: cjonesy/docker-vertica
+          name: vertica
+          ports:
+            - containerPort: 5433
+          resources: {}
+      hostname: vertica
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service_vertica: vertica
+  name: vertica
+spec:
+  ports:
+    - name: "5433"
+      port: 5433
+      targetPort: 5433
+  selector:
+    service_vertica: vertica
+

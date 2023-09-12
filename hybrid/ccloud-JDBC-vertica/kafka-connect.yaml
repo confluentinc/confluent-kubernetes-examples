@@ -1,0 +1,37 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connectverticademo
+spec:
+  keyConverterType: io.confluent.connect.avro.AvroConverter
+  valueConverterType: io.confluent.connect.avro.AvroConverter
+  replicas: 1
+  image:
+    application: confluentinc/cp-server-connect:7.5.0
+    init: confluentinc/confluent-init-container:2.7.0
+  build:
+    type: onDemand
+    onDemand:
+      plugins:
+        locationType: url
+        url:
+          - name: kafka-connect-jdbc # the url is used here as we needed to build our own connector lib to include the mysql jdbc jar
+            archivePath: https://raw.githubusercontent.com/MosheBlumbergX/confluent-kubernetes-examples/vertica/hybrid/ccloud-JDBC-vertica/confluentinc-kafka-connect-jdbc-10.2.5.zip
+            checksum: 63f7b70ff5db57125c0666f1a2a9e3a47bb69bace9485a4f2bd7dcb319c05c26df9eea74d0a690e8c1325eac687b3abd4838a875597b71ea32198c8270abc88b
+  dependencies:
+    kafka:
+      bootstrapEndpoint: <cloudKafka_url>:9092
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: ccloud-credentials
+      tls:
+        enabled: true
+        ignoreTrustStoreConfig: true 
+    schemaRegistry:
+      url: https://<cloudSR_url>
+      authentication:
+        type: basic
+        basic:
+          secretRef: ccloud-sr-credentials
