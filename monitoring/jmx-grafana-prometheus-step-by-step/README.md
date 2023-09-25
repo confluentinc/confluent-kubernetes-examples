@@ -94,6 +94,12 @@ Load Grafana datasource which tells where to get metrics. You can also configure
 kubectl apply -f grafana-datasource-config.yml -n monitoring
 ```
 
+(Optional) To use grafana.ini,
+```sh
+kubectl create configmap ge-config --from-file=grafana.ini -n monitoring
+```
+
+
 Deploy Grafana
 ```sh
 kubectl apply -f grafana-deployment.yml -n monitoring

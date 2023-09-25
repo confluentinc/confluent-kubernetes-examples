@@ -17,6 +17,9 @@ spec:
       containers:
       - name: grafana
         image: grafana/grafana:latest
+        env:
+        - name: GF_PATHS_CONFIG
+          value: "/opt/grafana/grafana.ini"
         ports:
         - name: grafana
           containerPort: 3000
@@ -30,6 +33,9 @@ spec:
         volumeMounts:
           - mountPath: /var/lib/grafana
             name: grafana-tmp-storage
+        # Uncomment this for grafana.ini file
+          - mountPath: /opt/grafana
+            name: ge-config
           - mountPath: /etc/grafana/provisioning/datasources
             name: grafana-datasources
             readOnly: false
@@ -39,6 +45,9 @@ spec:
         # - name: grafana-persistent-storage
         #   persistentVolumeClaim:
         #     claimName: graf-data-dir-pvc
+        - name: ge-config
+          configMap:
+            name: ge-config 
         - name: grafana-datasources
           configMap:
               defaultMode: 420
