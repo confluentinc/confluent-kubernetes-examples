@@ -1,0 +1,18 @@
+namespace: confluent
+
+configurations:
+- kustomizeconfig.yaml
+
+resources:
+- issuer.yaml
+- certificate.yaml
+
+vars:
+- name: NAMESPACE
+  objref:
+    kind: Certificate
+    group: cert-manager.io
+    apiVersion: v1
+    name: kafka-cert
+  fieldref:
+    fieldpath: metadata.namespace

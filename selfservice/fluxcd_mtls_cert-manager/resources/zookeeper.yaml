@@ -1,0 +1,20 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Zookeeper
+metadata:
+  name: zookeeper
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-zookeeper:7.5.0
+    init: confluentinc/confluent-init-container:2.7.0
+  dataVolumeCapacity: 50Gi
+  logVolumeCapacity: 50Gi
+  configOverrides:
+     jvm:
+      - "-Dzookeeper.ssl.hostnameVerification=false"
+      - "-Dzookeeper.ssl.quorum.hostnameVerification=false"
+  authentication:
+    type: mtls
+  tls:
+    secretRef: zookeeper-tls
