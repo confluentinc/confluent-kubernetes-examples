@@ -79,16 +79,14 @@ spec:
               directoryPathInContainer: /vault/secrets
           configurations:
             groupNameAttribute: cn
-            groupObjectClass: group
-            groupMemberAttribute: member
-            groupMemberAttributePattern: CN=(.*),DC=test,DC=com
-            groupSearchBase: dc=test,dc=com
-            groupSearchScope: 1
+            groupObjectClass: posixGroup
+            groupMemberAttribute: memberuid
+            groupMemberAttributePattern: cn=(.*),ou=users,dc=test,dc=com
+            groupSearchBase: ou=groups,dc=test,dc=com
             userNameAttribute: cn
-            userMemberOfAttributePattern: CN=(.*),DC=test,DC=com
-            userObjectClass: organizationalRole
-            userSearchBase: dc=test,dc=com
-            userSearchScope: 1
+            userMemberOfAttributePattern: cn=(.*),ou=users,dc=test,dc=com
+            userObjectClass: inetOrgPerson
+            userSearchBase: ou=users,dc=test,dc=com
   podTemplate:
     serviceAccountName: confluent-sa
     annotations:
