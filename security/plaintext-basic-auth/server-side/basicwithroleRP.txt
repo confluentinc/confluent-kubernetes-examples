@@ -1,0 +1,1 @@
+restproxyUser: thisismypass,admin

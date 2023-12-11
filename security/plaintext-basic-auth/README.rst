@@ -1,20 +1,22 @@
 Deploy Confluent Platform
 =========================
 
-In this workflow scenario, you'll set up Connect and Schema Registry with basic authentication.  
-You will use Control Center to monitor and connect to a Confluent Platform.
+In this workflow scenario, you'll set up Connect, Schema Registry, ksqlDB, Rest Proxy, and Confluent Control Center with basic authentication.
 
-NOTE: Control Center does not support basic authentication to the Connect Cluster and you will not be able to connect to it via the UI. 
-
-
+NOTE: Control Center does not support basic authentication to the Connect and ksqlDB Cluster till CFK 2.4.0 and you will not be able to connect to it via the UI.
+Starting with CFK 2.4.1, Control Center supports connecting to the Connect and ksqlDB cluster using basic authentication. Please check the `release notes from CFK 2.4.1 <https://docs.confluent.io/operator/2.4/release-notes.html#co-long-2-4-1-release-notes>`__
 
 The goal for this scenario is for you to:
 
 * Configure basic authentication for Connect authentication (no RBAC).
 * Configure basic authentication for Schema Registry authentication (no RBAC).
+* Configure basic authentication for ksqlDB authentication (no RBAC).
+* Configure basic authentication for Rest Proxy authentication (no RBAC).
+* Configure basic authentication for Confluent Control Center authentication (no RBAC).
 * Quickly set up the complete Confluent Platform on the Kubernetes.
 * Configure a Avro producer to generate sample data.
 * Configure a Avro consumer to generate sample data.
+* Use Control Center to monitor and connect to a Confluent Platform.
 
 
 
@@ -24,11 +26,13 @@ To complete this scenario, you'll follow these steps:
 
 #. Deploy Confluent For Kubernetes.
 
-#. Deploy secrets for basic authentication.
+#. Deploy server-side and client-side secrets for basic authentication.
 
 #. Deploy Confluent Platform.
 
 #. Deploy the Producer application.
+
+#. Validate authentication
 
 #. Tear down Confluent Platform.
 
@@ -41,7 +45,7 @@ the tutorial files:
 
 ::
    
-  export TUTORIAL_HOME=<Tutorial directory>/security/plaintext-basic-auth-ConnectAndSchemaRegistry
+  export TUTORIAL_HOME=<Tutorial directory>/security/plaintext-basic-auth
 
 ===============================
 Deploy Confluent for Kubernetes
@@ -71,26 +75,57 @@ Deploy Confluent for Kubernetes
 Create Basic authentication secret 
 ==================================
 
+Create directories
+^^^^^^^^^^^^^^^^^^
+* mkdir -p $TUTORIAL_HOME/server-side $TUTORIAL_HOME/client-side
+
+Create Server-side basic authentication for Confluent components
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 ::
 
   kubectl create secret generic basicsecretconnect \
-   --from-file=basic.txt=$TUTORIAL_HOME/basicConnect.txt \
+   --from-file=basic.txt=$TUTORIAL_HOME/server-side/basicConnect.txt \
    --namespace confluent
 
   kubectl create secret generic basicwithrolesr \
-   --from-file=basic.txt=$TUTORIAL_HOME/basicwithroleSR.txt \
+   --from-file=basic.txt=$TUTORIAL_HOME/server-side/basicwithroleSR.txt \
    --namespace confluent
 
-  kubectl create secret generic basicsecretsrccc \
-   --from-file=basic.txt=$TUTORIAL_HOME/basicsecretSRC3.txt \
+  kubectl create secret generic basicwithroleksql \
+   --from-file=basic.txt=$TUTORIAL_HOME/server-side/basicwithroleKSQL.txt \
    --namespace confluent
 
+  kubectl create secret generic basicwithrolec3 \
+   --from-file=basic.txt=$TUTORIAL_HOME/server-side/basicwithroleC3.txt \
+   --namespace confluent
+
+  kubectl create secret generic basicwithrolerp \
+   --from-file=basic.txt=$TUTORIAL_HOME/server-side/basicwithroleRP.txt \
+   --namespace confluent
+
+Create Client-side basic authentication for Confluent components
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+::
+
+  kubectl create secret generic basicsecretconnectclient \
+   --from-file=basic.txt=$TUTORIAL_HOME/client-side/basicsecretConnect.txt \
+   --namespace confluent
+
+  kubectl create secret generic basicsecretsrclient \
+   --from-file=basic.txt=$TUTORIAL_HOME/client-side/basicsecretSR.txt \
+   --namespace confluent
+
+  kubectl create secret generic basicsecretksqlclient \
+   --from-file=basic.txt=$TUTORIAL_HOME/client-side/basicsecretksql.txt \
+   --namespace confluent
 
 ========================================
 Review Confluent Platform configurations
 ========================================
 
-You install Confluent Platform components as custom resources (CRs). 
+Install Confluent Platform components as custom resources (CRs).
 
 You can configure all Confluent Platform components as custom resources. In this
 tutorial, you will configure all components in a single file and deploy all
@@ -146,11 +181,8 @@ Deploy Confluent Platform
      kubectl describe kafka --namespace=confluent
 
 ========
-Validate
-========
-
 Deploy producer application
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+========
 
 Now that we've got the infrastructure set up, let's deploy the avro producer and consumer client
 app.
@@ -175,57 +207,84 @@ topic as follows:
     configs:
       cleanup.policy: "delete"
       
-Deploy the producer/consumer app:
+Deploy the producer/consumer app
 
 ::
-   
+
   kubectl apply -f $TUTORIAL_HOME/producer-consumer-app-data.yaml --namespace=confluent
 
 Validate the consumer, the output will indicate that the produce was able to produce avro value: 
 
 ::
-   
+
   kubectl logs consumer-example --namespace=confluent
 
-Note that the following is expected in the end of the log:
+Note that the following is expected in the end of the log
 
 ::
+
   [2022-02-23 11:15:35,545] ERROR Error processing message, terminating consumer process:  (kafka.tools.ConsoleConsumer$:43)
 org.apache.kafka.common.errors.TimeoutException
 
+========
+Validate
+========
 
 Validate authentication with Connect
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
-  kubectl --namespace=confluent exec -it connect-0 -- curl -u thisismyusername:thisismypass http://0.0.0.0:8083
+  kubectl --namespace=confluent exec -it connect-0 -- curl -u connectUser:thisismypass http://0.0.0.0:8083
 
 
-The above should return something like this: 
+The above command would return similar output:
 
 ::
 
-  {"version":"6.1.0-ce","commit":"958ad0f3c7030f1c","kafka_cluster_id":"SjW1_kcORW-nSsU2Yy1R1Q"}
+  {"version":"7.5.0-ce","commit":"be816cdb62b83d78","kafka_cluster_id":"SjW1_kcORW-nSsU2Yy1R1Q"}
 
 Validate authentication with Schema Registry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
- kubectl --namespace=confluent exec -it schemaregistry-0 -- curl -u thisismyusername:thisismypass http://0.0.0.0:8081/schemas
+ kubectl --namespace=confluent exec -it schemaregistry-0 -- curl -u srUser:thisismypass http://0.0.0.0:8081/schemas
 
-The above should return something like this: 
-
+The above command would return similar output:
 ::
 
   [{"subject":"producer-example-0-value","version":1,"id":1,"schema":"{\"type\":\"record\",\"name\":\"myrecord\",\"fields\":[{\"name\":\"f1\",\"type\":\"string\"}]}"}]
 
 
-Validate in Control Center
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Validate authentication with ksqlDB
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Use Control Center to monitor the Confluent Platform, and see the created topic and data.
+::
+
+  kubectl --namespace=confluent exec -it ksqldb-0 -- curl -u ksqlUser:thisismypass http://0.0.0.0:8088/info
+
+This command returns an output similar to as follows:
+
+::
+
+{"KsqlServerInfo":{"version":"7.5.0","kafkaClusterId":"WqIyB4VZRHObFuBPHdtzJQ","ksqlServiceId":"confluent.ksqldb_","serverStatus":"RUNNING"}}%
+
+Validate authentication with Rest Proxy
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+::
+
+  kubectl --namespace=confluent exec -it kafkarestproxy-0 -- curl -u restproxyUser:thisismypass http://localhost:8082/brokers
+
+This command returns the list of the brokers in the cluster:
+
+::
+
+{"brokers":[0,1,2]}%
+
+Validate authentication with Control Center
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 #. Set up port forwarding to Control Center web UI from local machine:
 
@@ -236,14 +295,20 @@ Use Control Center to monitor the Confluent Platform, and see the created topic 
 #. Browse to Control Center:
 
    ::
-   
+
      http://localhost:9021
 
+#. Login to the control center UI using any of the following users depending on the role you would like to use:
 
+* Users:
+    * Full Control: Username:c3admin Password:password1
+    * Restricted Control: Username:c3restricted Password:password2
 
+Monitor the Confluent Platform Components using Control Center
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Use Control Center to monitor the Confluent Platform, and monitor the created topic and data.
 
-
-#. Check that the ``producer-example-0`` topic was created and that messages are being produced to the topic.
+Once logged into the Control Center UI, check the ``producer-example-0`` topic, and messages which are being produced to this topic.
 
 =========
 Tear Down
@@ -261,7 +326,7 @@ Shut down Confluent Platform and the data:
 
 ::
 
-  kubectl delete secrets basicsecretconnect basicsecretsrccc basicwithrolesr  --namespace=confluent
+  kubectl delete secrets basicsecretconnect basicwithrolesr basicwithroleksql basicwithrolec3 basicwithrolerp basicsecretconnectClient basicsecretsrClient basicsecretksqlClient  --namespace=confluent
 
 ::
 
@@ -269,8 +334,5 @@ Shut down Confluent Platform and the data:
 
 ::
 
-  helm delete secret basicsecret --namespace=confluent
-
-::
 
 
