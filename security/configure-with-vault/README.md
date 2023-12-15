@@ -289,6 +289,8 @@ podTemplate:
     ...
     annotations:
       vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/agent-requests-cpu: 20m
+      vault.hashicorp.com/agent-requests-mem: 32Mi
       vault.hashicorp.com/agent-inject-status: update
       vault.hashicorp.com/preserve-secret-case: "true"
       vault.hashicorp.com/agent-inject-secret-jksPassword.txt: secret/jksPassword.txt
