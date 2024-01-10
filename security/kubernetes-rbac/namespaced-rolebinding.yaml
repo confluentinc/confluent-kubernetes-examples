@@ -63,6 +63,12 @@ rules:
 - apiGroups:
   - apps
   resources:
+  - deployments
+  verbs:
+  - get
+- apiGroups:
+  - apps
+  resources:
   - statefulsets
   - statefulsets/scale
   - statefulsets/status
