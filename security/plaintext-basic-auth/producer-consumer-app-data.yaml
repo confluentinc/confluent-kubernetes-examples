@@ -42,7 +42,7 @@ spec:
             --property schema.registry.url=http://schemaregistry.confluent.svc.cluster.local:8081 \
             --property value.schema='{"type":"record","name":"myrecord","fields":[{"name":"f1","type":"string"}]}' \
             --property basic.auth.credentials.source=USER_INFO \
-            --property schema.registry.basic.auth.user.info=thisismyusername:thisismypass \
+            --property schema.registry.basic.auth.user.info=srUser:thisismypass \
             --topic producer-example-0 
     volumeMounts:
         - name: kafka-properties
@@ -77,7 +77,7 @@ spec:
         --consumer.config /mnt/kafka.properties \
         --property schema.registry.url=http://schemaregistry.confluent.svc.cluster.local:8081 \
         --property basic.auth.credentials.source=USER_INFO \
-        --property schema.registry.basic.auth.user.info=thisismyusername:thisismypass \
+        --property schema.registry.basic.auth.user.info=srUser:thisismypass \
         --topic producer-example-0 \
         --from-beginning \
         --timeout-ms 5000
