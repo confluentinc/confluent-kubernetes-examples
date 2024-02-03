@@ -1,0 +1,11 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: test-rb
+  namespace: confluent
+spec:
+  principal:
+    type: group
+    name: /g1
+  role: ClusterAdmin
