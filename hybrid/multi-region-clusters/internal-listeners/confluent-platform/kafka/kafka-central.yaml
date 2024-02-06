@@ -25,7 +25,7 @@ spec:
         jaasConfig:
           secretRef: credential
         type: digest
-      endpoint: zookeeper.central.svc.cluster.local:2182/mrc,zookeeper.east.svc.cluster.local:2182/mrc,zookeeper.west.svc.cluster.local:2182/mrc
+      endpoint: zookeeper.central.svc.cluster.local:2182,zookeeper.east.svc.cluster.local:2182,zookeeper.west.svc.cluster.local:2182/mrc
       tls:
         enabled: true
   image:
