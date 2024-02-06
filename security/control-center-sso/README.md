@@ -116,7 +116,7 @@ kubectl create secret generic credential \
 --from-file=plain-users.json=$TUTORIAL_HOME/creds-kafka-sasl-users.json \
 --from-file=plain.txt=$TUTORIAL_HOME/creds-client-kafka-sasl-user.txt \
 --from-file=ldap.txt=$TUTORIAL_HOME/ldap.txt \
---from-file=oidcClientSecret.txt=$TUTORIAL_HOME/oidcClientSecret.txt \ 
+--from-file=oidcClientSecret.txt=$TUTORIAL_HOME/oidcClientSecret.txt \
 -n confluent
 ```
 
