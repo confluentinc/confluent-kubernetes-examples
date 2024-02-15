@@ -82,7 +82,7 @@ Namespace:                kube-system
 ...
 Selector:                 k8s-app=kube-dns
 Type:                     LoadBalancer
-IP:                       10.0.37.50
+IP:                       10.0.37.60
 LoadBalancer Ingress:     35.185.208.215  ## The load balancer IP
 ```
 
@@ -108,7 +108,7 @@ Namespace:                kube-system
 ...
 Selector:                 k8s-app=kube-dns
 Type:                     LoadBalancer
-IP:                       10.1.32.71
+IP:                       10.1.32.81
 LoadBalancer Ingress:     35.224.242.222  ## The load balancer IP
 ```
 
