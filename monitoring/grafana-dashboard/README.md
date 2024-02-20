@@ -16,7 +16,7 @@ These instructions were last verified with:
 
 * Helm v3.3.0+
 * Prometheus Helm chart 13.8.0+ (app version 2.26.0+)
-* Grafana Helm chart 6.7.4 (app version 7.6.3+)
+* Grafana Helm chart 6.7.4 (app version 7.5.3+)
 
 ## Install Prometheus
     helm repo add stable https://charts.helm.sh/stable
