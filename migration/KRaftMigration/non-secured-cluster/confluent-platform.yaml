@@ -1,0 +1,34 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+  annotations:
+    platform.confluent.io/roll-precheck: "disable"
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server:7.6.0
+    init: confluentinc/confluent-init-container:2.8.0
+  dataVolumeCapacity: 100Gi
+  metricReporter:
+    enabled: true
+  dependencies:
+    zookeeper:
+      endpoint: zookeeper.confluent.svc.cluster.local:2181
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: confluent
+  annotations:
+    platform.confluent.io/kraft-migration-hold-krc-creation: "true"
+    platform.confluent.io/roll-precheck: "disable"
+spec:
+  replicas: 3
+  dataVolumeCapacity: 10G
+  image:
+    application: confluentinc/cp-server:7.6.0
+    init: confluentinc/confluent-init-container:2.8.0
