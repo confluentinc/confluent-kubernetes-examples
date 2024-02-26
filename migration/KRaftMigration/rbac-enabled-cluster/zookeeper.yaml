@@ -1,0 +1,19 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Zookeeper
+metadata:
+  name: zookeeper
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server:7.6.0
+    init: confluentinc/confluent-init-container:2.8.0
+  dataVolumeCapacity: "10"
+  logVolumeCapacity: "10"
+  authentication:
+    jaasConfig:
+      secretRef: credential
+    type: digest
+  tls:
+    secretRef: tls-group1
