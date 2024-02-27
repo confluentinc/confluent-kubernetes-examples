@@ -1,0 +1,27 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-schema-registry:7.5.0
+    init: confluentinc/confluent-init-container:2.7.0
+  tls:
+    secretRef: schemaregistry-tls
+  authentication:
+    type: mtls
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      domain: mydomain.example
+      prefix: schemaregistry
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: mtls
+      tls:
+        enabled: true

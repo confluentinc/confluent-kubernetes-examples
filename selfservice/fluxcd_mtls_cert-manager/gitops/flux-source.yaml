@@ -1,0 +1,10 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: helloworld
+  namespace: flux-system
+spec:
+  interval: 30s
+  url: https://github.com/purbon/tf-controller-example.git
+  ref:
+    branch: main

@@ -1,0 +1,27 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+  namespace: confluent
+spec:
+  replicas: 2
+  image:
+    application: confluentinc/cp-server-connect:7.5.0
+    init: confluentinc/confluent-init-container:2.7.0
+  tls:
+    secretRef: connect-tls
+  authentication:
+    type: mtls
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      domain: mydomain.example
+      prefix: connect
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: mtls
+      tls:
+        enabled: true

@@ -1,0 +1,111 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kafka-cert
+  namespace: confluent
+spec:
+  commonName: kafka
+  dnsNames:
+  - kafka
+  - kafka.$(NAMESPACE)
+  - kafka.$(NAMESPACE).svc.cluster.local
+  - '*.$(NAMESPACE).svc.cluster.local'
+  - '*.kafka.$(NAMESPACE).svc.cluster.local'
+  issuerRef:
+    kind: Issuer
+    name: my-ca-issuer
+  secretName: kafka-tls
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: zookeeper-cert
+  namespace: confluent
+spec:
+  commonName: zookeeper
+  dnsNames:
+    - zookeeper
+    - zookeeper.$(NAMESPACE)
+    - zookeeper.$(NAMESPACE).svc.cluster.local.
+    - '*.$(NAMESPACE).svc.cluster.local.'
+    - '*.zookeeper.$(NAMESPACE).svc.cluster.local.'
+    - zookeeper-0.zookeeper.confluent.svc.cluster.local
+    - zookeeper-1.zookeeper.confluent.svc.cluster.local
+    - zookeeper-2.zookeeper.confluent.svc.cluster.local
+    - zookeeper.confluent.svc.cluster.local
+  issuerRef:
+    kind: Issuer
+    name: my-ca-issuer
+  secretName: zookeeper-tls
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: c3-cert
+  namespace: confluent
+spec:
+  commonName: controlcenter
+  dnsNames:
+    - controlcenter
+    - controlcenter.$(NAMESPACE)
+    - controlcenter.$(NAMESPACE).svc.cluster.local
+    - '*.$(NAMESPACE).svc.cluster.local'
+    - '*.controlcenter.$(NAMESPACE).svc.cluster.local'
+  issuerRef:
+    kind: Issuer
+    name: my-ca-issuer
+  secretName: controlcenter-tls
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ksqldb-cert
+  namespace: confluent
+spec:
+  commonName: ksqldb
+  dnsNames:
+    - ksqldb
+    - ksqldb.$(NAMESPACE)
+    - ksqldb.$(NAMESPACE).svc.cluster.local
+    - '*.$(NAMESPACE).svc.cluster.local'
+    - '*.ksqldb.$(NAMESPACE).svc.cluster.local'
+  issuerRef:
+    kind: Issuer
+    name: my-ca-issuer
+  secretName: ksqldb-tls
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: sr-cert
+  namespace: confluent
+spec:
+  commonName: schemaregistry
+  dnsNames:
+    - schemaregistry
+    - schemaregistry.$(NAMESPACE)
+    - schemaregistry.$(NAMESPACE).svc.cluster.local
+    - '*.$(NAMESPACE).svc.cluster.local'
+    - '*.schemaregistry.$(NAMESPACE).svc.cluster.local'
+  issuerRef:
+    kind: Issuer
+    name: my-ca-issuer
+  secretName: schemaregistry-tls
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: connect-cert
+  namespace: confluent
+spec:
+  commonName: connect
+  dnsNames:
+    - connect
+    - connect.$(NAMESPACE)
+    - connect.$(NAMESPACE).svc.cluster.local
+    - '*.$(NAMESPACE).svc.cluster.local'
+    - '*.connect.$(NAMESPACE).svc.cluster.local'
+  issuerRef:
+    kind: Issuer
+    name: my-ca-issuer
+  secretName: connect-tls

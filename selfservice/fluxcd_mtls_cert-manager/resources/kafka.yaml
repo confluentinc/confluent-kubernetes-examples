@@ -1,0 +1,60 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  replicas: 4
+  image:
+    application: confluentinc/cp-server:7.5.0
+    init: confluentinc/confluent-init-container:2.7.0
+  dataVolumeCapacity: 100Gi
+  configOverrides:
+    server: #This config override is required for CP 7.0 update to use AclAuthorizer instead of SimpleAclAuthorizer
+      - authorizer.class.name=kafka.security.authorizer.AclAuthorizer
+  tls:
+    secretRef: kafka-tls
+  listeners:
+    internal:
+      authentication:
+        type: mtls
+        principalMappingRules:
+          - RULE:.*CN[\\s]?=[\\s]?([a-zA-Z0-9.]*)?.*/$1/
+      tls:
+        enabled: true
+    custom:
+     - name: publiccustom1
+       port: 9205
+    external:
+      authentication:
+        type: mtls
+        principalMappingRules:
+          - RULE:.*CN[\\s]?=[\\s]?([a-zA-Z0-9.]*)?.*/$1/
+      tls:
+        enabled: true
+  #    externalAccess:
+  #      type: loadBalancer
+  #      loadBalancer:
+  #        domain: mydomain.example
+  #        brokerPrefix: b
+  #        bootstrapPrefix: kafka
+  authorization:
+    type: simple
+    superUsers:
+      - User:kafka
+      - User:controlcenter
+      - User:connect
+      - User:schemaregisty
+  metricReporter:
+    enabled: true
+    authentication:
+      type: mtls
+    tls:
+      enabled: true
+  dependencies:
+    zookeeper:
+      endpoint: zookeeper.confluent.svc.cluster.local:2182
+      authentication:
+        type: mtls
+      tls:
+        enabled: true
