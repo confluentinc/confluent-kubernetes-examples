@@ -77,8 +77,6 @@ rules:
   resources:
   - configmaps
   - events
-  - persistentvolumeclaims
-  - persistentvolumes
   - secrets
   - secrets/finalizers
   - pods
@@ -93,18 +91,17 @@ rules:
   - patch
   - delete
 - apiGroups:
-  - networking.k8s.io
+    - ""
   resources:
-  - ingresses
-  - ingresses/status
+    - persistentvolumeclaims
+    - persistentvolumes
   verbs:
-  - get
-  - list
-  - watch
-  - create
-  - update
-  - patch
-  - delete
+    - get
+    - list
+    - watch
+    - create
+    - patch
+    - delete
 - apiGroups:
   - ""
   resources:
