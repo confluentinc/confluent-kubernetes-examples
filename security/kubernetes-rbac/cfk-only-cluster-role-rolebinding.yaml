@@ -78,7 +78,6 @@ rules:
   - configmaps
   - events
   - persistentvolumeclaims
-  - persistentvolumes
   - secrets
   - secrets/finalizers
   - pods
@@ -93,18 +92,13 @@ rules:
   - patch
   - delete
 - apiGroups:
-  - networking.k8s.io
+  - ""
   resources:
-  - ingresses
-  - ingresses/status
+  - persistentvolumes
   verbs:
   - get
   - list
   - watch
-  - create
-  - update
-  - patch
-  - delete
 - apiGroups:
   - ""
   resources:
@@ -113,6 +107,8 @@ rules:
   - get
   - list # needed for nonnamespaced deployments
   - watch # needed for nonnamespaced deployments
+cluster-role-rolebinding:
+  yaml:
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
