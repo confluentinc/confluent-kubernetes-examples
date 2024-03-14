@@ -1,0 +1,2 @@
+c3admin: pass1,Administrators
+c3restricted: pass2,Restricted

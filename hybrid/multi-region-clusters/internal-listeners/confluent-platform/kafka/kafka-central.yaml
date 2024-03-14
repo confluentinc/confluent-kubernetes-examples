@@ -10,7 +10,6 @@ spec:
     type: rbac
   configOverrides:
     server:
-      - client.rack=us-central1
       - confluent.license.topic.replication.factor=3
       - replica.selector.class=org.apache.kafka.common.replica.RackAwareReplicaSelector
   dataVolumeCapacity: 10Gi
