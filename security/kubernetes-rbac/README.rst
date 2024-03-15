@@ -50,3 +50,8 @@ Cluster Role and Role Binding
 
 If you want to install Cluster Role and RoleBinding, then the file to apply is 
 ``cluster-role-rolebinding.yaml`` in this directory.
+
+With Narrow permissions for CFK only (non-blueprints)
+-----------------------------
+If you want to install Cluster Role and RoleBinding for only CFK deployment (without cpc-platform), then the file to apply is
+``cfk-only-cluster-role-rolebinding.yaml`` in this directory.
