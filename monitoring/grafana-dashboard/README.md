@@ -19,12 +19,12 @@ These instructions were last verified with:
 * Grafana Helm chart 6.7.4 (app version 7.5.3+)
 
 ## Install Prometheus
-    helm repo add stable https://charts.helm.sh/stable
+    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
     helm repo add grafana https://grafana.github.io/helm-charts
     
     helm repo update
 
-    helm upgrade --install demo-test stable/prometheus \
+    helm upgrade --install prometheus prometheus-community/prometheus \
      --set alertmanager.persistentVolume.enabled=false \
      --set server.persistentVolume.enabled=false \
      --namespace default
@@ -53,7 +53,7 @@ Follow the in-browser instructions to configure a Prometheus data source for Gra
 [online documentation](https://prometheus.io/docs/visualization/grafana/#creating-a-prometheus-data-source). You will be asked
 to provide a URL. Enter the URL as shown below:
 
-    http://demo-test-prometheus-server.default.svc.cluster.local
+    http://prometheus-server.default.svc.cluster.local
 
 Click "Save & Test". You should see a green alert at the bottom of the page saying "Data source
 is working".
