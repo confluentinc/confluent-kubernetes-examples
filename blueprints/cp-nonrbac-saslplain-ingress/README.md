@@ -35,11 +35,7 @@ This scenario uses the Control Plane and Data Plane you deployed in [Quick Start
 1. Install Ingress controller:
 
    ```bash
-   helm repo add nginx-stable https://helm.nginx.com/stable
-   
-   helm repo update
-   
-   helm upgrade --install my-nginx nginx-stable/nginx-ingress \
+     helm upgrade --install ingress-nginx ingress-nginx --repo https://kubernetes.github.io/ingress-nginx \
      --set controller.publishService.enabled=true \
      --set controller.extraArgs.enable-ssl-passthrough="true"
    ```
