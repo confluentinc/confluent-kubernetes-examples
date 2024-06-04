@@ -43,13 +43,13 @@ Deploy Confluent for Kubernetes
 
 #. Create the namespace to use.
 
-   .. sourcecode:: bash
+   :: 
    
       kubectl create namespace confluent
 
 #. Set this namespace to default for your Kubernetes context.
 
-   .. sourcecode:: bash
+   :: 
    
       kubectl config set-context --current --namespace confluent
 
