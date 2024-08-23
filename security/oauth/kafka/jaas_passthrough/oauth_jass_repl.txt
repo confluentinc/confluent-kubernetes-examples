@@ -1,0 +1,1 @@
+sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required clientId="ssologin" clientSecret="KbLRih1HzjDC267PefuKU7QIoZ8hgHDK";
