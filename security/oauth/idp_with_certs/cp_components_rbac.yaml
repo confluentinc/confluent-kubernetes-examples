@@ -32,7 +32,7 @@ spec:
       authentication:
         type: oauth
         jaasConfig:
-          secretRef: oauth-jass
+          secretRef: oauth-jaas
         oauthSettings:
           tokenEndpointUri: https://keycloak.operator.svc.cluster.local:8443/realms/sso_test/protocol/openid-connect/token
           expectedIssuer: https://keycloak.operator.svc.cluster.local:8443/realms/sso_test
@@ -50,7 +50,7 @@ spec:
       authentication:
         type: oauth
         jaasConfig:
-          secretRef: oauth-jass
+          secretRef: oauth-jaas
         oauthSettings:
           tokenEndpointUri: https://keycloak.operator.svc.cluster.local:8443/realms/sso_test/protocol/openid-connect/token
       tls:
@@ -118,7 +118,7 @@ spec:
         authentication:
           type: oauth
           jaasConfig:
-            secretRef: oauth-jass
+            secretRef: oauth-jaas
           oauthSettings:
             tokenEndpointUri: https://keycloak.operator.svc.cluster.local:8443/realms/sso_test/protocol/openid-connect/token
       clusterRef:
@@ -127,7 +127,7 @@ spec:
       authentication:
         type: oauth
         jaasConfig:
-          secretRef: oauth-jass
+          secretRef: oauth-jaas
         oauthSettings:
           tokenEndpointUri: https://keycloak.operator.svc.cluster.local:8443/realms/sso_test/protocol/openid-connect/token
           expectedIssuer: https://keycloak.operator.svc.cluster.local:8443/realms/sso_test
@@ -145,7 +145,7 @@ spec:
     authentication:
       type: oauth
       oauth:
-        secretRef: oauth-jass
+        secretRef: oauth-jaas
         configuration:
           tokenEndpointUri: https://keycloak.operator.svc.cluster.local:8443/realms/sso_test/protocol/openid-connect/token
     tls:
@@ -190,7 +190,7 @@ spec:
       authentication:
         type: oauth
         oauth:
-          secretRef: oauth-jass
+          secretRef: oauth-jaas
           configuration:
             tokenEndpointUri: https://keycloak.operator.svc.cluster.local:8443/realms/sso_test/protocol/openid-connect/token
             expectedIssuer: https://keycloak.operator.svc.cluster.local:8443/realms/sso_test
@@ -247,7 +247,7 @@ spec:
       authentication:
         type: oauth
         oauth:
-          secretRef: oauth-jass
+          secretRef: oauth-jaas
           configuration:
             tokenEndpointUri: https://keycloak.operator.svc.cluster.local:8443/realms/sso_test/protocol/openid-connect/token
             expectedIssuer: https://keycloak.operator.svc.cluster.local:8443/realms/sso_test
@@ -315,7 +315,7 @@ spec:
       authentication:
         type: oauth
         oauth:
-          secretRef: oauth-jass
+          secretRef: oauth-jaas
           configuration:
             tokenEndpointUri: https://keycloak.operator.svc.cluster.local:8443/realms/sso_test/protocol/openid-connect/token
             expectedIssuer: https://keycloak.operator.svc.cluster.local:8443/realms/sso_test
