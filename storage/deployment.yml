@@ -7,7 +7,7 @@ spec:
   replicas: 3
   image:
     application: confluentinc/cp-zookeeper:7.6.0
-    init: confluentinc/confluent-init-container:2.8.0
+    init: confluentinc/confluent-init-container:2.9.0
   dataVolumeCapacity: 10Gi
   logVolumeCapacity: 10Gi
   storageClass:
@@ -22,7 +22,7 @@ spec:
   replicas: 3
   image:
     application: confluentinc/cp-server:7.6.0
-    init: confluentinc/confluent-init-container:2.8.0
+    init: confluentinc/confluent-init-container:2.9.0
   dataVolumeCapacity: 10Gi
   storageClass:
     name: production-storage-class
