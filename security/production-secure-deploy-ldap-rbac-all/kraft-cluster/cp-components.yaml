@@ -12,8 +12,8 @@ spec:
     type: rbac
   dataVolumeCapacity: 10G
   image:
-    application: docker.io/confluentinc/cp-server:7.6.0
-    init: confluentinc/confluent-init-container:2.8.0
+    application: docker.io/confluentinc/cp-server:7.7.0
+    init: confluentinc/confluent-init-container:2.9.0
   listeners:
     controller:
       authentication:
@@ -68,8 +68,8 @@ spec:
           secretRef: mds-client-erp
         type: bearer
   image:
-    application: docker.io/confluentinc/cp-server:7.6.0
-    init: confluentinc/confluent-init-container:2.8.0
+    application: docker.io/confluentinc/cp-server:7.7.0
+    init: confluentinc/confluent-init-container:2.9.0
   listeners:
     internal:
       authentication:
