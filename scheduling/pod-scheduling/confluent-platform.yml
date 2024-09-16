@@ -7,7 +7,7 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-zookeeper:7.6.0
+    application: confluentinc/cp-zookeeper:7.7.0
     init: confluentinc/confluent-init-container:2.9.0
   dataVolumeCapacity: 10Gi
   logVolumeCapacity: 10Gi
@@ -39,7 +39,7 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-server:7.6.0
+    application: confluentinc/cp-server:7.7.0
     init: confluentinc/confluent-init-container:2.9.0
   dataVolumeCapacity: 100Gi
   metricReporter:
@@ -73,7 +73,7 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-server-connect:7.6.0
+    application: confluentinc/cp-server-connect:7.7.0
     init: confluentinc/confluent-init-container:2.9.0
   dependencies:
     kafka:
@@ -87,7 +87,7 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-ksqldb-server:7.6.0
+    application: confluentinc/cp-ksqldb-server:7.7.0
     init: confluentinc/confluent-init-container:2.9.0
   dataVolumeCapacity: 10Gi
 ---
@@ -99,7 +99,7 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-enterprise-control-center:7.6.0
+    application: confluentinc/cp-enterprise-control-center:7.7.0
     init: confluentinc/confluent-init-container:2.9.0
   dataVolumeCapacity: 10Gi
   dependencies:
