@@ -19,12 +19,12 @@ These instructions were last verified with:
 * Grafana Helm chart 6.7.4 (app version 7.5.3+)
 
 ## Install Prometheus
-    helm repo add stable https://charts.helm.sh/stable
+    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
     helm repo add grafana https://grafana.github.io/helm-charts
     
     helm repo update
 
-    helm upgrade --install demo-test stable/prometheus \
+    helm upgrade --install demo-test prometheus-community/prometheus \
      --set alertmanager.persistentVolume.enabled=false \
      --set server.persistentVolume.enabled=false \
      --namespace default
