@@ -31,13 +31,8 @@ helm repo add confluentinc https://packages.confluent.io/helm
 2. Install Confluent For Kubernetes using Helm:
 
 ```
-helm upgrade --install operator confluentinc/confluent-for-kubernetes -n confluent --set kRaftEnabled=true
+helm upgrade --install operator confluentinc/confluent-for-kubernetes -n confluent 
 ```
-#### NOTE:  
-Make sure to deploy CFK with the `–-set kRaftEnabled=true` flag in the helm upgrade command so that CFK can create the required ClusterRole and ClusterRolebinding for KRaft controllers. Please check the following documentation link for more information: 
-
-- [Deploy CFK with KRaft](https://docs.confluent.io/operator/current/co-deploy-cfk.html#deploy-co-with-kraft)
-                
 
 3. Check that the Confluent For Kubernetes pod comes up and is running:
 
