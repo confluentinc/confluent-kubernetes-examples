@@ -1,0 +1,14 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: CMFRestClass
+metadata:
+  name: default
+  namespace: operator
+spec:
+  cmfRest:
+    endpoint: https://confluent-manager-for-apache-flink.operator.svc.cluster.local:8080
+    authentication:
+      type: mtls
+      sslClientAuthentication: true
+    tls:
+      secretRef: cmf-day2-tls
+---

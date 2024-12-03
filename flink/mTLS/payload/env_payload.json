@@ -1,0 +1,13 @@
+{
+    "name": "flink-env1",
+    "kubernetesNamespace": "staging-shared",
+    "flinkApplicationDefaults": {
+      "metadata": {
+      },
+      "spec": {
+        "flinkConfiguration": {
+          "taskmanager.numberOfTaskSlots": "2"
+        }
+      }
+    }
+  }
