@@ -1,0 +1,327 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: confluent
+spec:
+  replicas: 3
+  dataVolumeCapacity: 10Gi
+  image:
+    application: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:7.8.0-rc241023065244-6004-ubi8
+    init: confluentinc/confluent-init-container:2.9.3
+    pullSecretRef:
+      - confluent-registry
+  listeners:
+    controller:
+      authentication:
+        type: mtls
+        principalMappingRules:
+          - "RULE:.*CN=([a-zA-Z0-9.-]*).*$/$1/"
+          - "DEFAULT"
+      tls:
+        enabled: true
+  authorization:
+    type: rbac
+    superUsers:
+      - User:kafka
+      - User:ssologin
+  dependencies:
+    mdsKafkaCluster:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: mtls
+        sslClientAuthentication: true
+      tls:
+        enabled: true
+  tls:
+    secretRef: tls-kafka
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  authorization:
+    type: rbac
+    superUsers:
+      - User:kafka
+      - User:ssologin
+  replicas: 3
+  image:
+    application: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:7.8.x-6221-ubi8
+    init: confluentinc/confluent-init-container:2.9.0
+    pullSecretRef:
+      - confluent-registry
+  dataVolumeCapacity: 10Gi
+  tls:
+    secretRef: tls-kafka
+  listeners:
+    internal:
+      authentication:
+        type: mtls
+        mtls:
+          sslClientAuthentication: "required"
+          principalMappingRules:
+            - "RULE:.*CN=([a-zA-Z0-9.-]*).*$/$1/"
+            - "DEFAULT"
+      tls:
+        enabled: true
+    external:
+      authentication:
+        type: oauth
+        jaasConfig:
+          secretRef: oauth-jass
+        oauthSettings:
+          groupsClaimName: groups
+          jwksEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/certs
+          tokenEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
+        mtls:
+          sslClientAuthentication: "required"
+          principalMappingRules:
+            - "RULE:.*CN=([a-zA-Z0-9.-]*).*$/$1/"
+            - "DEFAULT"
+      tls:
+        enabled: true
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          domain: mydomain.example
+          brokerPrefix: b
+          bootstrapPrefix: kafka
+  metricReporter:
+    enabled: true
+    authentication:
+      type: mtls
+    tls:
+      enabled: true
+  services:
+    kafkaRest:
+      authentication:
+        type: oauth
+        oauth:
+          secretRef: oauth-jass
+          configuration:
+            tokenEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
+            expectedIssuer: http://keycloak:8080/realms/sso_test
+            jwksEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/certs
+            subClaimName: client_id
+        mtls:
+          sslClientAuthentication: "required"
+          principalMappingRules:
+            - RULE:^CN=([a-zA-Z0-9]*).*$/$1/
+            - DEFAULT
+    mds:
+      impersonation:
+        admins:
+          - User:kafka
+          - User:CN=kafka,L=Earth,ST=Pangea,C=Universe
+      tls:
+        enabled: true
+      tokenKeyPair:
+        secretRef: mds-token
+      provider:
+        mtls:
+          sslClientAuthentication: "required"
+          principalMappingRules: [ "RULE:.*CN=([a-zA-Z0-9.-]*).*$/$1/,DEFAULT" ]
+        oauth:
+          configurations:
+            expectedIssuer: http://keycloak:8080/realms/sso_test
+            jwksEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/certs
+            subClaimName: client_id
+        oidc:
+          clientCredentials:
+            secretRef: oidccredential
+          configurations:
+            groupsClaimName: profile_groups
+            subClaimName: sub
+            issuer: http://localhost:8080/realms/sso_test
+            jwksEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/certs
+            authorizeBaseEndpointUri: http://localhost:8080/realms/sso_test/protocol/openid-connect/auth
+            tokenBaseEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
+            refreshToken: false
+  dependencies:
+    kafkaRest:
+      authentication:
+        type: oauth
+        jaasConfig:
+          secretRef: oauth-jass
+        oauthSettings:
+          tokenEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
+          expectedIssuer: http://keycloak:8080/realms/sso_test
+          jwksEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/certs
+          subClaimName: client_id
+        sslClientAuthentication: true
+      tls:
+        enabled: true
+        secretRef: tls-kafka
+    kRaftController:
+      controllerListener:
+        tls:
+          enabled: true
+        authentication:
+          type: mtls
+      clusterRef:
+        name: kraftcontroller
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter
+  namespace: confluent
+spec:
+  authorization:
+    type: rbac
+  replicas: 1
+  podTemplate:
+    probe:
+      liveness:
+        periodSeconds: 10
+        failureThreshold: 5
+        timeoutSeconds: 500
+  image:
+    application: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-enterprise-control-center:7.8.x-6221-ubi8
+    init: confluentinc/confluent-init-container:2.9.0
+    pullSecretRef:
+      - confluent-registry
+  dataVolumeCapacity: 10Gi
+  tls:
+    secretRef: tls-controlcenter
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: mtls
+      tls:
+        enabled: true
+    mds:
+      ssoProtocol: oidc
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tokenKeyPair:
+        secretRef: mds-token
+      authentication:
+        type: mtls
+        sslClientAuthentication: true
+      tls:
+        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+  namespace: confluent
+spec:
+  authorization:
+    type: rbac
+  replicas: 1
+  image:
+    application: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-schema-registry:7.8.x-6221-ubi8
+    init: confluentinc/confluent-init-container:2.9.0
+    pullSecretRef:
+      - confluent-registry
+  tls:
+    secretRef: tls-schemaregistry
+  authentication:
+    type: oauth
+    oauth:
+      secretRef: oauth-jass
+      configuration:
+        tokenEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
+        expectedIssuer: http://keycloak:8080/realms/sso_test
+        jwksEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/certs
+        subClaimName: client_id
+    mtls:
+      sslClientAuthentication: "required"
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      domain: mydomain.example
+      prefix: schemaregistry
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: mtls
+      tls:
+        enabled: true
+    mds:
+      ssoProtocol: oidc
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tokenKeyPair:
+        secretRef: mds-token
+      authentication:
+        type: mtls
+        sslClientAuthentication: true
+      tls:
+        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: default
+  namespace: confluent
+spec:
+  kafkaClusterRef:
+    name: kafka
+    namespace: confluent
+  kafkaRest:
+    endpoint: https://kafka.confluent.svc.cluster.local:8090
+    authentication:
+      type: oauth
+      oauth:
+        secretRef: oauth-jass
+        configuration:
+          tokenEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
+      sslClientAuthentication: true
+    tls:
+      secretRef: tls-kafka
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+  namespace: confluent
+spec:
+  authorization:
+    type: rbac
+  replicas: 1
+  image:
+    application: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server-connect:7.8.x-6221-ubi8
+    init: confluentinc/confluent-init-container:2.9.0
+    pullSecretRef:
+      - confluent-registry
+  tls:
+    secretRef: tls-connect
+  authentication:
+    type: oauth
+    oauth:
+      secretRef: oauth-jass
+      configuration:
+        tokenEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
+        expectedIssuer: http://keycloak:8080/realms/sso_test
+        jwksEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/certs
+        subClaimName: client_id
+    mtls:
+      sslClientAuthentication: "required"
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      domain: mydomain.example
+      prefix: connect
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: mtls
+      tls:
+        enabled: true
+    mds:
+      ssoProtocol: oidc
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tokenKeyPair:
+        secretRef: mds-token
+      authentication:
+        type: mtls
+        sslClientAuthentication: true
+      tls:
+        enabled: true
