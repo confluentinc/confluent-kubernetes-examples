@@ -1,0 +1,144 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: confluent
+spec:
+  dataVolumeCapacity: 10G
+  image:
+    application: docker.io/confluentinc/cp-server:7.7.0
+    init: confluentinc/confluent-init-container:2.9.0
+  replicas: 3
+  tls:
+    secretRef: tls-group1
+  listeners:
+    controller:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  image:
+    application: confluentinc/cp-server:7.7.0
+    init: confluentinc/confluent-init-container:2.9.0
+  dataVolumeCapacity: 10Gi
+  configOverrides:
+    server:
+      # This is a workaround for an internal CFK bug "Kafka cluster with Kraft mode in CFK configures the controller listener with FileLoginModule"
+      - listener.name.controller.plain.sasl.jaas.config=${file:/mnt/secrets/credential-plain/plain-jaas.conf:sasl.jaas.config}
+  replicas: 3
+  metricReporter:
+    enabled: false
+  tls:
+    secretRef: tls-group1
+  listeners:
+    internal:
+      authentication:
+        type: ldap
+        jaasConfigPassThrough:
+          secretRef: credential-plain
+      tls:
+        enabled: true
+    replication:
+      authentication:
+        type: plain
+        jaasConfigPassThrough:
+          secretRef: credential-plain
+      tls:
+        enabled: true
+    external:
+      authentication:
+        type: ldap
+      tls:
+        enabled: true
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          domain: my.domain
+          brokerPrefix: rb
+          bootstrapPrefix: rb
+  authorization:
+    type: rbac
+    superUsers:
+      - User:kafka
+  services:
+    mds:
+      tls:
+        enabled: true
+      tokenKeyPair:
+        secretRef: mds-token
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          domain: my.domain
+          prefix: rb-mds
+      provider:
+        type: ldap
+        ldap:
+          address: ldap://ldap.confluent.svc.cluster.local:389
+          authentication:
+            type: simple
+            simple:
+              secretRef: credential
+          configurations:
+            groupNameAttribute: cn
+            groupObjectClass: group
+            groupMemberAttribute: member
+            groupMemberAttributePattern: CN=(.*),DC=test,DC=com
+            groupSearchBase: dc=test,dc=com
+            groupSearchScope: 1
+            userNameAttribute: cn
+            userMemberOfAttributePattern: CN=(.*),DC=test,DC=com
+            userObjectClass: organizationalRole
+            userSearchBase: dc=test,dc=com
+            userSearchScope: 1
+  dependencies:
+    kRaftController:
+      controllerListener:
+        authentication:
+          type: plain
+          jaasConfig:
+            secretRef: credential
+        tls:
+          enabled: true
+      clusterRef:
+        name: kraftcontroller
+    kafkaRest:
+      authentication:
+        type: bearer
+        bearer:
+          secretRef: mds-client
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: default
+  namespace: confluent
+spec:
+  kafkaRest:
+    authentication:
+      type: bearer
+      bearer:
+        secretRef: rest-credential
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: demotopic
+  namespace: confluent
+spec:
+  kafkaRestClassRef:
+    name: default
+  replicas: 3
+  partitionCount: 4
+  configs:
+    cleanup.policy: "delete"

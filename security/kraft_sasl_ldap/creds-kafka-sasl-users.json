@@ -1,0 +1,4 @@
+{
+  "kafka_client": "kafka_client-secret",
+  "kafka": "kafka-secret"
+}

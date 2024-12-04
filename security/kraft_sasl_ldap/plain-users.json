@@ -1,0 +1,7 @@
+{
+  "test": "test123",
+  "test2": "test-secret2",
+  "test3": "test-secret3",
+  "kafka": "kafka-secret",
+  "c3": "c3-secret"
+}

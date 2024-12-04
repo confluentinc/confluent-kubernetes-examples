@@ -19,6 +19,8 @@ spec:
       - rest.extension.classes=io.confluent.connect.replicator.monitoring.ReplicatorMonitoringExtension
       # This specifies that Replicator is the Connector configured
       - connector.class=io.confluent.connect.replicator.ReplicatorSourceConnector
+      # To prevent duplicate replicator tasks use eager
+      - connect.protocol=eager
   dependencies:
     kafka:
       bootstrapEndpoint: <destination-ccloud-endpoint:9092>
