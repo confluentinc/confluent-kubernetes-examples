@@ -1,0 +1,12 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: demotopic-krc
+  namespace: confluent
+spec:
+  kafkaRestClassRef:
+    name: default
+  replicas: 3
+  partitionCount: 4
+  configs:
+    cleanup.policy: "delete"
