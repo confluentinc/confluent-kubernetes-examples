@@ -6,10 +6,8 @@ metadata:
 spec:
   dataVolumeCapacity: 10Gi
   image:
-    application: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:7.8.0-rc241023065244-6004-ubi8
+    application: confluentinc/cp-server:7.8.0
     init: confluentinc/confluent-init-container:2.9.3
-    pullSecretRef:
-      - confluent-registry
   listeners:
     controller:
       authentication:
@@ -47,10 +45,8 @@ spec:
       - User:kafka
   replicas: 3
   image:
-    application: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:7.8.0-rc241023065244-6004-ubi8
+    application: confluentinc/cp-server:7.8.0
     init: confluentinc/confluent-init-container:2.9.3
-    pullSecretRef:
-      - confluent-registry
   dataVolumeCapacity: 10Gi
   tls:
     secretRef: tls-kafka
@@ -131,10 +127,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-kafka-rest:7.8.0-rc241023065244-6004-ubi8
+    application: confluentinc/cp-kafka-rest:7.8.0
     init: confluentinc/confluent-init-container:2.9.3
-    pullSecretRef:
-      - confluent-registry
   tls:
     secretRef: tls-kafkarestproxy
   authorization:
@@ -182,10 +176,8 @@ spec:
     type: rbac
   replicas: 1
   image:
-    application: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-enterprise-control-center:7.8.0-rc241023065244-6004-ubi8
+    application: confluentinc/cp-enterprise-control-center:7.8.0
     init: confluentinc/confluent-init-container:2.9.3
-    pullSecretRef:
-      - confluent-registry
   dataVolumeCapacity: 10Gi
   tls:
     secretRef: tls-controlcenter
@@ -228,10 +220,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-schema-registry:7.8.0-rc241023065244-6004-ubi8
+    application: confluentinc/cp-schema-registry:7.8.0
     init: confluentinc/confluent-init-container:2.9.3
-    pullSecretRef:
-      - confluent-registry
   tls:
     secretRef: tls-schemaregistry
   authorization:
@@ -267,10 +257,8 @@ metadata:
 spec:
   replicas: 2
   image:
-    application: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server-connect:7.8.0-rc241023065244-6004-ubi8
+    application: confluentinc/cp-server-connect:7.8.0
     init: confluentinc/confluent-init-container:2.9.3
-    pullSecretRef:
-      - confluent-registry
   tls:
     secretRef: tls-connect
   authorization:
