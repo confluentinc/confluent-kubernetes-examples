@@ -7,8 +7,8 @@ spec:
   replicas: 3
   dataVolumeCapacity: 10Gi
   image:
-    application: confluentinc/cp-server:7.8.0-rc241023065244-6004-ubi8
-    init: confluentinc/confluent-init-container:2.9.3
+    application: confluentinc/cp-server:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
   listeners:
     controller:
       authentication:
@@ -48,7 +48,7 @@ spec:
   replicas: 3
   image:
     application: confluentinc/cp-server:7.8.0
-    init: confluentinc/confluent-init-container:2.9.3
+    init: confluentinc/confluent-init-container:2.10.0
   dataVolumeCapacity: 10Gi
   tls:
     secretRef: tls-kafka
@@ -177,7 +177,7 @@ spec:
         timeoutSeconds: 500
   image:
     application: confluentinc/cp-enterprise-control-center:7.8.0
-    init: confluentinc/confluent-init-container:2.9.3
+    init: confluentinc/confluent-init-container:2.10.0
   dataVolumeCapacity: 10Gi
   tls:
     secretRef: tls-controlcenter
@@ -210,7 +210,7 @@ spec:
   replicas: 1
   image:
     application: confluentinc/cp-schema-registry:7.8.0
-    init: confluentinc/confluent-init-container:2.9.3
+    init: confluentinc/confluent-init-container:2.10.0
   tls:
     secretRef: tls-schemaregistry
   authentication:
@@ -279,7 +279,7 @@ spec:
   replicas: 1
   image:
     application: confluentinc/cp-server-connect:7.8.0
-    init: confluentinc/confluent-init-container:2.9.3
+    init: confluentinc/confluent-init-container:2.10.0
   tls:
     secretRef: tls-connect
   authentication:
