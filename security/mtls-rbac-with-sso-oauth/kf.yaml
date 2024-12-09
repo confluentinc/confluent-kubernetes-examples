@@ -8,7 +8,7 @@ spec:
   replicas: 3
   dataVolumeCapacity: 10Gi
   image:
-    application: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:7.8.0-rc241023065244-6004-ubi8
+    application: confluentinc/cp-server:7.8.0
     init: confluentinc/confluent-init-container:2.9.3
     pullSecretRef:
       - confluent-registry
@@ -67,8 +67,8 @@ spec:
       - User:ssologin
   replicas: 3
   image:
-    application: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:7.8.x-6221-ubi8
-    init: confluentinc/confluent-init-container:2.9.0
+    application: confluentinc/cp-server:7.8.0
+    init: confluentinc/confluent-init-container:2.9.3
     pullSecretRef:
       - confluent-registry
   dataVolumeCapacity: 10Gi
