@@ -6,10 +6,8 @@ metadata:
 spec:
   dataVolumeCapacity: 10Gi
   image:
-    application: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:7.8.0-rc241023065244-6004-ubi8
-    init: confluentinc/confluent-init-container:2.9.3
-    pullSecretRef:
-      - confluent-registry
+    application: confluentinc/cp-server:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
   listeners:
     controller:
       authentication:
@@ -47,10 +45,8 @@ spec:
       - User:kafka
   replicas: 3
   image:
-    application: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:7.8.x-6290-ubi8
-    init: confluentinc/confluent-init-container:2.9.3
-    pullSecretRef:
-      - confluent-registry
+    application: confluentinc/cp-server:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
   dataVolumeCapacity: 10Gi
   tls:
     secretRef: tls-group1
@@ -107,10 +103,8 @@ spec:
     secretRef: tls-group1
   replicas: 1
   image:
-    application: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-enterprise-control-center:7.8.x-6290-ubi8
-    init: confluentinc/confluent-init-container:2.9.3
-    pullSecretRef:
-      - confluent-registry
+    application: confluentinc/cp-enterprise-control-center:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
   dataVolumeCapacity: 10Gi
   dependencies:
     kafka:
@@ -154,10 +148,8 @@ metadata:
 spec:
   replicas: 2
   image:
-    application: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server-connect:7.8.x-6290-ubi8
-    init: confluentinc/confluent-init-container:2.9.3
-    pullSecretRef:
-      - confluent-registry
+    application: confluentinc/cp-server-connect:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
   tls:
     secretRef: tls-group1
   authorization:
@@ -194,10 +186,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-schema-registry:7.8.x-6290-ubi8
-    init: confluentinc/confluent-init-container:2.9.3
-    pullSecretRef:
-      - confluent-registry
+    application: confluentinc/cp-schema-registry:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
   tls:
     secretRef: tls-group1
   authorization:
@@ -230,10 +220,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-kafka-rest:7.8.x-6290-ubi8
-    init: confluentinc/confluent-init-container:2.9.3
-    pullSecretRef:
-      - confluent-registry
+    application: confluentinc/cp-kafka-rest:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
   tls:
     secretRef: tls-group1
   authorization:
@@ -270,10 +258,8 @@ metadata:
 spec:
   replicas: 2
   image:
-    application: confluentinc/cp-ksqldb-server:7.7.0
-    init: confluentinc/confluent-init-container:2.9.3
-    pullSecretRef:
-      - confluent-registry
+    application: confluentinc/cp-ksqldb-server:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
   dataVolumeCapacity: 10Gi
   tls:
     secretRef: tls-group1
