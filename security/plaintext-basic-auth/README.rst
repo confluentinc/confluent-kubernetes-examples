@@ -151,8 +151,8 @@ For example, the Kafka section of the file is as follows:
   spec:
     replicas: 3
     image:
-      application: confluentinc/cp-server:7.6.0
-      init: confluentinc/confluent-init-container:2.9.0
+      application: confluentinc/cp-server:7.8.0
+      init: confluentinc/confluent-init-container:2.10.0
     dataVolumeCapacity: 10Gi
     metricReporter:
       enabled: true
@@ -242,7 +242,7 @@ The above command would return similar output:
 
 ::
 
-  {"version":"7.6.0-ce","commit":"be816cdb62b83d78","kafka_cluster_id":"SjW1_kcORW-nSsU2Yy1R1Q"}
+  {"version":"7.8.0-ce","commit":"be816cdb62b83d78","kafka_cluster_id":"SjW1_kcORW-nSsU2Yy1R1Q"}
 
 Validate authentication with Schema Registry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -268,7 +268,7 @@ This command returns an output similar to as follows:
 
 ::
 
-{"KsqlServerInfo":{"version":"7.6.0","kafkaClusterId":"WqIyB4VZRHObFuBPHdtzJQ","ksqlServiceId":"confluent.ksqldb_","serverStatus":"RUNNING"}}%
+{"KsqlServerInfo":{"version":"7.8.0","kafkaClusterId":"WqIyB4VZRHObFuBPHdtzJQ","ksqlServiceId":"confluent.ksqldb_","serverStatus":"RUNNING"}}%
 
 Validate authentication with Rest Proxy
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
