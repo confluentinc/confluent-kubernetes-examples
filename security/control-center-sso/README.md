@@ -62,7 +62,7 @@ exit
 
 * Deploy [Keycloak](https://www.keycloak.org/) which is an open source identity and access managment solution. `keycloak.yaml` is used for an example here, this is not supported by Confluent. Therefore, please make sure to use the identity provider as per the organization requirement.
 ```
-kubectl apply -f keycloak.yaml
+kubectl apply -f $TUTORIAL_HOME/keycloak.yaml
 ```
 
 * Validate that Keycloak pod is running:
@@ -167,7 +167,7 @@ kubectl get pods -n confluent
 ## Create RBAC Rolebindings for Control Center user
 
 ```
-kubectl apply -f controlcenter-rolebinding.yaml
+kubectl apply -f $TUTORIAL_HOME/controlcenter-rolebinding.yaml
 ```
 
 ## Validate
