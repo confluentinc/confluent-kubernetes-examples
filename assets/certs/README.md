@@ -1,4 +1,4 @@
-# Scenario: Create one certificate for all components
+# Create one certificate for all components
 
 When testing, it's often helpful to generate your own certificates to validate the architecture and deployment.
 
@@ -58,27 +58,4 @@ openssl req -x509  -new -nodes \
 
 ```
 openssl x509 -in $TUTORIAL_HOME/generated/cacerts.pem -text -noout
-```
-
-## Create the Confluent component server certificates
-
-In this series of steps, you will create the server certificate private and public keys
-for each Confluent component.
-
-### Create server certificates
-
-```
-# Create CP Component server certificate
-# Use the SANs listed in kafka-server-domain.json
-
-cfssl gencert -ca=$TUTORIAL_HOME/generated/cacerts.pem \
--ca-key=$TUTORIAL_HOME/generated/rootCAkey.pem \
--config=$TUTORIAL_HOME/ca-config.json \
--profile=server $TUTORIAL_HOME/server-domain.json | cfssljson -bare $TUTORIAL_HOME/generated/server
-```
-
-### Check validity of server certificates
-
-```
-openssl x509 -in $TUTORIAL_HOME/generated/server.pem -text -noout
 ```
