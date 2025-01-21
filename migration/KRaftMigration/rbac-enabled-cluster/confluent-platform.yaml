@@ -98,6 +98,19 @@ spec:
   tls:
     secretRef: tls-group1
   dataVolumeCapacity: 10G
+  authorization:
+    superUsers:
+      - User:kafka
+    type: rbac
+  dependencies:
+    mdsKafkaCluster:
+      authentication:
+        jaasConfig:
+          secretRef: credential
+        type: plain
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      tls:
+        enabled: true
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: KafkaRestClass
