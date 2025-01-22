@@ -1,0 +1,3 @@
+username=ksql
+password=ksql-secret
+

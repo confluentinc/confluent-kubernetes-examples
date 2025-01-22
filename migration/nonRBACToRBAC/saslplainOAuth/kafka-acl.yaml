@@ -1,0 +1,60 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: confluent
+spec:
+  configOverrides:
+    server:
+      - authorizer.class.name=org.apache.kafka.metadata.authorizer.StandardAuthorizer
+      - allow.everyone.if.no.acl.found=true
+  dataVolumeCapacity: 10Gi
+  image:
+    application: confluentinc/cp-server:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
+  authorization:
+    superUsers:
+      - User:kafka
+    type: simple
+  listeners:
+    controller:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+  replicas: 3
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
+  dataVolumeCapacity: 10Gi
+  configOverrides:
+    server:
+      - authorizer.class.name=org.apache.kafka.metadata.authorizer.StandardAuthorizer
+      - allow.everyone.if.no.acl.found=true
+  authorization:
+    superUsers:
+      - User:kafka
+    type: simple
+  listeners:
+    internal:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+  dependencies:
+    kRaftController:
+      controllerListener:
+        authentication:
+          type: plain
+          jaasConfig:
+            secretRef: credential
+      clusterRef:
+        name: kraftcontroller

@@ -1,0 +1,79 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: confluent
+spec:
+  dataVolumeCapacity: 10Gi
+  image:
+    application: confluentinc/cp-server:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
+  configOverrides:
+    server:
+      - authorizer.class.name=org.apache.kafka.metadata.authorizer.StandardAuthorizer
+      - allow.everyone.if.no.acl.found=true
+      - listener.name.replication.plain.sasl.jaas.config=io.confluent.kafka.server.plugins.auth.FileBasedLoginModule required username="${file:/mnt/secrets/kraftcontroller-controller-listener-apikeys/plain.txt:username}" password="${file:/mnt/secrets/kraftcontroller-controller-listener-apikeys/plain.txt:password}" config_path="/mnt/secrets/kraftcontroller-controller-listener-apikeys/apikeys.json" refresh_ms="3000";
+      - listener.name.replication.sasl.enabled.mechanisms=PLAIN
+      - listener.name.replication.sasl.mechanism=PLAIN
+      - listener.name.replication.ssl.key.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
+      - listener.name.replication.ssl.keystore.location=/mnt/sslcerts/keystore.p12
+      - listener.name.replication.ssl.keystore.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
+      - listener.name.replication.ssl.truststore.location=/mnt/sslcerts/truststore.p12
+      - listener.name.replication.ssl.truststore.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
+      - listener.security.protocol.map=CONTROLLER:SASL_SSL,REPLICATION:SASL_SSL
+  authorization:
+    superUsers:
+      - User:kafka
+    type: simple
+  listeners:
+    controller:
+      tls:
+        enabled: true
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+  tls:
+    secretRef: tls-group1
+  replicas: 3
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
+  dataVolumeCapacity: 10Gi
+  tls:
+    secretRef: tls-group1
+  configOverrides:
+    server:
+      - authorizer.class.name=org.apache.kafka.metadata.authorizer.StandardAuthorizer
+      - allow.everyone.if.no.acl.found=true
+  authorization:
+    superUsers:
+      - User:kafka
+    type: simple
+  listeners:
+    internal:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+  dependencies:
+    kRaftController:
+      controllerListener:
+        tls:
+          enabled: true
+        authentication:
+          type: plain
+          jaasConfig:
+            secretRef: credential
+      clusterRef:
+        name: kraftcontroller

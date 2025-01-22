@@ -1,0 +1,136 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: confluent
+spec:
+  configOverrides:
+    server:
+      # add missing replication listener configs in kraft. Known CFK bug, to be fixed in future release
+      - listener.name.replication.ssl.key.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
+      - listener.name.replication.ssl.keystore.location=/mnt/sslcerts/keystore.p12
+      - listener.name.replication.ssl.keystore.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
+      - listener.name.replication.ssl.truststore.location=/mnt/sslcerts/truststore.p12
+      - listener.name.replication.ssl.truststore.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
+      - listener.security.protocol.map=CONTROLLER:SSL,REPLICATION:SSL
+  dataVolumeCapacity: 10Gi
+  image:
+    application: confluentinc/cp-server:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
+  listeners:
+    controller:
+      authentication:
+        type: mtls
+        principalMappingRules:
+          - RULE:.*CN=([a-zA-Z0-9.-]*).*$/$1/
+      tls:
+        enabled: true
+  authorization:
+    superUsers:
+      - User:kafka
+    type: rbac
+  dependencies:
+    mdsKafkaCluster:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: mtls
+      tls:
+        enabled: true
+  tls:
+    secretRef: tls-kafka
+  replicas: 3
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
+  dataVolumeCapacity: 10Gi
+  tls:
+    secretRef: tls-kafka
+  authorization:
+    superUsers:
+      - User:kafka
+    type: rbac
+  services:
+    mds:
+      tls:
+        enabled: true
+      tokenKeyPair:
+        secretRef: mds-token
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          domain: my.domain
+          prefix: rb-mds
+      provider:
+        ldap:
+          address: ldap://ldap.confluent.svc.cluster.local:389
+          authentication:
+            type: simple
+            simple:
+              secretRef: credential
+          configurations:
+            groupNameAttribute: cn
+            groupObjectClass: group
+            groupMemberAttribute: member
+            groupMemberAttributePattern: CN=(.*),DC=test,DC=com
+            groupSearchBase: dc=test,dc=com
+            groupSearchScope: 1
+            userNameAttribute: cn
+            userMemberOfAttributePattern: CN=(.*),DC=test,DC=com
+            userObjectClass: organizationalRole
+            userSearchBase: dc=test,dc=com
+            userSearchScope: 1
+  listeners:
+    internal:
+      authentication:
+        type: mtls
+        principalMappingRules:
+          - RULE:.*CN[\\s]?=[\\s]?([a-zA-Z0-9.]*)?.*/$1/
+      tls:
+        enabled: true
+    external:
+      authentication:
+        type: mtls
+        principalMappingRules:
+          - RULE:.*CN[\\s]?=[\\s]?([a-zA-Z0-9.]*)?.*/$1/
+      tls:
+        enabled: true
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          domain: mydomain.example
+          brokerPrefix: b
+          bootstrapPrefix: kafka
+  dependencies:
+    kafkaRest:
+      authentication:
+        type: bearer
+        bearer:
+          secretRef: mds-client
+    kRaftController:
+      controllerListener:
+        tls:
+          enabled: true
+        authentication:
+          type: mtls
+      clusterRef:
+        name: kraftcontroller
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: default
+  namespace: confluent
+spec:
+  kafkaRest:
+    authentication:
+      type: bearer
+      bearer:
+        secretRef: rest-credential

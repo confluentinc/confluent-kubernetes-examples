@@ -1,0 +1,124 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: confluent
+spec:
+  dataVolumeCapacity: 10Gi
+  image:
+    application: confluentinc/cp-server:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
+  listeners:
+    controller:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+  replicas: 3
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
+  dataVolumeCapacity: 10Gi
+  listeners:
+    internal:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+  dependencies:
+    kRaftController:
+      controllerListener:
+        authentication:
+          type: plain
+          jaasConfig:
+            secretRef: credential
+      clusterRef:
+        name: kraftcontroller
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-control-center:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
+  dataVolumeCapacity: 10Gi
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: c3-kafka-client
+    connect:
+      - name: connect
+        url:  http://connect.confluent.svc.cluster.local:8083
+    schemaRegistry:
+      url: http://schemaregistry.confluent.svc.cluster.local:8081
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+  namespace: confluent
+spec:
+  replicas: 2
+  image:
+    application: confluentinc/cp-server-connect:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: connect-kafka-client
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-schema-registry:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: sr-kafka-client
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestProxy
+metadata:
+  name: kafkarestproxy
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-kafka-rest:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: krp-kafka-client
+    schemaRegistry:
+      url: http://schemaregistry.confluent.svc.cluster.local:8081

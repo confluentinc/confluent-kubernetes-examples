@@ -1,0 +1,86 @@
+---
+# rolebinding `testuser-rb` allows `c3` to see kafkaCluster
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: testuser-rb
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: c3
+  role: ClusterAdmin
+  ## if use other kafkaRestClass except for default, need to configure accordingly
+  #kafkaRestClassRef:
+  # name: default
+---
+# rolebinding `testuser-rb-sr` allows `c3` to see schemaregistry information
+# `schemaRegistryCllusterId` pattern: `id_<schemaregistry.name>_<namespace>`
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: testuser-rb-sr
+  namespace: confluent
+spec:
+  # The Schema Registry cluster is named `schemaregistry` and is deployed in the
+  # namespace `confluent`
+  # The Schema Registry cluster id naming pattern is: id_<sr-cluster-name>_<namespace>
+  clustersScopeByIds:
+    schemaRegistryClusterId: id_schemaregistry_confluent
+  principal:
+    name: c3
+    type: user
+  role: SystemAdmin
+---
+# rolebinding `testuser-rb-connect` allows `c3` to see connect cluster
+# `connectClusterId` pattern: `<namespace>.<connect.name>`
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: testuser-rb-connect
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: c3
+  clustersScopeByIds:
+    connectClusterId: confluent.connect
+  role: SystemAdmin
+---
+# rolebinding `ksqldb-0` gives user `ksql` the role
+# `ResourceOwner` for the cluster named `ksql-cluster`
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: testuser-ksqldb-0
+  namespace: confluent
+spec:
+  # Cluster id is <namespace>..<ksql_cluster_name>_
+  clustersScopeByIds:
+    ksqlClusterId: confluent.ksqldb_
+  principal:
+    name: c3
+    type: user
+  resourcePatterns:
+    - name: ksql-cluster
+      patternType: LITERAL
+      resourceType: KsqlCluster
+  role: ResourceOwner
+---
+# rolebinding `ksqldb-1` gives user `ksql` the role
+# `ResourceOwner` for all topics named with the prefix `app1_`
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: testuser-ksqldb-1
+  namespace: confluent
+spec:
+  principal:
+    name: c3
+    type: user
+  resourcePatterns:
+    # The topics prefix is: `app1_`
+    - name: app1_
+      patternType: PREFIXED
+      resourceType: Topic
+  role: ResourceOwner

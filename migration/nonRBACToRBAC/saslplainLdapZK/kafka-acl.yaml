@@ -1,0 +1,38 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
+  dataVolumeCapacity: 10Gi
+  tls:
+    secretRef: tls-group1
+  configOverrides:
+    server:
+      - authorizer.class.name=kafka.security.authorizer.AclAuthorizer
+      - allow.everyone.if.no.acl.found=true
+  authorization:
+    superUsers:
+      - User:kafka
+    type: simple
+  listeners:
+    internal:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+  dependencies:
+    zookeeper:
+      endpoint: zookeeper.confluent.svc.cluster.local:2182
+      authentication:
+        type: digest
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
