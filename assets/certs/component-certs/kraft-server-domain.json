@@ -1,14 +1,14 @@
 {
-  "CN": "kraft",
+  "CN": "kraftcontroller",
   "hosts": [
-    "kraft",
+    "kraftcontroller",
     "*.my.domain",
-    "kraft.confluent.svc.cluster.local",
-    "*.kraft.confluent.svc.cluster.local",
-    "kraft.source.svc.cluster.local",
-    "*.kraft.source.svc.cluster.local",
-    "kraft.destination.svc.cluster.local",
-    "*.kraft.destination.svc.cluster.local"
+    "kraftcontroller.confluent.svc.cluster.local",
+    "*.kraftcontroller.confluent.svc.cluster.local",
+    "kraftcontroller.source.svc.cluster.local",
+    "*.kraftcontroller.source.svc.cluster.local",
+    "kraftcontroller.destination.svc.cluster.local",
+    "*.kraftcontroller.destination.svc.cluster.local"
   ],
   "key": {
     "algo": "rsa",
