@@ -1,0 +1,9 @@
+{
+  "kafka_client": "kafka_client-secret",
+  "c3": "c3-secret",
+  "kafka": "kafka-secret",
+  "connect": "connect-secret",
+  "sr": "sr-secret",
+  "ksql": "ksql-secret",
+  "krp": "krp-secret"
+}

@@ -1,0 +1,87 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: confluent
+spec:
+  dataVolumeCapacity: 10Gi
+  image:
+    application: confluentinc/cp-server:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
+  listeners:
+    controller:
+      authentication:
+        type: mtls
+        principalMappingRules:
+          - RULE:.*CN=([a-zA-Z0-9.-]*).*$/$1/
+      tls:
+        enabled: true
+  configOverrides:
+    server:
+      - authorizer.class.name=org.apache.kafka.metadata.authorizer.StandardAuthorizer
+      - allow.everyone.if.no.acl.found=true
+      - listener.name.replication.ssl.key.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
+      - listener.name.replication.ssl.keystore.location=/mnt/sslcerts/keystore.p12
+      - listener.name.replication.ssl.keystore.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
+      - listener.name.replication.ssl.truststore.location=/mnt/sslcerts/truststore.p12
+      - listener.name.replication.ssl.truststore.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
+      - listener.security.protocol.map=CONTROLLER:SSL,REPLICATION:SSL
+  authorization:
+    superUsers:
+      - User:kafka
+    type: simple
+  tls:
+    secretRef: tls-kafka
+  replicas: 3
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
+  dataVolumeCapacity: 10Gi
+  tls:
+    secretRef: tls-kafka
+  configOverrides:
+    server:
+      - authorizer.class.name=org.apache.kafka.metadata.authorizer.StandardAuthorizer
+      - allow.everyone.if.no.acl.found=true
+  authorization:
+    superUsers:
+      - User:kafka
+    type: simple
+  listeners:
+    internal:
+      authentication:
+        type: mtls
+        principalMappingRules:
+          - RULE:.*CN[\\s]?=[\\s]?([a-zA-Z0-9.]*)?.*/$1/
+      tls:
+        enabled: true
+    external:
+      authentication:
+        type: mtls
+        principalMappingRules:
+          - RULE:.*CN[\\s]?=[\\s]?([a-zA-Z0-9.]*)?.*/$1/
+      tls:
+        enabled: true
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          domain: mydomain.example
+          brokerPrefix: b
+          bootstrapPrefix: kafka
+  dependencies:
+    kRaftController:
+      controllerListener:
+        tls:
+          enabled: true
+        authentication:
+          type: mtls
+      clusterRef:
+        name: kraftcontroller
