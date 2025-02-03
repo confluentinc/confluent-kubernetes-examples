@@ -124,7 +124,7 @@ helm repo update
 
 * Install Confluent For Kubernetes using Helm:
 ```
-helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes
+helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes -n confluent
 ```
 
 The `confluent-sa` Service Account will be associated with our deployment of Confluent Platform,
@@ -188,6 +188,12 @@ and set the appropriate SANs.
 ## Provide component TLS certificates
 
 ```
+kubectl create secret generic tls-kraft \
+  --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kraft-server.pem \
+  --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
+  --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kraft-server-key.pem \
+  --namespace confluent
+
 kubectl create secret generic tls-kafka \
   --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server.pem \
   --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \

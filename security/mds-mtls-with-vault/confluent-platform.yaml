@@ -30,7 +30,7 @@ spec:
       tls:
         enabled: true
   tls:
-    secretRef: tls-kafka
+    secretRef: tls-kraft
   replicas: 3
 ---
 apiVersion: platform.confluent.io/v1beta1

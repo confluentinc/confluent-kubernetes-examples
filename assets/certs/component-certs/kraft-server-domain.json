@@ -1,0 +1,24 @@
+{
+  "CN": "kraft",
+  "hosts": [
+    "kraft",
+    "*.my.domain",
+    "kraft.confluent.svc.cluster.local",
+    "*.kraft.confluent.svc.cluster.local",
+    "kraft.source.svc.cluster.local",
+    "*.kraft.source.svc.cluster.local",
+    "kraft.destination.svc.cluster.local",
+    "*.kraft.destination.svc.cluster.local"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "Universe",
+      "ST": "Pangea",
+      "L": "Earth"
+    }
+  ]
+}

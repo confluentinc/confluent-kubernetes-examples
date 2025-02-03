@@ -84,6 +84,14 @@ cfssl gencert -ca=$TUTORIAL_HOME/generated/cacerts.pem \
 -config=$TUTORIAL_HOME/ca-config.json \
 -profile=server $TUTORIAL_HOME/kafka-server-domain.json | cfssljson -bare $TUTORIAL_HOME/generated/kafka-server
 
+# Create Kraft server certificates
+# Use the SANs listed in kraft-server-domain.json
+
+cfssl gencert -ca=$TUTORIAL_HOME/generated/cacerts.pem \
+-ca-key=$TUTORIAL_HOME/generated/rootCAkey.pem \
+-config=$TUTORIAL_HOME/ca-config.json \
+-profile=server $TUTORIAL_HOME/kraft-server-domain.json | cfssljson -bare $TUTORIAL_HOME/generated/kraft-server
+
 # Create ControlCenter server certificates
 # Use the SANs listed in controlcenter-server-domain.json
 
