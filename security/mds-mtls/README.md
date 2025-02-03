@@ -3,6 +3,7 @@
 In this workflow scenario, you'll set up a Confluent Platform cluster with the following security:
 - Full TLS network encryption with user provided certificates
 - mTLS authentication on MDS Server for RBAC, along with mTLS on all cp components
+- [Note that ksqlDB does not support mTLS based authentication with MDS](https://docs.confluent.io/operator/current/co-authenticate-cp.html#co-authenticate-cp-mtls:~:text=Note%20that%20ksqlDB%20does%20not%20support%20mTLS%20based%20authentication%20with%20MDS.).
 - File Based User Store in MDS for Confluent Control Center user credentials
 
 ## Set the current tutorial directory
@@ -41,7 +42,7 @@ kubectl get pods -n confluent
 In this scenario, you'll configure authentication using the mTLS mechanism. With mTLS, Confluent components and clients use TLS certificates for authentication. The certificate has a CN that identifies the principal name.
 
 Each Confluent component service should have its own TLS certificate. In this scenario, you'll
-generate a server certificate for each Confluent component service. Follow [these instructions](../assets/certs/component-certs/README.md) to generate these certificates.
+generate a server certificate for each Confluent component service. Follow [these instructions](https://github.com/confluentinc/confluent-kubernetes-examples/blob/master/assets/certs/component-certs/README.md) to generate these certificates.
 
 ## Deploy configuration secrets
 
