@@ -12,7 +12,9 @@
     "zookeeper.source.svc.cluster.local",
     "*.zookeeper.source.svc.cluster.local",
     "zookeeper.destination.svc.cluster.local",
-    "*.zookeeper.destination.svc.cluster.local"
+    "*.zookeeper.destination.svc.cluster.local",
+    "kraftcontroller.confluent.svc.cluster.local",
+    "*.kraftcontroller.confluent.svc.cluster.local"
   ],
   "key": {
     "algo": "rsa",
