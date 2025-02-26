@@ -793,6 +793,7 @@ data:
           "implicitFlowEnabled": false,
           "directAccessGrantsEnabled": true,
           "serviceAccountsEnabled": false,
+          "authorizationServicesEnabled": true,
           "publicClient": false,
           "frontchannelLogout": true,
           "protocol": "openid-connect",
