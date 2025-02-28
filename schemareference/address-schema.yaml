@@ -1,0 +1,11 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Schema
+metadata:
+  name: address-value
+  namespace: confluent
+spec:
+  compatibilityLevel: FULL
+  name: address-subject
+  data:
+    configRef: address-schema-config
+    format: avro

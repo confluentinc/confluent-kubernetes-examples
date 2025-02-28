@@ -1,0 +1,18 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Schema
+metadata:
+  name: customer-value
+  namespace: confluent
+spec:
+  compatibilityLevel: FULL
+  mode: READWRITE
+  data:
+    configRef: customer-schema-config
+    format: avro
+  schemaReferences:
+    - format: avro
+      subject: address-subject
+      version: "latest"
+      name: address-value
+      avro:
+        avro: com.example.Address
