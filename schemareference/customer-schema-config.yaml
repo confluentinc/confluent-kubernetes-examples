@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: customer-schema-config
+  namespace: confluent
+data:
+  schema: |
+    {
+      "namespace": "com.example",
+      "type": "record",
+      "name": "Customer",
+      "fields": [
+        {"name": "firstName", "type": "string"},
+        {"name": "lastName", "type": "string"},
+        {"name": "address", "type": "com.example.Address"}
+      ]
+    }
