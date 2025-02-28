@@ -4,10 +4,9 @@ The schema cr is a declarative way to manage schemas. A schema CR represents the
 to manage the versions that belong to the subject. This includes creating and deleting of subjects and schema versions. The schema CR can only manage new subjects created by CFK and not any existing schemas. The state of the schema CR status represents that of the latest schema version for the subject.
 
 ## Prerequisite
-1. have a running Zookeeper, Kafka, SchemaRegistry setup
+1. have a running Zookeeper/Kraft, Kafka, SchemaRegistry setup
 
 ## Create Schema CR
-Below is only one example to integrate with Nignix Ingress Controller to access kafka.
 
 In this example, we will create 2 schemas: address-value and customer-value. customer-value will refer to the latest address-value using schema referencing
 
