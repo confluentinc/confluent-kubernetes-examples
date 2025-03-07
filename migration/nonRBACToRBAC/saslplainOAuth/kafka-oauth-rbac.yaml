@@ -1,0 +1,109 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: confluent
+spec:
+  dataVolumeCapacity: 10Gi
+  image:
+    application: confluentinc/cp-server:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
+  authorization:
+    superUsers:
+      - User:kafka
+      - User:ssologin
+    type: rbac
+  listeners:
+    controller:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+  dependencies:
+    mdsKafkaCluster:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9073
+      authentication:
+        type: oauth
+        jaasConfig:
+          secretRef: oauth-jass
+        oauthSettings:
+          tokenEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
+  replicas: 3
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
+  dataVolumeCapacity: 10Gi
+  authorization:
+    superUsers:
+      - User:kafka
+      - User:ssologin
+    type: rbac
+  services:
+    mds:
+      tokenKeyPair:
+        secretRef: mds-token
+      provider:
+        oauth:
+          configurations:
+            expectedIssuer: http://keycloak:8080/realms/sso_test
+            jwksEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/certs
+            subClaimName: client_id
+        sso:
+          enabled: true
+          clientCredentials:
+            secretRef: oauth-jass-oidc
+          configurations:
+            groupsClaimName: profile_groups
+            subClaimName: sub
+            issuer: http://keycloak:8080/realms/sso_test
+            jwksEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/certs
+            authorizeBaseEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/auth
+            tokenBaseEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
+            refreshToken: false
+  listeners:
+    internal:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+  dependencies:
+    kafkaRest:
+      authentication:
+        type: oauth
+        jaasConfig:
+          secretRef: oauth-jass
+        oauthSettings:
+          tokenEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
+          expectedIssuer: http://keycloak:8080/realms/sso_test
+          jwksEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/certs
+          subClaimName: client_id
+    kRaftController:
+      controllerListener:
+        authentication:
+          type: plain
+          jaasConfig:
+            secretRef: credential
+      clusterRef:
+        name: kraftcontroller
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: default
+  namespace: confluent
+spec:
+  kafkaRest:
+    authentication:
+      type: oauth
+      oauth:
+        secretRef: oauth-jass
+        configuration:
+          tokenEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token

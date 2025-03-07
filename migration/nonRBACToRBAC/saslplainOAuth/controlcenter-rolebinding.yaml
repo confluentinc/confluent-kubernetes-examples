@@ -1,0 +1,44 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: testuser-rb
+  namespace: confluent
+spec:
+  principal:
+    type: group
+    name: /g1
+  role: ClusterAdmin
+---
+# rolebinding `testuser-rb-sr` allows `c3` to see schemaregistry information
+# `schemaRegistryCllusterId` pattern: `id_<schemaregistry.name>_<namespace>`
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: testuser-rb-sr
+  namespace: confluent
+spec:
+  # The Schema Registry cluster is named `schemaregistry` and is deployed in the
+  # namespace `confluent`
+  # The Schema Registry cluster id naming pattern is: id_<sr-cluster-name>_<namespace>
+  clustersScopeByIds:
+    schemaRegistryClusterId: id_schemaregistry_confluent
+  principal:
+    name: /g1
+    type: group
+  role: SystemAdmin
+---
+# rolebinding `testuser-rb-connect` allows `c3` to see connect cluster
+# `connectClusterId` pattern: `<namespace>.<connect.name>`
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: testuser-rb-connect
+  namespace: confluent
+spec:
+  principal:
+    type: group
+    name: /g1
+  clustersScopeByIds:
+    connectClusterId: confluent.connect
+  role: SystemAdmin
