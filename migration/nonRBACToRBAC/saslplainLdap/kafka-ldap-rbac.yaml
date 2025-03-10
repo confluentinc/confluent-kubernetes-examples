@@ -17,8 +17,8 @@ spec:
       - listener.security.protocol.map=CONTROLLER:SASL_SSL,REPLICATION:SASL_SSL
   dataVolumeCapacity: 10Gi
   image:
-    application: confluentinc/cp-server:7.8.0
-    init: confluentinc/confluent-init-container:2.10.0
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
   authorization:
     superUsers:
       - User:kafka
@@ -52,8 +52,8 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-server:7.8.0
-    init: confluentinc/confluent-init-container:2.10.0
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
   dataVolumeCapacity: 10Gi
   tls:
     secretRef: tls-group1

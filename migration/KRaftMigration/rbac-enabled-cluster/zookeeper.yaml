@@ -7,8 +7,8 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-server:7.8.0
-    init: confluentinc/confluent-init-container:2.10.0
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
   dataVolumeCapacity: "10"
   logVolumeCapacity: "10"
   authentication:

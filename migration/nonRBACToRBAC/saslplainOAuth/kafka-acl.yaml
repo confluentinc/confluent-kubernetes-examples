@@ -10,8 +10,8 @@ spec:
       - allow.everyone.if.no.acl.found=true
   dataVolumeCapacity: 10Gi
   image:
-    application: confluentinc/cp-server:7.8.0
-    init: confluentinc/confluent-init-container:2.10.0
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
   authorization:
     superUsers:
       - User:kafka
@@ -32,8 +32,8 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-server:7.8.0
-    init: confluentinc/confluent-init-container:2.10.0
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
   dataVolumeCapacity: 10Gi
   configOverrides:
     server:
