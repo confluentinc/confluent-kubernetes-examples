@@ -72,33 +72,33 @@ and set the appropriate SANs.
 export TUTORIAL_HOME=<Tutorial directory>/mds-mtls
 
 kubectl create secret generic tls-kafka \
-  --from-file=fullchain.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/kafka-server.pem \
-  --from-file=cacerts.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/cacerts.pem \
+  --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server.pem \
+  --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
   --from-file=privkey.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/kafka-server-key.pem \
   --namespace confluent
 
 kubectl create secret generic tls-controlcenter \
-  --from-file=fullchain.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/controlcenter-server.pem \
-  --from-file=cacerts.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/cacerts.pem \
-  --from-file=privkey.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/controlcenter-server-key.pem \
+  --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/controlcenter-server.pem \
+  --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
+  --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/controlcenter-server-key.pem \
   --namespace confluent
 
 kubectl create secret generic tls-schemaregistry \
-  --from-file=fullchain.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/schemaregistry-server.pem \
-  --from-file=cacerts.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/cacerts.pem \
-  --from-file=privkey.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/schemaregistry-server-key.pem \
+  --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/schemaregistry-server.pem \
+  --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
+  --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/schemaregistry-server-key.pem \
   --namespace confluent
 
 kubectl create secret generic tls-connect \
-  --from-file=fullchain.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/connect-server.pem \
-  --from-file=cacerts.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/cacerts.pem \
-  --from-file=privkey.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/connect-server-key.pem \
+  --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/connect-server.pem \
+  --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
+  --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/connect-server-key.pem \
   --namespace confluent
   
 kubectl create secret generic tls-kafkarestproxy \
-  --from-file=fullchain.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/kafkarestproxy-server.pem \
-  --from-file=cacerts.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/cacerts.pem \
-  --from-file=privkey.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/kafkarestproxy-server-key.pem \
+  --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafkarestproxy-server.pem \
+  --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
+  --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafkarestproxy-server-key.pem \
   --namespace confluent
 
 ```
@@ -123,8 +123,8 @@ kubectl create secret generic file-secret \
 
 ```
 kubectl create secret generic mds-token \
---from-file=mdsPublicKey.pem=$TUTORIAL_HOME/../assets/certs/mds-publickey.txt \
---from-file=mdsTokenKeyPair.pem=$TUTORIAL_HOME/../assets/certs/mds-tokenkeypair.txt \
+--from-file=mdsPublicKey.pem=$TUTORIAL_HOME/../../assets/certs/mds-publickey.txt \
+--from-file=mdsTokenKeyPair.pem=$TUTORIAL_HOME/../../assets/certs/mds-tokenkeypair.txt \
 -n confluent
 ```
 
@@ -202,13 +202,13 @@ openssl x509 -in $TUTORIAL_HOME/../assets/certs/generated/ca.pem -text -noout
 ```
 * Create server certificates with the appropriate SANs (SANs listed in server-domain.json)
 ```
-cfssl gencert -ca=$TUTORIAL_HOME/../assets/certs/generated/ca.pem \
--ca-key=$TUTORIAL_HOME/../assets/certs/generated/ca-key.pem \
--config=$TUTORIAL_HOME/../assets/certs/ca-config.json \
--profile=server $TUTORIAL_HOME/../assets/certs/server-domain.json | cfssljson -bare $TUTORIAL_HOME/../assets/certs/generated/server
+cfssl gencert -ca=$TUTORIAL_HOME/../../assets/certs/generated/ca.pem \
+-ca-key=$TUTORIAL_HOME/../../assets/certs/generated/ca-key.pem \
+-config=$TUTORIAL_HOME/../../assets/certs/ca-config.json \
+-profile=server $TUTORIAL_HOME/../../assets/certs/server-domain.json | cfssljson -bare $TUTORIAL_HOME/../assets/certs/generated/server
 ``` 
 
 * Validate server certificate and SANs
 ```
-openssl x509 -in $TUTORIAL_HOME/../assets/certs/generated/server.pem -text -noout
+openssl x509 -in $TUTORIAL_HOME/../../assets/certs/generated/server.pem -text -noout
 ```
