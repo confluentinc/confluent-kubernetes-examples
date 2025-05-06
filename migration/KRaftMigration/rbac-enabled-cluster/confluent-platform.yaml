@@ -7,8 +7,8 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-server:7.8.0
-    init: confluentinc/confluent-init-container:2.10.0
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
   dataVolumeCapacity: 10Gi
   tls:
     secretRef: tls-group1
@@ -93,11 +93,24 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-server:7.8.0
-    init: confluentinc/confluent-init-container:2.10.0
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
   tls:
     secretRef: tls-group1
   dataVolumeCapacity: 10G
+  authorization:
+    superUsers:
+      - User:kafka
+    type: rbac
+  dependencies:
+    mdsKafkaCluster:
+      authentication:
+        jaasConfig:
+          secretRef: credential
+        type: plain
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      tls:
+        enabled: true
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: KafkaRestClass
