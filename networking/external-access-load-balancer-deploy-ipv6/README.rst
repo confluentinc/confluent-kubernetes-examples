@@ -5,17 +5,14 @@ In this scenario workflow, you'll set up Confluent Platform component clusters
 with the Kubernetes LoadBalancer service type to enable external clients to
 access Confluent Platform, including Kafka and other components, using IPv6 addressing.
 
-Before continuing with the scenario, ensure that you have set up the
-`prerequisites </README.md#prerequisites>`_.
+Before continuing with the scenario, ensure that you have set up the prerequisites.
 
 Prerequisites
 ------------
 
 1. An AWS EKS cluster with IPv6 enabled
 2. AWS Load Balancer Controller installed in your cluster
-3. External DNS configured for IPv6 records
-4. Proper IAM roles and policies for AWS Load Balancer Controller
-5. VPC with IPv6 CIDR block configured
+3. Proper IAM roles and policies for AWS Load Balancer Controller
 
 To complete this tutorial, you'll follow these steps:
 
@@ -54,7 +51,7 @@ Set up an IPv6-enabled Kubernetes cluster for this tutorial.
 
      export DOMAIN=<Your Kubernetes cluster domain name>
 
-#. Create a namespace for the test client to deploy the producer application: 
+#. Create a namespace for deploying confluent platform:
 
    ::
    
@@ -327,4 +324,4 @@ Shut down Confluent Platform and the data:
   
 ::
 
-  kubectl delete namespace myclient
+  kubectl delete namespace confluent
