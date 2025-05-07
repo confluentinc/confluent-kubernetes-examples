@@ -1,0 +1,54 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraft
+  namespace: confluent
+spec:
+  dataVolumeCapacity: 10G
+  replicas: 3
+  image:
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
+  listeners:
+    controller:
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          bootstrapPrefix: kraft-confluent-ipv6
+          brokerPrefix: kraft-confluent-ipv6
+          domain: soak.cpdev.cloud
+          annotations:
+            external-dns.alpha.kubernetes.io/ttl: "5"
+            service.beta.kubernetes.io/aws-load-balancer-type: "external"
+            service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+            service.beta.kubernetes.io/aws-load-balancer-ip-address-type: "ipv4"
+            service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
+  dataVolumeCapacity: 10Gi
+  metricReporter:
+    enabled: true
+  listeners:
+    external:
+      externalAccess:
+        loadBalancer:
+          bootstrapPrefix: kafka-confluent-ipv6
+          brokerPrefix: kafka-confluent-ipv6
+          domain: soak.cpdev.cloud
+          annotations:
+            external-dns.alpha.kubernetes.io/ttl: "5"
+            service.beta.kubernetes.io/aws-load-balancer-type: "external"
+            service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+            service.beta.kubernetes.io/aws-load-balancer-ip-address-type: "dualstack"
+            service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+        type: loadBalancer
