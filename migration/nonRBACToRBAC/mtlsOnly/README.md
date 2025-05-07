@@ -34,11 +34,10 @@ kubectl get pods -n confluent
 In this scenario, you'll configure authentication using the mTLS mechanism. With mTLS, Confluent components and clients use TLS certificates for authentication. The certificate has a CN that identifies the principal name.
 
 Each Confluent component service should have its own TLS certificate. In this scenario, you'll
-generate a server certificate for each Confluent component service. Follow [these instructions](../assets/certs/component-certs/README.md) to generate these certificates.
+generate a server certificate for each Confluent component service. Follow [these instructions](../../../assets/certs/component-certs/README.md) to generate these certificates.
 
 
 ## Deploy configuration secrets
-
 You'll use Kubernetes secrets to provide credential configurations.
 
 With Kubernetes secrets, credential management (defining, configuring, updating)
