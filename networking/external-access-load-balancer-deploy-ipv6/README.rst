@@ -192,7 +192,7 @@ The Kafka section of the file is set as follow for load balancer access:
             annotations:
               service.beta.kubernetes.io/aws-load-balancer-type: "external"
               service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
-              service.beta.kubernetes.io/aws-load-balancer-ip-address-type: "ipv4"
+              service.beta.kubernetes.io/aws-load-balancer-ip-address-type: "dualstack"
               service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
 
 Component section of the file is set as follows for load balancer access:
@@ -207,7 +207,7 @@ Component section of the file is set as follows for load balancer access:
         annotations:
           service.beta.kubernetes.io/aws-load-balancer-type: "external"
           service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
-          service.beta.kubernetes.io/aws-load-balancer-ip-address-type: "ipv4"
+          service.beta.kubernetes.io/aws-load-balancer-ip-address-type: "dualstack"
           service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
           
 * [1]  Set this to the value of ``$DOMAIN``, Your Kubernetes cluster domain. You need to provide this value for this tutorial.
