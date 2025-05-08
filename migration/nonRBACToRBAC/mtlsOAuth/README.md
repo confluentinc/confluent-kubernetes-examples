@@ -320,21 +320,21 @@ brew install cfssl
 ```
 * Create Certificate Authority
 ```
-mkdir $TUTORIAL_HOME/../../assets/certs/generated && cfssl gencert -initca $TUTORIAL_HOME/../../assets/certs/ca-csr.json | cfssljson -bare $TUTORIAL_HOME/../../assets/certs/generated/ca -
+mkdir $TUTORIAL_HOME/../../../assets/certs/generated && cfssl gencert -initca $TUTORIAL_HOME/../../../assets/certs/ca-csr.json | cfssljson -bare $TUTORIAL_HOME/../../../assets/certs/generated/ca -
 ```
 * Validate Certificate Authority
 ```
-openssl x509 -in $TUTORIAL_HOME/../../assets/certs/generated/ca.pem -text -noout
+openssl x509 -in $TUTORIAL_HOME/../../../assets/certs/generated/ca.pem -text -noout
 ```
 * Create server certificates with the appropriate SANs (SANs listed in server-domain.json)
 ```
-cfssl gencert -ca=$TUTORIAL_HOME/../../assets/certs/generated/ca.pem \
--ca-key=$TUTORIAL_HOME/../../assets/certs/generated/ca-key.pem \
--config=$TUTORIAL_HOME/../../assets/certs/ca-config.json \
--profile=server $TUTORIAL_HOME/../../assets/certs/server-domain.json | cfssljson -bare $TUTORIAL_HOME/../../assets/certs/generated/server
+cfssl gencert -ca=$TUTORIAL_HOME/../../../assets/certs/generated/ca.pem \
+-ca-key=$TUTORIAL_HOME/../../../assets/certs/generated/ca-key.pem \
+-config=$TUTORIAL_HOME/../../../assets/certs/ca-config.json \
+-profile=server $TUTORIAL_HOME/../../../assets/certs/server-domain.json | cfssljson -bare $TUTORIAL_HOME/../../../assets/certs/generated/server
 ``` 
 
 * Validate server certificate and SANs
 ```
-openssl x509 -in $TUTORIAL_HOME/../../assets/certs/generated/server.pem -text -noout
+openssl x509 -in $TUTORIAL_HOME/../../../assets/certs/generated/server.pem -text -noout
 ```
