@@ -224,5 +224,5 @@ cfssl gencert -ca=$TUTORIAL_HOME/../../assets/certs/generated/ca.pem \
 
 * Validate server certificate and SANs
 ```
-openssl x509 -in $TUTORIAL_HOME/../assets/certs/generated/server.pem -text -noout
+openssl x509 -in $TUTORIAL_HOME/../../assets/certs/generated/server.pem -text -noout
 ```

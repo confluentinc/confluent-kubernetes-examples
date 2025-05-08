@@ -312,7 +312,7 @@ mkdir $TUTORIAL_HOME/../../../assets/certs/generated && cfssl gencert -initca $T
 ```
 * Validate Certificate Authority
 ```
-openssl x509 -in $TUTORIAL_HOME/../../assets/certs/generated/ca.pem -text -noout
+openssl x509 -in $TUTORIAL_HOME/../../../assets/certs/generated/ca.pem -text -noout
 ```
 * Create server certificates with the appropriate SANs (SANs listed in server-domain.json)
 ```
