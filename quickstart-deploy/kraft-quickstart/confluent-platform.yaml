@@ -6,9 +6,12 @@ metadata:
 spec:
   dataVolumeCapacity: 10G
   image:
-    application: docker.io/confluentinc/cp-server:7.9.0
-    init: confluentinc/confluent-init-container:2.11.0
+    application: docker.io/confluentinc/cp-server:7.9.1
+    init: confluentinc/confluent-init-container:2.11.1
   replicas: 3
+  dependencies:
+    metricsClient:
+      url: http://controlcenter-next-gen.confluent.svc.cluster.local:9090
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
@@ -18,13 +21,15 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-server:7.9.0
-    init: confluentinc/confluent-init-container:2.11.0
+    application: confluentinc/cp-server:7.9.1
+    init: confluentinc/confluent-init-container:2.11.1
   dataVolumeCapacity: 100Gi
   dependencies:
     kRaftController:
       clusterRef:
         name: kraftcontroller
+    metricsClient:
+      url: http://controlcenter-next-gen.confluent.svc.cluster.local:9090
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: Connect
@@ -34,8 +39,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-server-connect:7.9.0
-    init: confluentinc/confluent-init-container:2.11.0
+    application: confluentinc/cp-server-connect:7.9.1
+    init: confluentinc/confluent-init-container:2.11.1
   dependencies:
     kafka:
       bootstrapEndpoint: kafka:9071
@@ -48,20 +53,20 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-ksqldb-server:7.9.0
-    init: confluentinc/confluent-init-container:2.11.0
+    application: confluentinc/cp-ksqldb-server:7.9.1
+    init: confluentinc/confluent-init-container:2.11.1
   dataVolumeCapacity: 10Gi
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: ControlCenter
 metadata:
-  name: controlcenter
+  name: controlcenter-legacy
   namespace: confluent
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-enterprise-control-center:7.9.0
-    init: confluentinc/confluent-init-container:2.11.0
+    application: confluentinc/cp-enterprise-control-center:7.9.1
+    init: confluentinc/confluent-init-container:2.11.1
   dataVolumeCapacity: 10Gi
   dependencies:
     schemaRegistry:
@@ -74,6 +79,40 @@ spec:
       url: http://connect.confluent.svc.cluster.local:8083
 ---
 apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-control-center-next-gen:2.0.0
+    init: confluentinc/confluent-init-container:2.11.1
+  dataVolumeCapacity: 10Gi
+  dependencies:
+    schemaRegistry:
+      url: http://schemaregistry.confluent.svc.cluster.local:8081
+    ksqldb:
+    - name: ksqldb
+      url: http://ksqldb.confluent.svc.cluster.local:8088
+    connect:
+    - name: connect
+      url: http://connect.confluent.svc.cluster.local:8083
+    kafka:
+      bootstrapEndpoint: http://kafka.confluent.svc.cluster.local:9071
+    prometheusClient:
+      url: http://controlcenter-next-gen.confluent.svc.cluster.local:9090
+    alertManagerClient:
+      url: http://controlcenter-next-gen.confluent.svc.cluster.local:9093
+  services:
+    prometheus:
+      image: confluentinc/cp-enterprise-prometheus:2.0.0
+      pvc:
+        dataVolumeCapacity: 10Gi
+    alertmanager:
+      image: confluentinc/cp-enterprise-alertmanager:2.0.0
+---
+apiVersion: platform.confluent.io/v1beta1
 kind: SchemaRegistry
 metadata:
   name: schemaregistry
@@ -81,8 +120,8 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-schema-registry:7.9.0
-    init: confluentinc/confluent-init-container:2.11.0
+    application: confluentinc/cp-schema-registry:7.9.1
+    init: confluentinc/confluent-init-container:2.11.1
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: KafkaRestProxy
@@ -92,8 +131,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-kafka-rest:7.9.0
-    init: confluentinc/confluent-init-container:2.11.0
+    application: confluentinc/cp-kafka-rest:7.9.1
+    init: confluentinc/confluent-init-container:2.11.1
   dependencies:
     schemaRegistry:
       url: http://schemaregistry.confluent.svc.cluster.local:8081
