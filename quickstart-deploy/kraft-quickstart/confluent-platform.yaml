@@ -81,7 +81,7 @@ spec:
 apiVersion: platform.confluent.io/v1beta1
 kind: ControlCenter
 metadata:
-  name: controlcenter
+  name: controlcenter-next-gen
   namespace: confluent
 spec:
   replicas: 1
