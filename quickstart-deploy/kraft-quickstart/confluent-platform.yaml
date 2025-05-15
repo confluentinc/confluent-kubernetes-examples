@@ -11,7 +11,7 @@ spec:
   replicas: 3
   dependencies:
     metricsClient:
-      url: http://controlcenter-next-gen.confluent.svc.cluster.local:9090
+      url: http://controlcenter.confluent.svc.cluster.local:9090
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
@@ -29,7 +29,7 @@ spec:
       clusterRef:
         name: kraftcontroller
     metricsClient:
-      url: http://controlcenter-next-gen.confluent.svc.cluster.local:9090
+      url: http://controlcenter.confluent.svc.cluster.local:9090
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: Connect
@@ -81,7 +81,7 @@ spec:
 apiVersion: platform.confluent.io/v1beta1
 kind: ControlCenter
 metadata:
-  name: controlcenter-next-gen
+  name: controlcenter
   namespace: confluent
 spec:
   replicas: 1
@@ -101,9 +101,9 @@ spec:
     kafka:
       bootstrapEndpoint: http://kafka.confluent.svc.cluster.local:9071
     prometheusClient:
-      url: http://controlcenter-next-gen.confluent.svc.cluster.local:9090
+      url: http://controlcenter.confluent.svc.cluster.local:9090
     alertManagerClient:
-      url: http://controlcenter-next-gen.confluent.svc.cluster.local:9093
+      url: http://controlcenter.confluent.svc.cluster.local:9093
   services:
     prometheus:
       image: confluentinc/cp-enterprise-prometheus:2.0.0
