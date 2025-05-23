@@ -1,0 +1,81 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: operator
+spec:
+  dataVolumeCapacity: 10G
+  image:
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.11.1
+  replicas: 3
+  dependencies:
+    metricsClient:
+      url: http://controlcenter-next-gen.operator.svc.cluster.local:9090
+      authentication:
+        type: basic
+        basic:
+          secretRef: prometheus-client-creds
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: operator
+spec:
+  dependencies:
+    kRaftController:
+      clusterRef:
+        name: kraftcontroller
+    metricsClient:
+      url: http://controlcenter-next-gen.operator.svc.cluster.local:9090
+      authentication:
+        type: basic
+        basic:
+          secretRef: prometheus-client-creds
+  dataVolumeCapacity: 10G
+  image:
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.11.1
+  replicas: 3
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter-next-gen
+  namespace: operator
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-control-center-next-gen:2.0.0
+    init: confluentinc/confluent-init-container:v2.11.1
+  dataVolumeCapacity: 10Gi
+  dependencies:
+    prometheusClient:
+      url: http://controlcenter-next-gen.operator.svc.cluster.local:9090
+      authentication:
+        type: basic
+        basic:
+          secretRef: prometheus-client-creds
+    alertManagerClient:
+      url: http://controlcenter-next-gen.operator.svc.cluster.local:9093
+      authentication:
+        type: basic
+        basic:
+          secretRef: alertmanager-client-creds
+  services:
+    prometheus:
+      image: confluentinc/cp-enterprise-prometheus:2.0.0
+      pvc:
+        dataVolumeCapacity: 10Gi
+      authentication:
+        type: basic
+        basic:
+          secretRef: prometheus-credentials
+    alertmanager:
+      image: confluentinc/cp-enterprise-alertmanager:2.0.0
+      authentication:
+        type: basic
+        basic:
+          secretRef: alertmanager-credentials
+---

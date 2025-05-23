@@ -1,0 +1,83 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: operator
+spec:
+  dataVolumeCapacity: 10G
+  image:
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.11.1
+  replicas: 3
+  dependencies:
+    metricsClient:
+      url: http://controlcenter-next-gen.operator.svc.cluster.local:9090
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: operator
+spec:
+  dependencies:
+    kRaftController:
+      clusterRef:
+        name: kraftcontroller
+    metricsClient:
+      url: http://controlcenter-next-gen.operator.svc.cluster.local:9090
+  dataVolumeCapacity: 10G
+  image:
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.11.1
+  replicas: 3
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter-next-gen
+  namespace: operator
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-control-center-next-gen:2.0.0
+    init: confluentinc/confluent-init-container:2.11.1
+  dataVolumeCapacity: 10Gi
+  dependencies:
+    prometheusClient:
+      url: http://controlcenter-next-gen.operator.svc.cluster.local:9090
+    alertManagerClient:
+      url: http://controlcenter-next-gen.operator.svc.cluster.local:9093
+  services:
+    prometheus:
+      image: confluentinc/cp-enterprise-prometheus:2.0.0
+      pvc:
+        dataVolumeCapacity: 10Gi
+      containerTemplate:
+        envVars:
+          - name: PROMETHEUS_CONFIG
+            value: /etc/prometheus/prometheus.yml
+          - name: PROMETHEUS_RULES
+            value: /etc/prometheus/rules.yml
+        resources:
+          limits:
+            cpu: 10m
+            memory: 30Mi
+          requests:
+            cpu: 7m
+            memory: 18Mi
+    alertmanager:
+      image: confluentinc/cp-enterprise-alertmanager:2.0.0
+      containerTemplate:
+        envVars:
+          - name: ALERTMANAGER_CONFIG
+            value: /etc/alertmanager/prometheus.yml
+          - name: ALERTMANAGER_RULES
+            value: /etc/alertmanager/rules.yml
+        resources:
+          limits:
+            cpu: 10m
+            memory: 30Mi
+          requests:
+            cpu: 7m
+            memory: 18Mi
+---

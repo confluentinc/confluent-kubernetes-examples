@@ -1,0 +1,73 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: operator
+spec:
+  dataVolumeCapacity: 10G
+  image:
+    application: confluentinc/cp-server:7.9.1
+    init: confluentinc/confluent-init-container:2.11.1
+  replicas: 3
+  dependencies:
+    metricsClient:
+      url: https://controlcenter-next-gen.operator.svc.cluster.local:9090
+      tls:
+        enabled: true
+        secretRef: prometheus-client-tls
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: operator
+spec:
+  dependencies:
+    kRaftController:
+      clusterRef:
+        name: kraftcontroller
+    metricsClient:
+      url: https://controlcenter-next-gen.operator.svc.cluster.local:9090
+      tls:
+        enabled: true
+        secretRef: prometheus-client-tls
+  dataVolumeCapacity: 10G
+  image:
+    application: confluentinc/cp-server:7.9.1
+    init: confluentinc/confluent-init-container:2.11.1
+  replicas: 3
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter-next-gen
+  namespace: operator
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-control-center-next-gen:2.0.0
+    init: confluentinc/confluent-init-container:2.11.1
+  dataVolumeCapacity: 10Gi
+  dependencies:
+    prometheusClient:
+      url: https://controlcenter-next-gen.operator.svc.cluster.local:9090
+      tls:
+        enabled: true
+        secretRef: prometheus-client-tls
+    alertManagerClient:
+      url: https://controlcenter-next-gen.operator.svc.cluster.local:9093
+      tls:
+        enabled: true
+        secretRef: alertmanager-client-tls
+  services:
+    prometheus:
+       image: confluentinc/cp-enterprise-prometheus:2.0.0
+       tls:
+         secretRef: prometheus-tls
+       pvc:
+         dataVolumeCapacity: 10Gi
+    alertmanager:
+       image: confluentinc/cp-enterprise-alertmanager:2.0.0
+       tls:
+         secretRef: alertmanager-tls
+---
