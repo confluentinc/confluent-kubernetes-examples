@@ -1,0 +1,32 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: kraft-west
+  annotations:
+    platform.confluent.io/broker-id-offset: "20"
+spec:
+  listeners:
+    external:
+      externalAccess:
+        loadBalancer:
+          bootstrapPrefix: kraft-kafka-vpv-west-ext
+          brokerPrefix: kraft-kafka-vpv-west-ext
+          domain: platformops.dev.gcp.devel.cpdev.cloud
+        type: loadBalancer
+    replication:
+      externalAccess:
+        loadBalancer:
+          bootstrapPrefix: kraft-kafka-vpv-west-rep
+          brokerPrefix: kraft-kafka-vpv-west-rep
+          domain: platformops.dev.gcp.devel.cpdev.cloud
+        type: loadBalancer
+  dependencies:
+    kRaftController:
+      clusterRef:
+        name: kraftcontroller-west
+  image:
+    application: confluentinc/cp-server:7.6.0
+    init: confluentinc/confluent-init-container:2.7.0
+  replicas: 2
+  dataVolumeCapacity: 10Gi
