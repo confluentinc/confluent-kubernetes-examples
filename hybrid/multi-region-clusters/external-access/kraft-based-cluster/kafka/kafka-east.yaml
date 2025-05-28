@@ -10,15 +10,15 @@ spec:
     external:
       externalAccess:
         loadBalancer:
-          bootstrapPrefix: kraft-kafka-vpv-east-ext
-          brokerPrefix: kraft-kafka-vpv-east-ext
+          bootstrapPrefix: kraft-kafka-mrc-east-ext
+          brokerPrefix: kraft-kafka-mrc-east-ext
           domain: platformops.dev.gcp.devel.cpdev.cloud
         type: loadBalancer
     replication:
       externalAccess:
         loadBalancer:
-          bootstrapPrefix: kraft-kafka-vpv-east-rep
-          brokerPrefix: kraft-kafka-vpv-east-rep
+          bootstrapPrefix: kraft-kafka-mrc-east-rep
+          brokerPrefix: kraft-kafka-mrc-east-rep
           domain: platformops.dev.gcp.devel.cpdev.cloud
         type: loadBalancer
   dependencies:
