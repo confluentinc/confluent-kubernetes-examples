@@ -1,7 +1,7 @@
 # Create namespace
-kubectl create ns central --context mrc-central
-kubectl create ns east --context mrc-east
-kubectl create ns west --context mrc-west
+kubectl create ns kraft-central --context mrc-central
+kubectl create ns kraft-east --context mrc-east
+kubectl create ns kraft-west --context mrc-west
 
 # Install Confluent For Kubernetes
 
@@ -51,16 +51,16 @@ kubectl apply -f kraft/kraft-west.yaml --kube-context mrc-west
 ## Install Kafka brokers controllers
 
 ```bash
-kubectl apply -f kraft/kraft-central.yaml --kube-context mrc-central
-kubectl apply -f kraft/kraft-east.yaml --kube-context mrc-east
-kubectl apply -f kraft/kraft-west.yaml --kube-context mrc-west
+kubectl apply -f kafka/kafka-central.yaml --kube-context mrc-central
+kubectl apply -f kafka/kafka-east.yaml --kube-context mrc-east
+kubectl apply -f kafka/kafka-west.yaml --kube-context mrc-west
 ```
 
 
 ## Create topic in central cluster
 Here we create a topic with replication factor 3.
 ```bash
-kubectl apply -f kraft/topic.yaml --kube-context mrc-central
+kubectl apply -f topic_central.yaml --kube-context mrc-central
 ```
 
 ### produce to the topic
