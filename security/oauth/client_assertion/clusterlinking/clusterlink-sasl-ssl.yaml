@@ -1,0 +1,31 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: ClusterLink
+metadata:
+  name: clusterlinkus-demo
+  namespace: destination
+spec:
+  destinationKafkaCluster:
+    kafkaRestClassRef:
+      name: destination-kafka-rest
+      namespace: destination
+  sourceKafkaCluster:
+    clusterID: "NzM3ZDI4ZDUtYjllOS00MA"
+    bootstrapEndpoint: kafka.source.svc.cluster.local:9071
+    authentication:
+      type: oauth
+      oauthSettings:
+        groupsClaimName: groups
+        jwksEndpointUri: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/certs
+        tokenEndpointUri: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
+        expectedIssuer: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test
+        clientAssertion:
+          clientId: private-key-client
+          localClientAssertion:
+            issuer: private-key-client
+            subject: private-key-client
+            audience: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
+            privateKeyFile:
+              secretRef: private-key
+            includeJtiClaim: true
+  mirrorTopics:
+    - name: demo-test
