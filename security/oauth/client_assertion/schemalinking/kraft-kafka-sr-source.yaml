@@ -7,7 +7,7 @@ spec:
   dataVolumeCapacity: 10G
   image:
     application: confluentinc/cp-server:8.0.0
-    init: confluentinc/confluent-init-container:2.10.1
+    init: confluentinc/confluent-init-container:3.0.0
     pullSecretRef:
       - confluent-registry
   listeners:
@@ -31,7 +31,7 @@ spec:
   dataVolumeCapacity: 10G
   image:
     application: confluentinc/cp-server:8.0.0
-    init: confluentinc/confluent-init-container:2.10.1
+    init: confluentinc/confluent-init-container:3.0.0
     pullSecretRef:
       - confluent-registry
   tls:
@@ -97,7 +97,7 @@ spec:
   replicas: 2
   image:
     application: confluentinc/cp-schema-registry:8.0.0
-    init: confluentinc/confluent-init-container:2.10.1
+    init: confluentinc/confluent-init-container:3.0.0
     pullSecretRef:
       - confluent-registry
   tls:

@@ -7,7 +7,7 @@ spec:
   dataVolumeCapacity: 10G
   image:
     application: confluentinc/cp-server:8.0.0
-    init: confluentinc/confluent-init-container:2.10.1
+    init: confluentinc/confluent-init-container:3.0.0
     pullSecretRef:
       - confluent-registry
   listeners:
@@ -31,7 +31,7 @@ spec:
   dataVolumeCapacity: 10G
   image:
     application: confluentinc/cp-server:8.0.0
-    init: docker.io/confluentinc/confluent-init-container:2.10.1
+    init: confluentinc/confluent-init-container:3.0.0
     pullSecretRef:
       - confluent-registry
   tls:
@@ -43,15 +43,15 @@ spec:
         type: oauth
         oauthSettings:
           groupsClaimName: groups
-          jwksEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/certs
-          tokenEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
-          expectedIssuer: http://keycloak:8080/realms/sso_test
+          jwksEndpointUri: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/certs
+          tokenEndpointUri: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
+          expectedIssuer: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test
           clientAssertion:
             clientId: private-key-client
             localClientAssertion:
               issuer: private-key-client
               subject: private-key-client
-              audience: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
+              audience: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
               privateKeyFile:
                 secretRef: private-key
               includeJtiClaim: true
@@ -62,15 +62,15 @@ spec:
         type: oauth
         oauthSettings:
           groupsClaimName: groups
-          jwksEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/certs
-          tokenEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
-          expectedIssuer: http://keycloak:8080/realms/sso_test
+          jwksEndpointUri: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/certs
+          tokenEndpointUri: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
+          expectedIssuer: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test
           clientAssertion:
             clientId: private-key-client
             localClientAssertion:
               issuer: private-key-client
               subject: private-key-client
-              audience: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
+              audience: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
               privateKeyFile:
                 secretRef: private-key
               includeJtiClaim: true
@@ -105,15 +105,15 @@ spec:
       type: oauth
       oauth:
         configuration:
-          jwksEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/certs
-          tokenEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
-          expectedIssuer: http://keycloak:8080/realms/sso_test
+          jwksEndpointUri: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/certs
+          tokenEndpointUri: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
+          expectedIssuer: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test
           clientAssertion:
             clientId: private-key-client
             localClientAssertion:
               issuer: private-key-client
               subject: private-key-client
-              audience: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
+              audience: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
               privateKeyFile:
                 secretRef: private-key-encrypted-v2
                 encryptedPrivateKey: true
@@ -128,7 +128,7 @@ spec:
   replicas: 1
   image:
     application: confluentinc/cp-schema-registry:8.0.0
-    init: confluentinc/confluent-init-container:2.10.1
+    init: confluentinc/confluent-init-container:3.0.0
     pullSecretRef:
       - confluent-registry
   tls:
@@ -138,15 +138,15 @@ spec:
     oauth:
       configuration:
         groupsClaimName: groups
-        expectedIssuer: http://keycloak:8080/realms/sso_test
-        jwksEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/certs
-        tokenEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
+        expectedIssuer: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test
+        jwksEndpointUri: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/certs
+        tokenEndpointUri: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
         clientAssertion:
           clientId: private-key-client
           localClientAssertion:
             issuer: private-key-client
             subject: private-key-client
-            audience: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
+            audience: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
             privateKeyFile:
               secretRef: private-key
             includeJtiClaim: true
@@ -156,13 +156,13 @@ spec:
       authentication:
         type: oauth
         oauthSettings:
-          tokenEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
+          tokenEndpointUri: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
           clientAssertion:
             clientId: private-key-client
             localClientAssertion:
               issuer: private-key-client
               subject: private-key-client
-              audience: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
+              audience: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
               privateKeyFile:
                 secretRef: private-key
               includeJtiClaim: true

@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-KEYCLOAK_NS="operator-test"
+KEYCLOAK_NS="operator"
 KEYCLOAK_DEPLOY_FILE="keycloak_deploy.yaml"
 REALM_TEMPLATE_FILE="realm_template.json"
 REALM_FINAL_FILE="realm.json"
