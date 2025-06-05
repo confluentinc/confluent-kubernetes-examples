@@ -28,7 +28,7 @@ spec:
               subject: private-key-client
               audience: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
               privateKeyFile:
-                secretRef: keycloak.operator.svc.cluster.local-private-key
+                secretRef: private-key
               includeJtiClaim: true
   authorization:
     type: rbac
@@ -53,7 +53,7 @@ spec:
               subject: private-key-client
               audience: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
               privateKeyFile:
-                secretRef: keycloak.operator.svc.cluster.local-private-key
+                secretRef: private-key
               includeJtiClaim: true
       tls:
         enabled: true
@@ -132,7 +132,7 @@ spec:
                 subject: private-key-client
                 audience: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
                 privateKeyFile:
-                  secretRef: keycloak.operator.svc.cluster.local-private-key
+                  secretRef: private-key
                 includeJtiClaim: true
       clusterRef:
         name: kraftcontroller
@@ -151,7 +151,7 @@ spec:
               subject: private-key-client
               audience: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
               privateKeyFile:
-                secretRef: keycloak.operator.svc.cluster.local-private-key
+                secretRef: private-key
               includeJtiClaim: true
 ---
 apiVersion: platform.confluent.io/v1beta1
@@ -194,7 +194,7 @@ spec:
                 subject: private-key-client
                 audience: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
                 privateKeyFile:
-                  secretRef: keycloak.operator.svc.cluster.local-private-key
+                  secretRef: private-key
                 includeJtiClaim: true
       tls:
         enabled: true
@@ -221,5 +221,5 @@ spec:
               subject: private-key-client
               audience: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
               privateKeyFile:
-                secretRef: keycloak.operator.svc.cluster.local-private-key
+                secretRef: private-key
               includeJtiClaim: true
