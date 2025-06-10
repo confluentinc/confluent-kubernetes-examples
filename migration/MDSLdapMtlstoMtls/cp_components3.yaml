@@ -1,0 +1,313 @@
+## Both mtls and OAuth on MDS, update kafka and mds clients to mtls
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: confluent
+spec:
+  configOverrides:
+    server:
+      - listener.name.replication.plain.sasl.jaas.config=io.confluent.kafka.server.plugins.auth.FileBasedLoginModule required username="${file:/mnt/secrets/kraftcontroller-controller-listener-apikeys/plain.txt:username}" password="${file:/mnt/secrets/kraftcontroller-controller-listener-apikeys/plain.txt:password}" config_path="/mnt/secrets/kraftcontroller-controller-listener-apikeys/apikeys.json" refresh_ms="3000";
+      - listener.name.replication.sasl.enabled.mechanisms=PLAIN
+      - listener.name.replication.sasl.mechanism=PLAIN
+      - listener.name.replication.ssl.key.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
+      - listener.name.replication.ssl.keystore.location=/mnt/sslcerts/keystore.p12
+      - listener.name.replication.ssl.keystore.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
+      - listener.name.replication.ssl.truststore.location=/mnt/sslcerts/truststore.p12
+      - listener.name.replication.ssl.truststore.password=${file:/mnt/sslcerts/jksPassword.txt:jksPassword}
+      - listener.security.protocol.map=CONTROLLER:SASL_SSL,REPLICATION:SASL_SSL
+  dataVolumeCapacity: 10Gi
+  image:
+    application: confluentinc/cp-server:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
+  authorization:
+    superUsers:
+      - User:kafka
+      - User:kraftcontroller
+      - User:connect
+      - User:krp
+      - User:sr
+      - User:c3
+    type: rbac
+  listeners:
+    controller:
+      tls:
+        enabled: true
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+  dependencies:
+    mdsKafkaCluster:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9095
+      authentication:
+        type: mtls
+        sslClientAuthentication: true
+      tls:
+        enabled: true
+  tls:
+    secretRef: tls-kraft
+  replicas: 3
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
+  dataVolumeCapacity: 10Gi
+  tls:
+    secretRef: tls-kafka
+  authorization:
+    superUsers:
+      - User:kafka
+      - User:kraftcontroller
+      - User:connect
+      - User:krp
+      - User:sr
+      - User:c3
+    type: rbac
+  services:
+    mds:
+      impersonation:
+        admins:
+          - User:kafka
+          - User:krp
+          - User:connect
+      tls:
+        enabled: true
+      tokenKeyPair:
+        secretRef: mds-token
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          domain: my.domain
+          prefix: rb-mds
+      provider:
+        type: ldap
+        mtls:
+          sslClientAuthentication: "required"
+          principalMappingRules: [ "RULE:.*CN=([a-zA-Z0-9.-]*).*$/$1/,DEFAULT" ]
+        ldap:
+          address: ldap://ldap.confluent.svc.cluster.local:389
+          authentication:
+            type: simple
+            simple:
+              secretRef: credential
+          configurations:
+            groupNameAttribute: cn
+            groupObjectClass: group
+            groupMemberAttribute: member
+            groupMemberAttributePattern: CN=(.*),DC=test,DC=com
+            groupSearchBase: dc=test,dc=com
+            groupSearchScope: 1
+            userNameAttribute: cn
+            userMemberOfAttributePattern: CN=(.*),DC=test,DC=com
+            userObjectClass: organizationalRole
+            userSearchBase: dc=test,dc=com
+            userSearchScope: 1
+  listeners:
+    internal:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+    custom:
+      - name: customplain
+        port: 9093
+        authentication:
+          type: plain
+          jaasConfig:
+            secretRef: credential
+        tls:
+          enabled: true
+      - name: custommtls
+        port: 9095
+        authentication:
+          type: mtls
+          principalMappingRules:
+            - "RULE:.*CN=([a-zA-Z0-9.-]*).*$/$1/"
+            - "DEFAULT"
+        tls:
+          enabled: true
+  dependencies:
+    kafkaRest:
+      authentication:
+        type: mtls
+        sslClientAuthentication: true
+      tls:
+        enabled: true
+        secretRef: tls-kafka
+    kRaftController:
+      controllerListener:
+        tls:
+          enabled: true
+        authentication:
+          type: plain
+          jaasConfig:
+            secretRef: credential
+      clusterRef:
+        name: kraftcontroller
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: default
+  namespace: confluent
+spec:
+  kafkaRest:
+    authentication:
+      type: mtls
+      sslClientAuthentication: true
+    tls:
+      secretRef: tls-kafka
+#---
+#apiVersion: platform.confluent.io/v1beta1
+#kind: ControlCenter
+#metadata:
+#  name: controlcenter
+#  namespace: confluent
+#spec:
+#  replicas: 1
+#  image:
+#    application: confluentinc/cp-enterprise-control-center:7.8.0
+#    init: confluentinc/confluent-init-container:2.10.0
+#  dataVolumeCapacity: 10Gi
+#  authorization:
+#    type: rbac
+#  tls:
+#    secretRef: tls-controlcenter
+#  dependencies:
+#    kafka:
+#      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9095
+#      authentication:
+#        type: mtls
+#        sslClientAuthentication: true
+#      tls:
+#        enabled: true
+#    mds:
+#      endpoint: https://kafka.confluent.svc.cluster.local:8090
+#      tokenKeyPair:
+#        secretRef: mds-token
+#      authentication:
+#        type: bearer
+#        bearer:
+#          secretRef: c3-mds-client
+#        sslClientAuthentication: true
+#      tls:
+#        enabled: true
+#    connect:
+#      - name: connect
+#        url: https://connect.confluent.svc.cluster.local:8083
+#        tls:
+#          enabled: true
+#    schemaRegistry:
+#      url: https://schemaregistry.confluent.svc.cluster.local:8081
+#      tls:
+#        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+  namespace: confluent
+spec:
+  replicas: 2
+  image:
+    application: confluentinc/cp-server-connect:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
+  tls:
+    secretRef: tls-connect
+  authorization:
+    type: rbac
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9095
+      authentication:
+        type: mtls
+        sslClientAuthentication: true
+      tls:
+        enabled: true
+    mds:
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tokenKeyPair:
+        secretRef: mds-token
+      authentication:
+        type: mtls
+        sslClientAuthentication: true
+      tls:
+        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-schema-registry:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
+  tls:
+    secretRef: tls-schemaregistry
+  authorization:
+    type: rbac
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9095
+      authentication:
+        type: mtls
+        sslClientAuthentication: true
+      tls:
+        enabled: true
+    mds:
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tokenKeyPair:
+        secretRef: mds-token
+      authentication:
+        type: mtls
+        sslClientAuthentication: true
+      tls:
+        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestProxy
+metadata:
+  name: kafkarestproxy
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-kafka-rest:7.8.0
+    init: confluentinc/confluent-init-container:2.10.0
+  tls:
+    secretRef: tls-kafkarestproxy
+  authorization:
+    type: rbac
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9095
+      authentication:
+        type: mtls
+        sslClientAuthentication: true
+      tls:
+        enabled: true
+    mds:
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tokenKeyPair:
+        secretRef: mds-token
+      authentication:
+        type: mtls
+        sslClientAuthentication: true
+      tls:
+        enabled: true
+    schemaRegistry:
+      url: https://schemaregistry.confluent.svc.cluster.local:8081
+      tls:
+        enabled: true
