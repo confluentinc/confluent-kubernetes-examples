@@ -1,9 +1,8 @@
 ---
-# rolebinding `testuser-rb` allows `testuser1` to see kafkaCluster
 apiVersion: platform.confluent.io/v1beta1
 kind: ConfluentRolebinding
 metadata:
-  name: c3-mtls
+  name: controlcenter-mtls-1
   namespace: confluent
 spec:
   principal:
@@ -25,12 +24,12 @@ spec:
   #kafkaRestClassRef:
   # name: default
 ---
-# rolebinding `testuser-rb-sr` allows `testuser1` to see schemaregistry information
+# rolebinding `sr-mtls-1` allows `sr` to see schemaregistry information
 # `schemaRegistryCllusterId` pattern: `id_<schemaregistry.name>_<namespace>`
 apiVersion: platform.confluent.io/v1beta1
 kind: ConfluentRolebinding
 metadata:
-  name: sr-mtls
+  name: sr-mtls-1
   namespace: confluent
 spec:
   # The Schema Registry cluster is named `schemaregistry` and is deployed in the
@@ -43,7 +42,7 @@ spec:
     type: user
   role: SystemAdmin
 ---
-# rolebinding `schemaregistry-0` gives user `sr` the role
+# rolebinding `sr-mtls-2` gives user `sr` the role
 # `SecurityAdmin` for cluster `schemaregistry` in namespace `confluent`
 apiVersion: platform.confluent.io/v1beta1
 kind: ConfluentRolebinding
@@ -87,25 +86,10 @@ spec:
       resourceType: Group
   role: ResourceOwner
 ---
-# rolebinding `testuser-rb-connect` allows `testuser1` to see connect cluster
-# `connectClusterId` pattern: `<namespace>.<connect.name>`
 apiVersion: platform.confluent.io/v1beta1
 kind: ConfluentRolebinding
 metadata:
-  name: connect-mtls
-  namespace: confluent
-spec:
-  principal:
-    type: user
-    name: connect
-  clustersScopeByIds:
-    connectClusterId: confluent.connect
-  role: SystemAdmin
----
-apiVersion: platform.confluent.io/v1beta1
-kind: ConfluentRolebinding
-metadata:
-  name: connect-mtls-2
+  name: connect-mtls-1
   namespace: confluent
 spec:
   # The Connect cluster is named `connect` and is deployed in the namespace `confluent`
@@ -120,25 +104,7 @@ spec:
 apiVersion: platform.confluent.io/v1beta1
 kind: ConfluentRolebinding
 metadata:
-  name: connect-mtls-3
-  namespace: confluent
-spec:
-  principal:
-    name: connect
-    type: user
-  resourcePatterns:
-    - name: prod.connect
-      patternType: LITERAL
-      resourceType: Group
-    - name: prod.connect-
-      patternType: PREFIXED
-      resourceType: Topic
-  role: ResourceOwner
----
-apiVersion: platform.confluent.io/v1beta1
-kind: ConfluentRolebinding
-metadata:
-  name: connect-mtls-4
+  name: connect-mtls-2
   namespace: confluent
 spec:
   principal:
@@ -150,11 +116,10 @@ spec:
       resourceType: Topic
   role: DeveloperWrite
 ---
----
 apiVersion: platform.confluent.io/v1beta1
 kind: ConfluentRolebinding
 metadata:
-  name: connect-mtls-5
+  name: connect-mtls-3
   namespace: confluent
 spec:
   principal:
@@ -168,3 +133,36 @@ spec:
       patternType: PREFIXED
       resourceType: Topic
   role: ResourceOwner
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: krp-mtls-1
+  namespace: confluent
+spec:
+  principal:
+    name: krp
+    type: user
+  resourcePatterns:
+    - name: _confluent-license
+      patternType: LITERAL
+      resourceType: Topic
+    - name: _confluent-command
+      patternType: LITERAL
+      resourceType: Topic
+  role: ResourceOwner
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: krp-mtls-2
+  namespace: confluent
+spec:
+  principal:
+    name: krp
+    type: user
+  resourcePatterns:
+    - name: _confluent-monitoring
+      patternType: PREFIXED
+      resourceType: Topic
+  role: DeveloperWrite

@@ -6,8 +6,8 @@ metadata:
 spec:
   dataVolumeCapacity: 10G
   image:
-    application: confluentinc/cp-server:7.8.0
-    init: confluentinc/confluent-init-container:2.10.0
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
   listeners:
     controller:
       tls:
@@ -45,8 +45,8 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-server:7.8.0
-    init: confluentinc/confluent-init-container:2.10.0
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
   dataVolumeCapacity: 10Gi
   tls:
     secretRef: tls-kafka
@@ -135,8 +135,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-schema-registry:7.8.0
-    init: confluentinc/confluent-init-container:2.10.0
+    application: confluentinc/cp-schema-registry:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
   tls:
     secretRef: tls-schemaregistry
   authorization:
@@ -168,20 +168,10 @@ metadata:
   name: connect
   namespace: confluent
 spec:
-  podTemplate:
-    probe:
-      liveness:
-        periodSeconds: 400
-        failureThreshold: 1
-        timeoutSeconds: 5
-      readiness:
-        periodSeconds: 400
-        failureThreshold: 5
-        timeoutSeconds: 5
   replicas: 2
   image:
-    application: confluentinc/cp-server-connect:7.8.0
-    init: confluentinc/confluent-init-container:2.10.0
+    application: confluentinc/cp-server-connect:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
   build:
     type: onDemand
     onDemand:
@@ -224,8 +214,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-kafka-rest:7.8.0
-    init: confluentinc/confluent-init-container:2.10.0
+    application: confluentinc/cp-kafka-rest:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
   tls:
     secretRef: tls-kafkarestproxy
   authorization:
@@ -257,24 +247,10 @@ metadata:
   name: controlcenter
   namespace: confluent
 spec:
-  configOverrides:
-    server:
-      - control.center.replication.factor=3
-      - control.center.internal.topics.replication.factor=3
   replicas: 1
-  podTemplate:
-    probe:
-      liveness:
-        periodSeconds: 200
-        failureThreshold: 1
-        timeoutSeconds: 5
-      readiness:
-        periodSeconds: 200
-        failureThreshold: 5
-        timeoutSeconds: 5
   image:
-    application: confluentinc/cp-enterprise-control-center:7.8.0
-    init: confluentinc/confluent-init-container:2.10.0
+    application: confluentinc/cp-enterprise-control-center:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
   dataVolumeCapacity: 10Gi
   authorization:
     type: rbac
@@ -314,71 +290,71 @@ spec:
       url: https://schemaregistry.confluent.svc.cluster.local:8081
       tls:
         enabled: true
----
-# rolebinding `testuser1-cfrb-kafka` allows `testuser1` to see kafka cluster
-apiVersion: platform.confluent.io/v1beta1
-kind: ConfluentRolebinding
-metadata:
-  name: testuser1-cfrb-kafka
-  namespace: confluent
-spec:
-  principal:
-    name: 163ee8e8-04f8-4de2-ba22-daf394eea8f1 # corresponding sub from keycloak against testuser1
-    type: user
-  role: ClusterAdmin
----
-# rolebinding `testuser1-rb-connect` allows `testuser1` to see connect cluster
-# `connectClusterId` pattern: `<namespace>.<connect.name>`
-apiVersion: platform.confluent.io/v1beta1
-kind: ConfluentRolebinding
-metadata:
-  name: testuser1-rb-connect
-  namespace: confluent
-spec:
-  principal:
-    type: user
-    name: 163ee8e8-04f8-4de2-ba22-daf394eea8f1
-  clustersScopeByIds:
-    connectClusterId: confluent.connect
-  role: ClusterAdmin
-  ## if use other kafkaRestClass except for default, need to configure accordingly
-  #kafkaRestClassRef:
-  # name: default
----
----
-# rolebinding `testuser1-rb-sr` allows `testuser1` to see schemaregistry information
-# `schemaRegistryCllusterId` pattern: `id_<schemaregistry.name>_<namespace>`
-apiVersion: platform.confluent.io/v1beta1
-kind: ConfluentRolebinding
-metadata:
-  name: testuser1-rb-sr
-  namespace: confluent
-spec:
-  principal:
-    type: user
-    name: 163ee8e8-04f8-4de2-ba22-daf394eea8f1
-  clustersScopeByIds:
-    schemaRegistryClusterId: id_schemaregistry_confluent
-  role: SystemAdmin
----
-# rolebinding `testuser1-rb-ksql` allows `testuser1` to see ksqldb cluster
-# `ksqlClusterId` pattern: `<namespace>.<ksqldb.name>`
-apiVersion: platform.confluent.io/v1beta1
-kind: ConfluentRolebinding
-metadata:
-  name: testuser1-rb-ksql
-  namespace: confluent
-spec:
-  principal:
-    type: user
-    name: 163ee8e8-04f8-4de2-ba22-daf394eea8f1
-  clustersScopeByIds:
-    ksqlClusterId: confluent.ksqldb_
-  role: ResourceOwner
-  resourcePatterns:
-    - name: ksql-cluster
-      patternType: LITERAL
-      resourceType: KsqlCluster
-  ## if use other kafkaRestClass except for default, need to configure accordingly
-  #kafkaRestClassRef:
-  # name: default
+#---
+## rolebinding `testuser1-cfrb-kafka` allows `testuser1` to see kafka cluster
+#apiVersion: platform.confluent.io/v1beta1
+#kind: ConfluentRolebinding
+#metadata:
+#  name: testuser1-cfrb-kafka
+#  namespace: confluent
+#spec:
+#  principal:
+#    name: 163ee8e8-04f8-4de2-ba22-daf394eea8f1 # corresponding sub from keycloak against testuser1
+#    type: user
+#  role: ClusterAdmin
+#---
+## rolebinding `testuser1-rb-connect` allows `testuser1` to see connect cluster
+## `connectClusterId` pattern: `<namespace>.<connect.name>`
+#apiVersion: platform.confluent.io/v1beta1
+#kind: ConfluentRolebinding
+#metadata:
+#  name: testuser1-rb-connect
+#  namespace: confluent
+#spec:
+#  principal:
+#    type: user
+#    name: 163ee8e8-04f8-4de2-ba22-daf394eea8f1
+#  clustersScopeByIds:
+#    connectClusterId: confluent.connect
+#  role: ClusterAdmin
+#  ## if use other kafkaRestClass except for default, need to configure accordingly
+#  #kafkaRestClassRef:
+#  # name: default
+#---
+#---
+## rolebinding `testuser1-rb-sr` allows `testuser1` to see schemaregistry information
+## `schemaRegistryCllusterId` pattern: `id_<schemaregistry.name>_<namespace>`
+#apiVersion: platform.confluent.io/v1beta1
+#kind: ConfluentRolebinding
+#metadata:
+#  name: testuser1-rb-sr
+#  namespace: confluent
+#spec:
+#  principal:
+#    type: user
+#    name: 163ee8e8-04f8-4de2-ba22-daf394eea8f1
+#  clustersScopeByIds:
+#    schemaRegistryClusterId: id_schemaregistry_confluent
+#  role: SystemAdmin
+#---
+## rolebinding `testuser1-rb-ksql` allows `testuser1` to see ksqldb cluster
+## `ksqlClusterId` pattern: `<namespace>.<ksqldb.name>`
+#apiVersion: platform.confluent.io/v1beta1
+#kind: ConfluentRolebinding
+#metadata:
+#  name: testuser1-rb-ksql
+#  namespace: confluent
+#spec:
+#  principal:
+#    type: user
+#    name: 163ee8e8-04f8-4de2-ba22-daf394eea8f1
+#  clustersScopeByIds:
+#    ksqlClusterId: confluent.ksqldb_
+#  role: ResourceOwner
+#  resourcePatterns:
+#    - name: ksql-cluster
+#      patternType: LITERAL
+#      resourceType: KsqlCluster
+#  ## if use other kafkaRestClass except for default, need to configure accordingly
+#  #kafkaRestClassRef:
+#  # name: default

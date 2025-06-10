@@ -1,4 +1,4 @@
-## Add custom kafka listener for cp -> kafka communication
+## Add custom bearer kafka listener for cp -> kafka communication
 apiVersion: platform.confluent.io/v1beta1
 kind: KRaftController
 metadata:
@@ -18,16 +18,12 @@ spec:
       - listener.security.protocol.map=CONTROLLER:SASL_SSL,REPLICATION:SASL_SSL
   dataVolumeCapacity: 10Gi
   image:
-    application: confluentinc/cp-server:7.8.0
-    init: confluentinc/confluent-init-container:2.10.0
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
   authorization:
     superUsers:
       - User:kafka
       - User:kraftcontroller
-      - User:connect
-      - User:krp
-      - User:sr
-      - User:c3
     type: rbac
   listeners:
     controller:
@@ -39,7 +35,7 @@ spec:
           secretRef: credential
   dependencies:
     mdsKafkaCluster:
-      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9093
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
       authentication:
         type: plain
         jaasConfig:
@@ -58,8 +54,8 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-server:7.8.0
-    init: confluentinc/confluent-init-container:2.10.0
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
   dataVolumeCapacity: 10Gi
   tls:
     secretRef: tls-kafka
@@ -67,10 +63,6 @@ spec:
     superUsers:
       - User:kafka
       - User:kraftcontroller
-      - User:connect
-      - User:krp
-      - User:sr
-      - User:c3
     type: rbac
   services:
     mds:
@@ -112,12 +104,15 @@ spec:
       tls:
         enabled: true
     custom:
-      - name: customplain
+      - name: custombearer
         port: 9093
         authentication:
-          type: plain
-          jaasConfig:
-            secretRef: credential
+          type: bearer
+          mtls:
+            sslClientAuthentication: "required"
+            principalMappingRules:
+              - "RULE:.*CN=([a-zA-Z0-9.-]*).*$/$1/"
+              - "DEFAULT"
         tls:
           enabled: true
   dependencies:
@@ -148,50 +143,50 @@ spec:
       type: bearer
       bearer:
         secretRef: rest-credential
-#---
-#apiVersion: platform.confluent.io/v1beta1
-#kind: ControlCenter
-#metadata:
-#  name: controlcenter
-#  namespace: confluent
-#spec:
-#  replicas: 1
-#  image:
-#    application: confluentinc/cp-enterprise-control-center:7.8.0
-#    init: confluentinc/confluent-init-container:2.10.0
-#  dataVolumeCapacity: 10Gi
-#  authorization:
-#    type: rbac
-#  tls:
-#    secretRef: tls-controlcenter
-#  dependencies:
-#    kafka:
-#      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9093
-#      authentication:
-#        type: plain
-#        jaasConfig:
-#          secretRef: c3-kafka-client
-#      tls:
-#        enabled: true
-#    mds:
-#      endpoint: https://kafka.confluent.svc.cluster.local:8090
-#      tokenKeyPair:
-#        secretRef: mds-token
-#      authentication:
-#        type: bearer
-#        bearer:
-#          secretRef: c3-mds-client
-#      tls:
-#        enabled: true
-#    connect:
-#      - name: connect
-#        url: https://connect.confluent.svc.cluster.local:8083
-#        tls:
-#          enabled: true
-#    schemaRegistry:
-#      url: https://schemaregistry.confluent.svc.cluster.local:8081
-#      tls:
-#        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-control-center:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
+  dataVolumeCapacity: 10Gi
+  authorization:
+    type: rbac
+  tls:
+    secretRef: tls-controlcenter
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: c3-kafka-client
+      tls:
+        enabled: true
+    mds:
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tokenKeyPair:
+        secretRef: mds-token
+      authentication:
+        type: bearer
+        bearer:
+          secretRef: c3-mds-client
+      tls:
+        enabled: true
+    connect:
+      - name: connect
+        url: https://connect.confluent.svc.cluster.local:8083
+        tls:
+          enabled: true
+    schemaRegistry:
+      url: https://schemaregistry.confluent.svc.cluster.local:8081
+      tls:
+        enabled: true
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: Connect
@@ -201,15 +196,15 @@ metadata:
 spec:
   replicas: 2
   image:
-    application: confluentinc/cp-server-connect:7.8.0
-    init: confluentinc/confluent-init-container:2.10.0
+    application: confluentinc/cp-server-connect:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
   tls:
     secretRef: tls-connect
   authorization:
     type: rbac
   dependencies:
     kafka:
-      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9093
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
       authentication:
         type: plain
         jaasConfig:
@@ -235,15 +230,15 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-schema-registry:7.8.0
-    init: confluentinc/confluent-init-container:2.10.0
+    application: confluentinc/cp-schema-registry:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
   tls:
     secretRef: tls-schemaregistry
   authorization:
     type: rbac
   dependencies:
     kafka:
-      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9093
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
       authentication:
         type: plain
         jaasConfig:
@@ -269,15 +264,15 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-kafka-rest:7.8.0
-    init: confluentinc/confluent-init-container:2.10.0
+    application: confluentinc/cp-kafka-rest:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
   tls:
     secretRef: tls-kafkarestproxy
   authorization:
     type: rbac
   dependencies:
     kafka:
-      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9093
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
       authentication:
         type: plain
         jaasConfig:

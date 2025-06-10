@@ -1,4 +1,4 @@
-## Both mtls and OAuth on SR, Connect, Rp with MDS mtls only
+## Remove oauth from MDS to migrate MDS to mtls only. SR, Connect, Rp has both mtls and OAuth on server
 ## this setup has all S2S as mTLS and CP service to clients as dual
 apiVersion: platform.confluent.io/v1beta1
 kind: KRaftController
@@ -8,8 +8,8 @@ metadata:
 spec:
   dataVolumeCapacity: 10G
   image:
-    application: confluentinc/cp-server:7.8.0
-    init: confluentinc/confluent-init-container:2.10.0
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
   listeners:
     controller:
       tls:
@@ -44,8 +44,8 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-server:7.8.0
-    init: confluentinc/confluent-init-container:2.10.0
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
   dataVolumeCapacity: 10Gi
   tls:
     secretRef: tls-kafka
@@ -62,11 +62,18 @@ spec:
         port: 9093
         authentication:
           type: oauth
+          jaasConfig:
+            secretRef: oauth-jass
           oauthSettings:
             tokenEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
             expectedIssuer: http://keycloak:8080/realms/sso_test
             jwksEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/certs
             subClaimName: client_id
+          mtls:
+            sslClientAuthentication: "required"
+            principalMappingRules:
+              - "RULE:.*CN=([a-zA-Z0-9.-]*).*$/$1/"
+              - "DEFAULT"
         tls:
           enabled: true
       - name: custommtls
@@ -152,8 +159,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-schema-registry:7.8.0
-    init: confluentinc/confluent-init-container:2.10.0
+    application: confluentinc/cp-schema-registry:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
   tls:
     secretRef: tls-schemaregistry
   authorization:
@@ -194,20 +201,10 @@ metadata:
   name: connect
   namespace: confluent
 spec:
-  podTemplate:
-    probe:
-      liveness:
-        periodSeconds: 400
-        failureThreshold: 1
-        timeoutSeconds: 5
-      readiness:
-        periodSeconds: 400
-        failureThreshold: 5
-        timeoutSeconds: 5
   replicas: 2
   image:
-    application: confluentinc/cp-server-connect:7.8.0
-    init: confluentinc/confluent-init-container:2.10.0
+    application: confluentinc/cp-server-connect:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
   build:
     type: onDemand
     onDemand:
@@ -259,8 +256,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-kafka-rest:7.8.0
-    init: confluentinc/confluent-init-container:2.10.0
+    application: confluentinc/cp-kafka-rest:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
   tls:
     secretRef: tls-kafkarestproxy
   authorization:
@@ -301,24 +298,10 @@ metadata:
   name: controlcenter
   namespace: confluent
 spec:
-  configOverrides:
-    server:
-      - control.center.replication.factor=3
-      - control.center.internal.topics.replication.factor=3
   replicas: 1
-  podTemplate:
-    probe:
-      liveness:
-        periodSeconds: 200
-        failureThreshold: 1
-        timeoutSeconds: 5
-      readiness:
-        periodSeconds: 200
-        failureThreshold: 5
-        timeoutSeconds: 5
   image:
-    application: confluentinc/cp-enterprise-control-center:7.8.0
-    init: confluentinc/confluent-init-container:2.10.0
+    application: confluentinc/cp-enterprise-control-center:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
   dataVolumeCapacity: 10Gi
   authorization:
     type: rbac

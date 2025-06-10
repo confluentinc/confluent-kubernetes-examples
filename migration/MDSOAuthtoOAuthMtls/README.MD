@@ -1,14 +1,14 @@
-# LDAP RBAC to RBAC with LDAP+mTLS migration for Confluent Platform cluster
+# MDS with OAuth to MDS with OAuth+mTLS migration for Confluent Platform cluster
 
-In this workflow scenario, you'll set up a RBAC enabled CP Cluster with LDAP user store and then migrate it to RBAC with LDAP user store and mTLS.
-Post migration, MDS has both LDAP and mTLS. Kafka has custom dual auth (bearer+mTLS) listener. Connect, Schema Registry, Rest Proxy have basic auth + mTLS on server.
+In this workflow scenario, you'll set up a RBAC enabled CP Cluster with OAuth and then migrate it to RBAC enabled cluster with OAuth and mTLS.
+Post migration, MDS has both OAuth and mTLS. Kafka has custom dual auth (oauth+mTLS) listener. Connect, Schema Registry, Rest Proxy have oauth + mTLS on server. Control Center has SSO.
 
 ## Set the current tutorial directory
 
 Set the tutorial directory for this tutorial under the directory you downloaded the tutorial files:
 
 ```
-export TUTORIAL_HOME=<Tutorial directory>/migration/MDSLdaptoLdapMtls
+export TUTORIAL_HOME=<Tutorial directory>/migration/MDSOAuthtoOAuthMtls
 ```
 
 ## Deploy Confluent for Kubernetes
@@ -29,34 +29,16 @@ helm upgrade --install operator confluentinc/confluent-for-kubernetes -n conflue
 kubectl get pods -n confluent
 ```
 
-## Deploy OpenLDAP
+## Deploy Keycloak
 
-This repo includes a Helm chart for [OpenLdap](https://github.com/osixia/docker-openldap). The chart ``values.yaml`` includes the set of principal definitions that Confluent Platform needs for RBAC.
-
-* Deploy OpenLdap
+* Deploy [Keycloak](https://www.keycloak.org/) which is an open source identity and access managment solution. `keycloak.yaml` is used for an example here, this is not supported by Confluent. Therefore, please make sure to use the identity provider as per the organization requirement.
 ```
-helm upgrade --install -f $TUTORIAL_HOME/../../assets/openldap/ldaps-rbac.yaml test-ldap $TUTORIAL_HOME/../../assets/openldap --namespace confluent
+kubectl apply -f $TUTORIAL_HOME/keycloak_deploy.yaml
 ```
 
-* Validate that OpenLDAP is running:
+* Validate that Keycloak pod is running:
 ```
-kubectl get pods -n confluent
-```
-
-* Log in to the LDAP pod:
-```
-kubectl -n confluent exec -it ldap-0 -- bash
-``` 
-
-* Run the LDAP search command:
-
-```
-ldapsearch -LLL -x -H ldap://ldap.confluent.svc.cluster.local:389 -b 'dc=test,dc=com' -D "cn=mds,dc=test,dc=com" -w 'Developer!'
-```
-
-* Exit out of the LDAP pod:
-```
-exit 
+kubectl get pods -n confluent 
 ```
 
 
@@ -158,43 +140,21 @@ kubectl create secret generic mds-token \
 --from-file=mdsTokenKeyPair.pem=$TUTORIAL_HOME/../../assets/certs/mds-tokenkeypair.txt \
 -n confluent
 ```
-* Create Kafka RBAC credential
-```
-kubectl create secret generic mds-client \
---from-file=bearer.txt=$TUTORIAL_HOME/bearer.txt \
--n confluent
-``` 
-* Create RBAC client credentials for other components
-```
-kubectl create secret generic c3-mds-client \
---from-file=bearer.txt=$TUTORIAL_HOME/c3-client.txt \
--n confluent
 
-kubectl create secret generic connect-mds-client \
---from-file=bearer.txt=$TUTORIAL_HOME/connect-client.txt \
--n confluent
 
-kubectl create secret generic sr-mds-client \
---from-file=bearer.txt=$TUTORIAL_HOME/sr-client.txt \
--n confluent
+## Provide OIDC authentication credentials
 
-kubectl create secret generic krp-mds-client \
---from-file=bearer.txt=$TUTORIAL_HOME/krp-client.txt \
--n confluent
+* Create a Kubernetes secret object for OIDC credentials
 
 ```
+kubectl create -n confluent secret generic oauth-jass --from-file=oauth.txt=oauth_jass.txt
+kubectl -n confluent create secret generic oauth-jass-oidc --from-file=oidcClientSecret.txt=oauth_jass.txt
 
-* Create Kafka REST credential
-```
-kubectl create secret generic rest-credential \
---from-file=bearer.txt=$TUTORIAL_HOME/bearer.txt \
---from-file=basic.txt=$TUTORIAL_HOME/bearer.txt \
--n confluent
 ```
 
 ## Deploy Confluent Platform
 
-* Deploy Confluent Platform with MDS having LDAP user store. CP Cluster has TLS enabled, no mTLS.
+* Deploy Confluent Platform with MDS having OAuth. CP Cluster has TLS enabled, no mTLS.
 ```
 kubectl apply -f $TUTORIAL_HOME/cp_components1.yaml
 ```
@@ -205,7 +165,7 @@ kubectl apply -f $TUTORIAL_HOME/cp_components1.yaml
 kubectl get pods -n confluent
 ```
 
-## Add custombearer listener in kafka. This listener has bearer + mtls authentication.
+## Add customoauth listener in kafka. This listener has oauth + mtls authentication.
 
 * Triggers update in kafka to create custom listener. The custom listener will be used for all cp->kafka communication while the internal listeners update during migration.
 ```
@@ -219,7 +179,7 @@ kubectl apply -f $TUTORIAL_HOME/cp_components2.yaml
 kubectl apply -f $TUTORIAL_HOME/cp_components3.yaml
 ```
 
-## Add mtls provider in MDS service, this will be added in parallel to already existing ldap provider. Also add mTLS on SR, RP, Connect server.
+## Add mtls provider in MDS service, this will be added in parallel to already existing Oauth provider. Also add mTLS on SR, RP, Connect server.
 
 * Before enabling mTLS on MDS, SR, Connect, RP, You need to enable client side TLS in all external clients of these components.
 * If all external clients are migrated, Enable dual auth (Ldap + mTLS) on MDS, SR, RP, Connect.
@@ -240,7 +200,12 @@ Use Control Center to monitor the Confluent Platform. You can visit the external
 kubectl port-forward controlcenter-0 9021:9021 -n confluent
 ```
 
-* Browse to Control Center, use the credentials c3 as user, and c3-secret as password to login to Control Center.
+* Set up port forwarding for Keycloak:
+```
+kubectl port-forward deployment/keycloak 8080:8080 -n confluent 
+```
+
+* Browse to Control Center, click on `Log in via SSO`, use the credentials user1 as user, and user1 as password to login to Control Center.
 ```
 https://localhost:9021
 ```
@@ -250,11 +215,11 @@ https://localhost:9021
 ```
 kubectl delete confluentrolebinding --all -n confluent
 kubectl delete -f $TUTORIAL_HOME/cp_components4.yaml -n confluent
-kubectl delete secret rest-credential c3-mds-client connect-mds-client sr-mds-client krp-mds-client -n confluent
+kubectl delete secret oauth-jass oauth-jass-oidc -n confluent
 kubectl delete secret mds-token -n confluent
 kubectl delete secret credential -n confluent
 kubectl delete secret tls-kraft tls-kafka tls-controlcenter tls-connect tls-kafkarestproxy tls-schemaregistry -n confluent
-helm delete test-ldap -n confluent
+kubectl delete -f $TUTORIAL_HOME/keycloak_deploy.yaml
 helm delete operator -n confluent
 ```
 ## Appendix: Create your own certificates

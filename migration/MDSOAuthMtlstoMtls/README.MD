@@ -1,14 +1,14 @@
-# MDS with OAuth to MDS with OAuth+mTLS migration for Confluent Platform cluster
+# MDS with OAuth+mTLS to MDS with mTLS only migration for Confluent Platform cluster
 
-In this workflow scenario, you'll set up a RBAC enabled CP Cluster with OAuth and then migrate it to RBAC enabled cluster with OAuth and mTLS.
-Post migration, MDS has both OAuth and mTLS. Kafka has custom dual auth (bearer+mTLS) listener. Connect, Schema Registry, Rest Proxy have basic auth + mTLS on server.
+In this workflow scenario, you'll set up a RBAC enabled CP Cluster with OAuth+mTLS and then migrate it to RBAC enabled cluster with mTLS only.
+Post migration, MDS has mTLS only. Kafka has custom dual auth (bearer+mTLS) listener. Connect, Schema Registry, Rest Proxy have mTLS on server. Control Center has SSO.
 
 ## Set the current tutorial directory
 
 Set the tutorial directory for this tutorial under the directory you downloaded the tutorial files:
 
 ```
-export TUTORIAL_HOME=<Tutorial directory>/migration/MDSOAuthtoOAuthMtls
+export TUTORIAL_HOME=<Tutorial directory>/migration/MDSOAuthMtlstoMtls
 ```
 
 ## Deploy Confluent for Kubernetes
@@ -126,7 +126,6 @@ credentials.
 kubectl create secret generic credential \
 --from-file=plain-users.json=$TUTORIAL_HOME/creds-kafka-sasl-users.json \
 --from-file=plain.txt=$TUTORIAL_HOME/creds-client-kafka-sasl-user.txt \
---from-file=ldap.txt=$TUTORIAL_HOME/ldap.txt \
 -n confluent
 ```
 
@@ -147,8 +146,8 @@ kubectl create secret generic mds-token \
 * Create a Kubernetes secret object for OIDC credentials
 
 ```
-kubectl create -n confluent secret generic oauth-jass --from-file=oauth.txt=oauth_jass.txt
-kubectl -n confluent create secret generic oauth-jass-oidc --from-file=oidcClientSecret.txt=oauth_jass.txt
+kubectl create -n confluent secret generic oauth-jass --from-file=oauth.txt=$TUTORIAL_HOME/oauth_jass.txt
+kubectl -n confluent create secret generic oauth-jass-oidc --from-file=oidcClientSecret.txt=$TUTORIAL_HOME/oauth_jass.txt
 
 ```
 
@@ -165,11 +164,20 @@ kubectl apply -f $TUTORIAL_HOME/cp_components1.yaml
 kubectl get pods -n confluent
 ```
 
-## Add customoauth listener in kafka. This listener has oauth + mtls authentication.
+## Add custommtls listener in kafka. This listener has mtls authentication.
 
 * Triggers update in kafka to create custom listener. The custom listener will be used for all cp->kafka communication while the internal listeners update during migration.
 ```
 kubectl apply -f $TUTORIAL_HOME/cp_components2.yaml
+```
+
+## Create rolebindings for cert principals
+
+* In Dual auth mode, oauth credentials were used in cp->kafka communication. In next step, we will migrate all the cp components clients to mtls, then mtls cert principals will start getting used.
+* Add rolebindings for cp components' tls cert principals. mtls-rolebindings contains required rolebindings for the cp components in this example cluster.
+* You need to add required rolebindings for all external clients before migrating the cluster to mTLS only.
+```
+kubectl apply -f $TUTORIAL_HOME/mtls-rolebindings.yaml
 ```
 
 ## Update all cp components (SR, Connect, Rest proxy, C3) and Kafka Rest Class to enable sslClientAuthentication from client side and update their kafka dependency endpoint to communicate on the custom listener.
@@ -179,12 +187,19 @@ kubectl apply -f $TUTORIAL_HOME/cp_components2.yaml
 kubectl apply -f $TUTORIAL_HOME/cp_components3.yaml
 ```
 
-## Add mtls provider in MDS service, this will be added in parallel to already existing Oauth provider. Also add mTLS on SR, RP, Connect server.
+## Remove oauth from MDS service, this will migrate MDS to mtls only. SR, RP, Connect still have dual auth (oauth+mtls) on server.
 
-* Before enabling mTLS on MDS, SR, Connect, RP, You need to enable client side TLS in all external clients of these components.
-* If all external clients are migrated, Enable dual auth (Ldap + mTLS) on MDS, SR, RP, Connect.
+* Remove oauth from MDS to migrate MDS to mtls only. Now all S2S auth has mTLS and CP service to clients have dual(oauth+mtls) auth
+* If there are any external MDS clients, migrate them to mtls before migrating MDS to mtls.
 ```
 kubectl apply -f $TUTORIAL_HOME/cp_components4.yaml
+```
+
+## Remove oauth from SR, RP, Connect server, this will migrate all components to mtls only.
+
+* If there are any external CP components' clients, migrate them to mtls before migrating all components to mtls.
+```
+kubectl apply -f $TUTORIAL_HOME/cp_components5.yaml
 ```
 
 * 
@@ -214,12 +229,12 @@ https://localhost:9021
 
 ```
 kubectl delete confluentrolebinding --all -n confluent
-kubectl delete -f $TUTORIAL_HOME/cp_components4.yaml -n confluent
+kubectl delete -f $TUTORIAL_HOME/cp_components5.yaml -n confluent
 kubectl delete secret oauth-jass oauth-jass-oidc -n confluent
 kubectl delete secret mds-token -n confluent
 kubectl delete secret credential -n confluent
 kubectl delete secret tls-kraft tls-kafka tls-controlcenter tls-connect tls-kafkarestproxy tls-schemaregistry -n confluent
-kubectl delete -f $TUTORIAL_HOME/keycloak.yaml
+kubectl delete -f $TUTORIAL_HOME/keycloak_deploy.yaml
 helm delete operator -n confluent
 ```
 ## Appendix: Create your own certificates

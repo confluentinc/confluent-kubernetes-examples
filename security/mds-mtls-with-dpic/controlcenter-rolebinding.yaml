@@ -1,0 +1,15 @@
+---
+# rolebinding `testuser-rb` allows `testuser1` to see kafkaCluster
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: testuser-rb
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: testuser1
+  role: ClusterAdmin
+  ## if use other kafkaRestClass except for default, need to configure accordingly
+  #kafkaRestClassRef:
+  # name: default
