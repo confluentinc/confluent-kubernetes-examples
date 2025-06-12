@@ -1,0 +1,2 @@
+clientId=ssologin
+clientSecret=KbLRih1HzjDC267PefuKU7QIoZ8hgHDK

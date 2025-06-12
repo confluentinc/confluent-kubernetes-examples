@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  namespace: operator
+  labels:
+    app: keycloak
+spec:
+  type: ClusterIP
+  selector:
+    app: keycloak
+  ports:
+    - port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: operator
+  labels:
+    app: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:22.0.1
+          args:
+            - "start-dev"
+            - "--import-realm"
+          env:
+            - name: KEYCLOAK_ADMIN
+              value: "admin"
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: "admin"
+            - name: KC_PROXY
+              value: "edge"
+            - name: KC_HTTP_ACCESS_LOG_ENABLED
+              value: "true"
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /realms/master
+              port: 8080
+          volumeMounts:
+            - name: keycloak-volume
+              mountPath: /opt/keycloak/data/import
+            - name: public-key-volume
+              mountPath: /opt/keycloak/keys
+              readOnly: true
+      volumes:
+        - name: keycloak-volume
+          configMap:
+            name: keycloak-configmap
+        - name: public-key-volume
+          secret:
+            secretName: keycloak-public-key

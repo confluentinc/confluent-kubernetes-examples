@@ -1,0 +1,34 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaExporter
+metadata:
+  name: schema-exporter
+  namespace: source
+spec:
+  sourceCluster:
+    schemaRegistryClusterRef:
+      name: schemaregistry
+      namespace: source
+    schemaRegistryRest:
+      endpoint: https://schemaregistry.source.svc.cluster.local:8081
+      authentication:
+        type: oauth
+        oauth:
+          configuration:
+            groupsClaimName: groups
+            jwksEndpointUri: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/certs
+            expectedIssuer: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test
+            tokenEndpointUri: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
+            clientAssertion:
+              clientId: private-key-client
+              localClientAssertion:
+                issuer: private-key-client
+                subject: private-key-client
+                audience: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
+                privateKeyFile:
+                  secretRef: private-key
+                includeJtiClaim: true
+  destinationCluster:
+    schemaRegistryClusterRef:
+      name: schemaregistry
+      namespace: destination
+  contextName: mycustom
