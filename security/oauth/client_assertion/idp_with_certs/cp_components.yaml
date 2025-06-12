@@ -24,8 +24,8 @@ spec:
 #      - listener.name.controller.oauthbearer.sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required clientId="${file:/mnt/secrets/oauth-jass/oauth.txt:clientId}" clientSecret="${file:/mnt/secrets/oauth-jass/oauth.txt:clientSecret}" refresh_ms="3000" ssl.truststore.location="/mnt/sslcerts/truststore.jks" ssl.truststore.password="mystorepassword" unsecuredLoginStringClaim_sub="thePrincipalName";
   dataVolumeCapacity: 10G
   image:
-    application: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.0-rc250530060959-latest-ubi9
-    init: confluentinc/confluent-init-container:2.10.1
+    application: confluentinc/cp-server:8.0.0
+    init: confluentinc/confluent-init-container:3.0.0
     pullSecretRef:
       - confluent-registry
   listeners:
@@ -74,8 +74,8 @@ spec:
         mountPath: /mnt/jvmtruststore
   replicas: 3
   image:
-    application: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.0-rc250530060959-latest-ubi9
-    init: confluentinc/confluent-init-container:2.10.1
+    application: confluentinc/cp-server:8.0.0
+    init: confluentinc/confluent-init-container:3.0.0
     pullSecretRef:
       - confluent-registry
   dataVolumeCapacity: 10Gi

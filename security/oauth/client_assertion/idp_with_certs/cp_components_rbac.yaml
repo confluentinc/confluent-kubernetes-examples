@@ -24,8 +24,8 @@ spec:
       - confluent.metadata.server.ssl.endpoint.identification.algorithm=https
   dataVolumeCapacity: 10G
   image:
-    application: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.0-rc250530060959-latest-ubi9
-    init: confluentinc/confluent-init-container:2.10.1
+    application: confluentinc/cp-server:8.0.0
+    init: confluentinc/confluent-init-container:3.0.0
     pullSecretRef:
       - confluent-registry
   listeners:
@@ -105,8 +105,8 @@ spec:
       - "-Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=*"
   replicas: 3
   image:
-    application: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-server:8.0.0-rc250530060959-latest-ubi9
-    init: confluentinc/confluent-init-container:2.10.1
+    application: confluentinc/cp-server:8.0.0
+    init: confluentinc/confluent-init-container:3.0.0
     pullSecretRef:
       - confluent-registry
   dataVolumeCapacity: 10Gi
@@ -229,8 +229,8 @@ spec:
       - confluent.metadata.server.ssl.endpoint.identification.algorithm=https
   replicas: 1
   image:
-    application: 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/cp-schema-registry:8.0.0-rc250530060959-latest-ubi9
-    init: confluentinc/confluent-init-container:2.10.1
+    application: confluentinc/cp-schema-registry:8.0.0
+    init: confluentinc/confluent-init-container:3.0.0
     pullSecretRef:
       - confluent-registry
   tls:
