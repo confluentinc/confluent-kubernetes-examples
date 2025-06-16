@@ -1,42 +1,31 @@
 ## Introduction
 
-## Pre-requisite
-
-Follow [Sso](../keycloak/) example to deploy keycloak
-
-## Deploy Confluent for Kubernetes
-
-1. Set up the Helm Chart:
-```bash
-   helm repo add confluentinc https://packages.confluent.io/helm
-```
-Note that it is assumed that your Kubernetes cluster has a ``confluent`` namespace available, otherwise you can create it by running ``kubectl create namespace confluent``. 
-
-2.. Install Confluent For Kubernetes using Helm:
-```bash
-     helm upgrade --install operator confluentinc/confluent-for-kubernetes --namespace operator
-```
-3. Check that the Confluent For Kubernetes pod comes up and is running:
-```bash    
-     kubectl get pods --namespace operator
-```
+follow Sso example to deploy keycloak
 
 ### Create truststore with CA cert
-Lets set tutorial home to to root of this tutorial
-
 ```bash
-export TUTORIAL_HOME= <Tutorial directory>/security/oauth/idp_with_certs
-```
+kubectl create secret generic mycustomtruststore --from-file=truststore.jks=./jks/truststore.jks -n operator
 
-```bash
-./$TUTORIAL_HOME/../../../scripts/create-truststore.sh certs/cacerts.pem mystorepassword
-kubectl create secret generic mycustomtruststore --from-file=truststore.jks=./$TUTORIAL_HOME/jks/truststore.jks -n operator
-kubectl create secret generic cacert --from-file=cacerts.pem=./$TUTORIAL_HOME/certs/cacerts.pem -n operator 
+kubectl create secret generic cacert --from-file=cacerts.pem=./certs/ca/ca.pem -n operator 
+
+kubectl -n operator create secret tls ca-pair-sslcerts \
+    --cert=ca.pem \
+    --key=ca-key.pem
+    
+kubectl create configmap "keycloak-certs" \
+  --namespace "$NAMESPACE" \
+  --from-file=tls.pem="certs/ca/generated/server.pem" \
+  --from-file=tls-key.pem="certs/ca/generated/server-key.pem" \
+  --dry-run=client -o yaml | kubectl apply -f -
 ```
 
 ## Deployment
 
-1. Create jass config secret
+1. Deploy keycloak with HTTPS
+   ```bash
+    sh deploy_keycloak.sh
+    ```
+2. Create jass config secret
     ```bash
     kubectl create -n operator secret generic oauth-jass --from-file=oauth.txt=oauth_jass.txt
     ```
