@@ -1,0 +1,65 @@
+---
+pod:
+  annotations:
+    vault.hashicorp.com/agent-inject: "true"
+    vault.hashicorp.com/agent-inject-status: update
+    vault.hashicorp.com/preserve-secret-case: "true"
+    # cacerts and kafka full chain cert and key are injected. Kafka Rest Class will use these as kafka client
+    vault.hashicorp.com/agent-inject-secret-kafka-cacert: secret/cacerts.pem
+    vault.hashicorp.com/agent-inject-file-kafka-cacert: cacerts.pem
+    vault.hashicorp.com/secret-volume-path-kafka-cacert: /vault/secrets/kafka
+    vault.hashicorp.com/agent-inject-template-kafka-cacert: |-
+      {{- with secret "secret/cacerts.pem" -}}
+      {{ .Data.data.cacerts | base64Decode }}
+      {{- end }}
+    vault.hashicorp.com/agent-inject-secret-kafka-fullchain: secret/fullchain.pem
+    vault.hashicorp.com/agent-inject-file-kafka-fullchain: fullchain.pem
+    vault.hashicorp.com/secret-volume-path-kafka-fullchain: /vault/secrets/kafka
+    vault.hashicorp.com/agent-inject-template-kafka-fullchain: |-
+      {{- with secret "secret/fullchain.pem" -}}
+      {{ .Data.data.fullchain | base64Decode }}
+      {{- end }}
+    vault.hashicorp.com/agent-inject-secret-kafka-privkey: secret/privkey.pem
+    vault.hashicorp.com/agent-inject-file-kafka-privkey: privkey.pem
+    vault.hashicorp.com/secret-volume-path-kafka-privkey: /vault/secrets/kafka
+    vault.hashicorp.com/agent-inject-template-kafka-privkey: |-
+      {{- with secret "secret/privkey.pem" -}}
+      {{ .Data.data.privkey | base64Decode }}
+      {{- end }}
+    # connect keystore is injected. Used by Rest class to create connect rolebinding
+    vault.hashicorp.com/agent-inject-secret-connect-keystore.jks: secret/connectkeystore.jks
+    vault.hashicorp.com/agent-inject-file-connect-keystore.jks: keystore.jks
+    vault.hashicorp.com/secret-volume-path-connect-keystore.jks: /vault/secrets/connect
+    vault.hashicorp.com/agent-inject-template-connect-keystore.jks: |-
+      {{- with secret "secret/connectkeystore.jks" -}}
+      {{ .Data.data.keystore | base64Decode }}
+      {{- end }}
+    # Rest proxy keystore is injected. Used by Rest class to create kafkarestproxy rolebinding
+    vault.hashicorp.com/agent-inject-secret-krp-keystore.jks: secret/krpkeystore.jks
+    vault.hashicorp.com/agent-inject-file-krp-keystore.jks: keystore.jks
+    vault.hashicorp.com/secret-volume-path-krp-keystore.jks: /vault/secrets/krp
+    vault.hashicorp.com/agent-inject-template-krp-keystore.jks: |-
+      {{- with secret "secret/krpkeystore.jks" -}}
+      {{ .Data.data.keystore | base64Decode }}
+      {{- end }}
+    # Control center keystore is injected. Used by Rest class to create controlcenter rolebinding
+    vault.hashicorp.com/agent-inject-secret-c3-keystore.jks: secret/c3keystore.jks
+    vault.hashicorp.com/agent-inject-file-c3-keystore.jks: keystore.jks
+    vault.hashicorp.com/secret-volume-path-c3-keystore.jks: /vault/secrets/c3
+    vault.hashicorp.com/agent-inject-template-c3-keystore.jks: |-
+      {{- with secret "secret/c3keystore.jks" -}}
+      {{ .Data.data.keystore | base64Decode }}
+      {{- end }}
+    # schema registry keystore is injected. Used by Rest class to create schemaregistry rolebinding
+    vault.hashicorp.com/agent-inject-secret-sr-keystore.jks: secret/srkeystore.jks
+    vault.hashicorp.com/agent-inject-file-sr-keystore.jks: keystore.jks
+    vault.hashicorp.com/secret-volume-path-sr-keystore.jks: /vault/secrets/sr
+    vault.hashicorp.com/agent-inject-template-sr-keystore.jks: |-
+      {{- with secret "secret/srkeystore.jks" -}}
+      {{ .Data.data.keystore | base64Decode }}
+      {{- end }}
+    vault.hashicorp.com/role: confluent-operator
+
+serviceAccount:
+  create: true
+  name: confluent-sa
