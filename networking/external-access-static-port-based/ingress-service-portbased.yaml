@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ingress-without-sni
@@ -10,19 +10,31 @@ spec:
     - host: myoperator2.<Kubernetes cluster domain>
       http:
         paths:
-          - path:
+          - path: /
+            pathType: Prefix
+            backend:  
+              service:
+                name: kafka-0-internal
+                port:
+                  number: 9092
+          - path: /
+            pathType: Prefix
             backend:
-              serviceName: kafka-0-internal
-              servicePort: 9092
-          - path:
+              service:
+                name: kafka-1-internal
+                port:
+                  number: 9092
+          - path: /
+            pathType: Prefix
             backend:
-              serviceName: kafka-1-internal
-              servicePort: 9092
-          - path:
-            backend:
-              serviceName: kafka-2-internal
-              servicePort: 9092
-          - path:
-            backend:
-              serviceName: kafka-bootstrap
-              servicePort: 9092
+              service:
+                name: kafka-2-internal
+                port:
+                  number: 9092
+          - path: /
+            pathType: Prefix
+            backend:  
+              service:
+                name: kafka-bootstrap
+                port:
+                  number: 9092
