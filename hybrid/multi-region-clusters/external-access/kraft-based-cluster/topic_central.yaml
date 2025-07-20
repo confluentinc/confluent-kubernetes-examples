@@ -1,0 +1,12 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: elastic-0
+  namespace: kraft-central
+spec:
+  kafkaClusterRef:
+    name: kafka
+  replicas: 3
+  partitionCount: 1
+  configs:
+    cleanup.policy: "delete"

@@ -53,7 +53,7 @@ kubectl get pods -n confluent
 In this scenario, you'll configure internal authentication using the mTLS mechanism. With mTLS, Confluent components and clients use TLS certificates for authentication. The certificate has a CN that identifies the principal name.
 
 Each Confluent component service should have its own TLS certificate. In this scenario, you'll
-generate a server certificate for each Confluent component service. Follow [these instructions](../assets/certs/component-certs/README.md) to generate these certificates.
+generate a server certificate for each Confluent component service. Follow [these instructions](../../assets/certs/component-certs/README.md) to generate these certificates.
 
 ## Deploy configuration secrets
 
@@ -81,33 +81,33 @@ and set the appropriate SANs.
 export TUTORIAL_HOME=<Tutorial directory>/mtls-rbac-with-sso-oauth
 
 kubectl create secret generic tls-kafka \
-  --from-file=fullchain.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/kafka-server.pem \
-  --from-file=cacerts.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/cacerts.pem \
-  --from-file=privkey.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/kafka-server-key.pem \
+  --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server.pem \
+  --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
+  --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server-key.pem \
   --namespace confluent
 
 kubectl create secret generic tls-controlcenter \
-  --from-file=fullchain.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/controlcenter-server.pem \
-  --from-file=cacerts.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/cacerts.pem \
-  --from-file=privkey.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/controlcenter-server-key.pem \
+  --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/controlcenter-server.pem \
+  --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
+  --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/controlcenter-server-key.pem \
   --namespace confluent
 
 kubectl create secret generic tls-schemaregistry \
-  --from-file=fullchain.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/schemaregistry-server.pem \
-  --from-file=cacerts.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/cacerts.pem \
-  --from-file=privkey.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/schemaregistry-server-key.pem \
+  --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/schemaregistry-server.pem \
+  --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
+  --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/schemaregistry-server-key.pem \
   --namespace confluent
 
 kubectl create secret generic tls-connect \
-  --from-file=fullchain.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/connect-server.pem \
-  --from-file=cacerts.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/cacerts.pem \
-  --from-file=privkey.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/connect-server-key.pem \
+  --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/connect-server.pem \
+  --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
+  --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/connect-server-key.pem \
   --namespace confluent
   
 kubectl create secret generic tls-kafkarestproxy \
-  --from-file=fullchain.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/kafkarestproxy-server.pem \
-  --from-file=cacerts.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/cacerts.pem \
-  --from-file=privkey.pem=$TUTORIAL_HOME/../assets/certs/component-certs/generated/kafkarestproxy-server-key.pem \
+  --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafkarestproxy-server.pem \
+  --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
+  --from-file=privkey.pem=$TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafkarestproxy-server-key.pem \
   --namespace confluent
 
 ```
@@ -139,8 +139,8 @@ kubectl create secret generic oauth-jass \
 
 ```
 kubectl create secret generic mds-token \
---from-file=mdsPublicKey.pem=$TUTORIAL_HOME/../assets/certs/mds-publickey.txt \
---from-file=mdsTokenKeyPair.pem=$TUTORIAL_HOME/../assets/certs/mds-tokenkeypair.txt \
+--from-file=mdsPublicKey.pem=$TUTORIAL_HOME/../../assets/certs/mds-publickey.txt \
+--from-file=mdsTokenKeyPair.pem=$TUTORIAL_HOME/../../assets/certs/mds-tokenkeypair.txt \
 -n confluent
 ```
 
@@ -216,21 +216,21 @@ brew install cfssl
 ```
 * Create Certificate Authority
 ```
-mkdir $TUTORIAL_HOME/../assets/certs/generated && cfssl gencert -initca $TUTORIAL_HOME/../assets/certs/ca-csr.json | cfssljson -bare $TUTORIAL_HOME/../assets/certs/generated/ca -
+mkdir $TUTORIAL_HOME/../../assets/certs/generated && cfssl gencert -initca $TUTORIAL_HOME/../../assets/certs/ca-csr.json | cfssljson -bare $TUTORIAL_HOME/../../assets/certs/generated/ca -
 ```
 * Validate Certificate Authority
 ```
-openssl x509 -in $TUTORIAL_HOME/../assets/certs/generated/ca.pem -text -noout
+openssl x509 -in $TUTORIAL_HOME/../../assets/certs/generated/ca.pem -text -noout
 ```
 * Create server certificates with the appropriate SANs (SANs listed in server-domain.json)
 ```
-cfssl gencert -ca=$TUTORIAL_HOME/../assets/certs/generated/ca.pem \
--ca-key=$TUTORIAL_HOME/../assets/certs/generated/ca-key.pem \
--config=$TUTORIAL_HOME/../assets/certs/ca-config.json \
--profile=server $TUTORIAL_HOME/../assets/certs/server-domain.json | cfssljson -bare $TUTORIAL_HOME/../assets/certs/generated/server
+cfssl gencert -ca=$TUTORIAL_HOME/../../assets/certs/generated/ca.pem \
+-ca-key=$TUTORIAL_HOME/../../assets/certs/generated/ca-key.pem \
+-config=$TUTORIAL_HOME/../../assets/certs/ca-config.json \
+-profile=server $TUTORIAL_HOME/../../assets/certs/server-domain.json | cfssljson -bare $TUTORIAL_HOME/../../assets/certs/generated/server
 ``` 
 
 * Validate server certificate and SANs
 ```
-openssl x509 -in $TUTORIAL_HOME/../assets/certs/generated/server.pem -text -noout
+openssl x509 -in $TUTORIAL_HOME/../../assets/certs/generated/server.pem -text -noout
 ```

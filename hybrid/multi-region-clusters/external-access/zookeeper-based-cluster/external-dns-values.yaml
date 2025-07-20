@@ -1,0 +1,15 @@
+## @section external-dns parameters
+
+## @param provider DNS provider where the DNS records will be created.
+## Available providers are:
+## - alibabacloud, aws, azure, azure-private-dns, cloudflare, coredns, designate, digitalocean, google, hetzner, infoblox, linode, rfc2136, transip
+##
+provider: google
+
+## @param domainFilters Limit possible target zones by domain suffixes (optional)
+##
+domainFilters: [platformops.dev.gcp.devel.cpdev.cloud]
+
+## @param policy Modify how DNS records are synchronized between sources and providers (options: sync, upsert-only )
+##
+policy: sync

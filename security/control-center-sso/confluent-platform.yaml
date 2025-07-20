@@ -73,7 +73,7 @@ spec:
             userObjectClass: organizationalRole
             userSearchBase: dc=test,dc=com
             userSearchScope: 1
-        oidc:
+        sso:
           clientCredentials:
             secretRef: credential
           configurations:

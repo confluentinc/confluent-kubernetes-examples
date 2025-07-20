@@ -1,0 +1,33 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller-east
+  namespace: kraft-east
+  annotations:
+    platform.confluent.io/broker-id-offset: "9990"
+spec:
+  clusterID: f66a6843-54f1-4af8-b3Q
+  controllerQuorumVoters:
+    - brokerEndpoint: kraft-east0.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9990
+    - brokerEndpoint: kraft-east1.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9991
+    - brokerEndpoint: kraft-west0.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9992
+    - brokerEndpoint: kraft-west1.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9993
+    - brokerEndpoint: kraft-central0.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9994
+  dataVolumeCapacity: 10G
+  image:
+    application: confluentinc/cp-server:7.6.0
+    init: confluentinc/confluent-init-container:2.7.0
+  listeners:
+    controller:
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          bootstrapPrefix: kraft-east-bootstrap
+          brokerPrefix: kraft-east
+          domain: platformops.dev.gcp.devel.cpdev.cloud
+  replicas: 2

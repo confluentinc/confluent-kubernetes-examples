@@ -1,0 +1,489 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: confluent
+spec:
+  dataVolumeCapacity: 10Gi
+  image:
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
+  configOverrides:
+    server:
+      - listener.name.replication.ssl.client.auth=required
+      - listener.name.replication.ssl.key.password=${file:/vault/secrets/jksPassword.txt:jksPassword}
+      - listener.name.replication.ssl.keystore.location=/vault/secrets/keystore.jks
+      - listener.name.replication.ssl.keystore.password=${file:/vault/secrets/jksPassword.txt:jksPassword}
+      - listener.name.replication.ssl.principal.mapping.rules=RULE:.*CN[\s]?=[\s]?([a-zA-Z0-9._]*)?.*/$1/
+      - listener.name.replication.ssl.truststore.location=/vault/secrets/truststore.jks
+      - listener.name.replication.ssl.truststore.password=${file:/vault/secrets/jksPassword.txt:jksPassword}
+      - listener.security.protocol.map=CONTROLLER:SSL,REPLICATION:SSL
+  listeners:
+    controller:
+      authentication:
+        type: mtls
+        principalMappingRules:
+          - "RULE:.*CN=([a-zA-Z0-9.-]*).*$/$1/"
+          - "DEFAULT"
+      tls:
+        enabled: true
+  authorization:
+    type: rbac
+    superUsers:
+      - User:kafka
+      - User:kraftcontroller
+  podTemplate:
+    serviceAccountName: confluent-sa
+    annotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/agent-inject-status: update
+      vault.hashicorp.com/preserve-secret-case: "true"
+      vault.hashicorp.com/agent-inject-secret-jksPassword.txt: secret/jksPassword.txt
+      vault.hashicorp.com/agent-inject-template-jksPassword.txt: |
+        {{- with secret "secret/jksPassword.txt" -}}
+        {{ .Data.data.password }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-keystore.jks: secret/kraftkeystore.jks
+      vault.hashicorp.com/agent-inject-template-keystore.jks: |
+        {{- with secret "secret/kraftkeystore.jks" -}}
+        {{ .Data.data.keystore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-truststore.jks: secret/truststore.jks
+      vault.hashicorp.com/agent-inject-template-truststore.jks: |
+        {{- with secret "secret/truststore.jks" -}}
+        {{ .Data.data.truststore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/role: confluent-operator
+  dependencies:
+    mdsKafkaCluster:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: mtls
+        sslClientAuthentication: true
+      tls:
+        enabled: true
+  tls:
+    directoryPathInContainer: /vault/secrets
+  replicas: 3
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+  annotations:
+    platform.confluent.io/dpic-append-path: "kafka"
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
+  dataVolumeCapacity: 10Gi
+  tls:
+    directoryPathInContainer: /vault/secrets
+  authorization:
+    type: rbac
+    superUsers:
+      - User:kafka
+      - User:kraftcontroller
+  services:
+    mds:
+      impersonation:
+        admins:
+          - User:kafka
+          - User:krp
+          - User:connect
+          - User:sr
+      tls:
+        enabled: true
+      tokenKeyPair:
+        directoryPathInContainer: /vault/secrets
+      provider:
+        mtls:
+          sslClientAuthentication: "required"
+          principalMappingRules:
+            - "RULE:.*CN=([a-zA-Z0-9.-]*).*$/$1/"
+            - "DEFAULT"
+        file:
+          secretRef: file-secret # no dpic support for file provider
+  podTemplate:
+    serviceAccountName: confluent-sa
+    annotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/agent-inject-status: update
+      vault.hashicorp.com/preserve-secret-case: "true"
+      vault.hashicorp.com/agent-inject-secret-jksPassword.txt: secret/jksPassword.txt
+      vault.hashicorp.com/agent-inject-template-jksPassword.txt: |
+        {{- with secret "secret/jksPassword.txt" -}}
+        {{ .Data.data.password }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-keystore.jks: secret/kafkakeystore.jks
+      vault.hashicorp.com/agent-inject-template-keystore.jks: |
+        {{- with secret "secret/kafkakeystore.jks" -}}
+        {{ .Data.data.keystore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-truststore.jks: secret/truststore.jks
+      vault.hashicorp.com/agent-inject-template-truststore.jks: |
+        {{- with secret "secret/truststore.jks" -}}
+        {{ .Data.data.truststore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-mds-publickey: secret/mdsPublicKey.pem
+      vault.hashicorp.com/agent-inject-file-mds-publickey: mdsPublicKey.pem
+      vault.hashicorp.com/agent-inject-template-mds-publickey: |
+        {{- with secret "secret/mdsPublicKey.pem" -}}
+        {{ .Data.data.mdspublickey | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-mds-tokenkeypair: secret/mdsTokenKeyPair.pem
+      vault.hashicorp.com/agent-inject-file-mds-tokenkeypair: mdsTokenKeyPair.pem
+      vault.hashicorp.com/agent-inject-template-mds-tokenkeypair: |
+        {{- with secret "secret/mdsTokenKeyPair.pem" -}}
+        {{ .Data.data.mdstokenkeypair | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/role: confluent-operator
+  listeners:
+    external:
+      authentication:
+        type: mtls
+        principalMappingRules:
+          - "RULE:.*CN=([a-zA-Z0-9.-]*).*$/$1/"
+          - "DEFAULT"
+      tls:
+        enabled: true
+    internal:
+      authentication:
+        type: mtls
+        principalMappingRules:
+          - "RULE:.*CN=([a-zA-Z0-9.-]*).*$/$1/"
+          - "DEFAULT"
+      tls:
+        enabled: true
+  dependencies:
+    kRaftController:
+      controllerListener:
+        tls:
+          enabled: true
+        authentication:
+          type: mtls
+      clusterRef:
+        name: kraftcontroller
+    kafkaRest:
+      authentication:
+        type: mtls
+        sslClientAuthentication: true
+      tls:
+        enabled: true
+        directoryPathInContainer: /vault/secrets
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+  namespace: confluent
+  annotations:
+    platform.confluent.io/dpic-append-path: "connect"
+spec:
+  replicas: 2
+  image:
+    application: confluentinc/cp-server-connect:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
+  tls:
+    directoryPathInContainer: /vault/secrets
+  authorization:
+    type: rbac
+  authentication:
+    type: mtls
+    mtls:
+      sslClientAuthentication: "required"
+      principalMappingRules:
+        - "RULE:.*CN=([a-zA-Z0-9.-]*).*$/$1/"
+        - "DEFAULT"
+  podTemplate:
+    serviceAccountName: confluent-sa
+    annotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/agent-inject-status: update
+      vault.hashicorp.com/preserve-secret-case: "true"
+      vault.hashicorp.com/agent-inject-secret-jksPassword.txt: secret/jksPassword.txt
+      vault.hashicorp.com/agent-inject-file-jksPassword.txt: jksPassword.txt
+      vault.hashicorp.com/secret-volume-path-jksPassword.txt: /vault/secrets
+      vault.hashicorp.com/agent-inject-template-jksPassword.txt: |
+        {{- with secret "secret/jksPassword.txt" -}}
+        {{ .Data.data.password }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-keystore.jks: secret/connectkeystore.jks
+      vault.hashicorp.com/agent-inject-file-keystore.jks: keystore.jks
+      vault.hashicorp.com/secret-volume-path-keystore.jks: /vault/secrets
+      vault.hashicorp.com/agent-inject-template-keystore.jks: |
+        {{- with secret "secret/connectkeystore.jks" -}}
+        {{ .Data.data.keystore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-truststore.jks: secret/truststore.jks
+      vault.hashicorp.com/agent-inject-file-truststore.jks: truststore.jks
+      vault.hashicorp.com/secret-volume-path-truststore.jks: /vault/secrets
+      vault.hashicorp.com/agent-inject-template-truststore.jks: |
+        {{- with secret "secret/truststore.jks" -}}
+        {{ .Data.data.truststore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-mds-publickey: secret/mdsPublicKey.pem
+      vault.hashicorp.com/agent-inject-file-mds-publickey: mdsPublicKey.pem
+      vault.hashicorp.com/agent-inject-template-mds-publickey: |
+        {{- with secret "secret/mdsPublicKey.pem" -}}
+        {{ .Data.data.mdspublickey | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/role: confluent-operator
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: mtls
+        sslClientAuthentication: true
+      tls:
+        enabled: true
+    schemaRegistry:
+      url: https://schemaregistry.confluent.svc.cluster.local:8081
+      tls:
+        enabled: true
+    mds:
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tokenKeyPair:
+        directoryPathInContainer: /vault/secrets
+      authentication:
+        type: mtls
+        sslClientAuthentication: true
+      tls:
+        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+  namespace: confluent
+  annotations:
+    platform.confluent.io/dpic-append-path: "sr"
+spec:
+  replicas: 2
+  image:
+    application: confluentinc/cp-schema-registry:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
+  tls:
+    directoryPathInContainer: /vault/secrets
+  authorization:
+    type: rbac
+  authentication:
+    type: mtls
+    mtls:
+      sslClientAuthentication: "required"
+      principalMappingRules:
+        - "RULE:.*CN=([a-zA-Z0-9.-]*).*$/$1/"
+        - "DEFAULT"
+  podTemplate:
+    serviceAccountName: confluent-sa
+    annotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/agent-inject-status: update
+      vault.hashicorp.com/preserve-secret-case: "true"
+      vault.hashicorp.com/agent-inject-secret-jksPassword.txt: secret/jksPassword.txt
+      vault.hashicorp.com/agent-inject-template-jksPassword.txt: |
+        {{- with secret "secret/jksPassword.txt" -}}
+        {{ .Data.data.password }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-keystore.jks: secret/srkeystore.jks
+      vault.hashicorp.com/agent-inject-template-keystore.jks: |
+        {{- with secret "secret/srkeystore.jks" -}}
+        {{ .Data.data.keystore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-truststore.jks: secret/truststore.jks
+      vault.hashicorp.com/agent-inject-template-truststore.jks: |
+        {{- with secret "secret/truststore.jks" -}}
+        {{ .Data.data.truststore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-mds-publickey: secret/mdsPublicKey.pem
+      vault.hashicorp.com/agent-inject-file-mds-publickey: mdsPublicKey.pem
+      vault.hashicorp.com/agent-inject-template-mds-publickey: |
+        {{- with secret "secret/mdsPublicKey.pem" -}}
+        {{ .Data.data.mdspublickey | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/role: confluent-operator
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: mtls
+        sslClientAuthentication: true
+      tls:
+        enabled: true
+    mds:
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tokenKeyPair:
+        directoryPathInContainer: /vault/secrets
+      authentication:
+        type: mtls
+        sslClientAuthentication: true
+      tls:
+        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter
+  namespace: confluent
+  annotations:
+    platform.confluent.io/dpic-append-path: "c3"
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-control-center:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
+  dataVolumeCapacity: 10Gi
+  authorization:
+    type: rbac
+  tls:
+    directoryPathInContainer: /vault/secrets
+  podTemplate:
+    serviceAccountName: confluent-sa
+    annotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/agent-inject-status: update
+      vault.hashicorp.com/preserve-secret-case: "true"
+      vault.hashicorp.com/agent-inject-secret-jksPassword.txt: secret/jksPassword.txt
+      vault.hashicorp.com/agent-inject-template-jksPassword.txt: |
+        {{- with secret "secret/jksPassword.txt" -}}
+        {{ .Data.data.password }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-keystore.jks: secret/c3keystore.jks
+      vault.hashicorp.com/agent-inject-template-keystore.jks: |
+        {{- with secret "secret/c3keystore.jks" -}}
+        {{ .Data.data.keystore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-truststore.jks: secret/truststore.jks
+      vault.hashicorp.com/agent-inject-template-truststore.jks: |
+        {{- with secret "secret/truststore.jks" -}}
+        {{ .Data.data.truststore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-mds-publickey: secret/mdsPublicKey.pem
+      vault.hashicorp.com/agent-inject-file-mds-publickey: mdsPublicKey.pem
+      vault.hashicorp.com/agent-inject-template-mds-publickey: |
+        {{- with secret "secret/mdsPublicKey.pem" -}}
+        {{ .Data.data.mdspublickey | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/role: confluent-operator
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: mtls
+        sslClientAuthentication: true
+      tls:
+        enabled: true
+    schemaRegistry:
+      url: https://schemaregistry.confluent.svc.cluster.local:8081
+      tls:
+        enabled: true
+    connect:
+      - name: connect
+        url:  https://connect.confluent.svc.cluster.local:8083
+        tls:
+          enabled: true
+    mds:
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tokenKeyPair:
+        directoryPathInContainer: /vault/secrets
+      authentication:
+        type: mtls
+        sslClientAuthentication: true
+      tls:
+        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestProxy
+metadata:
+  name: kafkarestproxy
+  namespace: confluent
+  annotations:
+    platform.confluent.io/dpic-append-path: "krp"
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-kafka-rest:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
+  tls:
+    directoryPathInContainer: /vault/secrets
+  podTemplate:
+    serviceAccountName: confluent-sa
+    annotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/agent-inject-status: update
+      vault.hashicorp.com/preserve-secret-case: "true"
+      vault.hashicorp.com/agent-inject-secret-jksPassword.txt: secret/jksPassword.txt
+      vault.hashicorp.com/agent-inject-template-jksPassword.txt: |
+        {{- with secret "secret/jksPassword.txt" -}}
+        {{ .Data.data.password }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-keystore.jks: secret/krpkeystore.jks
+      vault.hashicorp.com/agent-inject-template-keystore.jks: |
+        {{- with secret "secret/krpkeystore.jks" -}}
+        {{ .Data.data.keystore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-truststore.jks: secret/truststore.jks
+      vault.hashicorp.com/agent-inject-template-truststore.jks: |
+        {{- with secret "secret/truststore.jks" -}}
+        {{ .Data.data.truststore | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-mds-publickey: secret/mdsPublicKey.pem
+      vault.hashicorp.com/agent-inject-file-mds-publickey: mdsPublicKey.pem
+      vault.hashicorp.com/agent-inject-template-mds-publickey: |
+        {{- with secret "secret/mdsPublicKey.pem" -}}
+        {{ .Data.data.mdspublickey | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/role: confluent-operator
+  authorization:
+    type: rbac
+  authentication:
+    type: mtls
+    mtls:
+      sslClientAuthentication: "required"
+      principalMappingRules:
+        - "RULE:.*CN=([a-zA-Z0-9.-]*).*$/$1/"
+        - "DEFAULT"
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: mtls
+        sslClientAuthentication: true
+      tls:
+        enabled: true
+    mds:
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tokenKeyPair:
+        directoryPathInContainer: /vault/secrets
+      authentication:
+        type: mtls
+        sslClientAuthentication: true
+      tls:
+        enabled: true
+    schemaRegistry:
+      url: https://schemaregistry.confluent.svc.cluster.local:8081
+      authentication:
+        type: mtls
+      tls:
+        enabled: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: default
+  namespace: confluent
+  annotations:
+    platform.confluent.io/dpic-append-path: "kafka"
+spec:
+  kafkaClusterRef:
+    name: kafka
+    namespace: confluent
+  kafkaRest:
+    endpoint: https://kafka.confluent.svc.cluster.local:8090
+    authentication:
+      type: mtls
+      sslClientAuthentication: true
+    tls:
+      directoryPathInContainer: /vault/secrets
