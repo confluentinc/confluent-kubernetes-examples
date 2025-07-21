@@ -5,7 +5,7 @@ set -euo pipefail
 # --- Default Variable Declarations ---
 CERTS_HOME="${CERTS_HOME:-$(dirname "$(readlink -f "$0")")/generated}"                    # Directory where certificates will be generated
 CP_NS="${CP_NS:-confluent}"                                                               # Confluent namespace
-PASSWD="${PASSWD:-myclientpassword}"                                                      # Password for keystores, if modified, update the same in the fips-tls K8s secret
+PASSWD="${PASSWD:-mystorepassword}"                                                      # Password for keystores, if modified, update the same in the fips-tls K8s secret
 LOCAL_DOMAIN="${LOCAL_DOMAIN:-svc.cluster.local}"                                         # Local domain used in server JSON
 EXTERNAL_DOMAIN="${EXTERNAL_DOMAIN:-svc.ps.cflt.inc}"                                     # External domain used in server JSON
 BC_VERSION="${BC_VERSION:-1.0.2.3}"                                                       # Bouncy Castle version
@@ -112,6 +112,7 @@ cat <<EOF > "${CERTS_HOME}/confluent-ps-fips-server-domain.json"
 {
   "CN": "confluent-ps-fips",
   "hosts": [
+    "localhost",
     "confluent-ps-fips",
     "*.${CP_NS}.${LOCAL_DOMAIN}",
     "*.kraftcontroller.${CP_NS}.${LOCAL_DOMAIN}",
@@ -121,6 +122,8 @@ cat <<EOF > "${CERTS_HOME}/confluent-ps-fips-server-domain.json"
     "*.ksqldb.${CP_NS}.${LOCAL_DOMAIN}",
     "*.kafkarestproxy.${CP_NS}.${LOCAL_DOMAIN}",
     "*.controlcenter.${CP_NS}.${LOCAL_DOMAIN}",
+    "*.prometheus.${CP_NS}.${LOCAL_DOMAIN}",
+    "*.alertmanager.${CP_NS}.${LOCAL_DOMAIN}",
     "*.${EXTERNAL_DOMAIN}",
     "*.${CP_NS}.${EXTERNAL_DOMAIN}",
     "*.kraftcontroller.${CP_NS}.${EXTERNAL_DOMAIN}",
@@ -129,7 +132,9 @@ cat <<EOF > "${CERTS_HOME}/confluent-ps-fips-server-domain.json"
     "*.connect.${CP_NS}.${EXTERNAL_DOMAIN}",
     "*.ksqldb.${EXTERNAL_DOMAIN}",
     "*.kafkarestproxy.${CP_NS}.${EXTERNAL_DOMAIN}",
-    "*.controlcenter.${EXTERNAL_DOMAIN}"
+    "*.controlcenter.${EXTERNAL_DOMAIN}",
+    "*.prometheus.${EXTERNAL_DOMAIN}",
+    "*.alertmanager.${EXTERNAL_DOMAIN}"
   ],
   "key": {
     "algo": "rsa",
@@ -164,7 +169,7 @@ cfssl gencert -ca="${CERTS_HOME}/cacerts.pem" \
 echo "Server certificate generated."
 
 echo "Creating full chain certificate..."
-cat "${CERTS_HOME}/cacerts.pem" "${CERTS_HOME}/confluent-ps-fips-server.pem" > "${CERTS_HOME}/confluent-ps-fips-fullchain.pem"
+cat "${CERTS_HOME}/confluent-ps-fips-server.pem" "${CERTS_HOME}/cacerts.pem" > "${CERTS_HOME}/confluent-ps-fips-fullchain.pem"
 echo "Full chain certificate created."
 
 echo "Verifying server certificate (grep DNS entries)..."

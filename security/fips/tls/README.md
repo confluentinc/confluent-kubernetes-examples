@@ -1,5 +1,5 @@
 
-# Deploy CKF and CP in FIPS mode
+# Deploy CKF and CP in FIPS mode - example with TLS
 
 In this workflow, we will deploy Confluent Platform cluster using CFK operator with the following options
 
@@ -57,12 +57,12 @@ In this workflow, we will deploy Confluent Platform cluster using CFK operator w
         --from-file=truststore.bcfks=${CERTS_HOME}/confluent-ps-fips-truststore.bcfks \
         --from-file=keystore.jks=${CERTS_HOME}/confluent-ps-fips-keystore.jks \
         --from-file=truststore.jks=${CERTS_HOME}/confluent-ps-fips-truststore.jks \
-        --from-literal=jksPassword.txt=jksPassword=myclientpassword
+        --from-literal=jksPassword.txt=jksPassword=mystorepassword
     kubectl get secret fips-tls -o jsonpath='{.data}' | jq .
     
     kubectl create secret generic tls-certs \
       --from-file=fullchain.pem=${CERTS_HOME}/confluent-ps-fips-fullchain.pem \
-      --from-file=cacerts.pem=${CERTS_HOME}/confluent-ps-fips-fullchain.pem \
+      --from-file=cacerts.pem=${CERTS_HOME}/cacerts.pem \
       --from-file=privkey.pem=${CERTS_HOME}/confluent-ps-fips-server-key.pem
     kubectl get secret tls-certs -o jsonpath='{.data}' | jq .
   }
@@ -74,11 +74,12 @@ In this workflow, we will deploy Confluent Platform cluster using CFK operator w
 {
   helm repo add confluentinc https://packages.confluent.io/helm
   helm repo update confluentinc
-  # 2.11.0 - 0.1193.1
+  # 3.0.0 - 0.1263.8
   helm upgrade --install confluent-operator \
     confluentinc/confluent-for-kubernetes \
+    --set kRaftEnabled=true \
     --set fipsmode=true \
-    --version 0.1193.1
+    --version 0.1263.8
   helm ls
   kubectl wait pod -l app.kubernetes.io/name=confluent-operator --for=condition=ready --timeout=180s
 }
@@ -119,6 +120,11 @@ kubectl port-forward controlcenter-0 9021:9021
 ```
 Browse to Control Center https://localhost:9021
 
+```
+As we are using self-signed certificates, we will receive a warning in the Chrome browser **Your connection is not private**. 
+Click on the "Advanced" button and click on "Proceed to localhost (unsafe)".
+```
+
 ## Cleanup
 
 ```sh
@@ -128,6 +134,11 @@ Browse to Control Center https://localhost:9021
   helm uninstall confluent-operator
   kubectl delete ns ${CP_NS}
 }
+
+And remove the **generated** directory under `../certs` to clean up the certificates.
 ```
+
+That's it!
+
 ---
 
