@@ -1,0 +1,218 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: confluent
+spec:
+    dataVolumeCapacity: 10Gi
+    dependencies:
+      metricsClient:
+        tls:
+          enabled: true
+          secretRef: tls-certs
+        url: https://controlcenter.confluent.svc.cluster.local:9090
+    image:
+      application: confluentinc/cp-server:8.0.0
+      init: confluentinc/confluent-init-container:3.0.0
+    listeners:
+      controller:
+        tls:
+          enabled: true
+    replicas: 1
+    tls:
+      fips:
+        enabled: true
+      secretRef: fips-tls
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+    dataVolumeCapacity: 10Gi
+    dependencies:
+      kRaftController:
+        clusterRef:
+          name: kraftcontroller
+        controllerListener:
+          tls:
+            enabled: true
+      metricsClient:
+        tls:
+          enabled: true
+          secretRef: tls-certs
+        url: https://controlcenter.confluent.svc.cluster.local:9090
+    image:
+      application: confluentinc/cp-server:8.0.0
+      init: confluentinc/confluent-init-container:3.0.0
+    listeners:
+      external:
+        tls:
+          enabled: true
+      internal:
+        tls:
+          enabled: true
+    replicas: 3
+    services:
+      kafkaRest:
+        tls:
+          enabled: true
+    tls:
+      fips:
+        enabled: true
+      secretRef: fips-tls
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+  namespace: confluent
+spec:
+    dependencies:
+      kafka:
+        bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+        tls:
+          enabled: true
+    image:
+      application: confluentinc/cp-server-connect:8.0.0
+      init: confluentinc/confluent-init-container:3.0.0
+    replicas: 1
+    tls:
+      fips:
+        enabled: true
+      secretRef: fips-tls
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter
+  namespace: confluent
+spec:
+    dataVolumeCapacity: 10Gi
+    dependencies:
+      alertManagerClient:
+        tls:
+          enabled: true
+          secretRef: tls-certs
+        url: https://controlcenter.confluent.svc.cluster.local:9093
+      connect:
+      - name: connect
+        tls:
+          enabled: true
+        url: https://connect.confluent.svc.cluster.local:8083
+      kafka:
+        bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+        tls:
+          enabled: true
+      ksqldb:
+      - name: ksqldb
+        tls:
+          enabled: true
+        url: https://ksqldb.confluent.svc.cluster.local:8088
+      prometheusClient:
+        tls:
+          enabled: true
+          secretRef: tls-certs
+        url: https://controlcenter.confluent.svc.cluster.local:9090
+      schemaRegistry:
+        tls:
+          enabled: true
+        url: https://schemaregistry.confluent.svc.cluster.local:8081
+    image:
+      application: confluentinc/cp-enterprise-control-center-next-gen:2.2.0
+      init: confluentinc/confluent-init-container:3.0.0
+    replicas: 1
+    services:
+      alertmanager:
+        image: confluentinc/cp-enterprise-alertmanager:2.2.0
+        tls:
+          secretRef: tls-certs
+      prometheus:
+        image: confluentinc/cp-enterprise-prometheus:2.2.0
+        pvc:
+          dataVolumeCapacity: 10Gi
+        tls:
+          secretRef: tls-certs
+    tls:
+      secretRef: tls-certs
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KsqlDB
+metadata:
+  name: ksqldb
+  namespace: confluent
+spec:
+    dataVolumeCapacity: 10Gi
+    dependencies:
+      kafka:
+        bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+        tls:
+          enabled: true
+    image:
+      application: confluentinc/cp-ksqldb-server:8.0.0
+      init: confluentinc/confluent-init-container:3.0.0
+    replicas: 1
+    tls:
+      fips:
+        enabled: true
+      secretRef: fips-tls
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+  namespace: confluent
+spec:
+    dependencies:
+      kafka:
+        bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+        tls:
+          enabled: true
+    image:
+      application: confluentinc/cp-schema-registry:8.0.0
+      init: confluentinc/confluent-init-container:3.0.0
+    replicas: 1
+    tls:
+      fips:
+        enabled: true
+      secretRef: fips-tls
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestProxy
+metadata:
+  name: kafkarestproxy
+  namespace: confluent
+spec:
+    dependencies:
+      kafka:
+        bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+        tls:
+          enabled: true
+      schemaRegistry:
+        tls:
+          enabled: true
+        url: https://schemaregistry.confluent.svc.cluster.local:8081
+    image:
+      application: confluentinc/cp-kafka-rest:8.0.0
+      init: confluentinc/confluent-init-container:3.0.0
+    replicas: 1
+    tls:
+      fips:
+        enabled: true
+      secretRef: fips-tls
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: krc-cfk
+  namespace: confluent
+spec:
+  kafkaClusterRef:
+    name: kafka
+    namespace: confluent
+  kafkaRest:
+    endpoint: https://kafka.confluent.svc.cluster.local:8090
+    tls:
+      secretRef: tls-certs
+---
