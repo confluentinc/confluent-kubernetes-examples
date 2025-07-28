@@ -1,7 +1,7 @@
 apiVersion: platform.confluent.io/v1beta1
 kind: FlinkEnvironment
 metadata:
-  name: abhijeet-env1
+  name: flink-env1
   namespace: operator
 spec:
   kubernetesNamespace: default

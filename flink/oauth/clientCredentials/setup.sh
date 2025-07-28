@@ -92,9 +92,8 @@ curl -sSL $CFK_EXAMPLES_REPO_HOME/scripts/create-keystore.sh | bash -s -- $TUTOR
 rm -rf $TUTORIAL_HOME/certs/jks
 mv jks $TUTORIAL_HOME/certs
 
-#echo "Deploying Confluent Operator"
-#OPERATOR_VERSION=v0.1193.34
-#helm install confluent-operator confluentinc/confluent-for-kubernetes --namespace operator --version OPERATOR_VERSION
+echo "Deploying Confluent Operator"
+helm install confluent-operator confluentinc/confluent-for-kubernetes --namespace operator --version 	0.1263.8
 
 echo "Deploying Confluent Platform components..."
 kubectl apply -f $TUTORIAL_HOME/manifests/cp_components.yaml
