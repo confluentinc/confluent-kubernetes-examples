@@ -16,6 +16,7 @@ echo "Waiting for Keycloak deployment to be ready..."
 kubectl wait --for=condition=available --timeout=300s deployment/keycloak -n operator
 
 echo "Generating CA certificate..."
+mkdir -p $TUTORIAL_HOME/certs/ca
 openssl genrsa -out $TUTORIAL_HOME/certs/ca/ca-key.pem 2048
 openssl req -new -key $TUTORIAL_HOME/certs/ca/ca-key.pem -x509 \
   -days 1000 \
@@ -53,6 +54,7 @@ kubectl -n operator create secret generic prometheus-client-creds --from-file=ba
 kubectl -n operator create secret generic alertmanager-client-creds --from-file=basic.txt=./creds/c3/alertmanager-client-credentials-secret.txt
 
 echo "Generating C3 Next Gen certificates..."
+mkdir -p $TUTORIAL_HOME/certs/generated
 cfssl gencert -ca=$TUTORIAL_HOME/certs/ca/ca.pem \
   -ca-key=$TUTORIAL_HOME/certs/ca/ca-key.pem \
   -config=$TUTORIAL_HOME/certs/server_configs/ca-config.json \

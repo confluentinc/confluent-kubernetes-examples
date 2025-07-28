@@ -230,3 +230,7 @@ kubectl create secret generic alertmanager-client-tls -n operator --from-file=fu
     ```bash
        kubectl get crc default  -n operator -oyaml
     ```
+
+### C3 NG UI
+// refer screenshot here
+![Control Center Next Gen UI With Flink](./screenshots/c3ng_ui.png)
