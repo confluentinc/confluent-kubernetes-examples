@@ -1,0 +1,18 @@
+{
+  "CN": "controlcenter-ng",
+  "hosts": [
+    "controlcenter-ng",
+    "controlcenter-ng.operator.svc.cluster.local"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "Universe",
+      "ST": "Pangea",
+      "L": "Earth"
+    }
+  ]
+}

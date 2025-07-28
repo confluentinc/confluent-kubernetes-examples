@@ -1,0 +1,18 @@
+{
+  "CN": "confluent-manager-for-apache-flink",
+  "hosts": [
+    "confluent-manager-for-apache-flink",
+    "confluent-manager-for-apache-flink.operator.svc.cluster.local"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "Universe",
+      "ST": "Pangea",
+      "L": "Earth"
+    }
+  ]
+}

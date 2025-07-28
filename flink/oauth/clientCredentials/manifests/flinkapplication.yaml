@@ -1,0 +1,31 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: FlinkApplication
+metadata:
+  name: abhijeet-app1
+  namespace: operator
+spec:
+  flinkEnvironment: abhijeet-env1
+  image: confluentinc/cp-flink:1.19.1-cp1
+  flinkVersion: v1_19
+  flinkConfiguration:
+    "taskmanager.numberOfTaskSlots": "2"
+    "metrics.reporter.prom.factory.class": "org.apache.flink.metrics.prometheus.PrometheusReporterFactory"
+    "metrics.reporter.prom.port": "9249-9250"
+    "rest.profiling.enabled": "true"
+  serviceAccount: flink
+  jobManager:
+    resource:
+      memory: 1048m
+      cpu: 1
+  taskManager:
+    resource:
+      memory: 1048m
+      cpu: 1
+  job:
+    jarURI: local:///opt/flink/examples/streaming/StateMachineExample.jar
+    state: running
+    parallelism: 3
+    upgradeMode: stateless
+  cmfRestClassRef:
+    name: default
+    namespace: operator

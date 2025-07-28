@@ -1,0 +1,17 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: CMFRestClass
+metadata:
+  name: default
+  namespace: operator
+spec:
+  cmfRest:
+    endpoint: https://confluent-manager-for-apache-flink.operator.svc.cluster.local:8091
+    authentication:
+      type: oauth
+      oauth:
+        secretRef: oauth-jaas
+        configuration:
+          tokenEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
+    tls:
+      secretRef: cmf-day2-tls
+---
