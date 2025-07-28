@@ -2,22 +2,6 @@
 
 This playbook will generate the necessary certificates for the Confluent Manager for Apache Flink [mTLS].
 
-## Internal
-
-::
-
-      assume cc-internal-devprod-prod-1/developer
-      export USER=AWS
-      export APIKEY=$(aws ecr get-login-password --region us-west-2)
-      export EMAIL=abhsharma@confluent.io
-      
-      kubectl -n operator create secret docker-registry confluent-registry \
-      --docker-server=519856050701.dkr.ecr.us-west-2.amazonaws.com       \
-      --docker-username=$USER                                            \
-      --docker-password=$APIKEY                                          \
-      --docker-email=$EMAIL
-
-
 ## Prerequisites
 
 1. Create ns
