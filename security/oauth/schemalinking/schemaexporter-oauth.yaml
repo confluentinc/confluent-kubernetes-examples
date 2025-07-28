@@ -8,12 +8,6 @@ spec:
     schemaRegistryClusterRef:
       name: schemaregistry
       namespace: source
-#    schemaRegistryRest:
-#      endpoint: http://localhost:8081
-#      authentication:
-#        type: basic
-#        basic:
-#          secretRef: rest-credential
   destinationCluster:
     schemaRegistryClusterRef:
       name: schemaregistry
