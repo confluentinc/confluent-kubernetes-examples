@@ -1,6 +1,7 @@
 {
   "CN": "confluent-manager-for-apache-flink",
   "hosts": [
+    "cmf-service",
     "confluent-manager-for-apache-flink",
     "confluent-manager-for-apache-flink.operator.svc.cluster.local"
   ],

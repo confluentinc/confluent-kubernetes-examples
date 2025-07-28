@@ -1,22 +1,22 @@
 ---
-# rolebinding `testuser1-cfrb-kafka` allows `testuser1` to see kafka cluster
+# rolebinding `user1-cfrb-kafka` allows `user1` to see kafka cluster
 apiVersion: platform.confluent.io/v1beta1
 kind: ConfluentRolebinding
 metadata:
-  name: testuser1-cfrb-kafka
+  name: user1-cfrb-kafka
   namespace: operator
 spec:
   principal:
-    name: b0a630eb-c418-491f-8378-d2d625ba60e4 # corresponding sub from keycloak against testuser1
+    name: b0a630eb-c418-491f-8378-d2d625ba60e4 # corresponding sub from keycloak against user1
     type: user
   role: ClusterAdmin
 ---
-# rolebinding `testuser1-rb-connect` allows `testuser1` to see connect cluster
+# rolebinding `user1-rb-connect` allows `user1` to see connect cluster
 # `connectClusterId` pattern: `<namespace>.<connect.name>`
 apiVersion: platform.confluent.io/v1beta1
 kind: ConfluentRolebinding
 metadata:
-  name: testuser1-rb-connect
+  name: user1-rb-connect
   namespace: operator
 spec:
   principal:
@@ -30,12 +30,12 @@ spec:
   # name: default
 ---
 ---
-# rolebinding `testuser1-rb-sr` allows `testuser1` to see schemaregistry information
+# rolebinding `user1-rb-sr` allows `user1` to see schemaregistry information
 # `schemaRegistryCllusterId` pattern: `id_<schemaregistry.name>_<namespace>`
 apiVersion: platform.confluent.io/v1beta1
 kind: ConfluentRolebinding
 metadata:
-  name: testuser1-rb-sr
+  name: user1-rb-sr
   namespace: operator
 spec:
   principal:
@@ -45,12 +45,12 @@ spec:
     schemaRegistryClusterId: id_schemaregistry_operator
   role: SystemAdmin
 ---
-# rolebinding `testuser1-rb-ksql` allows `testuser1` to see ksqldb cluster
+# rolebinding `user1-rb-ksql` allows `user1` to see ksqldb cluster
 # `ksqlClusterId` pattern: `<namespace>.<ksqldb.name>`
 apiVersion: platform.confluent.io/v1beta1
 kind: ConfluentRolebinding
 metadata:
-  name: testuser1-rb-ksql
+  name: user1-rb-ksql
   namespace: operator
 spec:
   principal:

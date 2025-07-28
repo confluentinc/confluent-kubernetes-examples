@@ -253,7 +253,7 @@ spec:
       - control.center.replication.factor=3
       - control.center.internal.topics.replication.factor=3
       - confluent.controlcenter.cmf.enable=true
-      - confluent.controlcenter.cmf.url=http://cmf-service.operator.svc.cluster.local
+      - confluent.controlcenter.cmf.url=https://cmf-service:80
     jvm:
       - "-Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=http://keycloak:8080/realms/sso_test,http://keycloak:8080/realms/sso_test/protocol/openid-connect/certs,http://keycloak:8080/realms/sso_test/protocol/openid-connect/auth,http://keycloak:8080/realms/sso_test/protocol/openid-connect/token"
   replicas: 1

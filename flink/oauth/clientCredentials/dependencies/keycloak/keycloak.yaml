@@ -466,6 +466,7 @@ data:
       ],
       "users": [
         {
+          "id": "b0a630eb-c418-491f-8378-d2d625ba60e4",
           "username": "user1",
           "enabled": true,
           "credentials": [
@@ -479,6 +480,7 @@ data:
           ]
         },
         {
+          "id": "b0a630eb-c418-491f-8378-d2d625ba60e5",
           "username": "user2",
           "enabled": true,
           "credentials": [

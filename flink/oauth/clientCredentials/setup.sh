@@ -132,13 +132,14 @@ echo "Deploying Flink Application..."
 kubectl apply -f $TUTORIAL_HOME/manifests/flinkapplication.yaml
 
 echo "Please Add local DNS entry... command below:"
-echo "echo 127.0.0.1 confluent-manager-for-apache-flink.operator.svc.cluster.local | sudo tee -a /etc/hosts"
 echo "echo 127.0.0.1 keycloak | sudo tee -a /etc/hosts"
 
 echo "Setup completed successfully!"
 echo ""
 echo "Next steps:"
 echo "1. Port forward Keycloak: while true; do kubectl port-forward service/keycloak 8080:8080 -n operator; done"
-echo "2. Configure Keycloak clients and users at http://localhost:8080/admin/master/console/#/sso_test/clients"
-echo "3. Port forward CMF service: while true; do kubectl port-forward service/cmf-service 8091:80 -n operator; done"
-echo "4. Test API access using the provided curl commands in the README"
+echo "2. Port forward C3NG: while true; do kubectl port-forward service/controlcenter-ng 9021:9021 -n operator; done"
+echo "3. Configure Keycloak clients and users at http://localhost:8080/admin/master/console/#/sso_test/clients"
+echo "4. Port forward CMF service: while true; do kubectl port-forward service/cmf-service 8091:80 -n operator; done"
+echo "5. Test API access using the provided curl commands in the README"
+echo "6. Open C3NG at http://localhost:9021"

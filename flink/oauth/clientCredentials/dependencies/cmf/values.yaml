@@ -6,7 +6,7 @@ image:
   repository: confluentinc
   name: cp-cmf
   pullPolicy: IfNotPresent
-  tag: 2.0.0
+  tag: 2.0.1
 ## CMF Pod Resources
 resources:
   limits:
@@ -97,6 +97,8 @@ cmf:
       confluent.metadata.oauthbearer.login.client.secret: W8V4cqewCy54x4gm7UjhLkk0rrFDi6DT
       ssl.truststore.location: /opt/truststore/truststore.jks
       ssl.truststore.password: allpassword
+  kafka:
+    oauthbearerAllowedUrls: "http://keycloak:8080/realms/sso_test,http://keycloak:8080/realms/sso_test/protocol/openid-connect/certs,http://keycloak:8080/realms/sso_test/protocol/openid-connect/auth,http://keycloak:8080/realms/sso_test/protocol/openid-connect/token"
 
 ## Enable Kubernetes RBAC
 # When set to true, it will create a proper role/rolebinding or cluster/clusterrolebinding based on namespaced field.
