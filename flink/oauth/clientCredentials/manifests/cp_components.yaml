@@ -11,7 +11,7 @@ spec:
       - "-Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=http://keycloak:8080/realms/sso_test,http://keycloak:8080/realms/sso_test/protocol/openid-connect/certs,http://keycloak:8080/realms/sso_test/protocol/openid-connect/auth,http://keycloak:8080/realms/sso_test/protocol/openid-connect/token"
   dataVolumeCapacity: 10G
   image:
-    application: confluentinc/cp-server:7.9.0
+    application: confluentinc/cp-server:7.9.1
     init: confluentinc/confluent-init-container:2.11.1
     pullSecretRef:
       - confluent-registry
@@ -35,6 +35,9 @@ spec:
         type: basic
         basic:
           secretRef: prometheus-client-creds
+      tls:
+        enabled: true
+        secretRef: prometheus-client-tls
     mdsKafkaCluster:
       bootstrapEndpoint: kafka.operator.svc.cluster.local:9073
       authentication:
@@ -62,7 +65,7 @@ spec:
       - "-Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=http://keycloak:8080/realms/sso_test,http://keycloak:8080/realms/sso_test/protocol/openid-connect/certs,http://keycloak:8080/realms/sso_test/protocol/openid-connect/auth,http://keycloak:8080/realms/sso_test/protocol/openid-connect/token"
   replicas: 3
   image:
-    application: confluentinc/cp-server:7.9.0
+    application: confluentinc/cp-server:7.9.1
     init: confluentinc/confluent-init-container:2.11.1
     pullSecretRef:
       - confluent-registry
@@ -113,6 +116,9 @@ spec:
         type: basic
         basic:
           secretRef: prometheus-client-creds
+      tls:
+        enabled: true
+        secretRef: prometheus-client-tls
     kRaftController:
       controllerListener:
         tls:
@@ -244,7 +250,7 @@ spec:
 apiVersion: platform.confluent.io/v1beta1
 kind: ControlCenter
 metadata:
-  name: controlcenter-ng
+  name: controlcenter-next-gen
   namespace: operator
 spec:
   configOverrides:

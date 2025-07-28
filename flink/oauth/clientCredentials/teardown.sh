@@ -18,10 +18,13 @@ echo "Deleting CMF Rest Class..."
 kubectl delete -f $TUTORIAL_HOME/manifests/cmfrestclass.yaml --ignore-not-found=true
 
 echo "Uninstalling CMF Helm release..."
-helm uninstall cmf -n operator
+helm uninstall cmf -n operator --ignore-not-found=true
 
 echo "Deleting CMF related secrets..."
 kubectl delete secret cmf-truststore cmf-keystore cmf-day2-tls -n operator --ignore-not-found=true
+
+echo "Deleting Confluent Platform Role bindings ..."
+kubectl delete -f $TUTORIAL_HOME/manifests/cp_rbs.yaml --ignore-not-found=true
 
 echo "Deleting Confluent Platform components..."
 kubectl delete -f $TUTORIAL_HOME/manifests/cp_components.yaml --ignore-not-found=true

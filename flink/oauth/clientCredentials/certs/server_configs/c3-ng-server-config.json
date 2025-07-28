@@ -1,8 +1,8 @@
 {
-  "CN": "controlcenter-ng",
+  "CN": "controlcenter-next-gen",
   "hosts": [
-    "controlcenter-ng",
-    "controlcenter-ng.operator.svc.cluster.local"
+    "controlcenter-next-gen",
+    "controlcenter-next-gen.operator.svc.cluster.local"
   ],
   "key": {
     "algo": "rsa",

@@ -104,8 +104,10 @@ kubectl wait --for=condition=ready --timeout=-1s pod -l app=kraftcontroller -n o
 sleep 30
 kubectl wait --for=condition=ready --timeout=-1s pod -l app=kafka -n operator
 sleep 30
-kubectl wait --for=condition=ready --timeout=-1s pod -l app=controlcenter-ng -n operator
+kubectl wait --for=condition=ready --timeout=-1s pod -l app=controlcenter-next-gen -n operator
 
+echo "Creating confluent role bindings Environment..."
+kubectl apply -f $TUTORIAL_HOME/manifests/cp_rbs.yaml
 
 echo "Creating CMF certificate secrets..."
 kubectl create secret generic cmf-truststore -n operator --from-file=truststore.jks=$TUTORIAL_HOME/certs/jks/truststore.jks
@@ -138,8 +140,8 @@ echo "Setup completed successfully!"
 echo ""
 echo "Next steps:"
 echo "1. Port forward Keycloak: while true; do kubectl port-forward service/keycloak 8080:8080 -n operator; done"
-echo "2. Port forward C3NG: while true; do kubectl port-forward service/controlcenter-ng 9021:9021 -n operator; done"
+echo "2. Port forward C3NG: while true; do kubectl port-forward service/controlcenter-next-gen 9021:9021 -n operator; done"
 echo "3. Configure Keycloak clients and users at http://localhost:8080/admin/master/console/#/sso_test/clients"
 echo "4. Port forward CMF service: while true; do kubectl port-forward service/cmf-service 8091:80 -n operator; done"
 echo "5. Test API access using the provided curl commands in the README"
-echo "6. Open C3NG at http://localhost:9021"
+echo "6. Open C3NG at https://localhost:9021 & connect via user1/user1"

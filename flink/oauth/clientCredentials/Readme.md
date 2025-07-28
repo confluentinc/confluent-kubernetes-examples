@@ -176,7 +176,7 @@ kubectl create secret generic alertmanager-client-tls -n operator --from-file=fu
 ### Validate C3 UI
 1. Port Forward Control Center
     ```bash
-    while true; do kubectl port-forward service/controlcenter-ng 9021:9021 -n operator; done;
+    while true; do kubectl port-forward service/controlcenter-next-gen 9021:9021 -n operator; done;
     ```
 2. Access Control Center UI at `https://localhost:9021/` with the following credentials:
 
