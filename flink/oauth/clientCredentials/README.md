@@ -2,6 +2,12 @@
 
 This playbook will generate the necessary certificates for the Confluent Manager for Apache Flink [mTLS].
 
+## Automated Setup
+
+This playbook contains `./setup.sh` and `./teardown.sh` scripts to automate the setup and teardown of the environment. 
+This script will create the necessary Kubernetes secrets, generate the required certificates, and deploy the 
+Confluent Platform, Control Center Next Gen & Confluent Manager for Apache Flink with OAuth enabled via CFK.
+
 ## Prerequisites
 
 1. Create ns
@@ -190,8 +196,6 @@ kubectl create secret generic alertmanager-client-tls -n operator --from-file=fu
 2. Deploy via HELM
     ```bash
    helm upgrade --install -f $TUTORIAL_HOME/dependencies/cmf/values.yaml cmf confluentinc/confluent-manager-for-apache-flink --namespace operator --version 2.0
-   # To use for internal development
-   # helm upgrade --install -f $TUTORIAL_HOME/dependencies/cmf/values.yaml cmf oci://519856050701.dkr.ecr.us-west-2.amazonaws.com/helm/dev/confluentinc/confluent-manager-for-apache-flink --namespace operator --version 2.0-SNAPSHOT 
    ```
 4. Add apt local names in /etc/hosts and port forward
     ```
