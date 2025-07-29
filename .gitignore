@@ -3,3 +3,6 @@
 assets/certs/component-certs/generated/*
 assets/certs/generated/*
 **/.local
+flink/oauth/clientCredentials/certs/ca
+flink/oauth/clientCredentials/certs/generated
+flink/oauth/clientCredentials/certs/jks
