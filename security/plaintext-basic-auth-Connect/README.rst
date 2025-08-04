@@ -74,6 +74,9 @@ Create Basic authentication secret
    --from-file=basic.txt=$TUTORIAL_HOME/basic.txt \
    --namespace confluent
 
+  kubectl create secret generic rest-credential \
+  --from-file=basic.txt=$TUTORIAL_HOME/rest-credential.txt \
+  --namespace confluent
 
 ========================================
 Review Confluent Platform configurations
@@ -232,5 +235,3 @@ Shut down Confluent Platform and the data:
   helm delete secret basicsecret --namespace=confluent
 
 ::
-
-
