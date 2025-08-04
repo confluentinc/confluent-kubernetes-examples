@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oracle-cdc-readiness-config
+  namespace: oracle
+  labels:
+    app: oracle
+    component: readiness-check
+data:
+  orclcdc_readiness.sh: |
+    #!/bin/bash
+    # Oracle XStream CDC Readiness Check
+    
+    # Download the orclcdc_readiness.sql file
+    curl -o ${HOME}/orclcdc_readiness.sql https://docs.confluent.io/kafka-connectors/oracle-xstream-cdc-source/current/_downloads/35f0e2f456c5dae965ee476492943e9e/orclcdc_readiness.sql
+    # check if the file is exists
+    if [ -f ${HOME}/orclcdc_readiness.sql ]; then
+      # only 19c and 21c are supported, so remove the 23 check
+      sed -i 's/IF k_db_version < 19 OR k_db_version >= 23 THEN/IF k_db_version < 19 THEN/' ${HOME}/orclcdc_readiness.sql
+      echo "=== CDC Readiness Validation ==="
+      # Execute the generated SQL
+      sqlplus -S / as sysdba @${HOME}/orclcdc_readiness.sql ${XSTREAM_ADMIN_USER} ${XSTREAM_CONNECT_USER} ${XSTREAM_OUTBOUND_SERVER} ${ORACLE_PDB} | tee ${HOME}/orclcdc_readiness.log
+    else
+      echo "Failed to download the orclcdc_readiness.sql file"
+      exit 1
+    fi
+    echo "=== Readiness Check Complete ==="

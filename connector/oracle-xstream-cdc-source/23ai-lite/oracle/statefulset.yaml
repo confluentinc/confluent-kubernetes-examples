@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: oracle-db
+  namespace: oracle
+  labels:
+    app: oracle
+spec:
+  serviceName: oracle-db
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oracle
+  template:
+    metadata:
+      labels:
+        app: oracle
+    spec:
+      securityContext:
+        fsGroup: 54321
+        runAsUser: 54321
+        runAsGroup: 54321
+      containers:
+      - name: oracle-db
+        image: container-registry.oracle.com/database/free:latest-lite
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: oracle
+          containerPort: 1521
+          protocol: TCP
+        # Load all environment variables from ConfigMap
+        envFrom:
+        - configMapRef:
+            name: oracle-config
+        volumeMounts:
+        - name: oracle-data
+          mountPath: /opt/oracle/oradata
+        # Mount all SQL scripts under /opt/oracle/scripts/startup for automatic execution
+        - name: xstream-scripts
+          mountPath: /opt/oracle/scripts/startup/01-xstream-setup.sh
+          subPath: xstream-setup.sh
+          readOnly: true
+        - name: sample-data-scripts
+          mountPath: /opt/oracle/scripts/startup/02-sample-data-setup.sh
+          subPath: sample-data-setup.sh
+          readOnly: true
+        - name: readiness-scripts
+          mountPath: /opt/oracle/scripts/startup/03-orclcdc-readiness.sh
+          subPath: orclcdc_readiness.sh
+          readOnly: true
+        resources:
+          requests:
+            memory: "4Gi"
+            cpu: 2
+          limits:
+            memory: "4Gi"
+            cpu: 2
+        livenessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -c
+            - "echo 'SELECT 1 FROM DUAL;' | sqlplus -S / as sysdba | tail -2 | head -1 | grep -q '1'"
+          initialDelaySeconds: 240
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command:
+            - /bin/bash
+            - -c
+            - "echo 'SELECT 1 FROM DUAL;' | sqlplus -S / as sysdba | tail -2 | head -1 | grep -q '1'"
+          initialDelaySeconds: 180
+          periodSeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 3
+      volumes:
+      - name: oracle-data
+        persistentVolumeClaim:
+          claimName: oracle-db-data
+      - name: xstream-scripts
+        configMap:
+          name: oracle-xstream-config
+          defaultMode: 0755
+      - name: sample-data-scripts
+        configMap:
+          name: oracle-sample-data-config
+          defaultMode: 0755
+      - name: readiness-scripts
+        configMap:
+          name: oracle-cdc-readiness-config
+          defaultMode: 0755 
