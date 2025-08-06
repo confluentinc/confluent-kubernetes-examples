@@ -193,4 +193,4 @@ data:
           - name: oracle-libs
             emptyDir: {}
           - name: confluent-hub-components
-            emptyDir: {} 
+            emptyDir: {}

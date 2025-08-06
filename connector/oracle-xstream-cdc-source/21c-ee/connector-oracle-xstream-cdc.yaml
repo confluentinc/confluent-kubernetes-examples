@@ -47,4 +47,4 @@ spec:
     
   connectClusterRef:
     name: connect
-    namespace: confluent 
+    namespace: confluent

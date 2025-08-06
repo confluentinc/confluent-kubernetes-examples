@@ -262,4 +262,4 @@ data:
       exit 1
     fi
 
-    echo "=== XStream Setup Complete ===" 
+    echo "=== XStream Setup Complete ==="

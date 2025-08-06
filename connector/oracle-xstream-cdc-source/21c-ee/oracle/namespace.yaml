@@ -4,4 +4,4 @@ metadata:
   name: oracle
   labels:
     app: oracle
-    purpose: oracle-database 
+    purpose: oracle-database

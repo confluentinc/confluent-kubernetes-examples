@@ -92,4 +92,4 @@ spec:
       - name: readiness-scripts
         configMap:
           name: oracle-cdc-readiness-config
-          defaultMode: 0755 
+          defaultMode: 0755
