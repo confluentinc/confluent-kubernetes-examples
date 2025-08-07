@@ -4,9 +4,6 @@ Deploy Confluent Platform
 In this workflow scenario, you'll set up Connect with basic authentication.  
 You will use Control Center to monitor and connect to a Confluent Platform.
 
-NOTE: Control Center does not support basic authentication to the Connect Cluster and you will not be able to connect to it via the UI. 
-
-
 
 The goal for this scenario is for you to:
 
@@ -123,7 +120,7 @@ Deploy Confluent Platform
 
 ::
 
-  kubectl apply -f $TUTORIAL_HOME/confluent-platform.yaml --namespace=confluent
+  kubectl delete -f confluent-platform.yaml --namespace=confluent
 
 #. Check that all Confluent Platform resources are deployed:
 
@@ -198,7 +195,7 @@ Use Control Center to monitor the Confluent Platform, and see the created topic 
 
    ::
 
-     kubectl port-forward controlcenter-0 9021:9021 --namespace=confluent
+     kubectl port-forward controlcenter-0 9021:9021 --namespace=test-connect
 
 #. Browse to Control Center:
 
@@ -228,7 +225,7 @@ Shut down Confluent Platform and the data:
 
 ::
 
-  helm delete operator --namespace=confluent
+  helm delete operator --namespace=test-connect
 
 ::
 
