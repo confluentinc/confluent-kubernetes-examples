@@ -15,14 +15,14 @@ spec:
   listeners:
     internal:
       authentication:
-        type: plain
+        type: ldap
         jaasConfig:
           secretRef: credential
       tls:
         enabled: true
     external:
       authentication:
-        type: plain
+        type: ldap
         jaasConfig:
           secretRef: credential
       externalAccess:
@@ -97,6 +97,14 @@ spec:
     init: confluentinc/confluent-init-container:2.11.0
   tls:
     secretRef: tls-group1
+  listeners:
+    controller:
+      authentication:
+        type: plain
+        jaasConfigPassThrough:
+          secretRef: credential-plain
+      tls:
+        enabled: true
   dataVolumeCapacity: 10G
   authorization:
     superUsers:
