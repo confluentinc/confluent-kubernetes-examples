@@ -1,0 +1,18 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: cfrb-client-kafka-ro
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: 0oaut4itbi0EM26kW697      # Replace with appropriate Okta Client ID
+  resourcePatterns:
+    - name: csg-ps
+      patternType: PREFIXED
+      resourceType: Topic
+    - name: csg-ps-okta-group1-
+      patternType: PREFIXED
+      resourceType: Group
+  role: ResourceOwner
+---
