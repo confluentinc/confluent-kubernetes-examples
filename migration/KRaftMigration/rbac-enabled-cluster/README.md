@@ -19,6 +19,12 @@ export TUTORIAL_HOME=<Tutorial directory>/migration/KRaftMigration/rbac-enabled-
 
 ## Deploy Confluent for Kubernetes
 
+* Create the namespace to use
+```
+kubectl create namespace confluent
+```
+
+
 * Set up the Helm Chart:
 ```
 helm repo add confluentinc https://packages.confluent.io/helm
@@ -41,7 +47,7 @@ This repo includes a Helm chart for [OpenLdap](https://github.com/osixia/docker-
 
 * Deploy OpenLdap
 ```
-helm upgrade --install -f $TUTORIAL_HOME/../../../assets/openldap/ldaps-rbac.yaml test-ldap $TUTORIAL_HOME/../../assets/openldap --namespace confluent
+helm upgrade --install -f $TUTORIAL_HOME/../../../assets/openldap/ldaps-rbac.yaml test-ldap $TUTORIAL_HOME/../../../assets/openldap --namespace confluent
 ```
 
 * Validate that OpenLDAP is running:
