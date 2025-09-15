@@ -15,14 +15,14 @@ spec:
   listeners:
     internal:
       authentication:
-        type: ldap
+        type: plain
         jaasConfig:
           secretRef: credential
       tls:
         enabled: true
     external:
       authentication:
-        type: ldap
+        type: plain
         jaasConfig:
           secretRef: credential
       externalAccess:
@@ -101,8 +101,8 @@ spec:
     controller:
       authentication:
         type: plain
-        jaasConfigPassThrough:
-          secretRef: credential-plain
+        jaasConfig:
+          secretRef: credential
       tls:
         enabled: true
   dataVolumeCapacity: 10G

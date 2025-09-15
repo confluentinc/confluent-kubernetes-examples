@@ -112,13 +112,6 @@ kubectl create secret generic credential \
 --from-file=digest.txt=$TUTORIAL_HOME/creds-kafka-zookeeper-credentials.txt \
 --from-file=plain.txt=$TUTORIAL_HOME/creds-client-kafka-sasl-user.txt \
 --from-file=ldap.txt=$TUTORIAL_HOME/ldap.txt \
---from-file=plain-interbroker.txt=$TUTORIAL_HOME/creds/creds-client-kafka-sasl-user.txt \
---namespace confluent
-```
-
-```
-kubectl create secret generic credential-plain \
---from-file=plain-jaas.conf=$TUTORIAL_HOME/creds-kafka-sasl-users.conf \
 --namespace confluent
 ```
 
