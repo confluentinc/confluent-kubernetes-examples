@@ -1,0 +1,129 @@
+## Image pull secret
+imagePullSecretRef: confluent-registry
+
+## confluent-manager-for-apache-flink image
+image:
+  repository: confluentinc
+  name: cp-cmf
+  pullPolicy: IfNotPresent
+  tag: 2.0.1
+## CMF Pod Resources
+resources:
+  limits:
+    cpu: 2
+    memory: 1024Mi
+  requests:
+    cpu: 1
+    memory: 1024Mi
+
+## Load license either from K8s secret
+license:
+  ##
+  ## The license secret reference name is injected through
+  ## CONFLUENT_LICENSE environment variable.
+  ## The expected key: license.txt. license.txt contains raw license data.
+  ## Example:
+  ##   secretRef: confluent-license-for-cmf
+  secretRef: ""
+
+## Pod Security Context
+podSecurity:
+  enabled: true
+  securityContext:
+    fsGroup: 1001
+    runAsUser: 1001
+    runAsNonRoot: true
+
+## Persistence for CMF
+persistence:
+  # if set to false, the database will be on the pod ephemeral storage, e.g. gone when the pod stops
+  create: true
+  dataVolumeCapacity: 10Gi
+##  storageClassName: # Without the storage class, the default storage class is used.
+
+## Volumes to mount for the CMF pod.
+##
+## Example with a PVC.
+## mountedVolumes:
+##   volumes:
+##   - name: custom-volume
+##     persistentVolumeClaim:
+##       claimName: pvc-test
+##   volumeMounts:
+##   - name: custom-volume
+##     mountPath: /mnt/<path_of_your_choice>
+##/mnt/jvmtruststore/truststore.jks
+mountedVolumes:
+  volumes:
+    - name: mdstoken
+      secret:
+        secretName: mds-token
+    - name: truststore
+      secret:
+        secretName: cmf-truststore
+    - name: keystore
+      secret:
+        secretName: cmf-keystore
+  volumeMounts:
+    - name: mdstoken
+      mountPath: /mnt/secrets
+    - name: truststore
+      mountPath: /opt/truststore
+    - name: keystore
+      mountPath: /opt/keystore
+
+## Configure the CMF service for example Authn/Authz
+cmf:
+  ssl:
+    keystore: /opt/keystore/keystore.jks
+    keystore-password: allpassword
+    trust-store: /opt/truststore/truststore.jks
+    trust-store-password: allpassword
+#    client-auth: need
+  k8s: #This configuration is only required if you did not setup FKO and CMF can reach FKO
+    enabled: false
+  authentication:
+    type: oauth
+    config:
+      oauthbearer.jwks.endpoint.url: http://keycloak:8080/realms/sso_test/protocol/openid-connect/certs
+      token.issuer: Confluent
+      oauthbearer.expected.issuer: http://keycloak:8080/realms/sso_test
+      public.key.path: /mnt/secrets/mdsPublicKey.pem
+      oauthbearer.sub.claim.name: client_id
+      confluent.metadata.bootstrap.server.urls: https://kafka.operator.svc.cluster.local:8090
+      confluent.metadata.http.auth.credentials.provider: OAUTHBEARER
+      confluent.metadata.oauthbearer.token.endpoint.url: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
+      confluent.metadata.oauthbearer.login.client.id: ssologin
+      confluent.metadata.oauthbearer.login.client.secret: W8V4cqewCy54x4gm7UjhLkk0rrFDi6DT
+      ssl.truststore.location: /opt/truststore/truststore.jks
+      ssl.truststore.password: allpassword
+  kafka:
+    oauthbearerAllowedUrls: "http://keycloak:8080/realms/sso_test,http://keycloak:8080/realms/sso_test/protocol/openid-connect/certs,http://keycloak:8080/realms/sso_test/protocol/openid-connect/auth,http://keycloak:8080/realms/sso_test/protocol/openid-connect/token"
+
+## Enable Kubernetes RBAC
+# When set to true, it will create a proper role/rolebinding or cluster/clusterrolebinding based on namespaced field.
+# If a user doesn't have permission to create role/rolebinding then they can disable rbac field and
+# create required resources out of band to be used by the Operator. In this case, follow the
+# templates/clusterrole.yaml and templates/clusterrolebiding.yaml to create proper required resources.
+rbac: true
+## Creates a default service account for the CMF pod if service.account.create is set to true.
+# In order to use a custom service account, set the name field to the desired service account name and set create to false.
+# Also note that the new service account must have the necessary permissions to run the CMF pod, i.e cluster wide permissions.
+# The custom service account must have:
+#
+# rules:
+#  - apiGroups: ["flink.apache.org"]
+#    resources: ["flinkdeployments", "flinkdeployments/status"] # Needed to manage FlinkDeployments CRs
+#    verbs: ["*"]
+#  - apiGroups: [""]
+#    resources: ["services"] # Read-only permissions needed for the flink UI
+#    verbs: ["get", "list", "watch"]
+serviceAccount:
+  create: true
+  name: ""
+# The jvmArgs parameter allows you to specify custom Java Virtual Machine (JVM) arguments that will be passed to the application container.
+# This can be useful for tuning memory settings, garbage collection, and other JVM-specific options.
+# Example :
+# jvmArgs: "-Xms512m -Xmx1024m -XX:+UseG1GC"
+
+jvmArgs: "-Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=http://keycloak:8080/realms/sso_test,http://keycloak:8080/realms/sso_test/protocol/openid-connect/certs,http://keycloak:8080/realms/sso_test/protocol/openid-connect/auth,http://keycloak:8080/realms/sso_test/protocol/openid-connect/token"

@@ -1,0 +1,155 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: source
+spec:
+  dataVolumeCapacity: 10G
+  image:
+    application: confluentinc/cp-server:8.0.0
+    init: confluentinc/confluent-init-container:3.0.0
+    pullSecretRef:
+      - confluent-registry
+  listeners:
+    controller:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+  replicas: 3
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: source
+spec:
+  dataVolumeCapacity: 10G
+  image:
+    application: confluentinc/cp-server:8.0.0
+    init: confluentinc/confluent-init-container:3.0.0
+    pullSecretRef:
+      - confluent-registry
+  replicas: 3
+  listeners:
+    internal:
+      authentication:
+        type: oauth
+        oauthSettings:
+          groupsClaimName: groups
+          jwksEndpointUri: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/certs
+          tokenEndpointUri: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
+          expectedIssuer: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test
+          clientAssertion:
+            clientId: private-key-client
+            localClientAssertion:
+              issuer: private-key-client
+              subject: private-key-client
+              audience: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
+              privateKeyFile:
+                secretRef: private-key
+              includeJtiClaim: true
+    replication:
+      authentication:
+        type: oauth
+        oauthSettings:
+          groupsClaimName: groups
+          jwksEndpointUri: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/certs
+          tokenEndpointUri: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
+          expectedIssuer: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test
+          clientAssertion:
+            clientId: private-key-client
+            localClientAssertion:
+              issuer: private-key-client
+              subject: private-key-client
+              audience: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
+              privateKeyFile:
+                secretRef: private-key
+              includeJtiClaim: true
+    external:
+      authentication:
+        type: oauth
+        oauthSettings:
+          groupsClaimName: groups
+          jwksEndpointUri: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/certs
+          tokenEndpointUri: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
+          expectedIssuer: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test
+          clientAssertion:
+            clientId: private-key-client
+            localClientAssertion:
+              issuer: private-key-client
+              subject: private-key-client
+              audience: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
+              privateKeyFile:
+                secretRef: private-key
+              includeJtiClaim: true
+  dependencies:
+    kRaftController:
+      controllerListener:
+        authentication:
+          type: plain
+          jaasConfig:
+            secretRef: credential
+      clusterRef:
+        name: kraftcontroller
+  services:
+    kafkaRest:
+      authentication:
+        type: oauth
+        oauth:
+          configuration:
+            groupsClaimName: groups
+            jwksEndpointUri: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/certs
+            expectedIssuer: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test
+            tokenEndpointUri: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
+            clientAssertion:
+              clientId: private-key-client
+              localClientAssertion:
+                issuer: private-key-client
+                subject: private-key-client
+                audience: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
+                privateKeyFile:
+                  secretRef: private-key
+                includeJtiClaim: true
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: demo
+  namespace: source
+spec:
+  replicas: 3
+  partitionCount: 4
+  configs:
+    cleanup.policy: "delete"
+  kafkaRestClassRef:
+    name: source-kafka-rest
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: source-kafka-rest
+  namespace: source
+spec:
+  kafkaClusterRef:
+    name: kafka
+  kafkaRest:
+    endpoint: http://kafka.source.svc.cluster.local:8090
+    authentication:
+      type: oauth
+      oauth:
+        configuration:
+          groupsClaimName: groups
+          jwksEndpointUri: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/certs
+          expectedIssuer: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test
+          tokenEndpointUri: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
+          clientAssertion:
+            clientId: private-key-client
+            localClientAssertion:
+              issuer: private-key-client
+              subject: private-key-client
+              audience: http://keycloak.operator.svc.cluster.local:8080/realms/sso_test/protocol/openid-connect/token
+              privateKeyFile:
+                secretRef: private-key
+              includeJtiClaim: true
+---

@@ -1,0 +1,18 @@
+{
+  "CN": "controlcenter-next-gen",
+  "hosts": [
+    "controlcenter-next-gen",
+    "controlcenter-next-gen.operator.svc.cluster.local"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "Universe",
+      "ST": "Pangea",
+      "L": "Earth"
+    }
+  ]
+}

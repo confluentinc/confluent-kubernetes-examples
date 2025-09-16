@@ -2,10 +2,10 @@
   "apiVersion": "platform.confluent.io/v1beta1",
   "kind": "FlinkApplication",
   "metadata": {
-    "name": "abhijeet-env1"
+    "name": "flink-env1"
   },
   "spec": {
-    "flinkEnvironment": "abhijeet-env1",
+    "flinkEnvironment": "flink-env1",
     "image": "confluentinc/cp-flink:1.19.1-cp1",
     "flinkVersion": "v1_19",
     "flinkConfiguration": {

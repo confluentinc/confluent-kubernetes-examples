@@ -4,10 +4,6 @@ Deploy Confluent Platform
 In this workflow scenario, you'll set up Connect with basic authentication.  
 You will use Control Center to monitor and connect to a Confluent Platform.
 
-NOTE: Control Center does not support basic authentication to the Connect Cluster and you will not be able to connect to it via the UI. 
-
-
-
 The goal for this scenario is for you to:
 
 * Configure basic authentication for Connect authentication (no RBAC).
@@ -74,6 +70,9 @@ Create Basic authentication secret
    --from-file=basic.txt=$TUTORIAL_HOME/basic.txt \
    --namespace confluent
 
+  kubectl create secret generic rest-credential \
+  --from-file=basic.txt=$TUTORIAL_HOME/rest-credential.txt \
+  --namespace confluent
 
 ========================================
 Review Confluent Platform configurations
@@ -232,5 +231,3 @@ Shut down Confluent Platform and the data:
   helm delete secret basicsecret --namespace=confluent
 
 ::
-
-

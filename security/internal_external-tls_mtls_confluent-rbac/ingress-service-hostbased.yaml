@@ -1,4 +1,4 @@
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ingress-with-tls-reencryption
@@ -21,24 +21,40 @@ spec:
     - host: mds.mydomain.com
       http:
         paths:
-          - backend:
-              serviceName: mds-bootstrap
-              servicePort: 8090
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mds-bootstrap
+                port:
+                  number: 8090
     - host: controlcenter.mydomain.com
       http:
         paths:
-          - backend:
-              serviceName: controlcenter-0-internal
-              servicePort: 9021
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: controlcenter-0-internal
+                port:
+                  number: 9021
     - host: ksqldb.mydomain.com
       http:
         paths:
-          - backend:
-              serviceName: ksqldb-bootstrap
-              servicePort: 8088
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ksqldb-bootstrap
+                port:
+                  number: 8088
     - host: connect.mydomain.com
       http:
         paths:
-          - backend:
-              serviceName: connect-bootstrap
-              servicePort: 8083
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: connect-bootstrap
+                port:
+                  number: 8083

@@ -90,7 +90,7 @@ kubectl -n destination create secret tls ca-pair-sslcerts \
 After the Schema registry is in running state, create schema exporter between source and destination. Schema exporter will be created in the source cluster.
 
 ### create schema exporter between source and destination
-    kubectl apply -f $TUTORIAL_HOME/schemaexporter-basic.yaml
+    kubectl apply -f $TUTORIAL_HOME/schemaexporter-oauth.yaml
 
 
 ## Verify is schemas are exported

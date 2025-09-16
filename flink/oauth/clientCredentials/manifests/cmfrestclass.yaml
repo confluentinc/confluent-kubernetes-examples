@@ -1,0 +1,17 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: CMFRestClass
+metadata:
+  name: default
+  namespace: operator
+spec:
+  cmfRest:
+    endpoint: https://cmf-service:80
+    authentication:
+      type: oauth
+      oauth:
+        secretRef: oauth-jaas
+        configuration:
+          tokenEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
+    tls:
+      secretRef: cmf-day2-tls
+---
