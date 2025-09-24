@@ -18,7 +18,7 @@ spec:
       - confluent.telemetry.exporter._c3-2.type=http
   dataVolumeCapacity: 10G
   image:
-    application: docker.io/confluentinc/cp-server:8.0.0
+    application: confluentinc/cp-server:8.0.0
     init: confluentinc/confluent-init-container:3.0.0
   replicas: 3
   dependencies:
@@ -102,7 +102,7 @@ spec:
     - name: connect
       url: http://connect.confluent.svc.cluster.local:8083
     kafka:
-      bootstrapEndpoint: http://kafka.confluent.svc.cluster.local:9071
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
     prometheusClient:
       url: http://controlcenter.confluent.svc.cluster.local:9090
     alertManagerClient:
@@ -139,7 +139,7 @@ spec:
     - name: connect
       url: http://connect.confluent.svc.cluster.local:8083
     kafka:
-      bootstrapEndpoint: http://kafka.confluent.svc.cluster.local:9071
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
     prometheusClient:
       url: http://controlcenter-2.confluent.svc.cluster.local:9090
     alertManagerClient:
