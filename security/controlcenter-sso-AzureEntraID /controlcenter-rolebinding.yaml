@@ -1,0 +1,10 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: c3-user-rb
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: ZdpHlzTwv2DCnYJRMsWCeeXE6F4kUooA0d7qflmAui4
+  role: SystemAdmin
