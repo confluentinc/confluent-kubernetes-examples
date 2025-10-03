@@ -16,22 +16,19 @@ Steps to configure SSO using OIDC based IDP Azure Entra ID for C3 deployed via C
 
 You can sign up with a free trial on Azure  Microsoft Azure 
 
-#1.1 Register OIDC client Application (Add Redirect URi once the CFK cluster is deployed )
+# 1.1 Register OIDC client Application (Add Redirect URi once the CFK cluster is deployed )
 
+<img width="1292" height="961" alt="Register an application" src="https://github.com/user-attachments/assets/5f37ae45-d28e-4796-8359-ae68b6364632" />
 
-https://github.com/user-attachments/assets/f74f1c93-5131-4010-9dbf-e37c09696b23
 
 # 1.2 Create Client Secret
 
-   
-https://github.com/user-attachments/assets/81002926-10fa-4c81-941b-d4700cc3ffd9
+<img width="1367" height="669" alt="unknown" src="https://github.com/user-attachments/assets/0e6318de-c7e4-4e3e-a6d7-fa54073c06ef" />
+
 
 # 1.3 Add group claims in Token Configuration.
 
-
-
-https://github.com/user-attachments/assets/ea4013ba-9e86-49a7-9446-ac953a9ca476
-
+<img width="1715" height="898" alt="unknown" src="https://github.com/user-attachments/assets/f1c1b530-39f5-4a99-b48a-11b037614dbe" />
 
 
 # 1.4 Capture IDP endpoints required to fetch, authorize, and verify tokens from OpenID Connect metadata document URL
