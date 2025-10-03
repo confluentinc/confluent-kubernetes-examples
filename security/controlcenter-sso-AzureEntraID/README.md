@@ -1,4 +1,4 @@
-<img width="1367" height="669" alt="unknown" src="https://github.com/user-attachments/assets/08ca9545-d741-46a3-bde0-ae42570b0b75" /># C3_SSO_setup_cfk
+# C3_SSO_setup_cfk
 This involves setting up IDP (Azure Entra ID ) & Service Provider (Confluent Platform kafka Cluster)
 
 Steps to configure SSO using OIDC based IDP Azure Entra ID for C3 deployed via CFK  referring :
