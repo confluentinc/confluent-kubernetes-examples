@@ -16,7 +16,7 @@ Steps to configure SSO using OIDC based IDP Azure Entra ID for C3 deployed via C
 
 You can sign up with a free trial on Azure  Microsoft Azure 
 
-#1.1 Register OIDC client Application (Add Redirect URi once the CFK cluster is deployed )
+# 1.1 Register OIDC client Application (Add Redirect URi once the CFK cluster is deployed )
 
 <img width="1292" height="961" alt="Register an application" src="https://github.com/user-attachments/assets/5f37ae45-d28e-4796-8359-ae68b6364632" />
 
