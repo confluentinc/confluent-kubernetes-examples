@@ -1,0 +1,19 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaExporter
+metadata:
+  name: schema-exporter-finance
+  namespace: confluent
+spec:
+  sourceCluster:
+    schemaRegistryClusterRef:
+      name: schemaregistry
+      namespace: confluent
+  destinationCluster:
+    schemaRegistryRest:
+      endpoint: https://lsrc-ng2jxd.ap-south-1.aws.private.confluent.cloud
+      authentication:
+        type: basic
+        basic:
+          secretRef: cc-credential
+  contextName: "cc"
+  subjects: [ ":.finance:*" ]
