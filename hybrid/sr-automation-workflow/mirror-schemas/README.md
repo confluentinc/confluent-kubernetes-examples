@@ -36,6 +36,34 @@ This mirroring workflow:
 - `kubectl` configured to access your cluster
 - Confluent Cloud API credentials for schema registry access
 
+## ⚠️ **IMPORTANT: Clean Existing Mode Settings First** ⚠️
+
+**If you already have an existing Schema Registry setup in Confluent Platform**, you **MUST** clean all mode settings at subject and context levels before proceeding with this tutorial.
+
+**Run the cleanup script:**
+```bash
+# Navigate to the cleanup directory
+cd hybrid/sr-automation-workflow/clean-mode-settings
+
+# Set your Schema Registry endpoint
+export SCHEMA_REGISTRY_URL="http://localhost:8081"
+
+# If using authentication, set credentials
+export SCHEMA_REGISTRY_USER="your-username"
+export SCHEMA_REGISTRY_PASSWORD="your-password"
+
+# Run the cleanup script
+./cleanup_mode_settings.sh
+```
+
+**Why this is critical:**
+- Existing mode settings can conflict with the automation workflow
+- The automation workflow needs to manage modes automatically
+- Leftover mode configurations can cause synchronization failures
+- This ensures a clean state for the mirroring setup
+
+**⚠️ This step is MANDATORY for existing Schema Registry deployments ⚠️**
+
 ## Basic Setup
 
 - Set the tutorial directory for this tutorial under the directory you downloaded the tutorial files:
