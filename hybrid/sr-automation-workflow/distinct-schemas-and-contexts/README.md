@@ -3,6 +3,16 @@
 This playbook demonstrates how to synchronize distinct schema contexts between Confluent Platform (CP) and Confluent Cloud (CC) using Confluent for Kubernetes (CFK). 
 The workflow establishes context-specific bidirectional schema synchronization.
 
+## ⚠️ **WARNING: State-Changing Operation** ⚠️
+
+**This operation will change the state of Schema Registry in both Confluent Platform (CP) and Confluent Cloud (CC).**
+
+**Before proceeding, please ensure you have:**
+- Proper authorization and approval from your organization
+- Understanding of the impact on existing applications and services
+
+**This workflow will modify schema registry modes and create bidirectional synchronization between environments.**
+
 ## What This Workflow Does
 
 This context-based workflow:

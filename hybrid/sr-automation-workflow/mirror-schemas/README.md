@@ -3,6 +3,16 @@
 This playbook demonstrates how to create an exact replica between Confluent Platform (CP) and Confluent Cloud (CC) using Confluent for Kubernetes (CFK). 
 The workflow establishes true bidirectional schema synchronization, ensuring both environments maintain identical schema repositories.
 
+## ⚠️ **WARNING: State-Changing Operation** ⚠️
+
+**This operation will change the state of Schema Registry in both Confluent Platform (CP) and Confluent Cloud (CC).**
+
+**Before proceeding, please ensure you have:**
+- Proper authorization and approval from your organization
+- Understanding of the impact on existing applications and services
+
+**This workflow will modify schema registry modes and create bidirectional synchronization between environments.**
+
 ## What This Workflow Does
 
 This mirroring workflow:

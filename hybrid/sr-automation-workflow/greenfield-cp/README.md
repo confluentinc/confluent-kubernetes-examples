@@ -3,6 +3,16 @@
 This playbook demonstrates how to integrate a new Confluent Platform (CP) with an existing Confluent Cloud (CC) Schema Registry using Confluent for Kubernetes (CFK). 
 The workflow establishes a greenfield CP deployment that automatically imports schemas from Confluent Cloud and enables forward mode at CP for seamless hybrid operations.
 
+## ⚠️ **WARNING: State-Changing Operation** ⚠️
+
+**This operation will change the state of Schema Registry in both Confluent Platform (CP) and Confluent Cloud (CC).**
+
+**Before proceeding, please ensure you have:**
+- Proper authorization and approval from your organization
+- Understanding of the impact on existing applications and services
+
+**This workflow will modify schema registry modes and create bidirectional synchronization between environments.**
+
 ## What This Workflow Does
 
 This greenfield workflow:
