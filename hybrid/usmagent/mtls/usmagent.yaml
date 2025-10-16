@@ -1,0 +1,22 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: USMAgent
+metadata:
+  name: usm-agent
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: docker.io/confluentinc/cp-usm-agent:1.0.0
+    init: confluentinc/confluent-init-container:3.1.0
+  authentication:
+    type: mtls
+  # TLS secret
+  tls:
+    secretRef: tls-usmagent
+  confluentCloudClient:
+    endpoint: <frontdoor_url>
+    environmentId: <env_id>
+    authentication:
+      type: basic
+      basic:
+        secretRef: setu-ccloud-cred
