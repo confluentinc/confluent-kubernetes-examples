@@ -63,7 +63,7 @@ kubectl get svc -n confluent
 
 ## Testing the Configuration
 
-1. Create a client configuration file (`client.properties`):
+1. Create a client configuration file (`client.properties`). Modify the `sasl.jaas.config` section with appropriate credentials.
 ```
 security.protocol=SASL_PLAINTEXT
 sasl.mechanism=PLAIN
