@@ -8,7 +8,7 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cpc-gateway:latest-ubi9
+    application: confluentinc/cpc-gateway:1.0.0-1-ubi9
     init: confluentinc/confluent-init-container:3.1.0
   streamingDomains:
     - name: passthrough-sasl-plain-kafka
