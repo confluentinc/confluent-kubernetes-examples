@@ -22,42 +22,39 @@ In this scenario, the Gateway acts as a passthrough proxy that forwards SASL/PLA
 
 ### Step 1: Deploy the Confluent for Kubernetes Operator
 
-Add the Confluent Helm repository
+- Add the Confluent Helm repository
 ```
 helm repo add confluentinc https://packages.confluent.io/helm
 helm repo update
 ```
-
-Create the `confluent` namespace in the Kubernetes cluster
+- Create the `confluent` namespace in the Kubernetes cluster
 ```
 kubectl create namespace confluent
 ```
-Install the CFK operator
+- Install the CFK operator
 ```
 helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes -n confluent
 ```
-Check that the `confluent-operator` pod comes up and is running:
-
+- Check that the `confluent-operator` pod comes up and is running:
 ```
 kubectl get pods -n confluent
 ```
 
 ### Step 2: Deploy gateway yaml
 
-Modify the `streamingDomains` section in the [gateway.yaml](./gateway.yaml) to point to your Kafka cluster SASL/PLAIN listener.
-Now deploy the gateway yaml.
-
+- Modify the `streamingDomains` section in the [gateway.yaml](./gateway.yaml) to point to your Kafka cluster SASL/PLAIN listener.
+- Now deploy the gateway yaml.
 ```
 kubectl apply -f gateway.yaml -n confluent
 ```
-Wait for the gateway pods to become READY
+- Wait for the gateway pods to become READY
 ```
 kubectl wait --for=condition=Ready pod -l app=confluent-gateway --timeout=600s -n confluent
 ```
 
 ### Step 3: Verify Deployment
 
-Check all components are running:
+- Check all components are running:
 ```
 kubectl get pods -n confluent
 kubectl get gateway -n confluent
@@ -96,7 +93,7 @@ kafka-console-consumer \
 
 To remove all resources created by this example:
 
-Delete Gateway
+- Delete Gateway
 ```
 kubectl delete -f gateway.yaml
 ```
