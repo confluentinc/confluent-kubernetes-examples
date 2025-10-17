@@ -95,5 +95,5 @@ To remove all resources created by this example:
 
 - Delete Gateway
 ```
-kubectl delete -f gateway.yaml
+kubectl delete -f gateway.yaml -n confluent
 ```
