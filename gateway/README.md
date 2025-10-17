@@ -18,3 +18,4 @@
 | Scenario                                           | Auth Mode | Routing | Client TLS | Cluster TLS | Client Auth | Cluster Auth | Description |
 |----------------------------------------------------| --- | --- | --- | --- | --- | --- | --- |
 | [passthrough-sasl-plain](./passthrough-sasl-plain) | Passthrough | Port | None | None | PLAIN | PLAIN | Simple plaintext setup with basic authentication |
+| [passthrough-sasl-ssl](./passthrough-sasl-ssl)     | Passthrough | Host | TLS | TLS | PLAIN | PLAIN | Host-based routing with TLS encryption and SASL/PLAIN authentication |
