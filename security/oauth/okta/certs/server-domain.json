@@ -1,0 +1,28 @@
+{
+  "CN": "kafka",
+  "hosts": [
+    "kafka",
+    "localhost",
+    "*.confluent.svc.cluster.local",
+    "*.kraftcontroller.confluent.svc.cluster.local",
+    "*.kafka.confluent.svc.cluster.local",
+    "*.schemaregistry.confluent.svc.cluster.local",
+    "*.connect.confluent.svc.cluster.local",
+    "*.ksqldb.confluent.svc.cluster.local",
+    "*.kafkarestproxy.confluent.svc.cluster.local",
+    "*.controlcenter.confluent.svc.cluster.local"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "US",
+      "ST": "CA",
+      "L": "MountainView",
+      "O": "Confluent",
+      "OU": "Operator"
+    }
+  ]
+}
