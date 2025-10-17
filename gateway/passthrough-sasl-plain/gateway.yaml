@@ -1,0 +1,37 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Gateway
+metadata:
+  labels:
+    app.kubernetes.io/name: confluent-for-kubernetes
+    app.kubernetes.io/managed-by: kustomize
+  name: confluent-gateway
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cpc-gateway:latest-ubi9
+    init: confluentinc/confluent-init-container:3.1.0
+  streamingDomains:
+    - name: passthrough-sasl-plain-kafka
+      type: kafka
+      kafkaCluster:
+        bootstrapServers:
+          - id: passthrough_SASL_PLAIN
+            endpoint: SASL_PLAINTEXT://ec2.us-west-2.compute.amazonaws.com:9093
+        nodeIdRanges:
+          - name: pool-1
+            start: 1
+            end: 3
+  routes:
+    - name: passthrough-sasl-plain-route
+      endpoint: gateway.example.com:9595
+      brokerIdentificationStrategy:
+        type: port
+      streamingDomain:
+        name: passthrough-sasl-plain-kafka
+        bootstrapServerId: passthrough_SASL_PLAIN
+      security:
+        auth: passthrough
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      domain: gateway.example.com
