@@ -5,7 +5,7 @@
 | Dimension                  | Options                           | Description                                  |
 |----------------------------|-----------------------------------|----------------------------------------------|
 | **Authentication Mode**    | Passthrough / Authentication Swap | Client to cluster authentication type        |
-| **Routing Strategy**       | Port-based / Host-based           | How requests are routed to Kafka brokers     |
+| **Routing Strategy**       | Port-based / Host-based           | How brokers are distinguished                |
 | **Client TLS**             | None / TLS / mTLS                 | Encryption between client and gateway        |
 | **Cluster TLS**            | None / TLS / mTLS                 | Encryption between gateway and Kafka cluster |
 | **Client Authentication**  | PLAIN / mTLS                      | Authentication mechanism for clients         |
