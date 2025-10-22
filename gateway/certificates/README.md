@@ -68,13 +68,6 @@ openssl x509 -req \
     )
 ```
 
-**SANs included:**
-- `gateway.example.com` - Primary Gateway hostname
-- `*.gateway.example.com` - Wildcard for subdomains
-- `broker0.gateway.example.com`, `broker1.gateway.example.com`, `broker2.gateway.example.com` - For host-based routing
-- `localhost` - For local testing
-- `127.0.0.1` - For local IP access
-
 - Clean up the CSR file:
 
 ```
