@@ -84,7 +84,7 @@ cat gateway.pem cacerts.pem > fullchain.pem
 
 ### Step 5: Create Kubernetes Secret
 
-Create a Kubernetes secret containing the certificates:
+- Create a Kubernetes secret containing the certificates:
 
 ```
 kubectl create secret generic gateway-tls \
