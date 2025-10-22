@@ -125,3 +125,18 @@ kafka-console-consumer \
   --topic test-topic \
   --from-beginning
 ```
+
+## Clean Up
+
+To remove all resources created by this example:
+
+- Delete Gateway
+```
+kubectl delete -f gateway.yaml -n confluent
+```
+
+- Delete Kubernetes secrets
+```
+kubectl delete secret gateway-tls -n confluent
+kubectl delete secret kafka-tls -n confluent
+```
