@@ -1,0 +1,42 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Gateway
+metadata:
+  labels:
+    app.kubernetes.io/name: confluent-for-kubernetes
+    app.kubernetes.io/managed-by: kustomize
+  name: confluent-gateway
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cpc-gateway:1.0.0-1-ubi9
+    init: confluentinc/confluent-init-container:3.1.0
+  streamingDomains:
+    - name: passthrough-sasl-ssl-kafka
+      type: kafka
+      kafkaCluster:
+        bootstrapServers:
+          - id: passthrough_SASL_SSL
+            endpoint: SASL_SSL://broker:9095
+            tls:
+              secretRef: kafka-tls
+        nodeIdRanges:
+          - name: pool-1
+            start: 1
+            end: 3
+  routes:
+    - name: passthrough-sasl-ssl-route
+      endpoint: gateway.example.com:9595
+      brokerIdentificationStrategy:
+        type: port
+      streamingDomain:
+        name: passthrough-sasl-ssl-kafka
+        bootstrapServerId: passthrough_SASL_SSL
+      security:
+        client:
+          tls:
+            secretRef: gateway-tls
+        auth: passthrough
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      domain: gateway.example.com
