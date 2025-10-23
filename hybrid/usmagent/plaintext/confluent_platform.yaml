@@ -1,0 +1,59 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: confluent
+spec:
+  dataVolumeCapacity: 10G
+  image:
+    application: docker.io/confluentinc/cp-server:8.1.0
+    init: confluentinc/confluent-init-container:3.1.0
+  replicas: 3
+  dependencies:
+    usmAgentClient:
+      url: http://usm-agent.confluent.svc.cluster.local:10000
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  dataVolumeCapacity: 10G
+  image:
+    application: docker.io/confluentinc/cp-server:8.1.0
+    init: confluentinc/confluent-init-container:3.1.0
+  replicas: 3
+  metricReporter:
+    enabled: false
+  dependencies:
+    kRaftController:
+      clusterRef:
+        name: kraftcontroller
+    usmAgentClient:
+      url: http://usm-agent.confluent.svc.cluster.local:10000
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+  namespace: confluent
+spec:
+  build:
+    type: onDemand
+    onDemand:
+      plugins:
+        locationType: confluentHub
+        confluentHub:
+          - name: kafka-connect-datagen
+            owner: confluentinc
+            version: 0.5.2
+  replicas: 1
+  image:
+    application: docker.io/confluentinc/cp-server-connect:8.1.0
+    init: confluentinc/confluent-init-container:3.1.0
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka:9071
+    usmAgentClient:
+      url: http://usm-agent.confluent.svc.cluster.local:10000
