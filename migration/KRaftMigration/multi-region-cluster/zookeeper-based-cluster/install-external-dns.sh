@@ -6,7 +6,7 @@ set -e
 
 # shellcheck disable=SC2128
 TUTORIAL_HOME=$(dirname "$BASH_SOURCE")
-VALUES_FILE="$TUTORIAL_HOME/external-dns-alternative-values.yaml"
+VALUES_FILE="$TUTORIAL_HOME/external-dns-values.yaml"
 
 # --- Add the correct Helm repository ---
 echo "Adding the kubernetes-sigs Helm repository..."
