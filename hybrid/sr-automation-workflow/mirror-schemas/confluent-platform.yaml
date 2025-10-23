@@ -42,7 +42,7 @@ spec:
   unifiedStreamManager:
     enabled: true # enables the USM schema registry extension
     remoteSchemaRegistry:
-      endpoint: https://lsrc-stgc8r0k60.us-west-2.aws.private.stag.cpdev.cloud
+      endpoint: https://lsrc-ng2jxd.ap-south-1.aws.private.confluent.cloud
       authentication:
         type: basic
         basic:
