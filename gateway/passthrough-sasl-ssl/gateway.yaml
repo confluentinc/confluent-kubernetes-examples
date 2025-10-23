@@ -11,12 +11,12 @@ spec:
     application: confluentinc/cpc-gateway:1.0.0-1-ubi9
     init: confluentinc/confluent-init-container:3.1.0
   streamingDomains:
-    - name: passthrough-sasl-ssl-kafka
+    - name: sasl-ssl-kafka
       type: kafka
       kafkaCluster:
         bootstrapServers:
-          - id: passthrough_SASL_SSL
-            endpoint: SASL_SSL://broker:9095
+          - id: SASL_SSL
+            endpoint: broker:9095
             tls:
               secretRef: kafka-tls
   routes:
@@ -26,8 +26,8 @@ spec:
         type: host
         pattern: broker$(nodeId).gateway.example.com:9595
       streamingDomain:
-        name: passthrough-sasl-ssl-kafka
-        bootstrapServerId: passthrough_SASL_SSL
+        name: sasl-ssl-kafka
+        bootstrapServerId: SASL_SSL
       security:
         client:
           tls:
