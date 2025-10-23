@@ -1,0 +1,27 @@
+{
+  "CN": "sr-east-server",
+  "hosts": [
+    "schemaregistry-0.schemaregistry.east.svc.cluster.local",
+    "schemaregistry-1.schemaregistry.east.svc.cluster.local",
+    "schemaregistry.east.svc.cluster.local",
+    "sr-east.platformops.dev.gcp.devel.cpdev.cloud",
+    "sr-east0.platformops.dev.gcp.devel.cpdev.cloud",
+    "sr-east1.platformops.dev.gcp.devel.cpdev.cloud",
+    "*.schemaregistry.east.svc.cluster.local",
+    "*.east.svc.cluster.local",
+    "platformops.dev.gcp.devel.cpdev.cloud"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "US",
+      "ST": "CA",
+      "L": "Palo Alto",
+      "O": "Confluent",
+      "OU": "Engineering"
+    }
+  ]
+}

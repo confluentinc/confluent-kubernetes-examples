@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: ldap-central.platformops.dev.gcp.devel.cpdev.cloud
+  name: ldap-central
+  namespace: central
+spec:
+  externalTrafficPolicy: Local
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+    - name: client
+      port: 389
+      protocol: TCP
+      targetPort: 389
+  selector:
+    statefulset.kubernetes.io/pod-name: ldap-0
+  sessionAffinity: None
+  type: LoadBalancer

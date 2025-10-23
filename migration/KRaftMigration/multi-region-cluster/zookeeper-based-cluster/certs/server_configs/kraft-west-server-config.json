@@ -1,0 +1,27 @@
+{
+  "CN": "kraft-west-server",
+  "hosts": [
+    "kraft-0.kraft.west.svc.cluster.local",
+    "kraft-1.kraft.west.svc.cluster.local",
+    "kraft.west.svc.cluster.local",
+    "kraft-west.platformops.dev.gcp.devel.cpdev.cloud",
+    "kraft-west0.platformops.dev.gcp.devel.cpdev.cloud",
+    "kraft-west1.platformops.dev.gcp.devel.cpdev.cloud",
+    "*.kraft.west.svc.cluster.local",
+    "*.west.svc.cluster.local",
+    "platformops.dev.gcp.devel.cpdev.cloud"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "US",
+      "ST": "CA",
+      "L": "Palo Alto",
+      "O": "Confluent",
+      "OU": "Engineering"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+# Generated certificates and keys
+certs/generated/*.pem
+certs/generated/*.key
+certs/generated/*.csr
+certs/ca/*.pem
+certs/ca/*.key
+certs/ca/*.csr
+certs/mds/*.pem
+certs/mds/*.key
+certs/mds/*.csr
+
+# Keep certificate configuration files
+!certs/server_configs/
+!certs/server_configs/*.json
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.bak
+*.backup
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

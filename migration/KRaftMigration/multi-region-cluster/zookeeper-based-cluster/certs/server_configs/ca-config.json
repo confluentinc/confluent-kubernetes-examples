@@ -1,0 +1,19 @@
+{
+  "CN": "TestCA",
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "US",
+      "ST": "CA",
+      "L": "MountainView",
+      "O": "Confluent",
+      "OU": "Operator"
+    }
+  ],
+  "ca": {
+    "expiry": "43800h"
+  }
+}

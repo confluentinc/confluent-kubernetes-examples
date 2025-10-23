@@ -1,0 +1,18 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftMigrationJob
+metadata:
+  name: kraftmigrationjob-east
+  namespace: east
+  annotations:
+    platform.confluent.io/kraft-migration-trigger-finalize-to-kraft: "true"
+spec:
+  dependencies:
+    kafka:
+      name: kafka
+      namespace: east
+    zookeeper:
+      name: zookeeper
+      namespace: east
+    kRaftController:
+      name: kraftcontroller-east
+      namespace: east

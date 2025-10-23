@@ -1,0 +1,28 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: sr-rb-0
+spec:
+  principal:
+    name: sr
+    type: user
+  clustersScopeByIds:
+    schemaRegistryClusterId: schema-registry-mrc
+  role: SecurityAdmin
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: sr-rb-1
+spec:
+  principal:
+    name: sr
+    type: user
+  resourcePatterns:
+    - name: _schemas_mrc
+      patternType: LITERAL
+      resourceType: Topic
+    - name: schema-registry-mrc
+      patternType: LITERAL
+      resourceType: Group
+  role: ResourceOwner

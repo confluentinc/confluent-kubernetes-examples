@@ -1,0 +1,12 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: c3-rb-0
+  namespace: central
+spec:
+  principal:
+    name: c3
+    type: user
+  clustersScopeByIds:
+    schemaRegistryClusterId: schema-registry-mrc
+  role: SystemAdmin

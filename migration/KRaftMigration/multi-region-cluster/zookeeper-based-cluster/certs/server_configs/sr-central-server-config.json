@@ -1,0 +1,26 @@
+{
+  "CN": "sr-central-server",
+  "hosts": [
+    "schemaregistry-0.schemaregistry.central.svc.cluster.local",
+    "schemaregistry.central.svc.cluster.local",
+    "sr-central.platformops.dev.gcp.devel.cpdev.cloud",
+    "sr-central0.platformops.dev.gcp.devel.cpdev.cloud",
+    "sr-central1.platformops.dev.gcp.devel.cpdev.cloud",
+    "*.schemaregistry.central.svc.cluster.local",
+    "*.central.svc.cluster.local",
+    "platformops.dev.gcp.devel.cpdev.cloud"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "US",
+      "ST": "CA",
+      "L": "Palo Alto",
+      "O": "Confluent",
+      "OU": "Engineering"
+    }
+  ]
+}

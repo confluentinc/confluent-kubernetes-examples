@@ -1,0 +1,152 @@
+name: ldap
+image: osixia/openldap:1.5.0
+tls:
+  enabled: true
+  fullchain: |-
+  privkey: |-
+  cacerts: |-
+
+env:
+  LDAP_ORGANISATION: "Test Inc."
+  LDAP_DOMAIN: "test.com"
+  LDAP_ADMIN_PASSWORD: "confluentrox"
+  LDAP_CONFIG_PASSWORD: "confluentconfigrox"
+  LDAP_READONLY_USER: "true"
+  LDAP_READONLY_USER_USERNAME: "mds"
+  LDAP_READONLY_USER_PASSWORD: "Developer!"
+  LDAP_BASE_DN: "dc=test,dc=com"
+
+# Adding integer before ldif name to allow sequence order.
+ldifs:
+  00_kafka.ldif: |-
+    dn: cn=kafka,{{ LDAP_BASE_DN }}
+    userPassword: kafka-secret
+    description: kafka user
+    objectClass: simpleSecurityObject
+    objectClass: organizationalRole
+    cn: kafka
+  01_erp.ldif: |-
+    dn: cn=erp,{{ LDAP_BASE_DN }}
+    userPassword: erp-secret
+    description: erp user
+    objectClass: simpleSecurityObject
+    objectClass: organizationalRole
+    cn: erp
+  02_sr.ldif: |-
+    dn: cn=sr,{{ LDAP_BASE_DN }}
+    userPassword: sr-secret
+    description: schema registry user
+    objectClass: simpleSecurityObject
+    objectClass: organizationalRole
+    cn: sr
+  03_c3.ldif: |-
+    dn: cn=c3,{{ LDAP_BASE_DN }}
+    userPassword: c3-secret
+    description: control center user
+    objectClass: simpleSecurityObject
+    objectClass: organizationalRole
+    cn: c3
+  04_ksql.ldif: |-
+    dn: cn=ksql,{{ LDAP_BASE_DN }}
+    userPassword: ksql-secret
+    description: ksql user
+    objectClass: simpleSecurityObject
+    objectClass: organizationalRole
+    cn: ksql
+  05_connect.ldif: |-
+    dn: cn=connect,{{ LDAP_BASE_DN }}
+    userPassword: connect-secret
+    description: connect user
+    objectClass: simpleSecurityObject
+    objectClass: organizationalRole
+    cn: connect
+  06_replicator.ldif: |-
+    dn: cn=replicator,{{ LDAP_BASE_DN }}
+    userPassword: replicator-secret
+    description: replicator user
+    objectClass: simpleSecurityObject
+    objectClass: organizationalRole
+    cn: replicator
+  07_krp.ldif: |-
+    dn: cn=krp,{{ LDAP_BASE_DN }}
+    userPassword: krp-secret
+    description: krp user
+    objectClass: simpleSecurityObject
+    objectClass: organizationalRole
+    cn: krp
+  08_c3-test.ldif: |-
+    dn: cn=testadmin,{{ LDAP_BASE_DN }}
+    userPassword: testadmin
+    description: testadmin user
+    objectClass: simpleSecurityObject
+    objectClass: organizationalRole
+    cn: testadmin
+  09_c3-groupou.ldif: |-
+    dn: ou=users,{{ LDAP_BASE_DN }}
+    objectClass: organizationalUnit
+    ou: Users
+
+    dn: ou=groups,{{ LDAP_BASE_DN }}
+    objectClass: organizationalUnit
+    ou: Groups
+  10_c3usersgroup.ldif: |-
+    dn: cn=c3users,ou=groups,{{ LDAP_BASE_DN }}
+    objectClass: top
+    objectClass: posixGroup
+    cn: c3users
+    gidNumber: 5000
+  11_readonlyusersgroup.ldif: |-
+    dn: cn=readonlyusers,ou=groups,{{ LDAP_BASE_DN }}
+    objectClass: top
+    objectClass: posixGroup
+    cn: readonlyusers
+    gidNumber: 5000
+  12_alice.ldif:  |-
+    dn: cn=alice,ou=users,{{ LDAP_BASE_DN }}
+    objectClass: inetOrgPerson
+    objectClass: posixAccount
+    objectClass: shadowAccount
+    uid: alice
+    sn: LookingGlass
+    givenName: Alice
+    cn: alice
+    displayName: Alice LookingGlass
+    uidNumber: 10000
+    gidNumber: 5000
+    userPassword: alice-secret
+    gecos: alice
+    loginShell: /bin/bash
+    homeDirectory: /home/alice
+  13_james.ldif:  |-
+    dn: cn=james,ou=users,{{ LDAP_BASE_DN }}
+    objectClass: inetOrgPerson
+    objectClass: posixAccount
+    objectClass: shadowAccount
+    uid: james
+    sn: LookingGlass
+    givenName: James
+    cn: james
+    displayName: James Logan
+    uidNumber: 10009
+    gidNumber: 5000
+    userPassword: james-secret
+    gecos: james
+    loginShell: /bin/bash
+    homeDirectory: /home/james
+  14_addgroup.ldif:  |-
+    dn: cn=readonlyusers,ou=groups,{{ LDAP_BASE_DN }}
+    changetype: modify
+    add: memberuid
+    memberuid: cn=alice,ou=users,{{ LDAP_BASE_DN }}
+
+    dn: cn=c3users,ou=groups,{{ LDAP_BASE_DN }}
+    changetype: modify
+    add: memberuid
+    memberuid: cn=james,ou=users,{{ LDAP_BASE_DN }}
+  15_kafka-dev.ldif: |-
+    dn: cn=devuser,{{ LDAP_BASE_DN }}
+    userPassword: dev-password
+    description: Developer user
+    objectClass: simpleSecurityObject
+    objectClass: organizationalRole
+    cn: devuser
