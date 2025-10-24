@@ -1,0 +1,54 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Gateway
+metadata:
+  labels:
+    app.kubernetes.io/name: confluent-for-kubernetes
+    app.kubernetes.io/managed-by: kustomize
+  name: confluent-gateway
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cpc-gateway:1.0.0-1-ubi9
+    init: confluentinc/confluent-init-container:3.1.0
+  secretStores:
+    - name: file-store
+      provider:
+        type: File
+        configSecretRef: file-store-config
+        clientCredentialsRef: file-store-client-credentials
+  streamingDomains:
+    - name: sasl-plain-kafka
+      type: kafka
+      kafkaCluster:
+        bootstrapServers:
+          - id: SASL_PLAIN
+            endpoint: broker:9093
+        nodeIdRanges:
+          - name: pool-1
+            start: 1
+            end: 3
+  routes:
+    - name: swap-sasl-plain-route
+      endpoint: gateway.example.com:9595
+      brokerIdentificationStrategy:
+        type: port
+      streamingDomain:
+        name: sasl-plain-kafka
+        bootstrapServerId: SASL_PLAIN
+      security:
+        auth: swap
+        secretStore: file-store
+        client:
+          authentication:
+            type: plain
+            jaasConfigPassThrough:
+              secretRef: client-jaas-passthrough
+        cluster:
+          authentication:
+            type: plain
+            jaasConfigPassThrough:
+              secretRef: plain-jaas
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      domain: gateway.example.com

@@ -19,3 +19,4 @@
 |----------------------------------------------------| --- | --- | --- | --- | --- | --- | --- |
 | [passthrough-sasl-plain](./passthrough-sasl-plain) | Passthrough | Port | None | None | PLAIN | PLAIN | Simple plaintext setup with basic authentication |
 | [passthrough-sasl-ssl](./passthrough-sasl-ssl)     | Passthrough | Host | TLS | TLS | PLAIN | PLAIN | Host-based routing with TLS encryption and SASL/PLAIN authentication |
+| [authswap-sasl-plain](./authswap-sasl-plain)       | Authentication Swap | Port | None | None | PLAIN | PLAIN | Simple authentication swap setup with SASL/PLAIN authentication |
