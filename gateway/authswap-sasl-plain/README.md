@@ -1,6 +1,6 @@
 # Authentication Swap - SASL/PLAIN to SASL/PLAIN with PLAINTEXT
 
-This example demonstrates a Gateway configuration with authentication swap where clients authenticate with one set of credentials (alice/alice-secret) and the Gateway uses swapped credentials (bob/bob-secret) to connect to the Kafka cluster.
+This example demonstrates a Gateway configuration with authentication swap where clients authenticate with one set of credentials (`alice/alice-secret`) and the Gateway uses swapped credentials (`bob/bob-secret`) to connect to the Kafka cluster.
 
 ## Configuration Overview
 
@@ -41,18 +41,18 @@ kubectl get pods -n confluent
 
 ### Step 2: Setup File Secret Store
 
-- Create Kubernetes secret for config
-```
-kubectl create secret generic file-store-config --from-literal=separator="/" -n confluent
-```
-
 - Create Kubernetes secret with user credentials for auth swap.
    - For the purpose of this example, we will be swapping incoming credentials for user `alice` with credentials for user `bob`.
-   - Change the outgoing authentication swap credentials in the below command `bob/bob-secret` appropriately based on your Kafka cluster setup.
+   - Please change the outgoing swapped credentials in the below command (`bob/bob-secret`) appropriately based on your Kafka cluster setup.
 ```
 kubectl create secret generic file-store-client-credentials \
   --from-literal=alice="bob/bob-secret" \
   -n confluent
+```
+
+- Create Kubernetes secret for file store config
+```
+kubectl create secret generic file-store-config --from-literal=separator="/" -n confluent
 ```
 
 ### Step 3: Setup JAAS configs
@@ -78,7 +78,7 @@ kubectl create secret generic plain-jaas \
 ```
 kubectl apply -f gateway.yaml -n confluent
 ```
-- Wait for the gateway pods to become READY
+- Wait for the gateway pods to become `READY`
 ```
 kubectl wait --for=condition=Ready pod -l app=confluent-gateway --timeout=600s -n confluent
 ```
