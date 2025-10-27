@@ -284,13 +284,13 @@ kubectl get pods -n confluent -o json | jq -r '.items[] | select(.metadata.annot
 ### Common Issues
 
 1. **Pod Name Mismatch**: Ensure the pod names in the annotation match the actual pod names
-2 **Configuration Not Generated**: Verify the operator is running and the CR annotation is correct. 
+2. **Configuration Not Generated**: Verify the operator is running and the CR annotation is correct. 
     Check operator logs, it corresponding ConfigMap (-init-config) is not updated
 
 ## Best Practices
 
 1. **Gradual Maintenance**: Put pods into maintenance mode one at a time to maintain service availability
-2. **Backup Configuration**: Always backup configuration files before making changes
+2. **Backup intended change**: Always backup intended (ex checkpoint) files before making changes
 3. **Test Changes**: Test configuration changes in a non-production environment first
 4. **Monitor Impact**: Monitor cluster health during maintenance operations
 5. **Clean Exit**: Always remove maintenance mode annotations when done
@@ -303,7 +303,7 @@ The maintenance mode feature is supported for all Confluent Platform components:
 - ✅ **SchemaRegistry**
 - ✅ **KsqlDB**
 - ✅ **Connect**
-- ✅ **ControlCenter**
+- ✅ **ControlCenter (Legacy and Next Gen)**
 - ✅ **KafkaRestProxy**
 - ✅ **Zookeeper**
 - ✅ **KRaftController**

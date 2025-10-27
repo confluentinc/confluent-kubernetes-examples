@@ -4,7 +4,7 @@ metadata:
   name: kraftcontroller
   namespace: confluent
 spec:
-  dataVolumeCapacity: 10G
+  dataVolumeCapacity: 10Gi
   image:
     application: confluentinc/cp-server:8.0.0
     init: confluentinc/confluent-init-container:3.1.0
@@ -22,7 +22,7 @@ spec:
     kRaftController:
       clusterRef:
         name: kraftcontroller
-  dataVolumeCapacity: 10G
+  dataVolumeCapacity: 10Gi
   image:
     application: confluentinc/cp-server:8.0.0
     init: confluentinc/confluent-init-container:3.1.0
