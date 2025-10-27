@@ -1,0 +1,39 @@
+{
+  "CN": "kafka-east-server",
+  "hosts": [
+    "kafka-0.kafka.east.svc.cluster.local",
+    "kafka-1.kafka.east.svc.cluster.local",
+    "kafka.east.svc.cluster.local",
+    "kafka-east.platformops.dev.gcp.devel.cpdev.cloud",
+    "kafka-east-ext.platformops.dev.gcp.devel.cpdev.cloud",
+    "kafka-east0.platformops.dev.gcp.devel.cpdev.cloud",
+    "kafka-east1.platformops.dev.gcp.devel.cpdev.cloud",
+    "kafka-east-ext0.platformops.dev.gcp.devel.cpdev.cloud",
+    "kafka-east-ext1.platformops.dev.gcp.devel.cpdev.cloud",
+    "mds-central.platformops.dev.gcp.devel.cpdev.cloud",
+    "mds-central0.platformops.dev.gcp.devel.cpdev.cloud",
+    "mds-central1.platformops.dev.gcp.devel.cpdev.cloud",
+    "mds-east.platformops.dev.gcp.devel.cpdev.cloud",
+    "mds-east0.platformops.dev.gcp.devel.cpdev.cloud",
+    "mds-east1.platformops.dev.gcp.devel.cpdev.cloud",
+    "mds-west.platformops.dev.gcp.devel.cpdev.cloud",
+    "mds-west0.platformops.dev.gcp.devel.cpdev.cloud",
+    "mds-west1.platformops.dev.gcp.devel.cpdev.cloud",
+    "*.kafka.east.svc.cluster.local",
+    "*.east.svc.cluster.local",
+    "platformops.dev.gcp.devel.cpdev.cloud"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "US",
+      "ST": "CA",
+      "L": "Palo Alto",
+      "O": "Confluent",
+      "OU": "Engineering"
+    }
+  ]
+}

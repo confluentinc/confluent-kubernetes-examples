@@ -1,0 +1,39 @@
+{
+  "CN": "kafka-west-server",
+  "hosts": [
+    "kafka-0.kafka.west.svc.cluster.local",
+    "kafka-1.kafka.west.svc.cluster.local",
+    "kafka.west.svc.cluster.local",
+    "kafka-west.platformops.dev.gcp.devel.cpdev.cloud",
+    "kafka-west-ext.platformops.dev.gcp.devel.cpdev.cloud",
+    "kafka-west0.platformops.dev.gcp.devel.cpdev.cloud",
+    "kafka-west1.platformops.dev.gcp.devel.cpdev.cloud",
+    "kafka-west-ext0.platformops.dev.gcp.devel.cpdev.cloud",
+    "kafka-west-ext1.platformops.dev.gcp.devel.cpdev.cloud",
+    "mds-central.platformops.dev.gcp.devel.cpdev.cloud",
+    "mds-central0.platformops.dev.gcp.devel.cpdev.cloud",
+    "mds-central1.platformops.dev.gcp.devel.cpdev.cloud",
+    "mds-east.platformops.dev.gcp.devel.cpdev.cloud",
+    "mds-east0.platformops.dev.gcp.devel.cpdev.cloud",
+    "mds-east1.platformops.dev.gcp.devel.cpdev.cloud",
+    "mds-west.platformops.dev.gcp.devel.cpdev.cloud",
+    "mds-west0.platformops.dev.gcp.devel.cpdev.cloud",
+    "mds-west1.platformops.dev.gcp.devel.cpdev.cloud",
+    "*.kafka.west.svc.cluster.local",
+    "*.west.svc.cluster.local",
+    "platformops.dev.gcp.devel.cpdev.cloud"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "US",
+      "ST": "CA",
+      "L": "Palo Alto",
+      "O": "Confluent",
+      "OU": "Engineering"
+    }
+  ]
+}

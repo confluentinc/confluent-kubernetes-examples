@@ -1,0 +1,26 @@
+{
+  "CN": "zk-central-server",
+  "hosts": [
+    "zookeeper-0.zookeeper.central.svc.cluster.local",
+    "zookeeper.central.svc.cluster.local",
+    "zk-central.platformops.dev.gcp.devel.cpdev.cloud",
+    "zk-central0.platformops.dev.gcp.devel.cpdev.cloud",
+    "zk-central1.platformops.dev.gcp.devel.cpdev.cloud",
+    "*.zookeeper.central.svc.cluster.local",
+    "*.central.svc.cluster.local",
+    "platformops.dev.gcp.devel.cpdev.cloud"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "US",
+      "ST": "CA",
+      "L": "Palo Alto",
+      "O": "Confluent",
+      "OU": "Engineering"
+    }
+  ]
+}

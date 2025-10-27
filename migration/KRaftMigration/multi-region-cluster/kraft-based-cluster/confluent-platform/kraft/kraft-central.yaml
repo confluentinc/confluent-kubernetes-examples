@@ -1,0 +1,60 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller-central
+  namespace: central
+  annotations:
+    platform.confluent.io/broker-id-offset: "9994"
+    platform.confluent.io/kraft-migration-hold-krc-creation: "true"
+spec:
+  configOverrides:
+    server:
+      # Manual Override as KMJ doesn't handle MRC well
+      - zookeeper.connect=zookeeper.central.svc.cluster.local:2182,zk-east.platformops.dev.gcp.devel.cpdev.cloud:2182,zk-west.platformops.dev.gcp.devel.cpdev.cloud:2182/mrc
+  authorization:
+    superUsers:
+      - User:kafka
+      - User:kafka-mds-client
+    type: rbac
+  dependencies:
+    mdsKafkaCluster:
+      authentication:
+        jaasConfig:
+          secretRef: credential-mds
+        type: plain
+      bootstrapEndpoint: kafka-central.platformops.dev.gcp.devel.cpdev.cloud:9072
+      tls:
+        enabled: true
+  controllerQuorumVoters:
+    - brokerEndpoint: kraft-east0.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9990
+    - brokerEndpoint: kraft-east1.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9991
+    - brokerEndpoint: kraft-west0.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9992
+    - brokerEndpoint: kraft-west1.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9993
+    - brokerEndpoint: kraft-central0.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9994
+  dataVolumeCapacity: 10G
+  image:
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
+    pullSecretRef:
+  listeners:
+    controller:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          bootstrapPrefix: kraft-central-bootstrap
+          brokerPrefix: kraft-central
+          domain: platformops.dev.gcp.devel.cpdev.cloud
+  replicas: 1
+  tls:
+    secretRef: tls-kraft-central

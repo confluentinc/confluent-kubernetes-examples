@@ -1,0 +1,17 @@
+{
+  "CN": "mds-publickey",
+  "hosts": [
+    "mds-publickey"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "Universe",
+      "ST": "Pangea",
+      "L": "Earth"
+    }
+  ]
+}

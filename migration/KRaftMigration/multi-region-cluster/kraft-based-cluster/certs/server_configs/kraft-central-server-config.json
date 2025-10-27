@@ -1,0 +1,30 @@
+{
+  "CN": "kraft-central-server",
+  "hosts": [
+    "kraft-0.kraft.central.svc.cluster.local",
+    "kraft-1.kraft.central.svc.cluster.local",
+    "kraft.central.svc.cluster.local",
+    "kraft-central.platformops.dev.gcp.devel.cpdev.cloud",
+    "kraft-central0.platformops.dev.gcp.devel.cpdev.cloud",
+    "kraft-central1.platformops.dev.gcp.devel.cpdev.cloud",
+    "kraft-central-bootstrap.platformops.dev.gcp.devel.cpdev.cloud",
+    "kraft-central-bootstrap0.platformops.dev.gcp.devel.cpdev.cloud",
+    "kraft-central-bootstrap1.platformops.dev.gcp.devel.cpdev.cloud",
+    "*.kraft.central.svc.cluster.local",
+    "*.central.svc.cluster.local",
+    "platformops.dev.gcp.devel.cpdev.cloud"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "US",
+      "ST": "CA",
+      "L": "Palo Alto",
+      "O": "Confluent",
+      "OU": "Engineering"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: mrc-topic
+  namespace: central
+spec:
+  kafkaRest:
+    authentication:
+      bearer:
+        secretRef: kafka-rest-credential
+      type: bearer
+  partitionCount: 6
+  replicas: 6
