@@ -1,0 +1,135 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: confluent
+spec:
+  dataVolumeCapacity: 10Gi
+  image:
+    application: confluentinc/cp-server:8.0.0
+    init: confluentinc/confluent-init-container:3.1.0
+    pullSecretRef:
+    - confluent-registry
+  replicas: 3
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  dependencies:
+    kRaftController:
+      clusterRef:
+        name: kraftcontroller
+  dataVolumeCapacity: 10Gi
+  image:
+    application: confluentinc/cp-server:8.0.0
+    init: confluentinc/confluent-init-container:3.1.0
+    pullSecretRef:
+      - confluent-registry
+  replicas: 3
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-server-connect:8.0.0
+    init: confluentinc/confluent-init-container:3.1.0
+    pullSecretRef:
+      - confluent-registry
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka:9071
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KsqlDB
+metadata:
+  name: ksqldb
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-ksqldb-server:8.0.0
+    init: confluentinc/confluent-init-container:3.1.0
+    pullSecretRef:
+      - confluent-registry
+  dataVolumeCapacity: 10Gi
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter-next-gen
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-control-center-next-gen:2.2.0
+    init: confluentinc/confluent-init-container:3.1.0
+    pullSecretRef:
+      - confluent-registry
+  dataVolumeCapacity: 10Gi
+  services:
+    prometheus:
+      image: confluentinc/cp-enterprise-prometheus:2.2.0
+      pvc:
+        dataVolumeCapacity: 10Gi
+    alertmanager:
+      image: confluentinc/cp-enterprise-alertmanager:2.2.0
+  dependencies:
+    schemaRegistry:
+      url: http://schemaregistry.confluent.svc.cluster.local:8081
+    ksqldb:
+      - name: ksqldb
+        url: http://ksqldb.confluent.svc.cluster.local:8088
+    connect:
+      - name: connect
+        url: http://connect.confluent.svc.cluster.local:8083
+    prometheusClient:
+      url: http://controlcenter-next-gen.confluent.svc.cluster.local:9090
+    alertManagerClient:
+      url: http://controlcenter-next-gen.confluent.svc.cluster.local:9093
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-schema-registry:8.0.0
+    init: confluentinc/confluent-init-container:3.1.0
+    pullSecretRef:
+      - confluent-registry
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestProxy
+metadata:
+  name: kafkarestproxy
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-kafka-rest:8.0.0
+    init: confluentinc/confluent-init-container:3.1.0
+    pullSecretRef:
+      - confluent-registry
+  dependencies:
+    schemaRegistry:
+      url: http://schemaregistry.confluent.svc.cluster.local:8081
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: krc-cfk
+  namespace: confluent
+spec:
+  kafkaClusterRef:
+    name: kafka
+  kafkaRest:
+    endpoint: http://kafka.confluent.svc.cluster.local:8090
