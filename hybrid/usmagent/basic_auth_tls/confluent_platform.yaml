@@ -15,7 +15,7 @@ spec:
       authentication:
         type: basic
         basic:
-          secretRef: setu-cp-cred
+          secretRef: usm-cp-cred
       tls:
         enabled: true
         secretRef: tls-kraft
@@ -42,7 +42,7 @@ spec:
       authentication:
         type: basic
         basic:
-          secretRef: setu-cp-cred
+          secretRef: usm-cp-cred
       tls:
         enabled: true
         secretRef: tls-kafka
@@ -74,7 +74,7 @@ spec:
       authentication:
         type: basic
         basic:
-          secretRef: setu-cp-cred
+          secretRef: usm-cp-cred
       tls:
         enabled: true
         secretRef: tls-connect

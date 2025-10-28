@@ -12,11 +12,11 @@ spec:
   authentication:
     type: basic
     basic:
-      secretRef: setu-basic-auth
+      secretRef: usm-basic-auth
   confluentCloudClient:
     endpoint: <frontdoor_url>
     environmentId: <env_id>
     authentication:
       type: basic
       basic:
-        secretRef: setu-ccloud-cred
+        secretRef: usm-ccloud-cred
