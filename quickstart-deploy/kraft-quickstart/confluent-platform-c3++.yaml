@@ -6,8 +6,8 @@ metadata:
 spec:
   dataVolumeCapacity: 10G
   image:
-    application: docker.io/confluentinc/cp-server:8.0.0
-    init: confluentinc/confluent-init-container:3.0.0
+    application: docker.io/confluentinc/cp-server:8.1.0
+    init: confluentinc/confluent-init-container:3.1.0
   replicas: 3
   dependencies:
     metricsClient:
@@ -21,8 +21,8 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-server:8.0.0
-    init: confluentinc/confluent-init-container:3.0.0
+    application: confluentinc/cp-server:8.1.0
+    init: confluentinc/confluent-init-container:3.1.0
   dataVolumeCapacity: 100Gi
   dependencies:
     kRaftController:
@@ -39,8 +39,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-server-connect:8.0.0
-    init: confluentinc/confluent-init-container:3.0.0
+    application: confluentinc/cp-server-connect:8.1.0
+    init: confluentinc/confluent-init-container:3.1.0
   dependencies:
     kafka:
       bootstrapEndpoint: kafka:9071
@@ -53,8 +53,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-ksqldb-server:8.0.0
-    init: confluentinc/confluent-init-container:3.0.0
+    application: confluentinc/cp-ksqldb-server:8.1.0
+    init: confluentinc/confluent-init-container:3.1.0
   dataVolumeCapacity: 10Gi
 ---
 apiVersion: platform.confluent.io/v1beta1
@@ -66,7 +66,7 @@ spec:
   replicas: 1
   image:
     application: confluentinc/cp-enterprise-control-center-next-gen:2.2.0
-    init: confluentinc/confluent-init-container:3.0.0
+    init: confluentinc/confluent-init-container:3.1.0
   dataVolumeCapacity: 10Gi
   dependencies:
     schemaRegistry:
@@ -99,8 +99,8 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cp-schema-registry:8.0.0
-    init: confluentinc/confluent-init-container:3.0.0
+    application: confluentinc/cp-schema-registry:8.1.0
+    init: confluentinc/confluent-init-container:3.1.0
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: KafkaRestProxy
@@ -110,8 +110,8 @@ metadata:
 spec:
   replicas: 1
   image:
-    application: confluentinc/cp-kafka-rest:8.0.0
-    init: confluentinc/confluent-init-container:3.0.0
+    application: confluentinc/cp-kafka-rest:8.1.0
+    init: confluentinc/confluent-init-container:3.1.0
   dependencies:
     schemaRegistry:
       url: http://schemaregistry.confluent.svc.cluster.local:8081
