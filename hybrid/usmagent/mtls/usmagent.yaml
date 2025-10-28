@@ -19,4 +19,4 @@ spec:
     authentication:
       type: basic
       basic:
-        secretRef: setu-ccloud-cred
+        secretRef: usm-ccloud-cred

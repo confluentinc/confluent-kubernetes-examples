@@ -15,7 +15,7 @@ spec:
       authentication:
         type: basic
         basic:
-          secretRef: setu-cp-cred
+          secretRef: usm-cp-cred
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
@@ -39,7 +39,7 @@ spec:
       authentication:
         type: basic
         basic:
-          secretRef: setu-cp-cred
+          secretRef: usm-cp-cred
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: Connect
@@ -68,4 +68,4 @@ spec:
       authentication:
         type: basic
         basic:
-          secretRef: setu-cp-cred
+          secretRef: usm-cp-cred

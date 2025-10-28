@@ -10,9 +10,9 @@ helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes 
 export TUTORIAL_HOME=<Tutorial directory>/hybrid/usmagent/plaintext
 ```
 
-### Generate ccloud secret. Please update the setu-ccloud.txt file with your credentials before running the command
+### Generate ccloud secret. Please update the usm-ccloud.txt file with your credentials before running the command
 ```
-kubectl create secret generic setu-ccloud-cred --from-file=basic.txt=$TUTORIAL_HOME/setu-ccloud.txt -n confluent
+kubectl create secret generic usm-ccloud-cred --from-file=basic.txt=$TUTORIAL_HOME/usm-ccloud.txt -n confluent
 ```
 
 ### Deploy USM Agent

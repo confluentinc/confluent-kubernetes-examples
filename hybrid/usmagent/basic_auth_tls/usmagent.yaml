@@ -12,7 +12,7 @@ spec:
   authentication:
     type: basic
     basic:
-      secretRef: setu-basic-auth
+      secretRef: usm-basic-auth
   # TLS secret
   tls:
     secretRef: tls-usmagent
@@ -22,4 +22,4 @@ spec:
     authentication:
       type: basic
       basic:
-        secretRef: setu-ccloud-cred
+        secretRef: usm-ccloud-cred
