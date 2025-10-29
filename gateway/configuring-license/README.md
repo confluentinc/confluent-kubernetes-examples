@@ -125,6 +125,10 @@ kafka-console-consumer \
 To remove all resources created by this example:
 
 - Delete Gateway
-```
+```shell
+# delete gateway
 kubectl delete -f gateway.yaml -n confluent
+
+# cleanup license secret if created
+kubectl delete secret confluent-gateway-licenses -n confluent
 ```
