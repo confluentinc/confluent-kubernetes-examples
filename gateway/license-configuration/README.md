@@ -51,7 +51,7 @@ No additional steps required.
 ```shell
 # Create license secret
 kubectl create secret generic confluent-gateway-licenses \
- --from-literal=licenses.txt=<your_license_key> \
+ --from-from=licenses.txt=licenses.txt \
  -n confluent
  
 # Verify secret
