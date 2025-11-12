@@ -1,0 +1,60 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Gateway
+metadata:
+  labels:
+    app.kubernetes.io/name: confluent-for-kubernetes
+    app.kubernetes.io/managed-by: kustomize
+  name: confluent-gateway
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cpc-gateway:1.0.0-1-ubi9
+    init: confluentinc/confluent-init-container:3.1.0
+  secretStores:
+    - name: file-store
+      provider:
+        type: File
+        configSecretRef: file-store-config
+        clientCredentialsRef: file-store-client-credentials
+  streamingDomains:
+    - name: oauth-kafka
+      type: kafka
+      kafkaCluster:
+        bootstrapServers:
+          - id: OAUTH
+            endpoint: broker:9093
+        nodeIdRanges:
+          - name: pool-1
+            start: 1
+            end: 3
+  routes:
+    - name: swap-mtls-oauth-route
+      endpoint: gateway.example.com:9595
+      brokerIdentificationStrategy:
+        type: port
+      streamingDomain:
+        name: oauth-kafka
+        bootstrapServerId: OAUTH
+      security:
+        auth: swap
+        secretStore: file-store
+        client:
+          tls:
+            secretRef: gateway-tls
+          authentication:
+            type: mtls
+            mtls:
+              principalMappingRules: [ "RULE:^CN=([^,]+).*$/$1/" ]
+              sslClientAuthentication: "required"
+        cluster:
+          authentication:
+            type: oauth
+            jaasConfigPassThrough:
+              secretRef: oauth-jaas
+            oauthSettings:
+              tokenEndpointUri: <endpoint_url>
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      domain: gateway.example.com
+
