@@ -1,0 +1,39 @@
+apiVersion: gateway.conduktor.io/v1
+kind: Gateway
+metadata:
+  name: confluent-gateway-green
+  namespace: confluent
+  labels:
+    app: confluent-gateway
+    version: green
+spec:
+  replicas: 3
+  image: conduktor/conduktor-gateway:3.0.0
+  config:
+    mode: GATEWAY_SECURITY
+    hostName: gateway.example.com
+  streamingDomains:
+    - name: main
+      config:
+        # Initially points to kafka-source, will be updated to kafka-destination during migration
+        bootstrap.servers: kafka-source:9092
+        security.protocol: SASL_PLAINTEXT
+        sasl.mechanism: PLAIN
+        sasl.jaas.config: |
+          org.apache.kafka.common.security.plain.PlainLoginModule required
+          username="kafka"
+          password="kafka-secret";
+  authentication:
+    type: passthrough
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      domain: gateway-green.example.com
+      port: 9092
+  resources:
+    requests:
+      memory: "2Gi"
+      cpu: "1"
+    limits:
+      memory: "4Gi"
+      cpu: "2"

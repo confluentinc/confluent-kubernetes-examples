@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: confluent-gateway-lb
+  namespace: confluent
+  annotations:
+    # AWS specific annotations (optional)
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+    # GCP specific annotations (optional)
+    cloud.google.com/neg: '{"ingress": true}'
+    # Azure specific annotations (optional)
+    service.beta.kubernetes.io/azure-load-balancer-internal: "false"
+spec:
+  type: LoadBalancer
+  selector:
+    app: confluent-gateway
+    version: blue  # Initially pointing to Blue, will be switched to green during migration
+  ports:
+    - name: kafka
+      port: 9092
+      targetPort: 9092
+      protocol: TCP
+    - name: kafka-ssl
+      port: 9093
+      targetPort: 9093
+      protocol: TCP
+    - name: metrics
+      port: 9090
+      targetPort: 9090
+      protocol: TCP
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800  # 3 hours
