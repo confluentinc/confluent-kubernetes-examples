@@ -1,0 +1,44 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Gateway
+metadata:
+  labels:
+    app.kubernetes.io/name: confluent-for-kubernetes
+    app.kubernetes.io/managed-by: kustomize
+  name: confluent-gateway
+spec:
+  replicas: 1
+  podTemplate:
+    envVars:
+      - name: GATEWAY_LICENSES
+        valueFrom:
+          secretKeyRef:
+            name: confluent-gateway-licenses
+            key: licenses.txt
+  image:
+    application: confluentinc/cpc-gateway:latest # confluentinc/confluent-gateway-for-cloud:latest
+    init: confluentinc/confluent-init-container:3.1.0
+  streamingDomains:
+    - name: local-kafka
+      type: kafka
+      kafkaCluster:
+        bootstrapServers:
+          - id: PLAINTEXT
+            endpoint: ec2.us-west-2.compute.amazonaws.com:9092
+        nodeIdRanges:
+          - name: default
+            start: 0
+            end: 3
+  routes:
+    - name: passthrough-sasl-plain-route
+      endpoint: gateway.example.com:9595
+      brokerIdentificationStrategy:
+        type: port
+      streamingDomain:
+        name: local-kafka
+        bootstrapServerId: PLAINTEXT
+      security:
+        auth: passthrough
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      domain: gateway.example.com
