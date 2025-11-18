@@ -1,6 +1,6 @@
 # Client Switchover with Blue/Green Gateway Deployment
 
-This example demonstrates a Blue/Green deployment strategy for Gateway with:
+This example demonstrates client switchover using gateway via Blue/Green deployment with:
 - **Deployment Mode**: Blue/Green with atomic switchover
 - **Replication**: Confluent Cluster Linking
 - **Authentication Mode**: SASL/PLAIN passthrough
@@ -8,11 +8,10 @@ This example demonstrates a Blue/Green deployment strategy for Gateway with:
 - **Client TLS**: None (PLAINTEXT)
 - **Cluster TLS**: None (PLAINTEXT)
 - **External Access**: LoadBalancer
-- **Zero-downtime Migration**: Atomic traffic switching
 
 ## Overview
 
-This scenario demonstrates how to perform a zero-downtime migration from one Kafka cluster to another using:
+This scenario demonstrates how to migrate from one Kafka cluster to another using:
 1. **Confluent Cluster Linking** to replicate topics from source to destination cluster
 2. **Blue/Green Gateway deployments** for atomic traffic switching
 3. **Mirror topic promotion** to make destination topics writable
@@ -20,7 +19,7 @@ This scenario demonstrates how to perform a zero-downtime migration from one Kaf
 The Blue/Green deployment strategy is the **RECOMMENDED** approach for production environments as it provides:
 - Atomic cutover (all clients switch simultaneously)
 - Instant rollback capability
-- Minimal producer downtime (~30 seconds)
+- Minimal producer downtime
 - Predictable consumer behavior (controlled duplicate processing window)
 
 ## Architecture
@@ -41,9 +40,9 @@ Before Migration:
      ▼
 ┌─────────────────┐         ┌─────────────────┐
 │ Cluster A       │         │ Cluster B       │
-│ (Source)        │◄────────│ (Destination)   │
+│ (Source)        │─────────│ (Destination)   │
 │ - orders        │ Cluster │ - orders(mirror)│
-│ - payments      │ Linking │ - payments(mir) │
+│ - users         │ Linking │ - users(mirror) │
 └─────────────────┘         └─────────────────┘
 
 After Migration:
@@ -63,137 +62,162 @@ After Migration:
 │ Cluster A       │         │ Cluster B       │
 │ (Source)        │         │ (Destination)   │
 │ - orders        │         │ - orders        │
-│ - payments      │         │ - payments      │
+│ - users         │         │ - users         │
 └─────────────────┘         └─────────────────┘
 ```
 
 ## Prerequisites
 
-- Kubernetes cluster (1.19+) with kubectl configured
-- Confluent for Kubernetes operator installed
-- Two Kafka clusters deployed (source and destination)
-- Confluent Cluster Linking configured between clusters
-- Helm 3 installed
-- Storage class available for persistent volumes
+- Please ensure that you have set up the [prerequisites](https://github.com/confluentinc/confluent-kubernetes-examples/blob/master/README.md#prerequisites) for using the examples in this repo.
+- Two Confluent Kafka clusters deployed (source and destination) with SASL/PLAIN listeners configured.
+- Confluent Cluster Linking configured between clusters.
 
 ## Deploy the Example
 
-### Step 1: Deploy Confluent for Kubernetes Operator
+### Step 1: Deploy the Confluent for Kubernetes Operator
 
-If not already installed, deploy the CFK operator:
-
-```bash
-# Add the Confluent Helm repository
+- Add the Confluent Helm repository
+```
 helm repo add confluentinc https://packages.confluent.io/helm
 helm repo update
-
-# Create the namespace
+```
+- Create the `confluent` namespace in the Kubernetes cluster
+```
 kubectl create namespace confluent
-
-# Install the CFK operator
+```
+- Install the CFK operator
+```
 helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes -n confluent
-
-# Verify operator is running
+```
+- Check that the `confluent-operator` pod comes up and is running:
+```
 kubectl get pods -n confluent
 ```
 
-### Step 2: Deploy Source Kafka Cluster (Cluster A)
-
-Create the source Kafka cluster configuration:
-
-```bash
-kubectl apply -f - <<EOF
-apiVersion: platform.confluent.io/v1beta1
-kind: Kafka
-metadata:
-  name: kafka-source
-  namespace: confluent
-spec:
-  replicas: 3
-  image:
-    application: confluentinc/cp-server:7.5.0
-    init: confluentinc/confluent-init-container:2.7.0
-  dataVolumeCapacity: 10Gi
-  listeners:
-    internal:
-      authentication:
-        type: plain
-        jaasConfig:
-          secretRef: credential
-      tls:
-        enabled: false
-    external:
-      authentication:
-        type: plain
-        jaasConfig:
-          secretRef: credential
-      tls:
-        enabled: false
-EOF
+### Step 2: Create source test topic.
+-  Create source client configuration file (`client-src.properties`). Modify the `sasl.jaas.config` section with appropriate credentials.
+```
+security.protocol=SASL_PLAINTEXT
+sasl.mechanism=PLAIN
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required \
+  username="kafka" \
+  password="kafka-secret";
+```
+- Create test topic in source cluster. Replace the source bootstrap server in the below command appropriately.
+```
+kafka-topics.sh --create --topic test-topic --bootstrap-server <src-bootstrap-server>  --command-config client-src.properties
 ```
 
-### Step 3: Deploy Destination Kafka Cluster (Cluster B)
+### Step 3: Configure Cluster Linking from source to destination
 
-Create the destination Kafka cluster configuration:
+Step 1: Create Configuration Files for Cluster Linking
+bash# Create source cluster configuration
+sudo docker exec broker2 bash -c 'cat > /tmp/source-cluster.config << "EOF"
+bootstrap.servers=ec2-44-251-10-93.us-west-2.compute.amazonaws.com:9093
+security.protocol=SASL_PLAINTEXT
+sasl.mechanism=PLAIN
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
+EOF'
 
-```bash
-kubectl apply -f - <<EOF
-apiVersion: platform.confluent.io/v1beta1
-kind: Kafka
-metadata:
-  name: kafka-destination
-  namespace: confluent
-spec:
-  replicas: 3
-  image:
-    application: confluentinc/cp-server:7.5.0
-    init: confluentinc/confluent-init-container:2.7.0
-  dataVolumeCapacity: 10Gi
-  listeners:
-    internal:
-      authentication:
-        type: plain
-        jaasConfig:
-          secretRef: credential
-      tls:
-        enabled: false
-    external:
-      authentication:
-        type: plain
-        jaasConfig:
-          secretRef: credential
-      tls:
-        enabled: false
-EOF
-```
+# Create destination cluster admin configuration
+sudo docker exec broker2 bash -c 'cat > /tmp/destination-admin.config << "EOF"
+security.protocol=SASL_PLAINTEXT
+sasl.mechanism=PLAIN
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
+EOF'
 
-### Step 4: Configure Cluster Linking
+Step 2: Create the Cluster Link
+bash# Create cluster link on the destination cluster (broker2)
+sudo docker exec broker2 kafka-cluster-links \
+--bootstrap-server localhost:9193 \
+--command-config /tmp/destination-admin.config \
+--create \
+--link source-to-destination-link \
+--config-file /tmp/source-cluster.config
 
-Create cluster link from source to destination:
+Step 3: List and Verify Cluster Links
+bash# List all cluster links on destination
+sudo docker exec broker2 kafka-cluster-links \
+--bootstrap-server localhost:9193 \
+--command-config /tmp/destination-admin.config \
+--list
 
-```bash
-# Create cluster link configuration
-kubectl apply -f - <<EOF
-apiVersion: platform.confluent.io/v1beta1
-kind: ClusterLink
-metadata:
-  name: source-to-destination-link
-  namespace: confluent
-spec:
-  sourceKafkaCluster:
-    kafkaRestClassRef:
-      name: kafka-source
-    bootstrapEndpoint: kafka-source:9092
-  destinationKafkaCluster:
-    kafkaRestClassRef:
-      name: kafka-destination
-    bootstrapEndpoint: kafka-destination:9092
-  configs:
-    acl.sync.enable: "false"
-    consumer.group.prefix.enable: "true"
-    topic.config.sync.enable: "true"
-EOF
-```
+# Describe the cluster link
+sudo docker exec broker2 kafka-cluster-links \
+--bootstrap-server localhost:9193 \
+--command-config /tmp/destination-admin.config \
+--describe \
+--link source-to-destination-link
+
+Step 4: Create Mirror Topics
+# Create mirror topic using kafka-mirrors command
+sudo docker exec broker2 kafka-mirrors \
+--bootstrap-server localhost:9193 \
+--command-config /tmp/destination-admin.config \
+--create \
+--mirror-topic sushi \
+--link source-to-destination-link
+
+Step 5: Verify Mirror Topic Creation
+# List topics on destination to see the mirror topic
+sudo docker exec broker2 kafka-topics \
+--bootstrap-server localhost:9193 \
+--command-config /tmp/destination-admin.config \
+--list
+
+# Describe the mirror topic
+sudo docker exec broker2 kafka-topics \
+--bootstrap-server localhost:9193 \
+--command-config /tmp/destination-admin.config \
+--describe \
+--topic sushi
+
+Step 6: Test the Cluster Link
+# Produce messages to source cluster
+echo "Testing cluster link message 1" | sudo docker exec -i broker kafka-console-producer \
+--bootstrap-server localhost:9093 \
+--producer-property security.protocol=SASL_PLAINTEXT \
+--producer-property sasl.mechanism=PLAIN \
+--producer-property 'sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="alice" password="alice-secret";' \
+--topic sushi
+
+echo "Testing cluster link message 2" | sudo docker exec -i broker kafka-console-producer \
+--bootstrap-server localhost:9093 \
+--producer-property security.protocol=SASL_PLAINTEXT \
+--producer-property sasl.mechanism=PLAIN \
+--producer-property 'sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="alice" password="alice-secret";' \
+--topic sushi
+
+# Wait for replication
+sleep 3
+
+# Consume from destination cluster mirror topic
+sudo docker exec broker2 kafka-console-consumer \
+--bootstrap-server localhost:9193 \
+--consumer-property security.protocol=SASL_PLAINTEXT \
+--consumer-property sasl.mechanism=PLAIN \
+--consumer-property 'sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="alice" password="alice-secret";' \
+--topic sushi \
+--from-beginning \
+--max-messages 2
+
+Step 7: Monitor Cluster Link Status
+# Check cluster link status and metrics
+# Describe the cluster link without --include-tasks
+sudo docker exec broker2 kafka-cluster-links \
+--bootstrap-server localhost:9193 \
+--command-config /tmp/destination-admin.config \
+--describe \
+--link source-to-destination-link
+
+Step 5: Get Cluster Link Metrics
+bash# Check the state of the link
+sudo docker exec broker2 kafka-configs \
+--bootstrap-server localhost:9193 \
+--command-config /tmp/destination-admin.config \
+--describe \
+--entity-type cluster-links \
+--entity-name source-to-destination-link
 
 ### Step 5: Deploy Blue Gateway (Initially Active)
 
