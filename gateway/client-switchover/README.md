@@ -94,130 +94,87 @@ helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes 
 kubectl get pods -n confluent
 ```
 
-### Step 2: Create source test topic.
--  Create source client configuration file (`client-src.properties`). Modify the `sasl.jaas.config` section with appropriate credentials.
-```
-security.protocol=SASL_PLAINTEXT
-sasl.mechanism=PLAIN
-sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required \
-  username="kafka" \
-  password="kafka-secret";
-```
-- Create test topic in source cluster. Replace the source bootstrap server in the below command appropriately.
-```
-kafka-topics.sh --create --topic test-topic --bootstrap-server <src-bootstrap-server>  --command-config client-src.properties
-```
+### Step 2: Configure Cluster Linking from source to destination Kafka cluster.
 
-### Step 3: Configure Cluster Linking from source to destination
-
-Step 1: Create Configuration Files for Cluster Linking
-bash# Create source cluster configuration
-sudo docker exec broker2 bash -c 'cat > /tmp/source-cluster.config << "EOF"
-bootstrap.servers=ec2-44-251-10-93.us-west-2.compute.amazonaws.com:9093
+#### Create Configuration Files for Cluster Linking
+- Create source cluster configuration: `source-cluster.config`.
+  - Modify the `bootstrap.servers` section and `sasl.jaas.config` section with appropriate credentials.
+```
+bootstrap.servers=ec2.us-west-2.compute.amazonaws.com:9093
 security.protocol=SASL_PLAINTEXT
 sasl.mechanism=PLAIN
 sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
-EOF'
+```
 
-# Create destination cluster admin configuration
-sudo docker exec broker2 bash -c 'cat > /tmp/destination-admin.config << "EOF"
+- Create destination cluster configuration: `destination-cluster.config`
+   - Modify the `sasl.jaas.config` section with appropriate credentials.
+```
 security.protocol=SASL_PLAINTEXT
 sasl.mechanism=PLAIN
 sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
-EOF'
+```
 
-Step 2: Create the Cluster Link
-bash# Create cluster link on the destination cluster (broker2)
-sudo docker exec broker2 kafka-cluster-links \
---bootstrap-server localhost:9193 \
---command-config /tmp/destination-admin.config \
+#### Create the Cluster Link on the destination cluster
+#### NOTE: Please modify the `bootstrap-server` config appropriately for all commands in this section.
+```
+kafka-cluster-links \
+--bootstrap-server ec2.us-west-2.compute.amazonaws.com:9193 \
+--command-config destination-cluster.config \
 --create \
 --link source-to-destination-link \
---config-file /tmp/source-cluster.config
+--config-file source-cluster.config
+```
 
-Step 3: List and Verify Cluster Links
-bash# List all cluster links on destination
-sudo docker exec broker2 kafka-cluster-links \
---bootstrap-server localhost:9193 \
---command-config /tmp/destination-admin.config \
+#### List and Verify Cluster Links.
+- List all cluster links on destination.
+```
+kafka-cluster-links \
+--bootstrap-server ec2.us-west-2.compute.amazonaws.com:9193 \
+--command-config destination-cluster.config \
 --list
+```
 
-# Describe the cluster link
-sudo docker exec broker2 kafka-cluster-links \
---bootstrap-server localhost:9193 \
---command-config /tmp/destination-admin.config \
+- Describe the cluster link. 
+```
+kafka-cluster-links \
+--bootstrap-server ec2.us-west-2.compute.amazonaws.com:9193 \
+--command-config destination-cluster.config \
 --describe \
 --link source-to-destination-link
+```
 
-Step 4: Create Mirror Topics
-# Create mirror topic using kafka-mirrors command
-sudo docker exec broker2 kafka-mirrors \
---bootstrap-server localhost:9193 \
---command-config /tmp/destination-admin.config \
+#### Create Mirror Topics
+```
+kafka-mirrors \
+--bootstrap-server ec2.us-west-2.compute.amazonaws.com:9193 \
+--command-config destination-cluster.config \
 --create \
---mirror-topic sushi \
+--mirror-topic test-topic \
 --link source-to-destination-link
+```
 
-Step 5: Verify Mirror Topic Creation
-# List topics on destination to see the mirror topic
-sudo docker exec broker2 kafka-topics \
---bootstrap-server localhost:9193 \
---command-config /tmp/destination-admin.config \
---list
-
-# Describe the mirror topic
-sudo docker exec broker2 kafka-topics \
---bootstrap-server localhost:9193 \
---command-config /tmp/destination-admin.config \
---describe \
---topic sushi
-
-Step 6: Test the Cluster Link
-# Produce messages to source cluster
-echo "Testing cluster link message 1" | sudo docker exec -i broker kafka-console-producer \
---bootstrap-server localhost:9093 \
---producer-property security.protocol=SASL_PLAINTEXT \
---producer-property sasl.mechanism=PLAIN \
---producer-property 'sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="alice" password="alice-secret";' \
---topic sushi
+#### Test the Cluster Link
+- Produce messages to source cluster. 
+```
+echo "Testing cluster link message 1" | kafka-console-producer \
+--bootstrap-server ec2.us-west-2.compute.amazonaws.com:9093 \
+-- producer.config client-src.properties
+--topic test-topic
 
 echo "Testing cluster link message 2" | sudo docker exec -i broker kafka-console-producer \
---bootstrap-server localhost:9093 \
---producer-property security.protocol=SASL_PLAINTEXT \
---producer-property sasl.mechanism=PLAIN \
---producer-property 'sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="alice" password="alice-secret";' \
---topic sushi
+--bootstrap-server ec2.us-west-2.compute.amazonaws.com:9093 \
+-- producer.config client-src.properties
+--topic test-topic
+```
 
-# Wait for replication
-sleep 3
-
-# Consume from destination cluster mirror topic
-sudo docker exec broker2 kafka-console-consumer \
---bootstrap-server localhost:9193 \
---consumer-property security.protocol=SASL_PLAINTEXT \
---consumer-property sasl.mechanism=PLAIN \
---consumer-property 'sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="alice" password="alice-secret";' \
---topic sushi \
+#### Consume from destination cluster mirror topic
+```
+kafka-console-consumer \
+--bootstrap-server ec2.us-west-2.compute.amazonaws.com:9193 \
+--consumer.config destination-cluster.config \
+--topic test-topic \
 --from-beginning \
 --max-messages 2
-
-Step 7: Monitor Cluster Link Status
-# Check cluster link status and metrics
-# Describe the cluster link without --include-tasks
-sudo docker exec broker2 kafka-cluster-links \
---bootstrap-server localhost:9193 \
---command-config /tmp/destination-admin.config \
---describe \
---link source-to-destination-link
-
-Step 5: Get Cluster Link Metrics
-bash# Check the state of the link
-sudo docker exec broker2 kafka-configs \
---bootstrap-server localhost:9193 \
---command-config /tmp/destination-admin.config \
---describe \
---entity-type cluster-links \
---entity-name source-to-destination-link
 
 ### Step 5: Deploy Blue Gateway (Initially Active)
 
