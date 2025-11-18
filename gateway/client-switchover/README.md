@@ -97,8 +97,7 @@ kubectl get pods -n confluent
 ### Step 2: Configure Cluster Linking from source to destination Kafka cluster.
 
 #### Create Configuration Files for Cluster Linking
-- Create source cluster configuration: `source-cluster.config`.
-  - Modify the `bootstrap.servers` section and `sasl.jaas.config` section with appropriate credentials.
+- Create source cluster configuration: `source-cluster.config`. Modify the `bootstrap.servers` section and `sasl.jaas.config` section with appropriate credentials.
 ```
 bootstrap.servers=ec2.us-west-2.compute.amazonaws.com:9093
 security.protocol=SASL_PLAINTEXT
@@ -106,8 +105,7 @@ sasl.mechanism=PLAIN
 sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
 ```
 
-- Create destination cluster configuration: `destination-cluster.config`
-   - Modify the `sasl.jaas.config` section with appropriate credentials.
+- Create destination cluster configuration: `destination-cluster.config`. Modify the `sasl.jaas.config` section with appropriate credentials.
 ```
 security.protocol=SASL_PLAINTEXT
 sasl.mechanism=PLAIN
@@ -167,7 +165,7 @@ echo "Testing cluster link message 2" | sudo docker exec -i broker kafka-console
 --topic test-topic
 ```
 
-#### Consume from destination cluster mirror topic
+- Consume from destination cluster mirror topic
 ```
 kafka-console-consumer \
 --bootstrap-server ec2.us-west-2.compute.amazonaws.com:9193 \
