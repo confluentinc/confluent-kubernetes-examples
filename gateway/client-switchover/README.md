@@ -173,8 +173,9 @@ kafka-console-consumer \
 --topic test-topic \
 --from-beginning \
 --max-messages 2
+```
 
-### Step 5: Deploy Blue Gateway (Initially Active)
+### Step 3: Deploy Blue Gateway (Initially Active)
 
 Create the Blue Gateway deployment:
 

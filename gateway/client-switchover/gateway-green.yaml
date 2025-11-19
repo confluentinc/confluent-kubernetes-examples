@@ -1,39 +1,37 @@
-apiVersion: gateway.conduktor.io/v1
+apiVersion: platform.confluent.io/v1beta1
 kind: Gateway
 metadata:
-  name: confluent-gateway-green
-  namespace: confluent
   labels:
-    app: confluent-gateway
-    version: green
+    app.kubernetes.io/name: confluent-for-kubernetes
+    app.kubernetes.io/managed-by: kustomize
+  name: confluent-gateway-green
 spec:
   replicas: 3
-  image: conduktor/conduktor-gateway:3.0.0
-  config:
-    mode: GATEWAY_SECURITY
-    hostName: gateway.example.com
+  image:
+    application: confluentinc/cpc-gateway:1.0.0-1-ubi9
+    init: confluentinc/confluent-init-container:3.1.0
   streamingDomains:
-    - name: main
-      config:
-        # Initially points to kafka-source, will be updated to kafka-destination during migration
-        bootstrap.servers: kafka-source:9092
-        security.protocol: SASL_PLAINTEXT
-        sasl.mechanism: PLAIN
-        sasl.jaas.config: |
-          org.apache.kafka.common.security.plain.PlainLoginModule required
-          username="kafka"
-          password="kafka-secret";
-  authentication:
-    type: passthrough
+    - name: destination-kafka-cluster
+      type: kafka
+      kafkaCluster:
+        bootstrapServers:
+          - id: passthrough_SASL_PLAIN
+            endpoint: SASL_PLAINTEXT://ec2-44-251-10-93.us-west-2.compute.amazonaws.com:9193
+        nodeIdRanges:
+          - name: pool-1
+            start: 1
+            end: 3
+  routes:
+    - name: passthrough-sasl-plain-route
+      endpoint: gateway.example.com:9696
+      brokerIdentificationStrategy:
+        type: port
+      streamingDomain:
+        name: destination-kafka-cluster
+        bootstrapServerId: passthrough_SASL_PLAIN
+      security:
+        auth: passthrough
   externalAccess:
     type: loadBalancer
     loadBalancer:
-      domain: gateway-green.example.com
-      port: 9092
-  resources:
-    requests:
-      memory: "2Gi"
-      cpu: "1"
-    limits:
-      memory: "4Gi"
-      cpu: "2"
+      domain: gateway.example.com
