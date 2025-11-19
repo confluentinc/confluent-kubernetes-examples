@@ -76,26 +76,26 @@ After Migration:
 
 ### Step 1: Deploy the Confluent for Kubernetes Operator
 
-- Add the Confluent Helm repository
+1. Add the Confluent Helm repository
 ```
 helm repo add confluentinc https://packages.confluent.io/helm
 helm repo update
 ```
-- Create the `confluent` namespace in the Kubernetes cluster
+2. Create the `confluent` namespace in the Kubernetes cluster
 ```
 kubectl create namespace confluent
 ```
-- Install the CFK operator
+3. Install the CFK operator
 ```
 helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes -n confluent
 ```
-- Check that the `confluent-operator` pod comes up and is running:
+4. Check that the `confluent-operator` pod comes up and is running:
 ```
 kubectl get pods -n confluent
 ```
 ### Step 2: Deploy Gateway instances and Loadbalancer Service
 
-#### Deploy Blue Gateway [Initially active]
+#### 1. Deploy Blue Gateway [Initially active]
 - Modify the `streamingDomains` section in the [gateway-blue.yaml](./gateway-blue.yaml)  to point to your Kafka cluster SASL/PLAIN listener.
 ```
 kubectl apply -f gateway-blue.yaml -n confluent
@@ -105,7 +105,7 @@ kubectl apply -f gateway-blue.yaml -n confluent
 kubectl wait --for=condition=Ready pod -l app=confluent-gateway-blue --timeout=600s -n confluent
 ```
 
-#### Deploy Green Gateway [Initially standby]
+#### 2. Deploy Green Gateway [Initially standby]
 - Modify the `streamingDomains` section in the [gateway-green.yaml](./gateway-green.yaml)  to point to your Kafka cluster SASL/PLAIN listener.
 ```
 kubectl apply -f gateway-green.yaml -n confluent
@@ -114,14 +114,14 @@ kubectl apply -f gateway-green.yaml -n confluent
 ```
 kubectl wait --for=condition=Ready pod -l app=confluent-gateway-green --timeout=600s -n confluent
 ```
-#### Deploy Loadbalancer Service [Initially pointing to Blue deployment]
+#### 3. Deploy Loadbalancer Service [Initially pointing to Blue deployment]
 - Modify the port mappings in `spec.ports` corresponding to your source and destination Kafka node id ranges.
 ```
 kubectl apply -f loadbalancer-service.yaml -n confluent
 ```
 ### Step 3: Create source and destination Kafka cluster configuration files.
 
-- Create source cluster configuration: `source-cluster.config`.
+1. Create source cluster configuration: `source-cluster.config`.
 - Modify the `sasl.jaas.config` section with appropriate credentials and the `bootstrap.servers` section with the appropriate endpoint.
 ```
 bootstrap.servers=ec2.us-west-2.compute.amazonaws.com:9093
@@ -130,7 +130,7 @@ sasl.mechanism=PLAIN
 sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
 ```
 
-- Create destination cluster configuration: `destination-cluster.config`.
+2. Create destination cluster configuration: `destination-cluster.config`.
 - Modify the `sasl.jaas.config` section with appropriate credentials.
 ```
 security.protocol=SASL_PLAINTEXT
@@ -140,15 +140,14 @@ sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule require
 
 ### Step 4: Test Initial Gateway setup [Loadbalancer pointing to Blue deployment]
 
-- Test producing messages:
+1. Test producing messages:
 ```
 kafka-console-producer \
   --bootstrap-server gateway.example.com:9595 \
   --producer.config client.properties \
   --topic gateway-blue-test
 ```
-
-- Test consuming messages:
+2. Test consuming messages:
 ```
 kafka-console-consumer \
   --bootstrap-server gateway.example.com:9595 \
@@ -160,7 +159,7 @@ kafka-console-consumer \
 ### Step 5: Configure Cluster Linking from source to destination Kafka cluster.
 #### NOTE: Please modify the `bootstrap-server` config appropriately for all commands in this section.
 
-#### Create the Cluster Link on the destination cluster
+#### 1. Create the Cluster Link on the destination cluster
 ```
 kafka-cluster-links \
 --bootstrap-server ec2.us-west-2.compute.amazonaws.com:9193 \
@@ -170,7 +169,7 @@ kafka-cluster-links \
 --config-file source-cluster.config
 ```
 
-#### List and Verify Cluster Links.
+#### 2. List and Verify Cluster Links.
 - List all cluster links on destination.
 ```
 kafka-cluster-links \
@@ -191,12 +190,12 @@ kafka-cluster-links \
 ### Step 6: Test Cluster linking setup
 #### NOTE: Please modify the `bootstrap-server` config appropriately for all commands in this section.
 
-#### Create Test Topic on Source Kafka Cluster
+#### 1. Create Test Topic on Source Kafka Cluster
 ```
 bash kafka-topics.sh --create --topic test-topic --bootstrap-server ec2.us-west-2.compute.amazonaws.com:9093  --command-config source-cluster.config
 ```
 
-#### Create Mirror Topic on Destination Kafka Cluster
+#### 2. Create Mirror Topic on Destination Kafka Cluster
 ```
 kafka-mirrors \
 --bootstrap-server ec2.us-west-2.compute.amazonaws.com:9193 \
@@ -206,7 +205,7 @@ kafka-mirrors \
 --link source-to-destination-link
 ```
 
-#### Test the Cluster Link
+#### 3. Test the Cluster Link
 - Produce messages to source cluster. 
 ```
 echo "Testing cluster link message 1" | kafka-console-producer \
