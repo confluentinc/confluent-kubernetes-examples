@@ -93,8 +93,29 @@ helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes 
 ```
 kubectl get pods -n confluent
 ```
+#### Step 2: Deploy Gateway instances
 
-### Step 2: Configure Cluster Linking from source to destination Kafka cluster.
+### Deploy Blue Gateway [Initially active]
+- Modify the `streamingDomains` section in the [gateway-blue.yaml](./gateway-blue.yaml)  to point to your Kafka cluster SASL/PLAIN listener.
+```
+kubectl apply -f gateway-blue.yaml -n confluent
+```
+- Wait for the gateway pods to become READY
+```
+kubectl wait --for=condition=Ready pod -l app=confluent-gateway-blue --timeout=600s -n confluent
+```
+
+#### Deploy Green Gateway [Initially standby]
+- Modify the `streamingDomains` section in the [gateway-green.yaml](./gateway-green.yaml)  to point to your Kafka cluster SASL/PLAIN listener.
+```
+kubectl apply -f gateway-green.yaml -n confluent
+```
+- Wait for the gateway pods to become READY
+```
+kubectl wait --for=condition=Ready pod -l app=confluent-gateway-green --timeout=600s -n confluent
+```
+
+### Step 3: Configure Cluster Linking from source to destination Kafka cluster.
 
 #### Create Configuration Files for Cluster Linking
 - Create source cluster configuration: `source-cluster.config`. Modify the `bootstrap.servers` section and `sasl.jaas.config` section with appropriate credentials.
@@ -141,7 +162,14 @@ kafka-cluster-links \
 --link source-to-destination-link
 ```
 
-#### Create Mirror Topics
+### Step 4: Test Cluster linking setup
+
+#### Create Test Topic on Source Kafka Cluster
+```
+bash kafka-topics.sh --create --topic test-topic --bootstrap-server ec2.us-west-2.compute.amazonaws.com:9093  --command-config source-cluster.config
+```
+
+#### Create Mirror Topic on Destination Kafka Cluster
 ```
 kafka-mirrors \
 --bootstrap-server ec2.us-west-2.compute.amazonaws.com:9193 \
