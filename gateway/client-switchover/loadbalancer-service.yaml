@@ -14,12 +14,21 @@ spec:
     - name: kafka-bootstrap
       port: 9595
       targetPort: 9595
-    - name: kafka-broker-1
+    - name: source-kafka-broker-1
       port: 9596
       targetPort: 9596
-    - name: kafka-broker-2
+    - name: source-kafka-broker-2
       port: 9597
       targetPort: 9597
-    - name: kafka-broker-3
+    - name: source-kafka-broker-3
       port: 9598
       targetPort: 9598
+    - name: destination-kafka-broker-1
+      port: 9697
+      targetPort: 9697
+    - name: destination-kafka-broker-2
+      port: 9698
+      targetPort: 9698
+    - name: destination-kafka-broker-3
+      port: 9699
+      targetPort: 9699
