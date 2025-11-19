@@ -31,7 +31,4 @@ spec:
         bootstrapServerId: passthrough_SASL_PLAIN
       security:
         auth: passthrough
-  externalAccess:
-    type: loadBalancer
-    loadBalancer:
-      domain: gateway.example.com
+
