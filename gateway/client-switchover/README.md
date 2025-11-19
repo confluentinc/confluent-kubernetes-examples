@@ -93,9 +93,9 @@ helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes 
 ```
 kubectl get pods -n confluent
 ```
-#### Step 2: Deploy Gateway instances
+### Step 2: Deploy Gateway instances and Loadbalancer Service
 
-### Deploy Blue Gateway [Initially active]
+#### Deploy Blue Gateway [Initially active]
 - Modify the `streamingDomains` section in the [gateway-blue.yaml](./gateway-blue.yaml)  to point to your Kafka cluster SASL/PLAIN listener.
 ```
 kubectl apply -f gateway-blue.yaml -n confluent
@@ -114,11 +114,15 @@ kubectl apply -f gateway-green.yaml -n confluent
 ```
 kubectl wait --for=condition=Ready pod -l app=confluent-gateway-green --timeout=600s -n confluent
 ```
+#### Deploy Loadbalancer Service [Initially pointing to Blue deployment]
+- Modify the port mappings in `spec.ports` corresponding to your source and destination Kafka node id ranges.
+```
+kubectl apply -f loadbalancer-service.yaml -n confluent
+```
+### Step 3: Create source and destination Kafka cluster configuration files.
 
-### Step 3: Configure Cluster Linking from source to destination Kafka cluster.
-
-#### Create Configuration Files for Cluster Linking
-- Create source cluster configuration: `source-cluster.config`. Modify the `bootstrap.servers` section and `sasl.jaas.config` section with appropriate credentials.
+- Create source cluster configuration: `source-cluster.config`.
+- Modify the `sasl.jaas.config` section with appropriate credentials and the `bootstrap.servers` section with the appropriate endpoint.
 ```
 bootstrap.servers=ec2.us-west-2.compute.amazonaws.com:9093
 security.protocol=SASL_PLAINTEXT
@@ -126,15 +130,37 @@ sasl.mechanism=PLAIN
 sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
 ```
 
-- Create destination cluster configuration: `destination-cluster.config`. Modify the `sasl.jaas.config` section with appropriate credentials.
+- Create destination cluster configuration: `destination-cluster.config`.
+- Modify the `sasl.jaas.config` section with appropriate credentials.
 ```
 security.protocol=SASL_PLAINTEXT
 sasl.mechanism=PLAIN
 sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
 ```
 
-#### Create the Cluster Link on the destination cluster
+### Step 4: Test Initial Gateway setup [Loadbalancer pointing to Blue deployment]
+
+- Test producing messages:
+```
+kafka-console-producer \
+  --bootstrap-server gateway.example.com:9595 \
+  --producer.config client.properties \
+  --topic gateway-blue-test
+```
+
+- Test consuming messages:
+```
+kafka-console-consumer \
+  --bootstrap-server gateway.example.com:9595 \
+  --consumer.config client.properties \
+  --topic gateway-blue-test \
+  --from-beginning
+```
+
+### Step 5: Configure Cluster Linking from source to destination Kafka cluster.
 #### NOTE: Please modify the `bootstrap-server` config appropriately for all commands in this section.
+
+#### Create the Cluster Link on the destination cluster
 ```
 kafka-cluster-links \
 --bootstrap-server ec2.us-west-2.compute.amazonaws.com:9193 \
@@ -162,7 +188,8 @@ kafka-cluster-links \
 --link source-to-destination-link
 ```
 
-### Step 4: Test Cluster linking setup
+### Step 6: Test Cluster linking setup
+#### NOTE: Please modify the `bootstrap-server` config appropriately for all commands in this section.
 
 #### Create Test Topic on Source Kafka Cluster
 ```
@@ -203,132 +230,9 @@ kafka-console-consumer \
 --max-messages 2
 ```
 
-### Step 3: Deploy Blue Gateway (Initially Active)
-
-Create the Blue Gateway deployment:
-
-```bash
-cat > gateway-blue.yaml <<EOF
-apiVersion: gateway.conduktor.io/v1
-kind: Gateway
-metadata:
-  name: confluent-gateway-blue
-  namespace: confluent
-  labels:
-    app: confluent-gateway
-    version: blue
-spec:
-  replicas: 3
-  image: conduktor/conduktor-gateway:3.0.0
-  config:
-    mode: GATEWAY_SECURITY
-    hostName: gateway.example.com
-  streamingDomains:
-    - name: main
-      config:
-        bootstrap.servers: kafka-source:9092
-        security.protocol: SASL_PLAINTEXT
-        sasl.mechanism: PLAIN
-        sasl.jaas.config: |
-          org.apache.kafka.common.security.plain.PlainLoginModule required
-          username="kafka"
-          password="kafka-secret";
-  authentication:
-    type: passthrough
-  externalAccess:
-    type: loadBalancer
-    loadBalancer:
-      domain: gateway.example.com
-      port: 9092
-EOF
-
-kubectl apply -f gateway-blue.yaml -n confluent
-```
-
-### Step 6: Deploy Green Gateway (Initially Standby)
-
-Create the Green Gateway deployment (initially pointing to source):
-
-```bash
-cat > gateway-green.yaml <<EOF
-apiVersion: gateway.conduktor.io/v1
-kind: Gateway
-metadata:
-  name: confluent-gateway-green
-  namespace: confluent
-  labels:
-    app: confluent-gateway
-    version: green
-spec:
-  replicas: 3
-  image: conduktor/conduktor-gateway:3.0.0
-  config:
-    mode: GATEWAY_SECURITY
-    hostName: gateway.example.com
-  streamingDomains:
-    - name: main
-      config:
-        bootstrap.servers: kafka-source:9092
-        security.protocol: SASL_PLAINTEXT
-        sasl.mechanism: PLAIN
-        sasl.jaas.config: |
-          org.apache.kafka.common.security.plain.PlainLoginModule required
-          username="kafka"
-          password="kafka-secret";
-  authentication:
-    type: passthrough
-  externalAccess:
-    type: loadBalancer
-    loadBalancer:
-      domain: gateway-green.example.com
-      port: 9092
-EOF
-
-kubectl apply -f gateway-green.yaml -n confluent
-```
-
-### Step 7: Create LoadBalancer Service with Selector
-
-Create a LoadBalancer service that can switch between Blue and Green:
-
-```bash
-kubectl apply -f - <<EOF
-apiVersion: v1
-kind: Service
-metadata:
-  name: confluent-gateway-lb
-  namespace: confluent
-spec:
-  type: LoadBalancer
-  selector:
-    app: confluent-gateway
-    version: blue  # Initially pointing to Blue
-  ports:
-    - name: kafka
-      port: 9092
-      targetPort: 9092
-    - name: kafka-ssl
-      port: 9093
-      targetPort: 9093
-EOF
-```
-
-### Step 8: Create Mirror Topics
-
-Mirror your production topics to the destination cluster:
-
-```bash
-# Create mirror topics
-kafka-mirrors --create \
-  --source-cluster kafka-source:9092 \
-  --destination-cluster kafka-destination:9092 \
-  --topics orders,payments,inventory,users \
-  --link source-to-destination-link
-```
-
 ## Migration Procedure: Blue/Green Deployment
 
-### Phase 1: Pre-Flight Checks
+### Step 1: Pre-Flight Checks
 
 1. **Verify Cluster Link Status**
 ```bash
