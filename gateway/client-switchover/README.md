@@ -124,7 +124,7 @@ kubectl apply -f loadbalancer-service.yaml -n confluent
 1. Create source cluster configuration: `source-cluster.config`.
 - Modify the `sasl.jaas.config` section with appropriate credentials and the `bootstrap.servers` section with the appropriate endpoint.
 ```
-bootstrap.servers=ec2.us-west-2.compute.amazonaws.com:9093
+bootstrap.servers=kafka-source:9093
 security.protocol=SASL_PLAINTEXT
 sasl.mechanism=PLAIN
 sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
@@ -162,29 +162,29 @@ kafka-console-consumer \
 #### 1. Create the Cluster Link on the destination cluster
 ```
 kafka-cluster-links \
---bootstrap-server ec2.us-west-2.compute.amazonaws.com:9193 \
---command-config destination-cluster.config \
---create \
---link source-to-destination-link \
---config-file source-cluster.config
+  --bootstrap-server kafka-destination:9193 \
+  --command-config destination-cluster.config \
+  --create \
+  --link source-to-destination-link \
+  --config-file source-cluster.config
 ```
 
 #### 2. List and Verify Cluster Links.
 - List all cluster links on destination.
 ```
 kafka-cluster-links \
---bootstrap-server ec2.us-west-2.compute.amazonaws.com:9193 \
---command-config destination-cluster.config \
---list
+  --bootstrap-server kafka-destination:9193 \
+  --command-config destination-cluster.config \
+  --list
 ```
 
 - Describe the cluster link. 
 ```
 kafka-cluster-links \
---bootstrap-server ec2.us-west-2.compute.amazonaws.com:9193 \
---command-config destination-cluster.config \
---describe \
---link source-to-destination-link
+  --bootstrap-server kafka-destination:9193 \
+  --command-config destination-cluster.config \
+  --describe \
+  --link source-to-destination-link
 ```
 
 ### Step 6: Test Cluster linking setup
@@ -192,79 +192,89 @@ kafka-cluster-links \
 
 #### 1. Create Test Topic on Source Kafka Cluster
 ```
-bash kafka-topics.sh --create --topic test-topic --bootstrap-server ec2.us-west-2.compute.amazonaws.com:9093  --command-config source-cluster.config
+bash kafka-topics.sh --create --topic test-topic --bootstrap-server kafka-source:9093  --command-config source-cluster.config
 ```
 
 #### 2. Create Mirror Topic on Destination Kafka Cluster
 ```
 kafka-mirrors \
---bootstrap-server ec2.us-west-2.compute.amazonaws.com:9193 \
---command-config destination-cluster.config \
---create \
---mirror-topic test-topic \
---link source-to-destination-link
+  --bootstrap-server kafka-destination:9193 \
+  --command-config destination-cluster.config \
+  --create \
+  --mirror-topic test-topic \
+  --link source-to-destination-link
 ```
 
 #### 3. Test the Cluster Link
 - Produce messages to source cluster. 
 ```
 echo "Testing cluster link message 1" | kafka-console-producer \
---bootstrap-server ec2.us-west-2.compute.amazonaws.com:9093 \
--- producer.config client-src.properties
---topic test-topic
+  --bootstrap-server kafka-source:9093 \
+  -- producer.config client-src.properties
+  --topic test-topic
 
-echo "Testing cluster link message 2" | sudo docker exec -i broker kafka-console-producer \
---bootstrap-server ec2.us-west-2.compute.amazonaws.com:9093 \
--- producer.config client-src.properties
---topic test-topic
+echo "Testing cluster link message 2" | kafka-console-producer \
+  --bootstrap-server kafka-source:9093 \
+  --producer.config client-src.properties
+  --topic test-topic
 ```
 
 - Consume from destination cluster mirror topic
 ```
 kafka-console-consumer \
---bootstrap-server ec2.us-west-2.compute.amazonaws.com:9193 \
---consumer.config destination-cluster.config \
---topic test-topic \
---from-beginning \
---max-messages 2
+  --bootstrap-server kafka-destination:9193 \
+  --consumer.config destination-cluster.config \
+  --topic test-topic \
+  --from-beginning \
+  --max-messages 2
 ```
 
 ## Migration Procedure: Blue/Green Deployment
+#### NOTE: Please modify the `bootstrap-server` config appropriately for all commands in this section.
 
 ### Step 1: Pre-Flight Checks
 
-1. **Verify Cluster Link Status**
-```bash
-# Check replication lag (should be < 100 messages)
-kafka-cluster-links --describe \
-  --link source-to-destination-link \
-  --bootstrap-server kafka-destination:9092
-
-# Expected: LAG < 100 messages per partition
+#### 1. Verify Cluster Link Status
+- Verify that replication lag is less than 100 messages per partition.
+```
+kafka-cluster-links \
+  --bootstrap-server kafka-destination:9193 \
+  --command-config destination-cluster.config \
+  --describe \
+  --link source-to-destination-link
 ```
 
-2. **Check Offset Sync Status**
+#### 2. Check Offset Sync Status
+- Compare consumer group offsets between clusters. Validate that the offset difference corresponds to 30-60 seconds of messages.
 ```bash
-# Compare consumer group offsets between clusters
+# Get source offsets.
 kafka-consumer-groups --describe --all-groups \
-  --bootstrap-server kafka-source:9092 > /tmp/offsets-source.txt
+  --bootstrap-server kafka-source:9093 \
+  --command-config source-cluster.config > /tmp/source-offsets.txt
 
+# Get destination offsets.
 kafka-consumer-groups --describe --all-groups \
-  --bootstrap-server kafka-destination:9092 > /tmp/offsets-destination.txt
-
-# Compare offsets
-diff /tmp/offsets-source.txt /tmp/offsets-destination.txt
+  --bootstrap-server kafka-destination:9193 \
+  --command-config destination-cluster.config > /tmp/destination-offsets.txt
+  
+# Validate the difference.
+diff /tmp/source-offsets.txt /tmp/destination-offsets.txt
 ```
 
-3. **Document Current State**
+#### 3. Verify all topics are mirrored
 ```bash
-# Capture pre-cutover snapshot
-CUTOVER_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-echo "Cutover initiated: $CUTOVER_TIME"
+# Get source kafka topics.
+kafka-topics--list --bootstrap-server kafka-source:9093  --command-config source-cluster.config | sort > /tmp/source-topics.txt
 
-# Save current state
-kubectl get pods -n confluent -o wide > /tmp/pre-cutover-pods.txt
-kubectl get svc -n confluent > /tmp/pre-cutover-services.txt
+# Get mirrored topics in the destination.
+kafka-mirrors \
+--bootstrap-server kafka-destination:9193 \
+--command-config destination-cluster.config \
+--list \
+--link source-to-destination-link | sort > /tmp/destination-topics.txt
+
+# Validate that any difference is expected (test or internal topics only).
+diff /tmp/source-topics.txt /tmp/destination-topics.txt
 ```
 
 ### Phase 2: Prepare Green Environment
