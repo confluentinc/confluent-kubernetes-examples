@@ -18,7 +18,7 @@ This example demonstrates migration from one Kafka cluster to another using:
 
 The Blue/Green deployment strategy is the **RECOMMENDED** approach for production environments as it provides:
 - Atomic cutover (all clients switch simultaneously).
-- Instant rollback capability.
+- Easy rollback capability.
 - Minimal producer downtime.
 - Predictable consumer behavior (controlled duplicate processing window).
 
@@ -222,12 +222,12 @@ kafka-mirrors \
 ```
 echo "Testing cluster link message 1" | kafka-console-producer \
   --bootstrap-server kafka-source:9093 \
-  -- producer.config client-src.properties
+  --producer.config source-cluster.config
   --topic test-topic
 
 echo "Testing cluster link message 2" | kafka-console-producer \
   --bootstrap-server kafka-source:9093 \
-  --producer.config client-src.properties
+  --producer.config source-cluster.config
   --topic test-topic
 ```
 
@@ -276,7 +276,7 @@ diff /tmp/source-offsets.txt /tmp/destination-offsets.txt
 #### 3. Verify all topics are mirrored
 ```bash
 # Get source kafka topics.
-kafka-topics--list --bootstrap-server kafka-source:9093  --command-config source-cluster.config | sort > /tmp/source-topics.txt
+kafka-topics --list --bootstrap-server kafka-source:9093  --command-config source-cluster.config | sort > /tmp/source-topics.txt
 
 # Get mirrored topics in the destination.
 kafka-mirrors \
@@ -393,7 +393,7 @@ kubectl delete -f gateway-blue.yaml -n confluent
 kubectl delete -f gateway-green.yaml -n confluent
 
 # Delete LoadBalancer service
-kubectl delete service confluent-gateway-lb -n confluent
+kubectl delete service confluent-gateway-switchover-lb -n confluent
 ```
 
 ## Troubleshooting
