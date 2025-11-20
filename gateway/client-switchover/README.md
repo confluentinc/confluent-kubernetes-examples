@@ -355,29 +355,29 @@ kubectl scale deployment confluent-gateway-blue -n confluent --replicas=0
 
 ### Why Blue/Green is Recommended
 
-1. **Atomic Cutover**: All clients switch simultaneously
-2. **Instant Rollback**: Can revert to Blue immediately if issues arise
-3. **Predictable Behavior**: No gradual degradation like rolling restart
-4. **Minimal Downtime**: ~30 seconds for producers
-5. **Testing Capability**: Can validate Green before switching
+- **Atomic Cutover**: All clients switch simultaneously.
+- *Instant Rollback**: Can revert to Blue immediately if issues arise.
+- **Predictable Behavior**: No gradual degradation like rolling restart.
+- **Minimal Downtime**: ~30 seconds for producers.
+- **Testing Capability**: Can validate Green before switching.
 
 ### Important Notes
 
-- **Mirror Topic Promotion is One-Way**: Once promoted, topics cannot be demoted back to mirrors
-- **Consumer Offset Sync Lag**: Expect 30-60 seconds of duplicate processing
-- **Transactional Guarantees**: Wait for `transaction.max.timeout.ms` before promotion to avoid zombie transactions
-- **Idempotency**: Producer IDs are not preserved across clusters
-- **Share Groups**: Not compatible with cluster migrations (state is not synced)
+- **Mirror Topic Promotion is One-Way**: Once promoted, topics cannot be demoted back to mirrors.
+- **Consumer Offset Sync Lag**: Expect 30-60 seconds of duplicate processing.
+- **Transactional Guarantees**: Wait for `transaction.max.timeout.ms` before promotion to avoid zombie transactions.
+- **Idempotency**: Producer IDs are not preserved across clusters.
+- **Share Groups**: Not compatible with cluster migrations (state is not synced).
 
 ## Monitoring and Alerting
 
 Set up monitoring for:
 
-1. **Replication Lag**: Alert if lag > 1000 messages
-2. **Consumer Lag**: Alert if lag increases unexpectedly
-3. **Producer Errors**: Alert on sustained `TopicAuthorizationException`
-4. **Connection Metrics**: Monitor client reconnection rates
-5. **Application Errors**: Monitor application-specific error rates
+- **Replication Lag**
+- **Consumer Lag**: Alert if lag increases unexpectedly.
+- **Producer and Consumer Errors**
+- **Connection Metrics**: Monitor client reconnection rates
+- **Application Errors**: Monitor application-specific error rates
 
 ## Clean Up
 
@@ -390,15 +390,6 @@ kubectl delete -f gateway-green.yaml -n confluent
 
 # Delete LoadBalancer service
 kubectl delete service confluent-gateway-lb -n confluent
-
-# Delete Cluster Link
-kubectl delete clusterlink source-to-destination-link -n confluent
-
-# Delete Kafka clusters (if created for this example)
-kubectl delete kafka kafka-source kafka-destination -n confluent
-
-# Delete namespace (if dedicated for this example)
-# kubectl delete namespace confluent
 ```
 
 ## Troubleshooting
