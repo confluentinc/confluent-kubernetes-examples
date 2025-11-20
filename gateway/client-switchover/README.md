@@ -1,6 +1,6 @@
 # Client Switchover with Blue/Green Gateway Deployment
 
-This example demonstrates client switchover using gateway via Blue/Green deployment with:
+This example demonstrates client switchover using Gateway via Blue/Green deployment with:
 - **Deployment Mode**: Blue/Green with atomic switchover
 - **Replication**: Confluent Cluster Linking
 - **Authentication Mode**: SASL/PLAIN passthrough
@@ -98,7 +98,7 @@ kubectl get pods -n confluent
 ```
 ### Step 2: Deploy Gateway instances and Loadbalancer Service
 
-#### 1. Deploy Blue Gateway [Initially active]
+#### 1. Deploy Blue Gateway [Initially ACTIVE]
 - Modify the `streamingDomains` section in the [gateway-blue.yaml](./gateway-blue.yaml)  to point to your Kafka cluster SASL/PLAIN listener.
 ```
 kubectl apply -f gateway-blue.yaml -n confluent
@@ -108,7 +108,7 @@ kubectl apply -f gateway-blue.yaml -n confluent
 kubectl wait --for=condition=Ready pod -l app=confluent-gateway-blue --timeout=600s -n confluent
 ```
 
-#### 2. Deploy Green Gateway [Initially standby]
+#### 2. Deploy Green Gateway [Initially STANDBY]
 - Modify the `streamingDomains` section in the [gateway-green.yaml](./gateway-green.yaml)  to point to your Kafka cluster SASL/PLAIN listener.
 ```
 kubectl apply -f gateway-green.yaml -n confluent
@@ -289,9 +289,9 @@ kafka-mirrors \
 diff /tmp/source-topics.txt /tmp/destination-topics.txt
 ```
 
-### Step 2: Traffic cutover to the Green cluster
+### Step 2: Traffic cutover to Green cluster
 
-#### 1. Patch loadbalancer to point to Green deployment
+#### 1. Patch loadbalancer to point to the Green deployment
 - Patch the loadbalancer to change the label selectors as well as the `targetPort` for the Kafka bootstrap listener.
 - Modify the `targetPort` in the below patch command to point to the port of the Green gateway route endpoint.
 ```
@@ -302,6 +302,7 @@ kubectl patch service confluent-gateway-switchover-lb -n confluent --type='json'
 ```
 
 ####  2. Test message consumption from new Gateway setup [Loadbalancer pointing to Green deployment]
+- You should be able to consume the test messages that were produced in `test-topic` as part of the Cluster Linking verification step.
 ```
 kafka-console-consumer \
   --bootstrap-server gateway.example.com:9595 \
@@ -331,9 +332,9 @@ kafka-console-producer \
 
 ### Step 4: Monitor and Validate
 - Monitor for 15-30 minutes. Watch for:
-  - Producer reinitialization (ProducerFencedException should spike then stabilize)
-  - Consumer duplicate processing (should spike then decrease)
-  - Application error rates
+  - Producer reinitialization (ProducerFencedException should spike then stabilize).
+  - Consumer duplicate processing (should spike then decrease).
+  - Application error rates.
 
 ### Step 5: Scale down Blue deployment
 
@@ -356,13 +357,13 @@ kubectl scale deployment confluent-gateway-blue -n confluent --replicas=0
 
 ## Key Considerations
 
-### Why Blue/Green is Recommended
+### Why Blue/Green Approach is Recommended
 
 - **Atomic Cutover**: All clients switch simultaneously.
-- *Instant Rollback**: Can revert to Blue immediately if issues arise.
+- **Clean Rollback**: Can revert to Blue if issues arise.
 - **Predictable Behavior**: No gradual degradation like rolling restart.
 - **Minimal Downtime**: ~30 seconds for producers.
-- **Testing Capability**: Can validate Green before switching.
+- **Testing Capability**: Can validate Green setup before switching.
 
 ### Important Notes
 
@@ -377,7 +378,7 @@ kubectl scale deployment confluent-gateway-blue -n confluent --replicas=0
 Set up monitoring for:
 
 - **Replication Lag**
-- **Consumer Lag**: Alert if lag increases unexpectedly.
+- **Consumer Lag**: Monitor for lag increasing unexpectedly.
 - **Producer and Consumer Errors**
 - **Connection Metrics**: Monitor client reconnection rates
 - **Application Errors**: Monitor application-specific error rates
@@ -418,6 +419,4 @@ kubectl delete service confluent-gateway-lb -n confluent
 ## Further Reading
 
 - [Confluent Cluster Linking Documentation](https://docs.confluent.io/platform/current/multi-dc-deployments/cluster-linking/)
-- [Disaster Recovery with Cluster Linking](https://docs.confluent.io/platform/current/multi-dc-deployments/cluster-linking/disaster-recovery.html)
-- [Gateway Migration Best Practices](https://docs.confluent.io/platform/current/gateway/migration.html)
-- [Kafka Migration Strategies](https://docs.confluent.io/platform/current/multi-dc-deployments/cluster-linking/migrate-cp.html)
+- [Disaster Recovery with Cluster Linking](https://docs.confluent.io/cloud/current/multi-cloud/cluster-linking/dr-failover.html)
