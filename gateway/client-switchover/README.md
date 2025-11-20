@@ -119,6 +119,15 @@ kubectl wait --for=condition=Ready pod -l app=confluent-gateway-green --timeout=
 ```
 kubectl apply -f loadbalancer-service.yaml -n confluent
 ```
+
+- Map the following DNS name to the created loadbalancer: `gateway.example.com`.
+```
+NOTE:
+For the rest of this document, we will be using `gateway.example.com` as the loadbalancer domain name.
+Please replace this appropriately if the configured domain name is different or if you would prefer to use the loadbalancer IP address instead.
+Also, please change the Kafka bootstrap listener port corresponding to this endpoint appropriately, based on the applied loadbalancer service yaml.
+```
+
 ### Step 3: Create source and destination Kafka cluster configuration files.
 
 1. Create source cluster configuration: `source-cluster.config`.
@@ -144,14 +153,14 @@ sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule require
 ```
 kafka-console-producer \
   --bootstrap-server gateway.example.com:9595 \
-  --producer.config client.properties \
+  --producer.config source-cluster.config \
   --topic gateway-blue-test
 ```
 2. Test consuming messages:
 ```
 kafka-console-consumer \
   --bootstrap-server gateway.example.com:9595 \
-  --consumer.config client.properties \
+  --consumer.config source-cluster.config \
   --topic gateway-blue-test \
   --from-beginning
 ```
@@ -268,109 +277,66 @@ kafka-topics--list --bootstrap-server kafka-source:9093  --command-config source
 
 # Get mirrored topics in the destination.
 kafka-mirrors \
---bootstrap-server kafka-destination:9193 \
---command-config destination-cluster.config \
---list \
---link source-to-destination-link | sort > /tmp/destination-topics.txt
+  --bootstrap-server kafka-destination:9193 \
+  --command-config destination-cluster.config \
+  --list \
+  --link source-to-destination-link | sort > /tmp/destination-topics.txt
 
 # Validate that any difference is expected (test or internal topics only).
 diff /tmp/source-topics.txt /tmp/destination-topics.txt
 ```
 
-### Phase 2: Prepare Green Environment
+### Step 2: Traffic cutover to the Green cluster
 
-1. **Update Green Gateway to Point to Destination**
-```bash
-# Edit the Green Gateway configuration
-kubectl edit gateway confluent-gateway-green -n confluent
-
-# Update the streamingDomains section:
-# Change: bootstrap.servers: kafka-source:9092
-# To:     bootstrap.servers: kafka-destination:9092
+#### 1. Patch loadbalancer to point to Green deployment
+- Patch the loadbalancer to change the label selectors as well as the `targetPort` for the Kafka bootstrap listener.
+- Modify the `targetPort` in the below patch command to point to the port of the Green gateway route endpoint.
+```
+kubectl patch service confluent-gateway-switchover-lb -n confluent --type='json' -p='[
+  {"op": "replace", "path": "/spec/selector/app", "value": "confluent-gateway-green"},
+  {"op": "replace", "path": "/spec/ports/0/targetPort", "value": 9696}
+]'
 ```
 
-2. **Restart Green Gateway Pods**
-```bash
-# Trigger a rollout restart
-kubectl rollout restart deployment/confluent-gateway-green -n confluent
-
-# Wait for rollout to complete
-kubectl rollout status deployment/confluent-gateway-green -n confluent --timeout=5m
-
-# Verify all Green pods are running
-kubectl get pods -l app=confluent-gateway,version=green -n confluent
+####  2. Test message consumption from new Gateway setup [Loadbalancer pointing to Green deployment]
+```
+kafka-console-consumer \
+  --bootstrap-server gateway.example.com:9595 \
+  --consumer.config destination-cluster.config \
+  --topic test-topic \
+  --from-beginning
 ```
 
-### Phase 3: Promote Mirror Topics
+### Step 3: Promote Mirror Topics
+#### NOTE: Please modify the `bootstrap-server` config appropriately for all commands in this section.
 
+- Promote mirrors to make them writable. Modify below command to include required topic names
 ```bash
-# Promote mirrors to make them writable
 kafka-mirrors --promote \
-  --topics orders,payments,inventory,users \
-  --bootstrap-server kafka-destination:9092
-
-# Verify promotion
-for topic in orders payments inventory users; do
-  echo "Testing $topic..."
-  echo "test-message" | kafka-console-producer \
-    --bootstrap-server kafka-destination:9092 \
-    --topic $topic 2>&1 | grep -i "error" || echo "  ✓ Writable"
-done
+  --topics test-topic \
+  --bootstrap-server kafka-destination:9193 \
+  --command-config destination-cluster.config
 ```
 
-### Phase 4: Atomic Traffic Cutover
-
-```bash
-# Switch LoadBalancer selector from Blue to Green
-kubectl patch service confluent-gateway-lb -n confluent -p \
-  '{"spec":{"selector":{"version":"green","app":"confluent-gateway"}}}'
-
-# Verify service endpoints
-kubectl get endpoints confluent-gateway-lb -n confluent
-# Should show Green pod IPs
-
-# Monitor client reconnections
-kubectl logs -f deployment/confluent-gateway-green -n confluent | grep "connection"
+- Verify promotion by producing messages:
+```
+kafka-console-producer \
+  --bootstrap-server gateway.example.com:9595 \
+  --producer.config destination-cluster.config \
+  --topic test-topic
 ```
 
-### Phase 5: Monitor and Validate
+### Step 4: Monitor and Validate
+- Monitor for 15-30 minutes. Watch for:
+  - Producer reinitialization (ProducerFencedException should spike then stabilize)
+  - Consumer duplicate processing (should spike then decrease)
+  - Application error rates
 
-1. **Verify Producer Health**
-```bash
-# Check for producer errors
-kubectl logs deployment/confluent-gateway-green -n confluent | \
-  grep -E "ProducerFencedException|InvalidProducerEpochException" | \
-  wc -l
-# Should spike initially then drop to 0
+### Step 5: Scale down Blue deployment
+
+- Scale down Blue deployment to 0 replicas. Goal is to retain for 24-48 hours in case of rollback.
 ```
-
-2. **Verify Consumer Health**
-```bash
-# Check consumer lag
-kafka-consumer-groups --describe --all-groups \
-  --bootstrap-server kafka-destination:9092
-
-# Monitor for duplicate processing (expected for 30-60 seconds)
-kubectl logs deployment/your-application -n confluent | \
-  grep "duplicate" | tail -20
-```
-
-3. **Application Metrics**
-```bash
-# Monitor application metrics
-curl http://gateway-metrics:9090/metrics | grep -E "producer|consumer|error"
-```
-
-### Phase 6: Cleanup (After Stability Confirmed)
-
-After 24-48 hours of stable operation:
-
-```bash
-# Scale down Blue deployment
-kubectl scale deployment/confluent-gateway-blue -n confluent --replicas=0
-
-# Keep Blue configuration for emergency rollback capability
-# Do not delete the Blue deployment immediately
+kubectl scale deployment confluent-gateway-blue -n confluent --replicas=0
 ```
 
 ## Rollback Procedure (If Issues Detected)
