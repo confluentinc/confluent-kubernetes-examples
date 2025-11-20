@@ -11,19 +11,41 @@ This example demonstrates client switchover using gateway via Blue/Green deploym
 
 ## Overview
 
-This scenario demonstrates how to migrate from one Kafka cluster to another using:
-1. **Confluent Cluster Linking** to replicate topics from source to destination cluster
-2. **Blue/Green Gateway deployments** for atomic traffic switching
-3. **Mirror topic promotion** to make destination topics writable
+This example demonstrates migration from one Kafka cluster to another using:
+- **Confluent Cluster Linking**: To replicate topics from source to destination cluster.
+- **Blue/Green Gateway deployment**: For atomic traffic cutover.
+- **Mirror topic promotion**: To make destination topics writable.
 
 The Blue/Green deployment strategy is the **RECOMMENDED** approach for production environments as it provides:
-- Atomic cutover (all clients switch simultaneously)
-- Instant rollback capability
-- Minimal producer downtime
-- Predictable consumer behavior (controlled duplicate processing window)
+- Atomic cutover (all clients switch simultaneously).
+- Instant rollback capability.
+- Minimal producer downtime.
+- Predictable consumer behavior (controlled duplicate processing window).
 
 ## Architecture
 
+```
+Before Migration:
+                                Load Balancer
+                               [selector: blue]
+                                      │
+                  ┌───────────────────┴───────────────────┐
+                  ▼                                       ▼
+            ┌──────────┐                            ┌──────────┐
+            │ Blue     │                            │ Green    │
+            │ Gateway  │                            │ Gateway  │
+            │ (Active) │                            │ (Standby)│
+            └────┬─────┘                            └─────┬────┘
+                 │                                        │
+                 ▼                                        ▼
+        ┌─────────────────┐                     ┌───────────────────┐
+        │    Source       │   Cluster Linking   │    Destination    │
+        │   Cluster       │ ───────────────────▶│      Cluster      │
+        │  - orders       │                     │ - orders(mirror)  │
+        │  - users        │                     │ - users(mirror)   │
+        └─────────────────┘                     └───────────────────┘
+
+```
 ```
 Before Migration:
                 Load Balancer
