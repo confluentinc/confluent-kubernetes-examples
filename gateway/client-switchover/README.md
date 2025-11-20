@@ -32,7 +32,7 @@ Before Migration:
                   ┌───────────────────┴───────────────────┐
                   ▼                                       ▼
             ┌──────────┐                            ┌──────────┐
-            │ Blue     │                            │ Green    │
+            │  Blue    │                            │ Green    │
             │ Gateway  │                            │ Gateway  │
             │ (Active) │                            │ (Standby)│
             └────┬─────┘                            └─────┬────┘
@@ -47,45 +47,26 @@ Before Migration:
 
 ```
 ```
-Before Migration:
-                Load Balancer
-                [selector: blue]
-                     │
-      ┌──────────────┴──────────────┐
-      ▼                             ▼
-┌──────────┐                  ┌──────────┐
-│ Blue     │                  │ Green    │
-│ Gateway  │                  │ Gateway  │
-│ (Active) │                  │ (Standby)│
-└────┬─────┘                  └──────────┘
-     │
-     ▼
-┌─────────────────┐         ┌─────────────────┐
-│ Cluster A       │         │ Cluster B       │
-│ (Source)        │─────────│ (Destination)   │
-│ - orders        │ Cluster │ - orders(mirror)│
-│ - users         │ Linking │ - users(mirror) │
-└─────────────────┘         └─────────────────┘
-
 After Migration:
-                Load Balancer
-                [selector: green]
-                     │
-      ┌──────────────┴──────────────┐
-      ▼                             ▼
-┌──────────┐                  ┌──────────┐
-│ Blue     │                  │ Green    │
-│ Gateway  │                  │ Gateway  │
-│ (Standby)│                  │ (Active) │
-└──────────┘                  └────┬─────┘
-                                   │
-                                   ▼
-┌─────────────────┐         ┌─────────────────┐
-│ Cluster A       │         │ Cluster B       │
-│ (Source)        │         │ (Destination)   │
-│ - orders        │         │ - orders        │
-│ - users         │         │ - users         │
-└─────────────────┘         └─────────────────┘
+                                Load Balancer
+                               [selector: green]
+                                      │
+                  ┌───────────────────┴───────────────────┐
+                  ▼                                       ▼
+            ┌──────────┐                            ┌──────────┐
+            │   Blue   │                            │  Green   │
+            │ Gateway  │                            │ Gateway  │
+            │(Standby) │                            │ (Active) │
+            └────┬─────┘                            └─────┬────┘
+                 │                                        │
+                 ▼                                        ▼
+        ┌─────────────────┐                     ┌─────────────────────┐
+        │    Source       │                     │    Destination      │
+        │   Cluster       │                     │      Cluster        │
+        │  - orders       │                     │ - orders(promoted)  │
+        │  - users        │                     │ - users(promoted)   │
+        └─────────────────┘                     └─────────────────────┘
+
 ```
 
 ## Prerequisites
