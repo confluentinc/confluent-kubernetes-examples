@@ -339,90 +339,17 @@ kafka-console-producer \
 kubectl scale deployment confluent-gateway-blue -n confluent --replicas=0
 ```
 
-## Rollback Procedure (If Issues Detected)
-
-If issues are detected during or after migration:
-
-```bash
-# Immediately switch traffic back to Blue
-kubectl patch service confluent-gateway-lb -n confluent -p \
-  '{"spec":{"selector":{"version":"blue","app":"confluent-gateway"}}}'
-
-# Scale up Blue if it was scaled down
-kubectl scale deployment/confluent-gateway-blue -n confluent --replicas=3
-
-# Verify Blue pods are serving traffic
-kubectl get endpoints confluent-gateway-lb -n confluent
-# Should show Blue pod IPs
-```
-
-## Testing the Configuration
-
-### Test Client Configuration
-
-Create a client configuration file (`client.properties`):
-
-```properties
-bootstrap.servers=gateway.example.com:9092
-security.protocol=SASL_PLAINTEXT
-sasl.mechanism=PLAIN
-sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required \
-  username="kafka" \
-  password="kafka-secret";
-```
-
-### Test Producer
-
-```bash
-# Produce test messages
-kafka-console-producer \
-  --bootstrap-server gateway.example.com:9092 \
-  --producer.config client.properties \
-  --topic orders
-```
-
-### Test Consumer
-
-```bash
-# Consume messages
-kafka-console-consumer \
-  --bootstrap-server gateway.example.com:9092 \
-  --consumer.config client.properties \
-  --topic orders \
-  --from-beginning
-```
-
-### Test Transactional Producer
-
-```bash
-# Create a transactional producer test
-cat > test-transaction.sh <<'EOF'
-#!/bin/bash
-kafka-transactions \
-  --bootstrap-server gateway.example.com:9092 \
-  --command-config client.properties \
-  --execute "
-    begin
-    send --topic orders --key k1 --value v1
-    send --topic payments --key k2 --value v2
-    commit
-  "
-EOF
-
-chmod +x test-transaction.sh
-./test-transaction.sh
-```
-
 ## Client Impact Summary
 
-| Client Type | During Migration | After Promotion | Recovery Time |
-|-------------|------------------|-----------------|---------------|
-| **Transactional Producer** | 🔴 Blocked | ✅ Auto-recovery | ~1-5s |
-| **Idempotent Producer** | 🔴 Blocked | ⚠️ Lost idempotency | ~1-5s |
-| **Regular Producer** | 🔴 Blocked | ✅ Works | ~1s |
-| **Consumer Group** | ✅ Works | 🟡 Duplicates (30-60s) | Immediate |
-| **Kafka Streams** | 🔴 Blocked | ✅ Auto-recovery | ~5-10s |
-| **Connect Source** | 🔴 Blocked | ✅ Auto-recovery | ~1-5s |
+| Client Type                | During Migration | After Promotion        | Recovery Time (after promotion) |
+|----------------------------|------------------|------------------------|---------------------------------|
+| **Transactional Producer** | 🔴 Blocked | ✅ Auto-recovery        | ~1-5s (reconnect + retry)       |
+| **Idempotent Producer**    | 🔴 Blocked | ⚠️ Lost idempotency    | ~1-5s (reinitialise)            |
+| **Regular Producer**       | 🔴 Blocked | ✅ Works                | ~1s (reinitialise)              |
+| **Consumer Group**         | ✅ Works | 🟡 Duplicates          | Immediate                       |
+| **Share Group**            | ✅ Works | 🔴 Complete state loss | N/A - requires mitigation       |
+| **Kafka Streams**          | 🔴 Blocked | ✅ Auto-recovery        | ~5-10s (state restore)          |
+| **Connect Source**         | 🔴 Blocked | ✅ Auto-recovery        | ~1-5s (task restart)           |
 
 ## Key Considerations
 
