@@ -38,7 +38,7 @@ spec:
       authentication:
         type: oauth
         jaasConfig:
-          secretRef: oauth-jass
+          secretRef: oauth-jaas
         oauthSettings:
 #          audience: api://default
           groupsClaimName: groups

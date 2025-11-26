@@ -24,10 +24,10 @@ Note that it is assumed that your Kubernetes cluster has a ``confluent`` namespa
 
 ## Deployment
 
-1. Create jass config secret
+1. Create jaas config secret
     ```bash
-    kubectl create -n operator secret generic oauth-jass --from-file=oauth.txt=oauth_jass.txt
-    kubectl -n operator create secret generic oauth-jass-oidc --from-file=oidcClientSecret.txt=oauth_jass.txt
+    kubectl create -n operator secret generic oauth-jaas --from-file=oauth.txt=oauth_jaas.txt
+    kubectl -n operator create secret generic oauth-jaas-oidc --from-file=oidcClientSecret.txt=oauth_jaas.txt
     ```
 2. apply cp_components.yaml
     ```bash
