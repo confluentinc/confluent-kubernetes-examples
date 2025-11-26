@@ -16,7 +16,7 @@ spec:
       kafkaCluster:
         bootstrapServers:
           - id: passthrough_SASL_PLAIN
-            endpoint: SASL_PLAINTEXT://ec2-44-251-10-93.us-west-2.compute.amazonaws.com:9093
+            endpoint: SASL_PLAINTEXT://ec2-source.us-west-2.compute.amazonaws.com:9093
         nodeIdRanges:
           - name: pool-1
             start: 1
