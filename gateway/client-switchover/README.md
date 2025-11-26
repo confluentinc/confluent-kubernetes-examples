@@ -177,7 +177,7 @@ kafka-console-consumer \
 ```
 
 ### Step 5: Configure Cluster Linking from source to destination Kafka cluster.
-#### NOTE: Please modify the `bootstrap-server` config appropriately for all commands in this section.
+**NOTE: Please modify the `bootstrap-server` config appropriately for all commands in this section.**
 
 #### 1. Create the Cluster Link on the destination cluster
 ```
@@ -208,7 +208,7 @@ kafka-cluster-links \
 ```
 
 ### Step 6: Test Cluster linking setup
-#### NOTE: Please modify the `bootstrap-server` config appropriately for all commands in this section.
+**NOTE: Please modify the `bootstrap-server` config appropriately for all commands in this section.**
 
 #### 1. Create Test Topic on Source Kafka Cluster
 ```
@@ -216,7 +216,7 @@ bash kafka-topics.sh --create --topic gateway-client-switchover-test --bootstrap
 ```
 
 #### 2. Create Mirror Topic on Destination Kafka Cluster
-#### NOTE: Please ensure that the mirror-topic has the same name as the original source topic.
+**NOTE: Please ensure that the mirror-topic has the same name as the original source topic.**
 
 ```
 kafka-mirrors \
@@ -252,7 +252,7 @@ kafka-console-consumer \
 ```
 
 ## Migration Procedure: Switch to Green Deployment
-#### NOTE: Please modify the `bootstrap-server` config appropriately for all commands in this section.
+**NOTE: Please modify the `bootstrap-server` config appropriately for all commands in this section.**
 
 ### Step 1: Pre-Flight Checks
 
@@ -306,9 +306,7 @@ diff /tmp/source-topics.txt /tmp/destination-topics.txt
 - Modify the `targetPort` in the below patch command to point to the port of the Green gateway route endpoint.
 ```
 kubectl patch service confluent-gateway-switchover-lb -n confluent --type='json' -p='[
-  {"op": "replace", "path": "/spec/selector/app", "value": "confluent-gateway-green"},
-  {"op": "replace", "path": "/spec/ports/0/targetPort", "value": 9696}
-]'
+  {"op": "replace", "path": "/spec/selector/app", "value": "confluent-gateway-green"}]'
 ```
 
 ####  2. Test message consumption from new Gateway setup [Loadbalancer pointing to Green deployment]
@@ -322,7 +320,7 @@ kafka-console-consumer \
 ```
 
 ### Step 3: Promote Mirror Topics
-#### NOTE: Please modify the `bootstrap-server` config appropriately for all commands in this section.
+**NOTE: Please modify the `bootstrap-server` config appropriately for all commands in this section.**
 
 - Promote mirrors to make them writable. Modify below command to include required topic names
 ```bash
@@ -347,7 +345,7 @@ kafka-console-producer \
   - Application error rates.
 
 ### Step 5: Scale down Blue deployment
-#### NOTE: This step can be carried out before Step 1 if downtime is acceptable. This will ensure promotion without causing duplicate processing.
+**NOTE: This step can be carried out before Step 1 if downtime is acceptable. This will ensure promotion without causing duplicate processing.**
 
 - Scale down Blue deployment to 0 replicas. Goal is to retain for 24-48 hours in case of rollback.
 ```
