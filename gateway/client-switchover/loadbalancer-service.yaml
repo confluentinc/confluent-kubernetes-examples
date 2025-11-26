@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: confluent-gateway-switchover-lb
+  namespace: confluent
+  labels:
+    app: confluent-gateway-common
+spec:
+  type: LoadBalancer
+  selector:
+    app: confluent-gateway-blue
+    platform.confluent.io/type: gateway
+  ports:
+    - name: kafka-bootstrap
+      port: 9595
+      targetPort: 9595
+    - name: kafka-broker-1
+      port: 9596
+      targetPort: 9596
+    - name: kafka-broker-2
+      port: 9597
+      targetPort: 9597
+    - name: kafka-broker-3
+      port: 9598
+      targetPort: 9598
