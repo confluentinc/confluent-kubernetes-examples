@@ -165,14 +165,14 @@ sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule require
 kafka-console-producer \
   --bootstrap-server gateway.example.com:9595 \
   --producer.config client.properties \
-  --topic gateway-blue-test
+  --topic gateway-client-switchover-test
 ```
 2. Test consuming messages:
 ```
 kafka-console-consumer \
   --bootstrap-server gateway.example.com:9595 \
   --consumer.config client.properties \
-  --topic gateway-blue-test \
+  --topic gateway-client-switchover-test \
   --from-beginning
 ```
 
@@ -212,7 +212,7 @@ kafka-cluster-links \
 
 #### 1. Create Test Topic on Source Kafka Cluster
 ```
-bash kafka-topics.sh --create --topic test-topic --bootstrap-server kafka-source:9093  --command-config source-cluster.config
+bash kafka-topics.sh --create --topic gateway-client-switchover-test --bootstrap-server kafka-source:9093  --command-config source-cluster.config
 ```
 
 #### 2. Create Mirror Topic on Destination Kafka Cluster
@@ -223,7 +223,7 @@ kafka-mirrors \
   --bootstrap-server kafka-destination:9193 \
   --command-config destination-cluster.config \
   --create \
-  --mirror-topic test-topic \
+  --mirror-topic gateway-client-switchover-test \
   --link source-to-destination-link
 ```
 
@@ -233,12 +233,12 @@ kafka-mirrors \
 echo "Testing cluster link message 1" | kafka-console-producer \
   --bootstrap-server kafka-source:9093 \
   --producer.config client.properties \
-  --topic test-topic
+  --topic gateway-client-switchover-test
 
 echo "Testing cluster link message 2" | kafka-console-producer \
   --bootstrap-server kafka-source:9093 \
   --producer.config client.properties \
-  --topic test-topic
+  --topic gateway-client-switchover-test
 ```
 
 - Consume from destination cluster mirror topic
@@ -246,7 +246,7 @@ echo "Testing cluster link message 2" | kafka-console-producer \
 kafka-console-consumer \
   --bootstrap-server kafka-destination:9193 \
   --consumer.config client.properties \
-  --topic test-topic \
+  --topic gateway-client-switchover-test \
   --from-beginning \
   --max-messages 2
 ```
@@ -312,12 +312,12 @@ kubectl patch service confluent-gateway-switchover-lb -n confluent --type='json'
 ```
 
 ####  2. Test message consumption from new Gateway setup [Loadbalancer pointing to Green deployment]
-- You should be able to consume the test messages that were produced in `test-topic` as part of the Cluster Linking verification step.
+- You should be able to consume the test messages that were produced in `gateway-client-switchover-test` as part of the Cluster Linking verification step.
 ```
 kafka-console-consumer \
   --bootstrap-server gateway.example.com:9595 \
   --consumer.config client.properties \
-  --topic test-topic \
+  --topic gateway-client-switchover-test \
   --from-beginning
 ```
 
@@ -327,7 +327,7 @@ kafka-console-consumer \
 - Promote mirrors to make them writable. Modify below command to include required topic names
 ```bash
 kafka-mirrors --promote \
-  --topics test-topic \
+  --topics gateway-client-switchover-test \
   --bootstrap-server kafka-destination:9193 \
   --command-config destination-cluster.config
 ```
@@ -337,7 +337,7 @@ kafka-mirrors --promote \
 kafka-console-producer \
   --bootstrap-server gateway.example.com:9595 \
   --producer.config client.properties \
-  --topic test-topic
+  --topic gateway-client-switchover-test
 ```
 
 ### Step 4: Monitor and Validate
@@ -347,6 +347,7 @@ kafka-console-producer \
   - Application error rates.
 
 ### Step 5: Scale down Blue deployment
+#### NOTE: This step can be carried out before Step 1 if downtime is acceptable. This will ensure promotion without causing duplicate processing.
 
 - Scale down Blue deployment to 0 replicas. Goal is to retain for 24-48 hours in case of rollback.
 ```
