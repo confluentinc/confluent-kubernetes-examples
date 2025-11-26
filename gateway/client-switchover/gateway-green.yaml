@@ -23,7 +23,7 @@ spec:
             end: 3
   routes:
     - name: passthrough-sasl-plain-route
-      endpoint: gateway.example.com:9696
+      endpoint: gateway.example.com:9595
       brokerIdentificationStrategy:
         type: port
       streamingDomain:
