@@ -131,7 +131,7 @@ Please replace this appropriately if the configured domain name is different or 
 Also, please change the Kafka bootstrap listener port corresponding to this endpoint appropriately, based on the applied loadbalancer service yaml.
 ```
 
-### Step 3: Create source and destination Kafka cluster configuration files.
+### Step 3: Create Kafka cluster configuration files.
 
 1. Create source cluster configuration: `source-cluster.config`.
 - Modify the `sasl.jaas.config` section with appropriate credentials and the `bootstrap.servers` section with the appropriate endpoint.
@@ -139,7 +139,7 @@ Also, please change the Kafka bootstrap listener port corresponding to this endp
 bootstrap.servers=kafka-source:9093
 security.protocol=SASL_PLAINTEXT
 sasl.mechanism=PLAIN
-sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="src-admin" password="src-admin-secret";
 ```
 
 2. Create destination cluster configuration: `destination-cluster.config`.
@@ -147,7 +147,15 @@ sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule require
 ```
 security.protocol=SASL_PLAINTEXT
 sasl.mechanism=PLAIN
-sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="admin" password="admin-secret";
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="dest-admin" password="dest-admin-secret";
+```
+
+3. Create client configuration: `client.properties`.
+- Modify the `sasl.jaas.config` section with appropriate credentials.
+```
+security.protocol=SASL_PLAINTEXT
+sasl.mechanism=PLAIN
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="usr1" password="usr1-secret";
 ```
 
 ### Step 4: Test Initial Gateway setup [Loadbalancer pointing to Blue deployment]
@@ -156,14 +164,14 @@ sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule require
 ```
 kafka-console-producer \
   --bootstrap-server gateway.example.com:9595 \
-  --producer.config source-cluster.config \
+  --producer.config client.properties \
   --topic gateway-blue-test
 ```
 2. Test consuming messages:
 ```
 kafka-console-consumer \
   --bootstrap-server gateway.example.com:9595 \
-  --consumer.config source-cluster.config \
+  --consumer.config client.properties \
   --topic gateway-blue-test \
   --from-beginning
 ```
@@ -208,6 +216,8 @@ bash kafka-topics.sh --create --topic test-topic --bootstrap-server kafka-source
 ```
 
 #### 2. Create Mirror Topic on Destination Kafka Cluster
+#### NOTE: Please ensure that the mirror-topic has the same name as the original source topic.
+
 ```
 kafka-mirrors \
   --bootstrap-server kafka-destination:9193 \
@@ -222,12 +232,12 @@ kafka-mirrors \
 ```
 echo "Testing cluster link message 1" | kafka-console-producer \
   --bootstrap-server kafka-source:9093 \
-  --producer.config source-cluster.config
+  --producer.config client.properties \
   --topic test-topic
 
 echo "Testing cluster link message 2" | kafka-console-producer \
   --bootstrap-server kafka-source:9093 \
-  --producer.config source-cluster.config
+  --producer.config client.properties \
   --topic test-topic
 ```
 
@@ -235,13 +245,13 @@ echo "Testing cluster link message 2" | kafka-console-producer \
 ```
 kafka-console-consumer \
   --bootstrap-server kafka-destination:9193 \
-  --consumer.config destination-cluster.config \
+  --consumer.config client.properties \
   --topic test-topic \
   --from-beginning \
   --max-messages 2
 ```
 
-## Migration Procedure: Blue/Green Deployment
+## Migration Procedure: Switch to Green Deployment
 #### NOTE: Please modify the `bootstrap-server` config appropriately for all commands in this section.
 
 ### Step 1: Pre-Flight Checks
@@ -306,7 +316,7 @@ kubectl patch service confluent-gateway-switchover-lb -n confluent --type='json'
 ```
 kafka-console-consumer \
   --bootstrap-server gateway.example.com:9595 \
-  --consumer.config destination-cluster.config \
+  --consumer.config client.properties \
   --topic test-topic \
   --from-beginning
 ```
@@ -326,7 +336,7 @@ kafka-mirrors --promote \
 ```
 kafka-console-producer \
   --bootstrap-server gateway.example.com:9595 \
-  --producer.config destination-cluster.config \
+  --producer.config client.properties \
   --topic test-topic
 ```
 
@@ -343,18 +353,6 @@ kafka-console-producer \
 kubectl scale deployment confluent-gateway-blue -n confluent --replicas=0
 ```
 
-## Client Impact Summary
-
-| Client Type                | During Migration | After Promotion        | Recovery Time (after promotion) |
-|----------------------------|------------------|------------------------|---------------------------------|
-| **Transactional Producer** | 🔴 Blocked | ✅ Auto-recovery        | ~1-5s (reconnect + retry)       |
-| **Idempotent Producer**    | 🔴 Blocked | ⚠️ Lost idempotency    | ~1-5s (reinitialise)            |
-| **Regular Producer**       | 🔴 Blocked | ✅ Works                | ~1s (reinitialise)              |
-| **Consumer Group**         | ✅ Works | 🟡 Duplicates          | Immediate                       |
-| **Share Group**            | ✅ Works | 🔴 Complete state loss | N/A - requires mitigation       |
-| **Kafka Streams**          | 🔴 Blocked | ✅ Auto-recovery        | ~5-10s (state restore)          |
-| **Connect Source**         | 🔴 Blocked | ✅ Auto-recovery        | ~1-5s (task restart)           |
-
 ## Key Considerations
 
 ### Why Blue/Green Approach is Recommended
@@ -367,7 +365,7 @@ kubectl scale deployment confluent-gateway-blue -n confluent --replicas=0
 
 ### Important Notes
 
-- **Mirror Topic Promotion is One-Way**: Once promoted, topics cannot be demoted back to mirrors.
+- **Mirror Topic Promotion is One-Way**: Once promoted, topic at source and destination are no longer linked and hence writable at both places.
 - **Consumer Offset Sync Lag**: Expect 30-60 seconds of duplicate processing.
 - **Transactional Guarantees**: Wait for `transaction.max.timeout.ms` before promotion to avoid zombie transactions.
 - **Idempotency**: Producer IDs are not preserved across clusters.
