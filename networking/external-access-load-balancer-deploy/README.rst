@@ -100,7 +100,7 @@ The Kafka section of the file is set as follow for load balancer access:
 
 :: 
 
-  Spec:
+  spec:
     listeners:
       external:
         externalAccess:
