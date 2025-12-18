@@ -63,7 +63,7 @@ Deploy Confluent for Kubernetes
 Deploy OpenLDAP
 ===============
 
-This repo includes a Helm chart for `OpenLdap
+This repo includes a Helm chart for `OpenLDAP
 <https://github.com/osixia/docker-openldap>`__. The chart ``values.yaml``
 includes the set of principal definitions that Confluent Platform needs for
 RBAC.

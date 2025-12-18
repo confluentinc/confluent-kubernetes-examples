@@ -94,13 +94,13 @@ allocations.
 Edit the Confluent Platform CR file: ``$TUTORIAL_HOME/confluent-platform.yaml``
 
 Specifically, note that external accesses to Confluent Platform components are
-configured using the Load Balance services.
+configured using the Load Balancer services.
 
 The Kafka section of the file is set as follow for load balancer access:
 
 :: 
 
-  Spec:
+  spec:
     listeners:
       external:
         externalAccess:

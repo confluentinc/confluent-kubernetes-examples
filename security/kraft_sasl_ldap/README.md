@@ -42,10 +42,10 @@ kubectl get pods --namespace confluent
 
 ## Deploy OpenLDAP
 
-This repo includes a Helm chart for [OpenLdap](https://github.com/osixia/docker-openldap). The chart ``values.yaml``
+This repo includes a Helm chart for [OpenLDAP](https://github.com/osixia/docker-openldap). The chart ``values.yaml``
 includes the set of principal definitions that are needed for this usecase. 
 
-- Deploy OpenLdap
+- Deploy OpenLDAP
 
 ```
 helm upgrade --install -f $TUTORIAL_HOME/../../assets/openldap/ldaps-rbac.yaml test-ldap $TUTORIAL_HOME/../../assets/openldap --namespace confluent
@@ -136,7 +136,7 @@ kubectl create secret generic mds-client \
 ```
 
 - Kafka REST credential
-```
+```bash
 kubectl create secret generic rest-credential \
 --from-file=bearer.txt=$TUTORIAL_HOME/bearer.txt \
 --from-file=basic.txt=$TUTORIAL_HOME/bearer.txt \
@@ -144,7 +144,7 @@ kubectl create secret generic rest-credential \
 ```
 
 - SASL/PLAIN credentials for jaasConfigPassThrough
-```
+```bash
 kubectl create secret generic credential-plain \
 --from-file=plain-jaas.conf=$TUTORIAL_HOME/creds-kafka-sasl-users.conf \
 --namespace confluent
@@ -152,23 +152,23 @@ kubectl create secret generic credential-plain \
 
 ## Set up Confluent Platform 
 - Deploy KRaft and Kafka broker 
-``` 
+```bash
 kubectl apply -f $TUTORIAL_HOME/kraftbroker_controller.yaml
 ```
 
 - Check that all pods are deployed:
-```yaml
+```bash
 kubectl get pods --namespace confluent
 ```
 
 ### Produce and consume from the topics
 - Login to kafka-0 pod 
-```
+```bash
 kubectl -n confluent exec -it kafka-0 -- bash
 ``` 
 
 - Create a conf file inside the kafka-0 pod
-```
+```bash
 cat << EOF > /tmp/kafka.properties
 bootstrap.servers=kafka.confluent.svc.cluster.local:9071
 sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=kafka password=kafka-secret;
@@ -180,12 +180,12 @@ EOF
 ```
 
 - Produce to the demotopic 
-```
+```bash
 seq 5 | kafka-console-producer --topic demotopic --broker-list kafka.confluent.svc.cluster.local:9071 --producer.config /tmp/kafka.properties
 ```
 
 - Consumer from the demotopic 
-``` 
+```bash
 kafka-console-consumer --from-beginning --topic demotopic --bootstrap-server  kafka.confluent.svc.cluster.local:9071 --consumer.config /tmp/kafka.properties
 1
 2
@@ -196,9 +196,10 @@ kafka-console-consumer --from-beginning --topic demotopic --bootstrap-server  ka
 
 ## Tear down Cluster
 
-```
+```bash
 kubectl delete -f $TUTORIAL_HOME/kraftbroker_controller.yaml
 kubectl delete secret rest-credential mds-client mds-token credential credential-plain tls-group1 --namespace confluent
 helm delete test-ldap --namespace confluent
 helm delete operator --namespace confluent
 kubectl delete namespace confluent
+```
