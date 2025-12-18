@@ -1,10 +1,10 @@
 ## Schema CR
 
-The schema cr is a declarative way to manage schemas. A schema CR represents the state of a Subject, and is used
+The schema CR is a declarative way to manage schemas. A schema CR represents the state of a Subject, and is used
 to manage the versions that belong to the subject. This includes creating and deleting of subjects and schema versions. The schema CR can only manage new subjects created by CFK and not any existing schemas. The state of the schema CR status represents that of the latest schema version for the subject.
 
 ## Prerequisite
-1. have a running Zookeeper/Kraft, Kafka, SchemaRegistry setup
+1. have a running Zookeeper/KRaft, Kafka, SchemaRegistry setup
 
 ## Create Schema CR
 
