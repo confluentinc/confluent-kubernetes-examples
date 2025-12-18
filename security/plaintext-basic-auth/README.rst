@@ -301,8 +301,8 @@ Validate authentication with Control Center
 #. Login to the control center UI using any of the following users depending on the role you would like to use:
 
 * Users:
-    * Full Control: Username:`c3admin` Password:`password1`
-    * Restricted Control: Username:c3restricted Password:password2
+    * Full Control: Username: ``c3admin`` Password: ``password1``
+    * Restricted Control: Username: ``c3restricted`` Password: ``password2``
 
 Monitor the Confluent Platform Components using Control Center
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
