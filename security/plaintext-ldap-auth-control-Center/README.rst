@@ -67,7 +67,7 @@ This repo includes a Helm chart for `OpenLdap
 includes the set of principal definitions that Confluent Platform needs for
 RBAC.
 
-#. Deploy OpenLdap
+#. Deploy OpenLDAP
 
    ::
 
