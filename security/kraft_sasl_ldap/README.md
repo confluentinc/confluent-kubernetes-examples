@@ -42,7 +42,7 @@ kubectl get pods --namespace confluent
 
 ## Deploy OpenLDAP
 
-This repo includes a Helm chart for [OpenLdap](https://github.com/osixia/docker-openldap). The chart ``values.yaml``
+This repo includes a Helm chart for [OpenLDAP](https://github.com/osixia/docker-openldap). The chart ``values.yaml``
 includes the set of principal definitions that are needed for this usecase. 
 
 - Deploy OpenLDAP
