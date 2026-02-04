@@ -62,12 +62,6 @@ The naive approach (mounting CSI volume directly in ControlCenter CR) doesn't wo
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-## Prerequisites
-
-1. Kubernetes cluster
-2. `kubectl` access to the cluster
-3. Helm installed
-
 ## Files in This Example
 
 | File | Description |
