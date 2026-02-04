@@ -7,7 +7,6 @@ This example tests if CSI syncSecret can automatically create K8s Secrets for TL
 - **Result**: CSI syncSecret successfully creates K8s Secrets for TLS from Vault
 - **Requirement**: A bootstrap pod is needed to trigger syncSecret before deploying the CR (operator validates `secretRef` exists)
 - **Goal**: TLS certificates stored in Vault, automatically synced to K8s Secrets, used via `secretRef`
-- **No basic auth** - just TLS to isolate the test
 
 ## How syncSecret Should Work
 
@@ -46,12 +45,6 @@ This example tests if CSI syncSecret can automatically create K8s Secrets for TL
 │  └──────────────┘  └──────────────┘  └──────────────┘          │
 └─────────────────────────────────────────────────────────────────┘
 ```
-
-## Prerequisites
-
-1. Kubernetes cluster
-2. `kubectl` access to the cluster
-3. Helm installed
 
 ## Files in This Example
 
@@ -151,4 +144,4 @@ kubectl -n vault-example-2 get job vault-secret-sync -w
 kubectl -n vault-example-2 delete pod controlcenter-next-gen-0
 ```
 
-**For automatic rotation**, consider using External Secrets Operator (ESO) - see Example 3 (basic_tls).
+**For automatic rotation**, consider using External Secrets Operator (ESO) - see basic_tls example.

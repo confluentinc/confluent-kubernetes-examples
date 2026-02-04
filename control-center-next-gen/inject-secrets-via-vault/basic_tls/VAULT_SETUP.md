@@ -4,19 +4,8 @@ This example combines:
 - **Vault Agent Injector** for basic auth (directoryPathInContainer)
 - **External Secrets Operator (ESO)** for TLS (auto-sync from Vault to K8s Secrets)
 
-## Why ESO for TLS?
-
-| Feature | CSI syncSecret + Job | ESO |
-|---------|---------------------|-----|
-| Initial secret creation | Manual (run Job) | ✅ Automatic |
-| Secret rotation | Manual (re-run Job) | ✅ Automatic (refreshInterval) |
-| Pod restart after rotation | Manual | Manual (or use Reloader) |
-| Production-ready | ⚠️ Partial | ✅ Yes |
-
 ## Prerequisites
 
-- `kubectl` access to the cluster
-- Helm installed
 - TLS certificates generated (follow [GENERATE_CERTS.md](GENERATE_CERTS.md) first)
 
 ## Step 1: Install External Secrets Operator
@@ -190,25 +179,16 @@ kubectl exec vault-0 -n vault-example-3 -- vault kv list secret/confluent/
                     └─────────────────┘
 ```
 
-## ESO vs CSI syncSecret
-
-| Aspect | CSI syncSecret | ESO |
-|--------|---------------|-----|
-| Secret creation | Pod must mount CSI volume | Automatic, no pod needed |
-| Refresh | Manual (re-run Job) | Automatic (refreshInterval) |
-| K8s Secret updates | Manual | Automatic |
-| Pod restart for new secrets | Manual | Manual (or use Reloader) |
-
 ## Next Steps
 
 1. Deploy External Secrets:
    ```bash
    kubectl apply -f external-secrets.yaml
-   
+
    # Verify secrets are synced
    kubectl -n vault-example-3 get externalsecret
    # All should show "SecretSynced"
-   
+
    kubectl -n vault-example-3 get secrets | grep -E "(prometheus|alertmanager)"
    # Should show all 4 TLS secrets
    ```

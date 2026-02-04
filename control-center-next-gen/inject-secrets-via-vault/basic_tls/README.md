@@ -1,6 +1,6 @@
 # Example 3: Combined Basic Auth + TLS (Production)
 
-This example demonstrates a **production-ready** C3++ deployment using both **TLS encryption** and **Basic Authentication**, with all secrets stored in HashiCorp Vault.
+This example demonstrates a C3++ deployment using both **TLS encryption** and **Basic Authentication**, with all secrets stored in HashiCorp Vault.
 
 ## What This Example Does
 
@@ -16,8 +16,6 @@ This example demonstrates a **production-ready** C3++ deployment using both **TL
 |---------|---------------------|-----|
 | Initial secret creation | Manual (run Job first) | ✅ Automatic |
 | Secret rotation | Manual (re-run Job + restart pods) | ✅ Auto-sync (restart pods) |
-| No chicken-and-egg | ❌ Job required | ✅ Secrets exist before pods |
-| Production-ready | ⚠️ Partial | ✅ Yes |
 
 ## Architecture
 
@@ -63,12 +61,6 @@ This example demonstrates a **production-ready** C3++ deployment using both **TL
 │  └────────────────────┘ └────────────────────┘ └────────────────────┘   │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
-
-## Prerequisites
-
-1. Kubernetes cluster
-2. `kubectl` access to the cluster
-3. Helm installed
 
 ## Files in This Example
 
@@ -134,7 +126,7 @@ kubectl -n vault-example-3 get pods -w
 
 # Wait for all pods to be Running:
 # - kraftcontroller-0,1,2: 1/1 Running
-# - kafka-0,1,2: 1/1 Running  
+# - kafka-0,1,2: 1/1 Running
 # - controlcenter-next-gen-0: 3/3 Running
 ```
 
@@ -159,33 +151,3 @@ kubectl -n vault-example-3 delete pod controlcenter-next-gen-0
 kubectl -n vault-example-3 rollout restart statefulset kraftcontroller
 kubectl -n vault-example-3 rollout restart statefulset kafka
 ```
-
-### For Automatic Pod Restart
-
-Consider using [Reloader](https://github.com/stakater/Reloader) to automatically restart pods when secrets change:
-
-```bash
-helm repo add stakater https://stakater.github.io/stakater-charts
-helm upgrade --install reloader stakater/reloader --namespace vault-example-3
-```
-
-Then add annotation to your CR:
-
-```yaml
-podTemplate:
-  annotations:
-    reloader.stakater.com/auto: "true"
-```
-
-## Summary
-
-This example demonstrates **production-ready Vault integration** for C3++:
-
-| Component | Auth Method | TLS Method | Auto-Sync |
-|-----------|-------------|------------|-----------|
-| Prometheus Server | Vault Agent Injector | ESO | TLS: ✅ Yes |
-| Prometheus Client | Vault Agent Injector | ESO | TLS: ✅ Yes |
-| AlertManager Server | Vault Agent Injector | ESO | TLS: ✅ Yes |
-| AlertManager Client | Vault Agent Injector | ESO | TLS: ✅ Yes |
-
-**All secrets originate from Vault** with automatic TLS sync via ESO.
