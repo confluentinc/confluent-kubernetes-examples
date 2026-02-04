@@ -1,0 +1,157 @@
+# Example 1: Basic Auth Only (No TLS) with Vault Agent Injector
+# All secrets come from Vault using Vault Agent Injector annotations
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: vault-example-1
+spec:
+  dataVolumeCapacity: 10G
+  image:
+    application: confluentinc/cp-server:7.9.1
+    init: confluentinc/confluent-init-container:2.11.1
+  replicas: 3
+  
+  # Vault Agent Injector annotations
+  podTemplate:
+    annotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/role: "confluent-operator"
+      vault.hashicorp.com/agent-pre-populate-only: "true"
+      vault.hashicorp.com/agent-init-first: "true"
+      # Prometheus client credentials
+      vault.hashicorp.com/agent-inject-secret-prometheus-client: "secret/data/confluent/prometheus-client"
+      vault.hashicorp.com/agent-inject-file-prometheus-client: "prometheus-client/basic.txt"
+      vault.hashicorp.com/agent-inject-template-prometheus-client: |
+        {{- with secret "secret/data/confluent/prometheus-client" -}}
+        {{ .Data.data.basic_txt }}
+        {{- end -}}
+  
+  dependencies:
+    metricsClient:
+      url: http://controlcenter-next-gen.vault-example-1.svc.cluster.local:9090
+      authentication:
+        type: basic
+        basic:
+          directoryPathInContainer: /vault/secrets/prometheus-client
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: vault-example-1
+spec:
+  dataVolumeCapacity: 10G
+  image:
+    application: confluentinc/cp-server:7.9.1
+    init: confluentinc/confluent-init-container:2.11.1
+  replicas: 3
+  
+  # Vault Agent Injector annotations
+  podTemplate:
+    annotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/role: "confluent-operator"
+      vault.hashicorp.com/agent-pre-populate-only: "true"
+      vault.hashicorp.com/agent-init-first: "true"
+      # Prometheus client credentials
+      vault.hashicorp.com/agent-inject-secret-prometheus-client: "secret/data/confluent/prometheus-client"
+      vault.hashicorp.com/agent-inject-file-prometheus-client: "prometheus-client/basic.txt"
+      vault.hashicorp.com/agent-inject-template-prometheus-client: |
+        {{- with secret "secret/data/confluent/prometheus-client" -}}
+        {{ .Data.data.basic_txt }}
+        {{- end -}}
+  
+  dependencies:
+    kRaftController:
+      clusterRef:
+        name: kraftcontroller
+    metricsClient:
+      url: http://controlcenter-next-gen.vault-example-1.svc.cluster.local:9090
+      authentication:
+        type: basic
+        basic:
+          directoryPathInContainer: /vault/secrets/prometheus-client
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter-next-gen
+  namespace: vault-example-1
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-control-center-next-gen:2.0.0
+    init: confluentinc/confluent-init-container:2.11.1
+  dataVolumeCapacity: 10Gi
+  
+  # Vault Agent Injector annotations
+  podTemplate:
+    annotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/role: "confluent-operator"
+      vault.hashicorp.com/agent-pre-populate-only: "true"
+      vault.hashicorp.com/agent-init-first: "true"
+      
+      # Prometheus server credentials (for Prometheus sidecar)
+      vault.hashicorp.com/agent-inject-secret-prometheus-server: "secret/data/confluent/prometheus-server"
+      vault.hashicorp.com/agent-inject-file-prometheus-server: "prometheus-server/basic.txt"
+      vault.hashicorp.com/agent-inject-template-prometheus-server: |
+        {{- with secret "secret/data/confluent/prometheus-server" -}}
+        {{ .Data.data.basic_txt }}
+        {{- end -}}
+      
+      # Prometheus client credentials (for C3 -> Prometheus)
+      vault.hashicorp.com/agent-inject-secret-prometheus-client: "secret/data/confluent/prometheus-client"
+      vault.hashicorp.com/agent-inject-file-prometheus-client: "prometheus-client/basic.txt"
+      vault.hashicorp.com/agent-inject-template-prometheus-client: |
+        {{- with secret "secret/data/confluent/prometheus-client" -}}
+        {{ .Data.data.basic_txt }}
+        {{- end -}}
+      
+      # AlertManager server credentials (for AlertManager sidecar)
+      vault.hashicorp.com/agent-inject-secret-alertmanager-server: "secret/data/confluent/alertmanager-server"
+      vault.hashicorp.com/agent-inject-file-alertmanager-server: "alertmanager-server/basic.txt"
+      vault.hashicorp.com/agent-inject-template-alertmanager-server: |
+        {{- with secret "secret/data/confluent/alertmanager-server" -}}
+        {{ .Data.data.basic_txt }}
+        {{- end -}}
+      
+      # AlertManager client credentials (for C3 -> AlertManager)
+      vault.hashicorp.com/agent-inject-secret-alertmanager-client: "secret/data/confluent/alertmanager-client"
+      vault.hashicorp.com/agent-inject-file-alertmanager-client: "alertmanager-client/basic.txt"
+      vault.hashicorp.com/agent-inject-template-alertmanager-client: |
+        {{- with secret "secret/data/confluent/alertmanager-client" -}}
+        {{ .Data.data.basic_txt }}
+        {{- end -}}
+  
+  dependencies:
+    prometheusClient:
+      url: http://controlcenter-next-gen.vault-example-1.svc.cluster.local:9090
+      authentication:
+        type: basic
+        basic:
+          directoryPathInContainer: /vault/secrets/prometheus-client
+    alertManagerClient:
+      url: http://controlcenter-next-gen.vault-example-1.svc.cluster.local:9093
+      authentication:
+        type: basic
+        basic:
+          directoryPathInContainer: /vault/secrets/alertmanager-client
+  
+  services:
+    prometheus:
+      image: confluentinc/cp-enterprise-prometheus:2.0.0
+      authentication:
+        type: basic
+        basic:
+          directoryPathInContainer: /vault/secrets/prometheus-server
+      pvc:
+        dataVolumeCapacity: 10Gi
+    alertmanager:
+      image: confluentinc/cp-enterprise-alertmanager:2.0.0
+      authentication:
+        type: basic
+        basic:
+          directoryPathInContainer: /vault/secrets/alertmanager-server

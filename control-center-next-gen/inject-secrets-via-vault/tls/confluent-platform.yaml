@@ -1,0 +1,100 @@
+# Example 2: TLS Setup with Vault CSI syncSecret
+#
+# This example tests if CSI syncSecret can create K8s Secrets for TLS
+# before the operator needs them.
+#
+# How it works:
+# 1. CSI volume is mounted (triggers before containers start)
+# 2. syncSecret creates K8s Secrets from mounted content
+# 3. secretRef references these K8s Secrets for TLS
+#
+# Note: No basic auth in this example - just TLS
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: vault-example-2
+spec:
+  dataVolumeCapacity: 10G
+  image:
+    application: confluentinc/cp-server:7.9.1
+    init: confluentinc/confluent-init-container:2.11.1
+  replicas: 3
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: vault-example-2
+spec:
+  dataVolumeCapacity: 10G
+  image:
+    application: confluentinc/cp-server:7.9.1
+    init: confluentinc/confluent-init-container:2.11.1
+  replicas: 3
+  dependencies:
+    kRaftController:
+      clusterRef:
+        name: kraftcontroller
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter-next-gen
+  namespace: vault-example-2
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-control-center-next-gen:2.0.0
+    init: confluentinc/confluent-init-container:2.11.1
+  dataVolumeCapacity: 10Gi
+  
+  # Mount CSI volume to trigger syncSecret
+  # This creates K8s Secrets from Vault TLS certs
+  mountedVolumes:
+    volumes:
+      - name: vault-tls-secrets
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "vault-c3-tls"
+    volumeMounts:
+      - name: vault-tls-secrets
+        mountPath: /mnt/vault-tls
+        readOnly: true
+  
+  dependencies:
+    # Prometheus client - HTTPS with TLS
+    prometheusClient:
+      url: https://controlcenter-next-gen.vault-example-2.svc.cluster.local:9090
+      tls:
+        enabled: true
+        # Uses synced K8s Secret (created by CSI syncSecret)
+        secretRef: prometheus-client-tls
+    
+    # AlertManager client - HTTPS with TLS
+    alertManagerClient:
+      url: https://controlcenter-next-gen.vault-example-2.svc.cluster.local:9093
+      tls:
+        enabled: true
+        # Uses synced K8s Secret (created by CSI syncSecret)
+        secretRef: alertmanager-client-tls
+  
+  services:
+    # Prometheus sidecar with TLS
+    prometheus:
+      image: confluentinc/cp-enterprise-prometheus:2.0.0
+      # Server TLS - uses synced K8s Secret
+      tls:
+        secretRef: prometheus-tls
+      pvc:
+        dataVolumeCapacity: 10Gi
+    
+    # AlertManager sidecar with TLS
+    alertmanager:
+      image: confluentinc/cp-enterprise-alertmanager:2.0.0
+      # Server TLS - uses synced K8s Secret
+      tls:
+        secretRef: alertmanager-tls
