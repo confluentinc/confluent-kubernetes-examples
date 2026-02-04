@@ -5,17 +5,26 @@ This example tests if CSI syncSecret can automatically create K8s Secrets for TL
 ## What This Example Demonstrates
 
 - **Result**: CSI syncSecret successfully creates K8s Secrets for TLS from Vault
-- **Requirement**: A bootstrap pod is needed to trigger syncSecret before deploying the CR (operator validates `secretRef` exists)
-- **Goal**: TLS certificates stored in Vault, automatically synced to K8s Secrets, used via `secretRef`
+- **Challenge**: Operator validates `secretRef` secrets exist BEFORE creating pods, but CSI syncSecret only creates secrets when a pod mounts the volume
+- **Solution**: Use a Job to mount the CSI volume first, triggering syncSecret to create K8s Secrets before deploying Confluent CRs
+- **No basic auth** - just TLS to isolate the test
 
-## How syncSecret Should Work
+## How It Works (Job-based Approach)
 
-1. ControlCenter CR includes `mountedVolumes` with CSI driver
-2. When pod starts, CSI volume is mounted (before any containers)
-3. CSI driver fetches secrets from Vault
-4. syncSecret creates K8s Secrets from the fetched content
-5. `secretRef` can now reference these K8s Secrets
-6. Init containers and main containers start
+The naive approach (mounting CSI volume directly in ControlCenter CR) doesn't work because:
+1. Operator validates `secretRef` secrets exist before creating pods
+2. CSI syncSecret only creates K8s Secrets when a pod mounts the volume
+3. This creates a chicken-and-egg problem
+
+**Solution:** Run a Job first to trigger syncSecret:
+
+1. Deploy SecretProviderClass (defines Vault paths and K8s secret mapping)
+2. Run a Job that mounts the CSI volume
+3. CSI driver fetches secrets from Vault and mounts as files
+4. syncSecret creates K8s Secrets from the mounted content
+5. Job completes (secrets persist due to `deleteSecretOnPodDelete=false`)
+6. Deploy ControlCenter CR - operator finds secrets, creates pods
+7. C3++ pod uses `secretRef` to mount the synced secrets
 
 ## Architecture
 
@@ -27,24 +36,38 @@ This example tests if CSI syncSecret can automatically create K8s Secrets for TL
 │  secret/confluent/ca (ca_crt)                                   │
 └─────────────────────────────────────────────────────────────────┘
                               │
-                              ▼ (CSI Driver + syncSecret)
+                              ▼ CSI Driver fetches on volume mount
 ┌─────────────────────────────────────────────────────────────────┐
-│                    K8s Secrets (auto-created)                    │
-│  prometheus-tls (kubernetes.io/tls)                              │
-│  alertmanager-tls (kubernetes.io/tls)                            │
-│  prometheus-client-tls (Opaque, ca.crt)                          │
-│  alertmanager-client-tls (Opaque, ca.crt)                        │
+│           Secret Sync Job (runs once, then completes)            │
+│  - Mounts CSI volume referencing SecretProviderClass            │
+│  - Triggers syncSecret to create K8s Secrets                    │
+│  - Auto-deletes after 5 minutes (ttlSecondsAfterFinished)       │
 └─────────────────────────────────────────────────────────────────┘
                               │
-                              ▼ (secretRef)
+                              ▼ syncSecret creates
 ┌─────────────────────────────────────────────────────────────────┐
-│                    C3++ Pod                                      │
+│                    K8s Secrets (persisted)                       │
+│  prometheus-tls (Opaque: tls.crt, tls.key, ca.crt)              │
+│  alertmanager-tls (Opaque: tls.crt, tls.key, ca.crt)            │
+│  prometheus-client-tls (Opaque: ca.crt)                         │
+│  alertmanager-client-tls (Opaque: ca.crt)                       │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼ secretRef
+┌─────────────────────────────────────────────────────────────────┐
+│                    C3++ Pod (deployed after Job)                 │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
 │  │ControlCenter │  │  Prometheus  │  │ AlertManager │          │
 │  │  TLS client  │  │  TLS server  │  │  TLS server  │          │
 │  └──────────────┘  └──────────────┘  └──────────────┘          │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+## Prerequisites
+
+1. Kubernetes cluster
+2. `kubectl` access to the cluster
+3. Helm installed
 
 ## Files in This Example
 
@@ -144,4 +167,4 @@ kubectl -n vault-example-2 get job vault-secret-sync -w
 kubectl -n vault-example-2 delete pod controlcenter-next-gen-0
 ```
 
-**For automatic rotation**, consider using External Secrets Operator (ESO) - see basic_tls example.
+**For automatic rotation**, consider using External Secrets Operator (ESO) - see Example 3 (basic_tls).
