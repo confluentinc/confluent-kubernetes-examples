@@ -7,7 +7,6 @@ This example tests if CSI syncSecret can automatically create K8s Secrets for TL
 - **Result**: CSI syncSecret successfully creates K8s Secrets for TLS from Vault
 - **Challenge**: Operator validates `secretRef` secrets exist BEFORE creating pods, but CSI syncSecret only creates secrets when a pod mounts the volume
 - **Solution**: Use a Job to mount the CSI volume first, triggering syncSecret to create K8s Secrets before deploying Confluent CRs
-- **No basic auth** - just TLS to isolate the test
 
 ## How It Works (Job-based Approach)
 
