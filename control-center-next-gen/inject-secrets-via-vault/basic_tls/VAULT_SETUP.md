@@ -1,4 +1,4 @@
-# Vault Setup for Example 3: Combined Basic Auth + TLS (Production)
+# Vault Setup for Example 3: Combined Basic Auth + TLS
 
 This example combines:
 - **Vault Agent Injector** for basic auth (directoryPathInContainer)

@@ -1,4 +1,4 @@
-# Example 3: Combined Basic Auth + TLS (Production)
+# Example 3: Combined Basic Auth + TLS
 
 This example demonstrates a C3++ deployment using both **TLS encryption** and **Basic Authentication**, with all secrets stored in HashiCorp Vault.
 
