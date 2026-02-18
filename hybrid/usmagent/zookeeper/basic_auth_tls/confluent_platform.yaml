@@ -1,0 +1,88 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Zookeeper
+metadata:
+  name: zookeeper
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: <your-registry>/confluentinc/cp-zookeeper:7.9.4-cp1-rc260105153205-latest-ubi8
+    init: confluentinc/confluent-init-container:3.1.0
+  dataVolumeCapacity: 10Gi
+  logVolumeCapacity: 10Gi
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  dataVolumeCapacity: 10G
+  image:
+    application: <your-registry>/confluentinc/cp-kafka:7.9.4-cp1-rc260105153205-latest-ubi8
+    init: confluentinc/confluent-init-container:3.1.0
+  replicas: 3
+  metricReporter:
+    enabled: false
+  configOverrides:
+    server:
+      - confluent.catalog.collector.enable=true
+      - confluent.catalog.collector.destination.topic=catalog-events
+      - confluent.catalog.collector.full.configs.enable=true
+      - confluent.catalog.collector.multitenant.topics.enable=false
+      - confluent.telemetry.exporter._usm.events.filtering.routes.allowed=catalog-events
+      - confluent.telemetry.exporter._usm.events.filtering.enabled=true
+      - confluent.telemetry.exporter._usm.events.enabled=true
+      - confluent.telemetry.exporter._usm.type=http
+      - inter.broker.protocol.version=3.9
+      - log.message.format.version=3.9
+      - confluent.telemetry.exporter._usm.events.client.base.url=https://usm-agent:10000
+      - confluent.telemetry.exporter._usm.events.api.key=admin
+      - confluent.telemetry.exporter._usm.events.api.secret=asdf
+      - confluent.telemetry.exporter._usm.events.https.ssl.protocol=TLSv1.2
+      - confluent.telemetry.exporter._usm.events.https.ssl.truststore.location=/mnt/sslcerts/tls-kafka/truststore.p12
+      - confluent.telemetry.exporter._usm.events.https.ssl.truststore.password=${file:/mnt/sslcerts/tls-kafka/jksPassword.txt:jksPassword}
+  dependencies:
+    zookeeper:
+      endpoint: zookeeper.confluent.svc.cluster.local:2181
+    usmAgentClient:
+      url: https://usm-agent.confluent.svc.cluster.local:10000
+      authentication:
+        type: basic
+        basic:
+          secretRef: usm-cp-cred
+      tls:
+        enabled: true
+        secretRef: tls-kafka
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+  namespace: confluent
+spec:
+  build:
+    type: onDemand
+    onDemand:
+      plugins:
+        locationType: confluentHub
+        confluentHub:
+          - name: kafka-connect-datagen
+            owner: confluentinc
+            version: 0.5.2
+  replicas: 1
+  image:
+    application: <your-registry>/confluentinc/cp-kafka-connect:7.9.4-cp1-rc260105153205-latest-ubi8
+    init: confluentinc/confluent-init-container:3.1.0
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka:9071
+    usmAgentClient:
+      url: https://usm-agent.confluent.svc.cluster.local:10000
+      authentication:
+        type: basic
+        basic:
+          secretRef: usm-cp-cred
+      tls:
+        enabled: true
+        secretRef: tls-connect
