@@ -1,0 +1,136 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: operator
+spec:
+  dataVolumeCapacity: 10G
+  image:
+    application: docker.io/confluentinc/cp-server:8.0.0
+    init: confluentinc/confluent-init-container:3.0.0
+    pullSecretRef:
+      - confluent-registry
+  listeners:
+    controller:
+      tls:
+        enabled: true
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+  tls:
+    secretRef: tls-kraft
+  replicas: 3
+  services:
+    observer:
+      image: us.gcr.io/cc-devel/confluent-observer-container:v0.1312.0-67-gca6852fd7
+      authentication:
+        type: mtls
+      tls:
+        directoryPathInContainer: "/mnt/dpic/certs/tls-kraft"
+  metrics:
+    tls:
+      enabled: true
+      secretRef: tls-kraft
+  podTemplate:
+    annotations:
+      kafkacluster-manual-roll: "3"
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/agent-inject-status: update
+      vault.hashicorp.com/preserve-secret-case: "true"
+      vault.hashicorp.com/agent-inject-secret-tls-kraft-cacerts: secret/tls-kraft
+      vault.hashicorp.com/secret-volume-path-tls-kraft-cacerts: /mnt/dpic/certs/tls-kraft
+      vault.hashicorp.com/agent-inject-file-tls-kraft-cacerts: cacerts.pem
+      vault.hashicorp.com/agent-inject-template-tls-kraft-cacerts: |
+        {{- with secret "secret/tls-kraft" -}}
+        {{ .Data.data.cacerts | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-tls-kraft-fullchain: secret/tls-kraft
+      vault.hashicorp.com/secret-volume-path-tls-kraft-fullchain: /mnt/dpic/certs/tls-kraft
+      vault.hashicorp.com/agent-inject-file-tls-kraft-fullchain: fullchain.pem
+      vault.hashicorp.com/agent-inject-template-tls-kraft-fullchain: |
+        {{- with secret "secret/tls-kraft" -}}
+        {{ .Data.data.fullchain | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-tls-kraft-privkey: secret/tls-kraft
+      vault.hashicorp.com/secret-volume-path-tls-kraft-privkey: /mnt/dpic/certs/tls-kraft
+      vault.hashicorp.com/agent-inject-file-tls-kraft-privkey: privkey.pem
+      vault.hashicorp.com/agent-inject-template-tls-kraft-privkey: |
+        {{- with secret "secret/tls-kraft" -}}
+        {{ .Data.data.privkey | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/role: confluent-operator
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: operator
+  annotations:
+    platform.confluent.io/enable-shrink: "false"
+spec:
+  dataVolumeCapacity: 10G
+  image:
+    application: docker.io/confluentinc/cp-server:8.0.0
+    init: confluentinc/confluent-init-container:3.0.0
+    pullSecretRef:
+      - confluent-registry
+  replicas: 3
+  dependencies:
+    kRaftController:
+      controllerListener:
+        tls:
+          enabled: true
+        authentication:
+          type: plain
+          jaasConfig:
+            secretRef: credential
+  listeners:
+    internal:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+  services:
+    observer:
+      image: us.gcr.io/cc-devel/confluent-observer-container:v0.1312.0-67-gca6852fd7
+      authentication:
+        type: mtls
+      tls:
+        directoryPathInContainer: "/mnt/dpic/certs/tls-kafka"
+  tls:
+    secretRef: tls-kafka
+  metrics:
+    tls:
+      enabled: true
+      secretRef: tls-kafka
+  podTemplate:
+    annotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/agent-inject-status: update
+      vault.hashicorp.com/preserve-secret-case: "true"
+      vault.hashicorp.com/agent-inject-secret-tls-kafka-cacerts: secret/tls-kafka
+      vault.hashicorp.com/secret-volume-path-tls-kafka-cacerts: /mnt/dpic/certs/tls-kafka
+      vault.hashicorp.com/agent-inject-file-tls-kafka-cacerts: cacerts.pem
+      vault.hashicorp.com/agent-inject-template-tls-kafka-cacerts: |
+        {{- with secret "secret/tls-kafka" -}}
+        {{ .Data.data.cacerts | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-tls-kafka-fullchain: secret/tls-kafka
+      vault.hashicorp.com/secret-volume-path-tls-kafka-fullchain: /mnt/dpic/certs/tls-kafka
+      vault.hashicorp.com/agent-inject-file-tls-kafka-fullchain: fullchain.pem
+      vault.hashicorp.com/agent-inject-template-tls-kafka-fullchain: |
+        {{- with secret "secret/tls-kafka" -}}
+        {{ .Data.data.fullchain | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/agent-inject-secret-tls-kafka-privkey: secret/tls-kafka
+      vault.hashicorp.com/secret-volume-path-tls-kafka-privkey: /mnt/dpic/certs/tls-kafka
+      vault.hashicorp.com/agent-inject-file-tls-kafka-privkey: privkey.pem
+      vault.hashicorp.com/agent-inject-template-tls-kafka-privkey: |
+        {{- with secret "secret/tls-kafka" -}}
+        {{ .Data.data.privkey | base64Decode }}
+        {{- end }}
+      vault.hashicorp.com/role: confluent-operator
+---

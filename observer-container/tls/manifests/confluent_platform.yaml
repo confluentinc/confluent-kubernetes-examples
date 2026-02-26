@@ -1,0 +1,87 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: operator
+spec:
+  dataVolumeCapacity: 10G
+  image:
+    application: docker.io/confluentinc/cp-server:8.0.0
+    init: confluentinc/confluent-init-container:3.0.0
+    pullSecretRef:
+      - confluent-registry
+  listeners:
+    controller:
+      tls:
+        enabled: true
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+  tls:
+    secretRef: tls-kraft
+  replicas: 3
+  services:
+    observer:
+      image: us.gcr.io/cc-devel/confluent-observer-container:v0.1312.0-67-gca6852fd7
+      authentication:
+        type: mtls
+      tls:
+        secretRef: tls-kraft
+  metrics:
+    tls:
+      enabled: true
+      secretRef: tls-kraft
+  podTemplate:
+    annotations:
+      kafkacluster-manual-roll: "3"
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: operator
+  annotations:
+    platform.confluent.io/enable-shrink: "false"
+spec:
+  dataVolumeCapacity: 10G
+  image:
+    application: docker.io/confluentinc/cp-server:8.0.0
+    init: confluentinc/confluent-init-container:3.0.0
+    pullSecretRef:
+      - confluent-registry
+  replicas: 3
+  dependencies:
+    kRaftController:
+      controllerListener:
+        tls:
+          enabled: true
+        authentication:
+          type: plain
+          jaasConfig:
+            secretRef: credential
+  listeners:
+    internal:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+  services:
+    observer:
+      image: us.gcr.io/cc-devel/confluent-observer-container:v0.1312.0-67-gca6852fd7
+      authentication:
+        type: mtls
+      tls:
+        secretRef: tls-kafka
+  tls:
+    secretRef: tls-kafka
+  metrics:
+    tls:
+      enabled: true
+      secretRef: tls-kafka
+  podTemplate:
+    annotations:
+      kafkacluster-manual-roll: "3"
+---
