@@ -14,11 +14,7 @@ spec:
     - name: vault-store
       provider:
         type: Vault
-        config:
-          address: http://vault:8200
-          authTokenSecretRef: vault-auth-token
-          prefixPath: secret/
-          separator: /
+        configSecretRef: vault-config
   streamingDomains:
     - name: oauth-kafka
       type: kafka
@@ -46,7 +42,8 @@ spec:
             type: scram
             scram:
               alterScramCredentials: true
-              adminCredentialSecretRef: scram-admin-credentials
+              admin:
+                secretRef: scram-admin-credentials
         cluster:
           authentication:
             type: oauth

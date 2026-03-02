@@ -45,10 +45,13 @@ kubectl get pods -n confluent
    - For the purpose of this example, we will be swapping incoming credentials for user `alice` with credentials for user `bob`.
    - Please change the Vault address and swapped credentials appropriately based on your setup.
 
-- Create Kubernetes secret for Vault authentication token
+- Create Kubernetes secret with Vault configuration
 ```
-kubectl create secret generic vault-auth-token \
+kubectl create secret generic vault-config \
+  --from-literal=address=http://vault:8200 \
   --from-literal=authToken=vault-plaintext-root-token \
+  --from-literal=prefixPath=secret/ \
+  --from-literal=separator=/ \
   -n confluent
 ```
 
@@ -88,7 +91,8 @@ client:
     type: scram
     scram:
       alterScramCredentials: true
-      adminCredentialSecretRef: scram-admin-credentials
+      admin:
+        secretRef: scram-admin-credentials
 ```
 
 #### Configuration Parameters
@@ -101,7 +105,7 @@ client:
 - Allows the Gateway to dynamically manage SCRAM credentials
 - The Gateway uses admin credentials to create and update SCRAM user credentials
 
-**`adminCredentialSecretRef`**
+**`admin.secretRef`**
 - References a Kubernetes secret containing admin credentials (`username` and `password`)
 - The admin credentials are used to manage SCRAM credentials via the Kafka `AlterUserScramCredentials` API
 
