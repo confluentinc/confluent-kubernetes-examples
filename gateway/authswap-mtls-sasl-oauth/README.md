@@ -1,6 +1,6 @@
 # Authentication Swap - mTLS to OAuth
 
-This example demonstrates a Gateway configuration with authentication swap where clients authenticate with tls certificate and the Gateway uses swapped credentials (`bob/bob-secret`) to connect to the Kafka cluster.
+This example demonstrates a Gateway configuration with authentication swap where clients authenticate with tls certificate and the Gateway uses swapped OAuth credentials (clientId: `bob`, clientSecret: `bob-secret`) to connect to the Kafka cluster.
 
 ## Configuration Overview
 
@@ -123,8 +123,9 @@ The complete authentication flow with mTLS and auth swap works as follows:
 3. **Principal Extraction**: Gateway extracts username from certificate using `principalMappingRules` → `alice`
 4. **Credential Lookup**: Gateway looks up `alice` in the `file-store-client-credentials` secret
 5. **Credential Swap**: Gateway finds mapping: `alice="bob/bob-secret"`
-6. **Kafka Connection**: Gateway connects to Kafka cluster using swapped OAuth credentials (clientId: `bob`, clientSecret: `bob-secret`)
-7. **Authorization**: Kafka sees the request coming from user `bob`, not `alice`
+6. **Token Exchange**: Gateway uses swapped credentials (clientId: `bob`, clientSecret: `bob-secret`) to request a JWT token from the IDP's token endpoint (configured via `tokenEndpointUri`)
+7. **Kafka Connection**: Gateway connects to Kafka cluster using the JWT token via OAUTHBEARER SASL mechanism.
+8. **Authorization**: Kafka validates the JWT token and extracts the principal from the token.
 
 This allows you to:
 - Use certificate-based authentication on the client side (more secure, no passwords)
