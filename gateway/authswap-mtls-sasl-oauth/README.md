@@ -150,6 +150,7 @@ See [Step 5 in the Certificate Guide](../certificates/README.md#step-5-create-ku
 
 - Modify the `streamingDomains` section in the [gateway.yaml](./gateway.yaml) to point to your Kafka cluster OAuth listener.
 - **Important**: Update the `tokenEndpointUri` under `cluster.authentication.oauthSettings` in the gateway.yaml file. Replace `<endpoint_url>` with your actual OAuth token endpoint URL (e.g., `https://your-oauth-server.com/oauth2/token`).
+- **Important**: Also update the `<endpoint_url>` in `podTemplate.envVars` for `GATEWAY_OPTS` with the same token endpoint URL. This sets the `org.apache.kafka.sasl.oauthbearer.allowed.urls` JVM system property, which is required to allowlist the OAuth token endpoint.
 - Now deploy the gateway yaml.
 ```
 kubectl apply -f gateway.yaml -n confluent
