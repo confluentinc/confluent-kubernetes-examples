@@ -48,8 +48,11 @@ kubectl get pods -n confluent
 
 - Create Kubernetes secret for Vault authentication token
 ```
-kubectl create secret generic vault-auth-token \
+kubectl create secret generic vault-config \
+  --from-literal=address=http://vault:8200 \
   --from-literal=authToken=vault-plaintext-root-token \
+  --from-literal=prefixPath=secret/ \
+  --from-literal=separator=/ \
   -n confluent
 ```
 
@@ -226,5 +229,5 @@ kubectl delete -f gateway.yaml -n confluent
 
 - Delete Kubernetes secrets
 ```
-kubectl delete secret vault-auth-token scram-admin-credentials oauth-jaas -n confluent
+kubectl delete secret vault-config scram-admin-credentials oauth-jaas -n confluent
 ```

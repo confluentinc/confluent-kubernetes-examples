@@ -51,6 +51,10 @@ spec:
               secretRef: oauth-jaas
             oauthSettings:
               tokenEndpointUri: <endpoint_url>
+  podTemplate:
+    envVars:
+      - name: GATEWAY_OPTS
+        value: "-Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=<endpoint_url>"
   externalAccess:
     type: loadBalancer
     loadBalancer:

@@ -226,5 +226,5 @@ kubectl delete -f gateway.yaml -n confluent
 
 - Delete Kubernetes secrets
 ```
-kubectl delete secret vault-auth-token scram-admin-credentials plain-jaas -n confluent
+kubectl delete secret vault-config scram-admin-credentials plain-jaas -n confluent
 ```
