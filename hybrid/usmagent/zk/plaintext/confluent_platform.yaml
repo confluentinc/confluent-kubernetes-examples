@@ -1,0 +1,63 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Zookeeper
+metadata:
+  name: zookeeper
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: docker.io/confluentinc/cp-zookeeper:7.9.6
+    init: confluentinc/confluent-init-container:3.1.0
+  dataVolumeCapacity: 10G
+  logVolumeCapacity: 10G
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  dataVolumeCapacity: 10G
+  image:
+    application: docker.io/confluentinc/cp-server:7.9.6
+    init: confluentinc/confluent-init-container:3.1.0
+  replicas: 3
+  metricReporter:
+    enabled: false
+  # CFK defaults inter.broker.protocol.version to 2.6, which prevents brokers from
+  # emitting topic metadata events in ZK mode. A minimum of 2.8 is required for
+  # metadata emission. Setting it to 3.9 (matching CP 7.9.6) enables USM metadata
+  # emission (events exporter, catalog collector).
+  configOverrides:
+    server:
+      - inter.broker.protocol.version=3.9
+  dependencies:
+    zookeeper:
+      endpoint: zookeeper.confluent.svc.cluster.local:2181
+    usmAgentClient:
+      url: http://usm-agent.confluent.svc.cluster.local:10000
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+  namespace: confluent
+spec:
+  build:
+    type: onDemand
+    onDemand:
+      plugins:
+        locationType: confluentHub
+        confluentHub:
+          - name: kafka-connect-datagen
+            owner: confluentinc
+            version: 0.5.2
+  replicas: 1
+  image:
+    application: docker.io/confluentinc/cp-server-connect:7.9.6
+    init: confluentinc/confluent-init-container:3.1.0
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka:9071
+    usmAgentClient:
+      url: http://usm-agent.confluent.svc.cluster.local:10000
