@@ -70,7 +70,7 @@ Centralize Kafka Connect logs from CFK‑managed clusters into Splunk, with:
 
 ### Tips
 
-- Consider using index type `_json` for the index to automatically parse logs into fields.
+- Consider setting the HEC token or event **sourcetype** to `_json` (or configuring props/transforms) so JSON logs are automatically parsed into fields, while keeping the index (for example `k8s_logs`) unchanged.
 - Configure Confluent's CRs to emit JSON logs that are easier to parse in Splunk via Log4j2 configuration overrides.
 - A basic Confluent Platform deployment with Connect, Kafka, KsqlDB, and Control Center is available in `confluent-platform.yaml`, with all components configured to emit JSON logs.
 

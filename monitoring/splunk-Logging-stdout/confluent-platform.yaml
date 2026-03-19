@@ -39,7 +39,6 @@ kind: Kafka
 metadata:
   name: kafka
   namespace: confluent
-
 spec:
   replicas: 3
   image:
@@ -199,3 +198,69 @@ spec:
         name: Log4j2
         status: warn
 ---
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-schema-registry:8.1.0
+    init: confluentinc/confluent-init-container:3.1.0
+  configOverrides:
+    log4j2:
+      Configuration:
+        Appenders:
+          Console:
+            PatternLayout:
+              Pattern: '{"severity":"%level","timestamp":"%d{yyyy-MM-dd''T''HH:mm:ss.SSSXXX}","textPayload":"%encode{%X{connector.context}%message%n%ex{full}}{JSON}","sourceLocation":{"file":"%encode{%F}{JSON}","line":"%L","function":"%encode{%c}{JSON}"},"thread":"%encode{%t}{JSON}"}%n'
+            name: stdout
+            target: SYSTEM_OUT
+        Loggers:
+          Logger:
+          - AppenderRef:
+            - ref: stdout
+            level: WARN
+            name: kafka.authorizer.logger
+          Root:
+            AppenderRef:
+            - ref: stdout
+            level: INFO
+        name: Log4j2
+        status: warn
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestProxy
+metadata:
+  name: kafkarestproxy
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-kafka-rest:8.1.0
+    init: confluentinc/confluent-init-container:3.1.0
+  dependencies:
+    schemaRegistry:
+      url: http://schemaregistry.confluent.svc.cluster.local:8081
+  configOverrides:
+    log4j2:
+      Configuration:
+        Appenders:
+          Console:
+            PatternLayout:
+              Pattern: '{"severity":"%level","timestamp":"%d{yyyy-MM-dd''T''HH:mm:ss.SSSXXX}","textPayload":"%encode{%X{connector.context}%message%n%ex{full}}{JSON}","sourceLocation":{"file":"%encode{%F}{JSON}","line":"%L","function":"%encode{%c}{JSON}"},"thread":"%encode{%t}{JSON}"}%n'
+            name: stdout
+            target: SYSTEM_OUT
+        Loggers:
+          Logger:
+          - AppenderRef:
+            - ref: stdout
+            level: WARN
+            name: kafka.authorizer.logger
+          Root:
+            AppenderRef:
+            - ref: stdout
+            level: INFO
+        name: Log4j2
+        status: warn
