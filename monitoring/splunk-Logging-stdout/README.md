@@ -34,7 +34,7 @@ Centralize Kafka Connect logs from CFK‑managed clusters into Splunk, with:
 +-----------+          +----------------------------+          +-------------------+
 | CFK      |  logs    | Splunk OTel Collector      |  HEC     | Splunk            |
 | Connect  +--------->+ (DaemonSet on every node)  +--------->+ (Cloud/Enterprise)|
-| Pods     | stdout   | - Tails container logs     | HTTPS    | - Index: cfk_*    |
+| Pods     | stdout   | - Tails container logs     | HTTPS    | - Index: k8s_logs    |
 +-----------+          +----------------------------+          +-------------------+
        |                          ^
        |                          |
@@ -144,7 +144,7 @@ splunkPlatform:
   endpoint: "https://Splunk-Endpoint:8088/services/collector"
   token: "Token from Splunk"
   index: "Index from Splunk"
-  insecureSkipVerify: true  # TODO: fix server cert; only use in non-prod
+  insecureSkipVerify: true  # Set to true only when testing with self-signed certs; do not use in production
 
 logsCollection:
   containers:
