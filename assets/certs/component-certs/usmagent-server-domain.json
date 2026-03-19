@@ -1,0 +1,20 @@
+{
+  "CN": "usm-agent",
+  "hosts": [
+    "usm-agent",
+    "usm-agent.mydomain.example",
+    "usm-agent.confluent.svc.cluster.local",
+    "*.usm-agent.confluent.svc.cluster.local"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "Universe",
+      "ST": "Pangea",
+      "L": "Earth"
+    }
+  ]
+}
