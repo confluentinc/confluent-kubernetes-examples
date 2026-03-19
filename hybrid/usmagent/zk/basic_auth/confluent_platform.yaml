@@ -7,7 +7,7 @@ spec:
   replicas: 3
   image:
     application: docker.io/confluentinc/cp-zookeeper:7.9.6
-    init: confluentinc/confluent-init-container:3.1.0
+    init: confluentinc/confluent-init-container:3.2.0
   dataVolumeCapacity: 10G
   logVolumeCapacity: 10G
 ---
@@ -20,7 +20,7 @@ spec:
   dataVolumeCapacity: 10G
   image:
     application: docker.io/confluentinc/cp-server:7.9.6
-    init: confluentinc/confluent-init-container:3.1.0
+    init: confluentinc/confluent-init-container:3.2.0
   replicas: 3
   metricReporter:
     enabled: false
@@ -59,7 +59,7 @@ spec:
   replicas: 1
   image:
     application: docker.io/confluentinc/cp-server-connect:7.9.6
-    init: confluentinc/confluent-init-container:3.1.0
+    init: confluentinc/confluent-init-container:3.2.0
   dependencies:
     kafka:
       bootstrapEndpoint: kafka:9071

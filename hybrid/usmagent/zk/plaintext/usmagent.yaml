@@ -11,8 +11,8 @@ spec:
 #        value: -l trace
   replicas: 1
   image:
-    application: docker.io/confluentinc/cp-usm-agent:1.0.0
-    init: confluentinc/confluent-init-container:3.1.0
+    application: docker.io/confluentinc/cp-usm-agent:1.0.1
+    init: confluentinc/confluent-init-container:3.2.0
   confluentCloudClient:
     endpoint: <frontdoor_url>
     environmentId: <env_id>
