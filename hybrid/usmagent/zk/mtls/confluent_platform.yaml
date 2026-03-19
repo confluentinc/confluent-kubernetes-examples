@@ -27,7 +27,7 @@ spec:
   # CFK defaults inter.broker.protocol.version to 2.6, which prevents brokers from
   # emitting topic metadata events in ZK mode. A minimum of 2.8 is required for
   # metadata emission. Setting it to 3.9 (matching CP 7.9.6) enables USM metadata
-  # emission (events exporter, catalog collector).
+  # emission (events exporter, ).
   configOverrides:
     server:
       - inter.broker.protocol.version=3.9

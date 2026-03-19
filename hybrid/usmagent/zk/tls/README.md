@@ -1,6 +1,8 @@
 ## USM Agent deployment with provided TLS certs (ZK mode)
 
 ### Pre-requisite
+- Confluent Platform 7.9.6+
+- In ZK mode, `inter.broker.protocol.version` must be 2.8 or above for USM metadata emission to work. For greenfield deployments, CFK defaults this to 2.6, so an explicit `configOverrides` is required (see `confluent_platform.yaml`). For brownfield deployments where CFK has previously upgraded CP, the version may already be 2.8+. Verify the current value first and only apply the override if it is below 2.8.
 - Deploy Confluent For Kubernetes (CFK) Operator
 ```
 helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes --namespace confluent
