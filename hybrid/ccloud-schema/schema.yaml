@@ -1,0 +1,18 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Schema
+metadata:
+  name: mycfk-schema-config-value
+  namespace: confluent
+spec:
+  # The subject name in Schema Registry
+  name: mycfk-schema-config-value
+  compatibilityLevel: BACKWARD
+  data:
+    configRef: mycfk-schema-config
+    format: avro
+  schemaRegistryRest:
+    endpoint: <schema-registry-endpoint>
+    authentication:
+      type: basic
+      basic:
+        secretRef: schema-registry-access

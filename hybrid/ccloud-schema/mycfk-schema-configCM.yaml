@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mycfk-schema-config
+  namespace: confluent
+data:
+  schema: |
+    {
+      "type": "record",
+      "name": "User",
+      "namespace": "com.example",
+      "fields": [
+        {"name": "id", "type": "string"},
+        {"name": "full_name", "type": "string"},
+        {"name": "email", "type": "string"}
+      ]
+    }
+
+
+    

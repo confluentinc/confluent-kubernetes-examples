@@ -1,0 +1,2 @@
+username=<schema-api-key>
+password=<schema-api-secret>
