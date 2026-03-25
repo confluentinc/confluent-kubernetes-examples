@@ -1,0 +1,15 @@
+# Arbitrary cluster name; surfaces as k8s.cluster.name in Splunk
+clusterName: k8s-cfk
+
+# Tell the chart we're on AKS (helps with some defaults)
+distribution: aks
+
+splunkPlatform:
+  endpoint: "https://Splunk-Endpoint:8088/services/collector"
+  token: "Token from Splunk"
+  index: "Index from Splunk"
+  insecureSkipVerify: true  # Set to true only when testing with self-signed certs; do not use in production
+
+logsCollection:
+  containers:
+    enabled: true  # collect container stdout/stderr logs
