@@ -15,6 +15,3 @@ data:
         {"name": "email", "type": "string"}
       ]
     }
-
-
-    

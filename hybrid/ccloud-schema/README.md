@@ -77,7 +77,7 @@ kubectl apply -f $TUTORIAL_HOME/schema.yaml
 
 ## Validate
 
-## Validate in the kubectl context
+### Validate in the kubectl context
 
 ```bash
 kubectl get schema -n confluent
