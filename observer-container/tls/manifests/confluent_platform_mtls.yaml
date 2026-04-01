@@ -7,7 +7,7 @@ spec:
   dataVolumeCapacity: 10G
   image:
     application: docker.io/confluentinc/cp-server:8.0.0
-    init: confluentinc/confluent-init-container:3.0.0
+    init: confluentinc/confluent-init-container:3.2.0
     pullSecretRef:
       - confluent-registry
   listeners:
@@ -23,7 +23,7 @@ spec:
   replicas: 3
   services:
     observer:
-      image: confluentinc/confluent-observer-container:3.2.1
+      image: confluentinc/confluent-observer-container:3.2.0
       authentication:
         type: mtls
       tls:
@@ -46,7 +46,7 @@ spec:
   dataVolumeCapacity: 10G
   image:
     application: docker.io/confluentinc/cp-server:8.0.0
-    init: confluentinc/confluent-init-container:3.0.0
+    init: confluentinc/confluent-init-container:3.2.0
     pullSecretRef:
       - confluent-registry
   replicas: 3
@@ -69,7 +69,7 @@ spec:
         enabled: true
   services:
     observer:
-      image: confluentinc/confluent-observer-container:3.2.1
+      image: confluentinc/confluent-observer-container:3.2.0
       authentication:
         type: mtls
       tls:
