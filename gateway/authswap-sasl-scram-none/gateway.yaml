@@ -1,0 +1,49 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Gateway
+metadata:
+  labels:
+    app.kubernetes.io/name: confluent-for-kubernetes
+    app.kubernetes.io/managed-by: kustomize
+  name: confluent-gateway
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cpc-gateway:1.1.0-1-ubi9
+    init: confluentinc/confluent-init-container:3.1.0
+  streamingDomains:
+    - name: noauth-kafka
+      type: kafka
+      kafkaCluster:
+        bootstrapServers:
+          - id: NOAUTH
+            endpoint: broker:9092
+            tls:
+              secretRef: kafka-tls
+        nodeIdRanges:
+          - name: pool-1
+            start: 1
+            end: 3
+  routes:
+    - name: swap-sasl-scram-to-none-route
+      endpoint: gateway.example.com:9595
+      brokerIdentificationStrategy:
+        type: port
+      streamingDomain:
+        name: noauth-kafka
+        bootstrapServerId: NOAUTH
+      security:
+        auth: swap
+        client:
+          authentication:
+            type: scram
+            scram:
+              alterScramCredentials: true
+              admin:
+                secretRef: scram-admin-credentials
+        cluster:
+          authentication:
+            type: none
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      domain: gateway.example.com
