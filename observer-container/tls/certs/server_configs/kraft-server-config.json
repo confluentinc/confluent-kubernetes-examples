@@ -1,0 +1,19 @@
+{
+  "CN": "kraftcontroller",
+  "hosts": [
+    "kraftcontroller",
+    "kraftcontroller.operator.svc.cluster.local",
+    "*.kraftcontroller.operator.svc.cluster.local"
+  ],
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "Universe",
+      "ST": "Pangea",
+      "L": "Earth"
+    }
+  ]
+}
