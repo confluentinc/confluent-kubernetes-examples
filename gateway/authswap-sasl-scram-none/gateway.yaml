@@ -8,17 +8,17 @@ metadata:
 spec:
   replicas: 3
   image:
-    application: confluentinc/cpc-gateway:1.1.0-1-ubi9
-    init: confluentinc/confluent-init-container:3.1.0
+    application: confluentinc/cpc-gateway:1.2.0-1-ubi9
+    init: confluentinc/confluent-init-container:3.2.0
   streamingDomains:
-    - name: noauth-kafka
+    - name: mtls-kafka
       type: kafka
       kafkaCluster:
         bootstrapServers:
-          - id: NOAUTH
+          - id: kafka-with-mtls
             endpoint: broker:9092
             tls:
-              secretRef: kafka-tls
+              secretRef: kafka-tls # keystore should be present in the secret for mtls connection
         nodeIdRanges:
           - name: pool-1
             start: 1
@@ -29,8 +29,8 @@ spec:
       brokerIdentificationStrategy:
         type: port
       streamingDomain:
-        name: noauth-kafka
-        bootstrapServerId: NOAUTH
+        name: mtls-kafka
+        bootstrapServerId: kafka-with-mtls
       security:
         auth: swap
         client:
