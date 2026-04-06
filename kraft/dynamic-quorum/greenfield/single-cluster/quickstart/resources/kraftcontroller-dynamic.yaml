@@ -1,0 +1,27 @@
+---
+# KRaftController with Dynamic Quorum (KIP-853) - Single Region
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: confluent
+spec:
+  replicas: 3
+  dataVolumeCapacity: 10Gi
+  image:
+    # Supported CP versions for dynamic quorum:
+    #   - confluentinc/cp-server:7.9.6   (manual observer promotion required)
+    #   - confluentinc/cp-server:8.1.0   (manual observer promotion required)
+    #   - confluentinc/cp-server:8.2.0   (auto-join: observers auto-promote to voters)
+    # CP 8.2+ enables auto-join by default (controller.quorum.auto.join.enable=true).
+    # To explicitly disable auto-join on 8.2+, add to configOverrides.server:
+    #   - "controller.quorum.auto.join.enable=false"
+    application: confluentinc/cp-server:7.9.6
+    init: confluentinc/confluent-init-container:3.2.0
+  dynamicQuorumConfig:
+    # Enable KIP-853 dynamic quorum
+    enabled: true
+    # Pod index 0 becomes the initial leader (formats with --standalone)
+    # Other pods start as observers (format with --no-initial-controllers)
+    bootstrapPod: 0
+    # Note: ConfigMap name is automatically derived as {kraftcontroller-name}-dynamic-quorum

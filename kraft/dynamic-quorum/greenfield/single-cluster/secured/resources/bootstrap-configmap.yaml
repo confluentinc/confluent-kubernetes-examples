@@ -1,0 +1,10 @@
+---
+# Bootstrap ConfigMap for Dynamic Quorum
+# Required for bootstrap pod to track formatting status
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kraftcontroller-dynamic-quorum
+  namespace: confluent
+data:
+  bootstrap-status: '{"bootstrap_formatted": false}'

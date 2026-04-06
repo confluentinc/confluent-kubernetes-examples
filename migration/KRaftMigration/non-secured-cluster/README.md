@@ -1,5 +1,7 @@
 # Migrate from Zookeeper based Kafka cluster to KRaft based Kafka cluster using Confluent for Kubernetes 
 
+> **Note**: This example migrates from ZooKeeper to KRaft with **static quorum** (`kraft.version=0`). To migrate to KRaft with **dynamic quorum** (`kraft.version=1`), which allows adding/removing controllers without downtime, see the [Dynamic Quorum ZK-to-KRaft examples](../../../kraft/dynamic-quorum/migration/zk-to-kraft/).
+
 Starting in the CFK 2.8, [CFK supports migration](https://docs.confluent.io/operator/current/co-migrate-kraft.html) from the Zookeeper based Confluent Platform deployment to Kraft based deployment. 
 In this workflow scenario, you'll migrate from Zookeeper based Kafka cluster to KRaft based Kafka cluster using Confluent for Kubernetes. This example doesn't have any security enabled on the Confluent Platform deployment. 
 Please make sure to follow the [requirements](https://docs.confluent.io/operator/current/co-migrate-kraft.html#requirements-and-considerations) before running the migration workflow. 

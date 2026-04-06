@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kraftcontroller-dynamic-quorum
+  namespace: central
+data:
+  bootstrap-status: '{"bootstrap_formatted": false}'

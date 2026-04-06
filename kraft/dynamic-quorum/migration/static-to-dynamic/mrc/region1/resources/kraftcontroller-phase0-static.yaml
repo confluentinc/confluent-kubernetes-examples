@@ -1,0 +1,96 @@
+---
+# KRaftController for Region 1 (Central) - Phase 0: Static Quorum
+# Cluster: my-cluster
+# Namespace: central
+# kraft.version=0, no dynamicQuorumConfig
+# CFK generates controller.quorum.voters automatically from controllerQuorumVoters
+#
+# Security: TLS (secretRef) + SASL/PLAIN on controller listener + RBAC
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: central
+  annotations:
+    # Node IDs: 100, 101, 102
+    platform.confluent.io/broker-id-offset: "100"
+spec:
+  replicas: 3
+  dataVolumeCapacity: 10Gi
+
+  mountedVolumes:
+    volumes:
+      - name: admin-config
+        configMap:
+          name: kraft-admin-config
+    volumeMounts:
+      - name: admin-config
+        mountPath: /mnt/admin-config
+
+  clusterID: OGYzZTUxNzEtNjgxOC00Yg
+
+  image:
+    # CP 8.0+ required for static-to-dynamic migration
+    application: confluentinc/cp-server:8.1.2
+    init: confluentinc/confluent-init-container:3.2.0
+
+  # TLS Configuration - secretRef based certificates
+  tls:
+    secretRef: tls-kraftcontroller
+
+  # RBAC Authorization
+  authorization:
+    type: rbac
+    superUsers:
+      - User:kafka
+      - User:ssologin
+
+  # CFK creates LoadBalancer services and external-dns syncs DNS automatically
+  listeners:
+    controller:
+      tls:
+        enabled: true
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          domain: my-domain.example.com
+          brokerPrefix: kraft-central
+
+  # Cross-Cluster Quorum Voters (3+3 split, 6 total, quorum needs 4)
+  controllerQuorumVoters:
+    # Region 1 (central namespace on my-cluster) - 3 controllers
+    - nodeId: 100
+      brokerEndpoint: kraft-central0.my-domain.example.com:9074
+    - nodeId: 101
+      brokerEndpoint: kraft-central1.my-domain.example.com:9074
+    - nodeId: 102
+      brokerEndpoint: kraft-central2.my-domain.example.com:9074
+    # Region 2 (east namespace on my-clusterdev) - 3 controllers
+    - nodeId: 200
+      brokerEndpoint: kraft-east0.my-domain.example.com:9074
+    - nodeId: 201
+      brokerEndpoint: kraft-east1.my-domain.example.com:9074
+    - nodeId: 202
+      brokerEndpoint: kraft-east2.my-domain.example.com:9074
+
+  # KRaft RBAC: reference Kafka's TOKEN listener (port 9073) via public DNS
+  # TOKEN listener is auto-created by CFK when MDS OAuth is enabled
+  # Must use public DNS — MDS auth consumer discovers all brokers across regions
+  dependencies:
+    mdsKafkaCluster:
+      bootstrapEndpoint: kafka-central-rep.my-domain.example.com:9073
+      authentication:
+        type: oauth
+        jaasConfig:
+          secretRef: oauth-jass
+        oauthSettings:
+          tokenEndpointUri: http://keycloak.my-domain.example.com:8080/realms/sso_test/protocol/openid-connect/token
+      tls:
+        enabled: true
+
+  # No dynamicQuorumConfig — this is static quorum (kraft.version=0)
+  # CFK generates controller.quorum.voters from controllerQuorumVoters above

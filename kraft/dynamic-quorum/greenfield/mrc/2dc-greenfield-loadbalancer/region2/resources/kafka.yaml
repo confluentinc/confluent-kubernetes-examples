@@ -1,0 +1,130 @@
+---
+# Kafka Cluster for Region 2 (East)
+# Cluster: my-clusterdev
+# Greenfield deployment with full security
+#
+# Security: TLS (secretRef) + SASL/PLAIN on all listeners + RBAC with OAuth MDS (Keycloak)
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: east
+  annotations:
+    # Broker IDs: 10, 11 (avoids conflicts with central: 30, 31)
+    platform.confluent.io/broker-id-offset: "10"
+spec:
+  replicas: 2
+  dataVolumeCapacity: 10Gi
+
+  image:
+    application: confluentinc/cp-server:8.1.2
+    init: confluentinc/confluent-init-container:3.2.0
+
+  tls:
+    secretRef: tls-kafka
+
+  authorization:
+    type: rbac
+    superUsers:
+      - User:kafka
+      - User:ssologin
+
+  services:
+    mds:
+      tls:
+        enabled: true
+      tokenKeyPair:
+        secretRef: mds-token
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          domain: my-domain.example.com
+          prefix: kafka-east-mds
+          advertisedURL:
+            enabled: true
+            prefix: kafka-east-mds
+      provider:
+        oauth:
+          configurations:
+            expectedIssuer: http://keycloak.my-domain.example.com:8080/realms/sso_test
+            jwksEndpointUri: http://keycloak.my-domain.example.com:8080/realms/sso_test/protocol/openid-connect/certs
+            subClaimName: client_id
+    kafkaRest:
+      authentication:
+        type: oauth
+        oauth:
+          secretRef: oauth-jass
+          configuration:
+            tokenEndpointUri: http://keycloak.my-domain.example.com:8080/realms/sso_test/protocol/openid-connect/token
+            expectedIssuer: http://keycloak.my-domain.example.com:8080/realms/sso_test
+            jwksEndpointUri: http://keycloak.my-domain.example.com:8080/realms/sso_test/protocol/openid-connect/certs
+            subClaimName: client_id
+
+  listeners:
+    internal:
+      tls:
+        enabled: true
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+    external:
+      tls:
+        enabled: true
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          domain: my-domain.example.com
+          brokerPrefix: kafka-east-ext
+          bootstrapPrefix: kafka-east-ext
+    replication:
+      tls:
+        enabled: true
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          domain: my-domain.example.com
+          brokerPrefix: kafka-east-rep
+          bootstrapPrefix: kafka-east-rep
+
+  dependencies:
+    kRaftController:
+      clusterRef:
+        name: kraftcontroller
+      controllerListener:
+        tls:
+          enabled: true
+        authentication:
+          type: plain
+          jaasConfig:
+            secretRef: credential
+    kafkaRest:
+      authentication:
+        type: oauth
+        jaasConfig:
+          secretRef: oauth-jass
+        oauthSettings:
+          tokenEndpointUri: http://keycloak.my-domain.example.com:8080/realms/sso_test/protocol/openid-connect/token
+          expectedIssuer: http://keycloak.my-domain.example.com:8080/realms/sso_test
+          jwksEndpointUri: http://keycloak.my-domain.example.com:8080/realms/sso_test/protocol/openid-connect/certs
+          subClaimName: client_id
+
+  # Metrics reporter — must use public DNS (replication listener) so producer can
+  # reach ALL brokers including cross-cluster ones. Internal DNS fails cross-cluster.
+  metricReporter:
+    enabled: true
+    bootstrapEndpoint: kafka-east-rep.my-domain.example.com:9072
+    authentication:
+      type: plain
+      jaasConfig:
+        secretRef: credential
+    tls:
+      enabled: true

@@ -1,0 +1,20 @@
+---
+# Kafka brokers pointing to KRaft controllers
+# This YAML stays the same throughout all migration phases
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  replicas: 3
+  storageClass:
+    name: retain-sc
+  dataVolumeCapacity: 10Gi
+  image:
+    application: confluentinc/cp-server:8.1.2
+    init: confluentinc/confluent-init-container:3.2.0
+  dependencies:
+    kRaftController:
+      clusterRef:
+        name: kraftcontroller

@@ -1,0 +1,19 @@
+---
+# KRaftController with Static Quorum (kraft.version=0)
+# Phase 0: Initial static quorum setup — no dynamicQuorumConfig
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: confluent
+spec:
+  replicas: 3
+  storageClass:
+    name: retain-sc
+  dataVolumeCapacity: 10Gi
+  image:
+    # CP 8.0+ required for static-to-dynamic migration
+    application: confluentinc/cp-server:8.1.2
+    init: confluentinc/confluent-init-container:3.2.0
+  # No dynamicQuorumConfig — this is static quorum (kraft.version=0)
+  # CFK generates controller.quorum.voters automatically

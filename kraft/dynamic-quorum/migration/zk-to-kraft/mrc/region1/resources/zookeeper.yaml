@@ -1,0 +1,47 @@
+---
+# ZooKeeper for Region 1 (Central)
+# Cluster: my-cluster, Namespace: central
+# MRC: 3 central + 2 east = 5 total (odd, required for ZK quorum)
+# Security: TLS (secretRef) + Digest authentication
+apiVersion: platform.confluent.io/v1beta1
+kind: Zookeeper
+metadata:
+  name: zookeeper
+  namespace: central
+  annotations:
+    platform.confluent.io/use-log4j1: "true"
+    platform.confluent.io/use-old-jetty9: "true"
+spec:
+  replicas: 3
+  dataVolumeCapacity: 10Gi
+  logVolumeCapacity: 10Gi
+
+  image:
+    application: confluentinc/cp-zookeeper:7.9.6
+    init: confluentinc/confluent-init-container:3.2.0
+
+  tls:
+    secretRef: tls-zookeeper
+
+  authentication:
+    type: digest
+    jaasConfig:
+      secretRef: credential
+
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      domain: my-domain.example.com
+      prefix: zk-central
+      advertisedURL:
+        enabled: true
+        prefix: zk-central
+
+  # MRC peers — 5 total (3 central + 2 east)
+  # Local nodes: internal DNS, Remote nodes: public DNS via LoadBalancer
+  peers:
+    - server.0=zookeeper-0.zookeeper.central.svc.cluster.local:2888:3888
+    - server.1=zookeeper-1.zookeeper.central.svc.cluster.local:2888:3888
+    - server.2=zookeeper-2.zookeeper.central.svc.cluster.local:2888:3888
+    - server.10=zk-east0.my-domain.example.com:2888:3888
+    - server.11=zk-east1.my-domain.example.com:2888:3888

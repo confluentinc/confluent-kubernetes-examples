@@ -1,0 +1,87 @@
+---
+# KRaftController for Region 2 (East) - Phase 1: Add Advertised Listeners
+# See region1 phase1 YAML for detailed explanation of changes.
+#
+# Security: TLS (secretRef) + SASL/PLAIN on controller listener + RBAC
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: east
+  annotations:
+    platform.confluent.io/broker-id-offset: "200"
+spec:
+  # [ADDED] Force roll
+  podTemplate:
+    annotations:
+      kafkacluster-manual-roll: "1"
+
+  replicas: 3
+  dataVolumeCapacity: 10Gi
+
+  mountedVolumes:
+    volumes:
+      - name: admin-config
+        configMap:
+          name: kraft-admin-config
+    volumeMounts:
+      - name: admin-config
+        mountPath: /mnt/admin-config
+
+  clusterID: OGYzZTUxNzEtNjgxOC00Yg
+
+  image:
+    application: confluentinc/cp-server:8.1.2
+    init: confluentinc/confluent-init-container:3.2.0
+
+  tls:
+    secretRef: tls-kraftcontroller
+
+  authorization:
+    type: rbac
+    superUsers:
+      - User:kafka
+      - User:ssologin
+
+  # [CHANGED] Added advertisedListenersEnabled
+  listeners:
+    advertisedListenersEnabled: true
+    controller:
+      tls:
+        enabled: true
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          domain: my-domain.example.com
+          brokerPrefix: kraft-east
+
+  controllerQuorumVoters:
+    - nodeId: 100
+      brokerEndpoint: kraft-central0.my-domain.example.com:9074
+    - nodeId: 101
+      brokerEndpoint: kraft-central1.my-domain.example.com:9074
+    - nodeId: 102
+      brokerEndpoint: kraft-central2.my-domain.example.com:9074
+    - nodeId: 200
+      brokerEndpoint: kraft-east0.my-domain.example.com:9074
+    - nodeId: 201
+      brokerEndpoint: kraft-east1.my-domain.example.com:9074
+    - nodeId: 202
+      brokerEndpoint: kraft-east2.my-domain.example.com:9074
+
+  dependencies:
+    mdsKafkaCluster:
+      bootstrapEndpoint: kafka-east-rep.my-domain.example.com:9073
+      authentication:
+        type: oauth
+        jaasConfig:
+          secretRef: oauth-jass
+        oauthSettings:
+          tokenEndpointUri: http://keycloak.my-domain.example.com:8080/realms/sso_test/protocol/openid-connect/token
+      tls:
+        enabled: true
+
