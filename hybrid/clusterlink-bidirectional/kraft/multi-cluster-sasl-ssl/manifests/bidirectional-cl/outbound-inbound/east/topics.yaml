@@ -1,0 +1,13 @@
+# Topics for east cluster (private)
+# east-topic: original on east, mirrored to central via OUTBOUND link
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: east-topic
+  namespace: east
+spec:
+  replicas: 3
+  partitionCount: 3
+  kafkaRestClassRef:
+    name: east-rest

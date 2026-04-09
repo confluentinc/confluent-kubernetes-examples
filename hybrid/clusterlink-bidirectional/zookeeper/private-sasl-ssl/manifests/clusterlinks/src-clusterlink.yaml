@@ -1,0 +1,59 @@
+# ClusterLink on PUBLIC cluster - OUTBOUND mode (default)
+# Initiates connections to the private cluster
+# Handles REVERSE mirroring (private -> public)
+#
+# ⚠️ IMPORTANT: Different credentials for src and dest clusters!
+# - sourceKafkaCluster.authentication uses dest-credential (dest-kafka/dest-kafka-secret)
+# - destinationKafkaCluster.authentication uses credential (src-kafka/src-kafka-secret)
+apiVersion: platform.confluent.io/v1beta1
+kind: ClusterLink
+metadata:
+  name: src-cluster-link
+  namespace: src
+spec:
+  name: bidirectional-private-link
+  
+  sourceInitiatedLink:
+    linkMode: Bidirectional
+  
+  sourceKafkaCluster:
+    bootstrapEndpoint: kafka.dest.svc.cluster.local:9071
+    # Uses DEST (private) cluster credentials (dest-credential secret)
+    authentication:
+      type: plain
+      jaasConfig:
+        secretRef: dest-credential
+    tls:
+      enabled: true
+      secretRef: tls-certs
+    kafkaRestClassRef:
+      name: dest-rest
+      namespace: dest
+  
+  # destinationKafkaCluster is the LOCAL cluster (where this ClusterLink is deployed)
+  # For OUTBOUND mode, we need local.* configs to read from local topics
+  destinationKafkaCluster:
+    kafkaRestClassRef:
+      name: src-rest
+      namespace: src
+    # Uses LOCAL (src/public) cluster credentials
+    # Generates local.sasl.jaas.config for reading local topics
+    authentication:
+      type: plain
+      jaasConfig:
+        secretRef: credential
+    tls:
+      enabled: true
+      secretRef: tls-certs
+  
+  # IMPORTANT: In private cluster mode, ONLY reverse mirroring works.
+  # Forward mirroring is NOT possible because creating a mirror topic requires the
+  # destination cluster to describe the source topic, and the INBOUND cluster cannot
+  # reach the remote cluster to do this.
+  mirrorTopics:
+    - name: reverse-topic
+      direction: toDestination
+  
+  configs:
+    consumer.offset.sync.enable: "true"
+

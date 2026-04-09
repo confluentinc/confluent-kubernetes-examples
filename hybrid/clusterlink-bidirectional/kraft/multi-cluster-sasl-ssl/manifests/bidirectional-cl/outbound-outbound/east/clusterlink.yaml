@@ -1,0 +1,60 @@
+# ClusterLink on EAST cluster
+#
+# Bidirectional link between east and central.
+# CR is needed on BOTH clusters. Mirror topics can be defined on either side.
+#
+# Two directions per mirror topic:
+#   toDestination = PULL from remote (central) to local (east)
+#   toSource      = PUSH from local (east) to remote (central)
+#
+# sourceKafkaCluster = central (remote)
+# destinationKafkaCluster = east (local)
+#
+# Credentials:
+# - central-credential: central cluster's SASL creds (for connecting TO central's Kafka)
+# - east-rest: local REST class for managing mirror topics on east
+# - central-rest: remote REST class pointing to central's REST API via LB
+#
+# No clusterID needed -- CFK discovers it via the REST API
+apiVersion: platform.confluent.io/v1beta1
+kind: ClusterLink
+metadata:
+  name: east-cluster-link
+  namespace: east
+spec:
+  # Link name MUST match on both sides for bidirectional
+  name: bidirectional-link
+
+  sourceInitiatedLink:
+    linkMode: Bidirectional
+
+  # Remote: central cluster (source of central-topic)
+  sourceKafkaCluster:
+    bootstrapEndpoint: kafka-central.my-domain.example.com:9092
+    kafkaRestClassRef:
+      name: central-rest
+      namespace: east
+    authentication:
+      type: plain
+      jaasConfig:
+        secretRef: central-credential
+    tls:
+      enabled: true
+      secretRef: tls-kafka
+
+  # Local: east cluster (destination for mirror)
+  destinationKafkaCluster:
+    kafkaRestClassRef:
+      name: east-rest
+      namespace: east
+
+  mirrorTopics:
+    # toDestination: PULL central-topic from central to east
+    - name: central-topic
+      direction: toDestination
+    # toSource: PUSH east-orders from east to central
+    - name: east-orders
+      direction: toSource
+
+  configs:
+    consumer.offset.sync.enable: "true"

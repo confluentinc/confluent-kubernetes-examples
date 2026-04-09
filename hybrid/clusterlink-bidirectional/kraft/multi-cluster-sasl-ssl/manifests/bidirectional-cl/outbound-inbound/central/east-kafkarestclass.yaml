@@ -1,0 +1,16 @@
+# Remote KafkaRestClass: central -> east REST API
+# Central (public) can reach east (private) REST endpoint
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: east-rest
+  namespace: central
+spec:
+  kafkaRest:
+    endpoint: https://kafka-east-rest.my-domain.example.com:443
+    authentication:
+      type: basic
+      basic:
+        secretRef: east-rest-credential
+    tls:
+      secretRef: tls-kafka

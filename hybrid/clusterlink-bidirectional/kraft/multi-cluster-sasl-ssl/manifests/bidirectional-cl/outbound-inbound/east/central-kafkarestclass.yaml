@@ -1,0 +1,18 @@
+# Remote KafkaRestClass: east -> central REST API
+# In a real private setup, east might not reach central's REST
+# But kafkaRestClassRef is required for bidirectional, so we point it here
+# and also provide clusterID as the primary discovery mechanism
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: central-rest
+  namespace: east
+spec:
+  kafkaRest:
+    endpoint: https://kafka-central-rest.my-domain.example.com:443
+    authentication:
+      type: basic
+      basic:
+        secretRef: central-rest-credential
+    tls:
+      secretRef: tls-kafka

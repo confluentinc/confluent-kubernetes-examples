@@ -1,0 +1,49 @@
+# ClusterLink on CENTRAL (public) cluster — OUTBOUND
+#
+# Case 4: Bidirectional with firewall
+# Central initiates the single connection. Traffic flows both ways over it.
+# Central needs dest.authentication (local.* creds) so east can read back.
+#
+# MUST be created AFTER the INBOUND CR on east
+apiVersion: platform.confluent.io/v1beta1
+kind: ClusterLink
+metadata:
+  name: central-cluster-link
+  namespace: central
+spec:
+  name: bidirectional-private-link
+  sourceInitiatedLink:
+    linkMode: Bidirectional
+    connectionMode: Outbound
+  # Remote: east (private)
+  sourceKafkaCluster:
+    bootstrapEndpoint: kafka-east.my-domain.example.com:9092
+    kafkaRestClassRef:
+      name: east-rest
+      namespace: central
+    authentication:
+      type: plain
+      jaasConfig:
+        secretRef: east-credential
+    tls:
+      enabled: true
+      secretRef: tls-kafka
+  # Local: central (public)
+  # dest.authentication generates local.* creds for single-connection reverse read
+  destinationKafkaCluster:
+    kafkaRestClassRef:
+      name: central-rest
+      namespace: central
+    authentication:
+      type: plain
+      jaasConfig:
+        secretRef: credential
+    tls:
+      enabled: true
+      secretRef: tls-kafka
+  mirrorTopics:
+    # Pull east-topic from east to central
+    - name: east-topic
+      direction: toDestination
+  configs:
+    consumer.offset.sync.enable: "true"

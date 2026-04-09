@@ -1,0 +1,58 @@
+# Kafka for east cluster (<east-cluster>, us-east4)
+# Security: TLS + SASL/PLAIN on listeners, Basic auth on REST API
+# External access: LoadBalancer for Kafka + REST
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: east
+spec:
+  replicas: 3
+  dataVolumeCapacity: 10Gi
+  image:
+    application: confluentinc/cp-server:7.9.6
+    init: confluentinc/confluent-init-container:2.10.0
+  dependencies:
+    kRaftController:
+      clusterRef:
+        name: kraftcontroller
+  tls:
+    secretRef: tls-kafka
+  listeners:
+    internal:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+    external:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          domain: my-domain.example.com
+          brokerPrefix: kafka-east
+          bootstrapPrefix: kafka-east
+  passwordEncoder:
+    secretRef: password-encoder-secret
+  services:
+    kafkaRest:
+      tls:
+        enabled: true
+      authentication:
+        type: basic
+        basic:
+          secretRef: kafkarest-credential
+          roles:
+            - "admin"
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          domain: my-domain.example.com
+          prefix: kafka-east-rest

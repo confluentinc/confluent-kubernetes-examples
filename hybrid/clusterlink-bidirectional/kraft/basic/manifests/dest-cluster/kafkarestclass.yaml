@@ -1,0 +1,12 @@
+# KafkaRestClass for destination cluster
+# Required for ClusterLink to communicate with the Kafka cluster
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: dest-rest
+  namespace: dest
+spec:
+  kafkaClusterRef:
+    name: kafka
+    namespace: dest
+

@@ -1,0 +1,22 @@
+# Kafka cluster for destination namespace (ZooKeeper mode)
+# NOTE: inter.broker.protocol.version=3.1 is REQUIRED for bidirectional cluster linking
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: dest
+spec:
+  replicas: 3
+  dataVolumeCapacity: 10Gi
+  image:
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.10.0
+  
+  # Required for bidirectional cluster linking with ZooKeeper mode
+  configOverrides:
+    server:
+      - inter.broker.protocol.version=3.1
+  
+  passwordEncoder:
+    secretRef: password-encoder-secret
+

@@ -1,0 +1,48 @@
+# ClusterLink on SOURCE cluster - handles REVERSE mirroring
+# ⚠️ IMPORTANT: Different credentials for src and dest clusters!
+apiVersion: platform.confluent.io/v1beta1
+kind: ClusterLink
+metadata:
+  name: src-cluster-link
+  namespace: src
+spec:
+  name: bidirectional-link
+  
+  sourceInitiatedLink:
+    linkMode: Bidirectional
+  
+  sourceKafkaCluster:
+    bootstrapEndpoint: kafka.dest.svc.cluster.local:9071
+    # Uses DEST cluster credentials (dest-credential secret)
+    authentication:
+      type: plain
+      jaasConfig:
+        secretRef: dest-credential
+    tls:
+      enabled: true
+      secretRef: tls-certs
+    kafkaRestClassRef:
+      name: dest-rest
+      namespace: dest
+  
+  # Destination = LOCAL cluster - needs local.* configs for bidirectional
+  destinationKafkaCluster:
+    kafkaRestClassRef:
+      name: src-rest
+      namespace: src
+    # Uses LOCAL (src) cluster credentials
+    authentication:
+      type: plain
+      jaasConfig:
+        secretRef: credential
+    tls:
+      enabled: true
+      secretRef: tls-certs
+  
+  mirrorTopics:
+    - name: reverse-topic
+      direction: toDestination
+  
+  configs:
+    consumer.offset.sync.enable: "true"
+
