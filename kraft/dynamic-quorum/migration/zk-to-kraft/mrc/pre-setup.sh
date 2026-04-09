@@ -81,7 +81,7 @@ echo ""
 echo "This script sets up the one-time prerequisites:"
 echo "  1. Namespaces (one per cluster)"
 echo "  2. TLS certificates (CA + component certs with wildcard SANs)"
-echo "  3. Secrets (registry, TLS, credentials, digest, MDS token, OAuth JAAS)"
+echo "  3. Secrets (TLS, credentials, digest, MDS token, OAuth JAAS)"
 echo "  4. Keycloak (OIDC identity provider for MDS OAuth)"
 echo "  5. External-DNS (for LoadBalancer DNS sync)"
 echo "  6. Confluent Operator (namespaced, one instance per cluster)"
@@ -218,41 +218,9 @@ SANEOF
 fi
 
 # ============================================================
-# Step 3: Create Registry Secrets
+# Step 3: Create TLS Secrets
 # ============================================================
-print_step "Step 3: Create Registry Secrets"
-echo "Image pull secret for pulling from container registry"
-
-# Region 1
-if kube1 get secret confluent-registry -n "$REGION1_NS" &>/dev/null; then
-    echo_info "confluent-registry already exists in $REGION1_NS on my-cluster (skipping)"
-else
-    ECR_PASSWORD="${ECR_PASSWORD:-$(gcloud auth print-access-token)}"
-    echo_info "Creating confluent-registry in $REGION1_NS on my-cluster..."
-    run_cmd kube1 create secret docker-registry confluent-registry \
-        --docker-server=docker.io \
-        --docker-username=_token \
-        --docker-password="$ECR_PASSWORD" \
-        -n "$REGION1_NS"
-fi
-
-# Region 2
-if kube2 get secret confluent-registry -n "$REGION2_NS" &>/dev/null; then
-    echo_info "confluent-registry already exists in $REGION2_NS on my-clusterdev (skipping)"
-else
-    ECR_PASSWORD="${ECR_PASSWORD:-$(gcloud auth print-access-token)}"
-    echo_info "Creating confluent-registry in $REGION2_NS on my-clusterdev..."
-    run_cmd kube2 create secret docker-registry confluent-registry \
-        --docker-server=docker.io \
-        --docker-username=_token \
-        --docker-password="$ECR_PASSWORD" \
-        -n "$REGION2_NS"
-fi
-
-# ============================================================
-# Step 4: Create TLS Secrets
-# ============================================================
-print_step "Step 4: Create TLS Secrets"
+print_step "Step 3: Create TLS Secrets"
 echo "Creating TLS secrets for KRaftController and Kafka in both regions."
 echo "Secrets use: fullchain.pem (cert chain), privkey.pem (private key), cacerts.pem (CA cert)"
 
@@ -286,9 +254,9 @@ create_tls_secret "tls-zookeeper" "$REGION1_NS" "kube1"
 create_tls_secret "tls-zookeeper" "$REGION2_NS" "kube2"
 
 # ============================================================
-# Step 6: Create Credential Secrets (SASL/PLAIN + Digest)
+# Step 4: Create Credential Secrets (SASL/PLAIN + Digest)
 # ============================================================
-print_step "Step 6: Create Credential Secrets"
+print_step "Step 4: Create Credential Secrets"
 echo "Creating SASL/PLAIN + Digest credential secrets."
 echo ""
 echo "Credential files:"
@@ -339,9 +307,9 @@ create_credential_secret "$REGION1_NS" "kube1"
 create_credential_secret "$REGION2_NS" "kube2"
 
 # ============================================================
-# Step 7: Create MDS Token Keypair Secret
+# Step 5: Create MDS Token Keypair Secret
 # ============================================================
-print_step "Step 7: Create MDS Token Keypair Secret"
+print_step "Step 5: Create MDS Token Keypair Secret"
 echo "MDS uses RSA keypair for signing/verifying authorization tokens."
 
 create_mds_token_secret() {
@@ -363,11 +331,11 @@ create_mds_token_secret "$REGION1_NS" "kube1"
 create_mds_token_secret "$REGION2_NS" "kube2"
 
 # ============================================================
-# Step 8: Create OAuth JAAS Secret
+# Step 6: Create OAuth JAAS Secret
 # ============================================================
-print_step "Step 8: Create OAuth JAAS Secret"
+print_step "Step 6: Create OAuth JAAS Secret"
 echo "OAuth client credentials for Keycloak (used by ERP and KafkaRest dependency)."
-echo "Client: ssologin / KbLRih1HzjDC267PefuKU7QIoZ8hgHDK"
+echo "Client: ssologin / my-oauth-client-secret"
 
 create_oauth_secret() {
     local namespace="$1"
@@ -382,7 +350,7 @@ create_oauth_secret() {
         OAUTH_FILE=$(mktemp)
         cat > "$OAUTH_FILE" <<'OAUTHEOF'
 clientId=ssologin
-clientSecret=KbLRih1HzjDC267PefuKU7QIoZ8hgHDK
+clientSecret=my-oauth-client-secret
 OAUTHEOF
         run_cmd $kube_fn create secret generic oauth-jass \
             --from-file=oauth.txt="$OAUTH_FILE" \
@@ -395,9 +363,9 @@ create_oauth_secret "$REGION1_NS" "kube1"
 create_oauth_secret "$REGION2_NS" "kube2"
 
 # ============================================================
-# Step 9: Deploy Keycloak (OIDC Identity Provider)
+# Step 7: Deploy Keycloak (OIDC Identity Provider)
 # ============================================================
-print_step "Step 9: Deploy Keycloak (Central Identity Provider)"
+print_step "Step 7: Deploy Keycloak (Central Identity Provider)"
 echo "Keycloak provides OAuth/OIDC identity resolution for MDS RBAC."
 echo "Deployed ONCE in Region 1 (central) — both regions reference via LoadBalancer DNS."
 echo "Endpoint: http://keycloak.${DOMAIN}:8080/realms/sso_test"
@@ -424,9 +392,9 @@ else
 fi
 
 # ============================================================
-# Step 10: Deploy External-DNS
+# Step 8: Deploy External-DNS
 # ============================================================
-print_step "Step 10: Deploy External-DNS"
+print_step "Step 8: Deploy External-DNS"
 echo "External-DNS automatically syncs LoadBalancer IPs with GCP Cloud DNS."
 echo "Handles DNS for ZK, KRaft controllers, and Kafka brokers."
 echo "Each cluster needs its own external-dns deployment."
@@ -452,9 +420,9 @@ else
 fi
 
 # ============================================================
-# Step 11: Deploy Confluent Operator via Helm
+# Step 9: Deploy Confluent Operator via Helm
 # ============================================================
-print_step "Step 11: Deploy Confluent Operator via Helm"
+print_step "Step 9: Deploy Confluent Operator via Helm"
 echo "Operator image: confluent-operator:${OPERATOR_VERSION}"
 echo "Each cluster gets its own namespaced operator instance."
 
@@ -498,9 +466,9 @@ run_cmd helm2 upgrade --install \
     --namespace "$REGION2_NS"
 
 # ============================================================
-# Step 12: Create Admin CLI Config
+# Step 10: Create Admin CLI Config
 # ============================================================
-print_step "Step 12: Create Admin CLI Config"
+print_step "Step 10: Create Admin CLI Config"
 echo "Creates a ConfigMap with security properties for admin CLI tools."
 echo "Mounted at /mnt/admin-config on KRaft pods."
 

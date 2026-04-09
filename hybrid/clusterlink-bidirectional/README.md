@@ -1048,7 +1048,7 @@ When using ACL sync (`acl.sync.enable: true`) with RBAC:
 | Destination CR (Case 2) | `clusterID` (required) | Remote is behind firewall, can't be reached |
 | Bidirectional (Cases 3 & 4) | `kafkaRestClassRef` (required) + `clusterID` (optional) | CFK requires `kafkaRestClassRef` for bidirectional. If the remote REST is reachable, CFK auto-discovers the cluster ID — `clusterID` is not mandatory. If provided, `clusterID` is used directly without REST discovery. |
 
-> **Note**: The remote KafkaRestClass must point to a reachable endpoint for bidirectional links — even when `clusterID` is provided, CFK's reconciler still checks the KafkaRestClass health. See [CFK-4530](https://confluentinc.atlassian.net/browse/CFK-4530) for tracking this as an improvement.
+> **Note**: The remote KafkaRestClass must point to a reachable endpoint for bidirectional links — even when `clusterID` is provided, CFK's reconciler still checks the KafkaRestClass health.
 >
 > **Tested**: Bidirectional SASL-SSL ClusterLink on 2 separate GKE clusters confirmed working without `clusterID` — CFK discovered the remote cluster ID via the REST API configured on the remote KafkaRestClass with HTTPS + basic auth.
 

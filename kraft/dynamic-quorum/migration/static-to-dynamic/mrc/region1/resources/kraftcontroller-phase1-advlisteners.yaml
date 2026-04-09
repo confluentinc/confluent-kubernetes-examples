@@ -2,7 +2,7 @@
 # KRaftController for Region 1 (Central) - Phase 1: Add Advertised Listeners
 #
 # Change from Phase 0:
-#   [NEW] advertisedListenersEnabled: true — required before kraft.version upgrade.
+#   [NEW] advertisedListenersEnabled: true — mandatory for dynamic quorum migration.
 #   [NEW] kafkacluster-manual-roll annotation — advListeners alone doesn't trigger auto-roll.
 #
 # No dynamicQuorumConfig, no configOverrides. Still static quorum.

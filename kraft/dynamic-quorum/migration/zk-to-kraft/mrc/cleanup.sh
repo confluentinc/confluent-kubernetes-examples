@@ -133,14 +133,14 @@ print_step "Phase 6: Uninstall operator and delete secrets (parallel)"
 
 (
     helm --kube-context "$REGION1_CONTEXT" uninstall confluent-operator -n "$REGION1_NS" &>/dev/null || true
-    for secret in confluent-registry tls-kraftcontroller tls-kafka tls-zookeeper credential mds-token oauth-jass; do
+    for secret in tls-kraftcontroller tls-kafka tls-zookeeper credential mds-token oauth-jass; do
         kube1 delete secret "$secret" -n "$REGION1_NS" &>/dev/null || true
     done
     echo_info "[R1] Operator and secrets removed."
 ) &
 (
     helm --kube-context "$REGION2_CONTEXT" uninstall confluent-operator -n "$REGION2_NS" &>/dev/null || true
-    for secret in confluent-registry tls-kraftcontroller tls-kafka tls-zookeeper credential mds-token oauth-jass; do
+    for secret in tls-kraftcontroller tls-kafka tls-zookeeper credential mds-token oauth-jass; do
         kube2 delete secret "$secret" -n "$REGION2_NS" &>/dev/null || true
     done
     echo_info "[R2] Operator and secrets removed."

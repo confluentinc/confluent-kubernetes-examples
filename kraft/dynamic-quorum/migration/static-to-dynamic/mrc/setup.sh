@@ -372,11 +372,11 @@ phase1() {
     echo ""
 
     echo_info "Applying Phase 1 YAML to Region 1 (my-cluster)..."
-    run_cmd kube1 apply -f "$SCRIPT_DIR/region1/resources/kraftcontroller-phase1-dual-config.yaml"
+    run_cmd kube1 apply -f "$SCRIPT_DIR/region1/resources/kraftcontroller-phase1-advlisteners.yaml"
     wait_for_kraftcontroller_ready_region1
 
     echo_info "Applying Phase 1 YAML to Region 2 (my-clusterdev)..."
-    run_cmd kube2 apply -f "$SCRIPT_DIR/region2/resources/kraftcontroller-phase1-dual-config.yaml"
+    run_cmd kube2 apply -f "$SCRIPT_DIR/region2/resources/kraftcontroller-phase1-advlisteners.yaml"
     wait_for_kraftcontroller_ready_region2
 
     # Verify

@@ -56,8 +56,7 @@ echo ""
 echo "This script sets up the one-time prerequisites:"
 echo "  1. Namespace ($NAMESPACE)"
 echo "  2. StorageClass (retain-sc — PVs persist across rolls)"
-echo "  3. Secrets (registry credentials)"
-echo "  4. Confluent Operator"
+echo "  3. Confluent Operator"
 echo ""
 echo "Configuration:"
 echo "  - Namespace:          $NAMESPACE"
@@ -89,23 +88,8 @@ parameters:
 EOF
 fi
 
-# Step 3: Create Registry Secret
-print_step "Step 3: Create Registry Secret"
-echo ""
-echo "Image pull secret for pulling from container registry"
-if kubectl get secret confluent-registry -n "$NAMESPACE" &>/dev/null; then
-    echo_info "confluent-registry already exists in $NAMESPACE (skipping)"
-else
-    ECR_PASSWORD="${ECR_PASSWORD:-$(gcloud auth print-access-token)}"
-    run_cmd kubectl create secret docker-registry confluent-registry \
-        --docker-server=docker.io \
-        --docker-username=_token \
-        --docker-password="$ECR_PASSWORD" \
-        -n "$NAMESPACE"
-fi
-
-# Step 4: Deploy Confluent Operator
-print_step "Step 4: Deploy Confluent Operator via Helm"
+# Step 3: Deploy Confluent Operator
+print_step "Step 3: Deploy Confluent Operator via Helm"
 echo ""
 echo "Operator image: confluent-operator:${OPERATOR_VERSION}"
 run_cmd helm upgrade --install \

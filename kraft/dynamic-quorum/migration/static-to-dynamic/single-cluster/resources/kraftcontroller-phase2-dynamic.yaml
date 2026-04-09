@@ -19,11 +19,5 @@ spec:
     enabled: true
     # No bootstrapPod — cluster is already formatted and running (not a greenfield deploy)
     # No ConfigMap or RBAC needed for migrated clusters
-  # CFK uses controllerQuorumVoters to generate controller.quorum.bootstrap.servers
-  controllerQuorumVoters:
-    - nodeId: 9990
-      brokerEndpoint: kraftcontroller-0.kraftcontroller.confluent.svc.cluster.local:9074
-    - nodeId: 9991
-      brokerEndpoint: kraftcontroller-1.kraftcontroller.confluent.svc.cluster.local:9074
-    - nodeId: 9992
-      brokerEndpoint: kraftcontroller-2.kraftcontroller.confluent.svc.cluster.local:9074
+  # controllerQuorumVoters is optional for single-region — CFK auto-infers from replicas
+  # For MRC, specify controllerQuorumVoters with LoadBalancer endpoints for all regions

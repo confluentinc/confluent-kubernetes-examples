@@ -194,7 +194,7 @@ OAuth client credentials for Keycloak (used by ERP and KafkaRest dependency).
 ```bash
 cat > /tmp/oauth.txt <<'EOF'
 clientId=ssologin
-clientSecret=KbLRih1HzjDC267PefuKU7QIoZ8hgHDK
+clientSecret=my-oauth-client-secret
 EOF
 
 for ctx_ns in "$REGION1_CONTEXT:$REGION1_NS" "$REGION2_CONTEXT:$REGION2_NS"; do

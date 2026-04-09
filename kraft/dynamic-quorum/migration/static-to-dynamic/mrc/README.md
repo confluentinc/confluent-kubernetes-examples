@@ -101,7 +101,7 @@ All controllers should be voters with low lag.
 
 #### Phase 1: Add Advertised Listeners on KRaft (MRC only)
 
-Add `advertisedListenersEnabled: true` to KRaftController on both clusters. This is required for cross-cluster admin commands to work after the upgrade.
+Add `advertisedListenersEnabled: true` to KRaftController on both clusters. This is mandatory for the static-to-dynamic quorum migration — dynamic quorum requires advertised listeners so that controllers can resolve each other's endpoints across regions.
 
 This change alone does not trigger an auto-roll. Add a pod template annotation to force it:
 
@@ -356,7 +356,7 @@ openssl rsa -in /tmp/mds-tokenkeypair.pem -outform PEM -pubout -out /tmp/mds-pub
 # OAuth credentials
 cat > /tmp/oauth.txt <<'EOF'
 clientId=ssologin
-clientSecret=KbLRih1HzjDC267PefuKU7QIoZ8hgHDK
+clientSecret=my-oauth-client-secret
 EOF
 
 for ctx_ns in "$REGION1_CONTEXT:$REGION1_NS" "$REGION2_CONTEXT:$REGION2_NS"; do

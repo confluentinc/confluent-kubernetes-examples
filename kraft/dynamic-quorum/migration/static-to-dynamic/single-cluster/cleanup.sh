@@ -68,10 +68,9 @@ run_cmd kubectl delete pvc -l app=kraftcontroller -n "$NAMESPACE" 2>/dev/null ||
 # Phase 2: Delete operator and infrastructure
 print_step "Phase 2: Delete Operator and infrastructure"
 echo ""
-echo "This will delete Confluent Operator (Helm release) and registry secret."
+echo "This will delete Confluent Operator (Helm release)."
 
 run_cmd helm uninstall confluent-operator -n "$NAMESPACE" 2>/dev/null || print_warning "Operator Helm release not found"
-run_cmd kubectl delete secret confluent-registry -n "$NAMESPACE" 2>/dev/null || print_warning "Registry secret not found"
 
 # Phase 3: Delete namespace
 print_step "Phase 3: Delete namespace"

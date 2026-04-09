@@ -100,9 +100,9 @@ echo "This will uninstall the operator and delete all secrets on both clusters."
 run_cmd helm --kube-context "$REGION1_CONTEXT" uninstall confluent-operator -n $REGION1_NS 2>/dev/null || print_warning "Operator not found on my-cluster"
 run_cmd helm --kube-context "$REGION2_CONTEXT" uninstall confluent-operator -n $REGION2_NS 2>/dev/null || print_warning "Operator not found on my-clusterdev"
 
-# Delete secrets (TLS, credentials, MDS, registry) and admin config
+# Delete secrets (TLS, credentials, MDS) and admin config
 echo_info "Deleting secrets and configmaps on both clusters..."
-for secret in confluent-registry tls-kraftcontroller tls-kafka credential mds-token oauth-jass; do
+for secret in tls-kraftcontroller tls-kafka credential mds-token oauth-jass; do
     run_cmd kube1 delete secret $secret -n $REGION1_NS 2>/dev/null || true
     run_cmd kube2 delete secret $secret -n $REGION2_NS 2>/dev/null || true
 done
@@ -142,6 +142,6 @@ echo "  - CP resources (Kafka + KRaftController on both clusters)"
 echo "  - Bootstrap ConfigMap & RBAC (Region 1)"
 echo "  - Keycloak (central identity provider, region 1 only)"
 echo "  - Operator (Helm release on both clusters)"
-echo "  - Secrets (TLS, credentials, MDS, OAuth, registry on both clusters)"
+echo "  - Secrets (TLS, credentials, MDS, OAuth on both clusters)"
 echo "  - Namespaces ($REGION1_NS, $REGION2_NS)"
 echo "  - Generated certificates ($CERT_DIR)"

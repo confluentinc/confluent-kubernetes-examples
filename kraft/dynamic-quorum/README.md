@@ -437,7 +437,7 @@ To recover from this state: delete the PVC, then delete the bootstrap pod. It wi
 
 In **static quorum** MRC, `advertised.listeners` on KRaft controllers was **not mandatory** -- controllers used `controller.quorum.voters` which already contained all endpoints. However, even in static quorum MRC, without `advertised.listeners` cross-cluster admin client commands (`kafka-metadata-quorum`, `kafka-features`) will fail when routed to a leader in a different cluster -- the leader returns its internal K8s DNS which is not resolvable from other clusters.
 
-In **dynamic quorum** MRC, `advertised.listeners` **is mandatory in the KRaft server properties**. Without it, when an observer runs `add-controller` to join the quorum, the leader responds with its internal DNS (e.g. `kraftcontroller-0.kraftcontroller.central.svc.cluster.local:9074`). Pods in other regions/clusters cannot resolve this internal DNS, so observer-to-voter promotion fails.
+In **dynamic quorum** MRC, `advertised.listeners` **is mandatory in the KRaft server properties**. Without it, the leader advertises its internal K8s DNS (e.g. `kraftcontroller-0.kraftcontroller.central.svc.cluster.local:9074`). Controllers in other regions cannot resolve this DNS, so they never join the quorum -- not even as observers.
 
 Note: `advertised.listeners` in the **client properties file** passed to `kafka-metadata-quorum --command-config` works fine and is unaffected by this issue. The problem is only when `advertised.listeners` is present in the KRaft **server** properties (i.e. `kafka.properties` that the controller process boots with).
 
@@ -701,10 +701,9 @@ After running `kafka-features upgrade --feature kraft.version=1`, two things cha
   If KRaft has `dynamicQuorumConfig.enabled` at kraft.version=0 and Kafka reconciles,
   CFK gives Kafka only `bootstrap.servers` (drops voters). At v0, Kafka with only
   bootstrap.servers crashloops (`UnattachedState, voters=[]`). Follow the step order.
-- **Do NOT skip Step 1 for MRC.** Without advertised listeners, cross-cluster admin commands
-  fail because controllers advertise internal K8s DNS that remote clusters cannot resolve.
-  Also see [KMETA-2851](#53-advertised-listeners-and-mrc) for a known bug when advertised
-  listeners are defined from initial cluster creation (affects greenfield, not this migration path).
+- **Do NOT skip Step 1 for MRC.** Advertised listeners are mandatory for dynamic quorum --
+  without them, the leader advertises its internal K8s DNS. Controllers in other regions
+  cannot resolve this DNS, so they never join the quorum (not even as observers).
 
 #### Examples
 
