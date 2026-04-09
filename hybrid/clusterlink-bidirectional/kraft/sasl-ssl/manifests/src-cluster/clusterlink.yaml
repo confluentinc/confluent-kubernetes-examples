@@ -3,7 +3,7 @@
 #
 # ⚠️ IMPORTANT: Different credentials for src and dest clusters!
 # - sourceKafkaCluster.authentication uses dest-credential (dest-kafka/dest-kafka-secret)
-# - destinationKafkaCluster.authentication uses credential (src-kafka/src-kafka-secret)
+# - destinationKafkaCluster: no authentication needed for outbound-outbound (each side has own connection)
 apiVersion: platform.confluent.io/v1beta1
 kind: ClusterLink
 metadata:
@@ -40,11 +40,6 @@ spec:
     kafkaRestClassRef:
       name: src-rest
       namespace: src
-    # Uses LOCAL (src) cluster credentials - generates local.* configs for bidirectional
-    authentication:
-      type: plain
-      jaasConfig:
-        secretRef: credential
     tls:
       enabled: true
       secretRef: tls-certs

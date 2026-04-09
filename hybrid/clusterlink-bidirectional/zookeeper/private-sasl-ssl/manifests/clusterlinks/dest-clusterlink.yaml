@@ -1,10 +1,6 @@
 # ClusterLink on PRIVATE cluster - INBOUND mode
 # Only accepts connections from the public cluster
 #
-# ⚠️ IMPORTANT: INBOUND links CANNOT have mirrorTopics because they cannot reach
-# the remote cluster to validate source topics. All mirroring is handled by the
-# OUTBOUND link on the public cluster.
-#
 # ⚠️ GOTCHAS:
 # 1. clusterID MUST be set for INBOUND mode
 # 2. This link CANNOT become healthy until the OUTBOUND link initiates connection
@@ -23,7 +19,8 @@ spec:
     connectionMode: Inbound
   
   sourceKafkaCluster:
-    bootstrapEndpoint: kafka.src.svc.cluster.local:9071
+    # INBOUND is passive — bootstrapEndpoint is CFK validation only, not functionally used
+    bootstrapEndpoint: placeholder-not-used-for-inbound:9092
     clusterID: "${SOURCE_CLUSTER_ID}"
     # ⚠️ NOTE: authentication is NOT required for INBOUND mode links
     # The INBOUND link is passive - it doesn't reach out to authenticate.
@@ -38,10 +35,11 @@ spec:
       name: dest-rest
       namespace: dest
   
-  # NOTE: No mirrorTopics - INBOUND links cannot create mirrors because they cannot
-  # reach the remote cluster to describe source topics. Only OUTBOUND link handles mirroring.
-  
+  # Mirror topics that this cluster wants from the remote cluster
+  mirrorTopics:
+    - name: forward-topic
+      direction: toDestination
+
   configs:
     consumer.offset.sync.enable: "true"
-    # Note: cluster.link.id is auto-populated from sourceKafkaCluster.clusterID for INBOUND mode
 

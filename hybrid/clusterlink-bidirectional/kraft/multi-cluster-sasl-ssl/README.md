@@ -73,7 +73,7 @@ with SASL-SSL security and LoadBalancer external access.
    password-encoder-secret    # password-encoder.txt
    ```
 
-4. **CP version**: `confluentinc/cp-server:7.9.6`, init: `confluentinc/confluent-init-container:2.10.0`
+4. **CP version**: `confluentinc/cp-server:7.9.6`, init: `confluentinc/confluent-init-container:3.2.0`
 
 ## Quick Start (Interactive)
 

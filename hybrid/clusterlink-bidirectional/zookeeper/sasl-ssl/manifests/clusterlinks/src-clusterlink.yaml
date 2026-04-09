@@ -25,16 +25,12 @@ spec:
       name: dest-rest
       namespace: dest
   
-  # Destination = LOCAL cluster - needs local.* configs for bidirectional
+  # Destination = LOCAL cluster
+  # No dest.authentication needed for outbound-outbound — each side has its own connection
   destinationKafkaCluster:
     kafkaRestClassRef:
       name: src-rest
       namespace: src
-    # Uses LOCAL (src) cluster credentials
-    authentication:
-      type: plain
-      jaasConfig:
-        secretRef: credential
     tls:
       enabled: true
       secretRef: tls-certs

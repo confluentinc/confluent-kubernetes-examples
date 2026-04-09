@@ -24,7 +24,8 @@ spec:
   
   # For forward mirroring: source = public cluster, dest = private cluster
   sourceKafkaCluster:
-    bootstrapEndpoint: kafka.src.svc.cluster.local:9071
+    # INBOUND is passive — bootstrapEndpoint is CFK validation only, not functionally used
+    bootstrapEndpoint: placeholder-not-used-for-inbound:9092
     # ⚠️ REQUIRED for INBOUND mode: Must explicitly provide the source cluster's ID
     # since this cluster cannot reach out to discover it
     # The ${SOURCE_CLUSTER_ID} placeholder is replaced by setup.sh
@@ -42,16 +43,10 @@ spec:
       name: dest-rest
       namespace: dest
   
-  # NOTE: INBOUND links CANNOT have mirrorTopics because they cannot reach the remote
-  # cluster to validate source topics. All mirroring is handled by the OUTBOUND link using:
-  # - direction: toDestination for reverse mirroring (private → public)
-  # - direction: toSource for forward mirroring (public → private)
-  # mirrorTopics: []  # Empty - OUTBOUND handles all mirroring
-  
-  configs:
-    consumer.offset.sync.enable: "true"
-    # Note: cluster.link.id is auto-populated from sourceKafkaCluster.clusterID for INBOUND mode
-   
+  # Mirror topics that this cluster wants from the remote cluster
   mirrorTopics:
     - name: forward-topic
       direction: toDestination
+
+  configs:
+    consumer.offset.sync.enable: "true"

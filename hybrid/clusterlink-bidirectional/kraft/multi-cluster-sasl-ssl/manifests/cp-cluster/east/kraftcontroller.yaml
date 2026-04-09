@@ -9,6 +9,6 @@ spec:
   dataVolumeCapacity: 10Gi
   image:
     application: confluentinc/cp-server:7.9.6
-    init: confluentinc/confluent-init-container:2.10.0
+    init: confluentinc/confluent-init-container:3.2.0
   tls:
     secretRef: tls-kraftcontroller

@@ -46,10 +46,8 @@ spec:
       enabled: true
       secretRef: tls-certs
   
-  # IMPORTANT: In private cluster mode, ONLY reverse mirroring works.
-  # Forward mirroring is NOT possible because creating a mirror topic requires the
-  # destination cluster to describe the source topic, and the INBOUND cluster cannot
-  # reach the remote cluster to do this.
+  # Topics from private cluster mirrored to this (public) cluster
+  # Mirroring in the other direction is handled by the INBOUND CR on the private cluster
   mirrorTopics:
     - name: reverse-topic
       direction: toDestination

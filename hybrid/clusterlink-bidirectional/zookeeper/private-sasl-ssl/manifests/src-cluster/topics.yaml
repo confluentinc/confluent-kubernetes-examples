@@ -1,6 +1,6 @@
-# NOTE: forward-topic exists but CANNOT be mirrored to the private cluster
+# NOTE: forward-topic exists on src but mirroring to private cluster is handled by INBOUND CR
 # because the INBOUND cluster cannot reach the public cluster to describe this topic.
-# This topic is kept for reference but forward mirroring is NOT possible in private cluster mode.
+# The INBOUND CR on the private cluster handles mirroring this topic.
 apiVersion: platform.confluent.io/v1beta1
 kind: KafkaTopic
 metadata:
