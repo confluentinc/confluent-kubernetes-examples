@@ -1,0 +1,12 @@
+# KafkaRestClass for source cluster
+# Required for ClusterLink to communicate with the Kafka cluster
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: src-rest
+  namespace: src
+spec:
+  kafkaClusterRef:
+    name: kafka
+    namespace: src
+

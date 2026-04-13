@@ -1,0 +1,14 @@
+# NOTE: forward-topic exists on src but mirroring to private cluster is handled by INBOUND CR
+# because the INBOUND cluster cannot reach the public cluster to describe this topic.
+# The INBOUND CR on the private cluster handles mirroring this topic.
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: forward-topic
+  namespace: src
+spec:
+  replicas: 3
+  partitionCount: 3
+  kafkaRestClassRef:
+    name: src-rest
+

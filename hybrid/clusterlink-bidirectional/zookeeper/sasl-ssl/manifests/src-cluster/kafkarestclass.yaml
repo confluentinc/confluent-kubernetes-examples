@@ -1,0 +1,17 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: src-rest
+  namespace: src
+spec:
+  kafkaClusterRef:
+    name: kafka
+    namespace: src
+  kafkaRest:
+    authentication:
+      type: basic
+      basic:
+        secretRef: rest-credential
+    tls:
+      secretRef: tls-certs
+

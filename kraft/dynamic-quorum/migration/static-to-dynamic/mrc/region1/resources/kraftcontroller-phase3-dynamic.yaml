@@ -1,0 +1,96 @@
+---
+# KRaftController for Region 1 (Central) - Phase 3: Switch to Dynamic Quorum
+#
+# Changes from Phase 1:
+#   [NEW] dynamicQuorumConfig.enabled: true — CFK generates bootstrap.servers
+#   [REMOVED] controllerQuorumVoters — no longer needed, voters property removed
+#
+# Apply AFTER kraft.version upgrade (phase 2).
+# This removes the "dangerous state" (v1 + voters on controllers).
+# Do this promptly after upgrade — don't leave controllers at v1 with voters.
+#
+# Security: TLS (secretRef) + SASL/PLAIN on controller listener + RBAC
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: central
+  annotations:
+    platform.confluent.io/broker-id-offset: "100"
+spec:
+  podTemplate:
+    annotations:
+      kafkacluster-manual-roll: "1"
+
+  replicas: 3
+  dataVolumeCapacity: 10Gi
+
+  mountedVolumes:
+    volumes:
+      - name: admin-config
+        configMap:
+          name: kraft-admin-config
+    volumeMounts:
+      - name: admin-config
+        mountPath: /mnt/admin-config
+
+  clusterID: OGYzZTUxNzEtNjgxOC00Yg
+
+  image:
+    application: confluentinc/cp-server:8.1.2
+    init: confluentinc/confluent-init-container:3.2.0
+
+  tls:
+    secretRef: tls-kraftcontroller
+
+  authorization:
+    type: rbac
+    superUsers:
+      - User:kafka
+      - User:ssologin
+
+  listeners:
+    advertisedListenersEnabled: true
+    controller:
+      tls:
+        enabled: true
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          domain: my-domain.example.com
+          brokerPrefix: kraft-central
+
+  # [CHANGED] controllerQuorumVoters used by dynamicQuorumConfig to generate bootstrap.servers
+  controllerQuorumVoters:
+    - nodeId: 100
+      brokerEndpoint: kraft-central0.my-domain.example.com:9074
+    - nodeId: 101
+      brokerEndpoint: kraft-central1.my-domain.example.com:9074
+    - nodeId: 102
+      brokerEndpoint: kraft-central2.my-domain.example.com:9074
+    - nodeId: 200
+      brokerEndpoint: kraft-east0.my-domain.example.com:9074
+    - nodeId: 201
+      brokerEndpoint: kraft-east1.my-domain.example.com:9074
+    - nodeId: 202
+      brokerEndpoint: kraft-east2.my-domain.example.com:9074
+
+  # [ADDED] Dynamic quorum — CFK generates bootstrap.servers instead of voters
+  dynamicQuorumConfig:
+    enabled: true
+
+  dependencies:
+    mdsKafkaCluster:
+      bootstrapEndpoint: kafka-central-rep.my-domain.example.com:9073
+      authentication:
+        type: oauth
+        jaasConfig:
+          secretRef: oauth-jass
+        oauthSettings:
+          tokenEndpointUri: http://keycloak.my-domain.example.com:8080/realms/sso_test/protocol/openid-connect/token
+      tls:
+        enabled: true

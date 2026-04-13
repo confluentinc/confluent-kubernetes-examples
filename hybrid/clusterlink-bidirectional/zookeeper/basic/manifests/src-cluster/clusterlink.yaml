@@ -1,0 +1,31 @@
+# ClusterLink on SOURCE cluster - handles REVERSE mirroring (dest -> src)
+apiVersion: platform.confluent.io/v1beta1
+kind: ClusterLink
+metadata:
+  name: src-cluster-link
+  namespace: src
+spec:
+  name: bidirectional-link
+  
+  sourceInitiatedLink:
+    linkMode: Bidirectional
+  
+  # Source = destination cluster (reverse mirroring)
+  sourceKafkaCluster:
+    bootstrapEndpoint: kafka.dest.svc.cluster.local:9092
+    kafkaRestClassRef:
+      name: dest-rest
+      namespace: dest
+  
+  destinationKafkaCluster:
+    kafkaRestClassRef:
+      name: src-rest
+      namespace: src
+  
+  mirrorTopics:
+    - name: reverse-topic
+      direction: toDestination
+  
+  configs:
+    consumer.offset.sync.enable: "true"
+

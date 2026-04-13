@@ -1,0 +1,44 @@
+# Kafka cluster for destination namespace with SASL-SSL
+# Uses same CA as source cluster for inter-cluster trust
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: dest
+spec:
+  replicas: 3
+  dataVolumeCapacity: 10Gi
+  image:
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.10.0
+  
+  # KRaft mode
+  dependencies:
+    kRaftController:
+      clusterRef:
+        name: kraftcontroller
+  
+  # Use same TLS certs as source (shared CA)
+  tls:
+    secretRef: tls-certs
+  
+  # Listener configuration with SASL-SSL
+  listeners:
+    internal:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+    external:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+  
+  # Password encoder for cluster linking
+  passwordEncoder:
+    secretRef: password-encoder-secret

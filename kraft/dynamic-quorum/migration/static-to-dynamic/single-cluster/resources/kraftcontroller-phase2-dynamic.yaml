@@ -1,0 +1,23 @@
+---
+# KRaftController with CFK-managed Dynamic Quorum (final state)
+# Phase 2: Enable dynamicQuorumConfig — CFK generates controller.quorum.bootstrap.servers
+# Applied after kraft.version has been upgraded to 1
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: confluent
+spec:
+  replicas: 3
+  storageClass:
+    name: retain-sc
+  dataVolumeCapacity: 10Gi
+  image:
+    application: confluentinc/cp-server:8.1.2
+    init: confluentinc/confluent-init-container:3.2.0
+  dynamicQuorumConfig:
+    enabled: true
+    # No bootstrapPod — cluster is already formatted and running (not a greenfield deploy)
+    # No ConfigMap or RBAC needed for migrated clusters
+  # controllerQuorumVoters is optional for single-region — CFK auto-infers from replicas
+  # For MRC, specify controllerQuorumVoters with LoadBalancer endpoints for all regions

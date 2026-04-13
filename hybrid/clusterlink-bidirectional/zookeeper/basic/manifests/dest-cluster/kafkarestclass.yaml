@@ -1,0 +1,10 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: dest-rest
+  namespace: dest
+spec:
+  kafkaClusterRef:
+    name: kafka
+    namespace: dest
+

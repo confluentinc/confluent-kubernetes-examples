@@ -1,0 +1,41 @@
+# Public Kafka cluster (initiates connections with OUTBOUND mode)
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: src
+spec:
+  replicas: 3
+  dataVolumeCapacity: 10Gi
+  image:
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.10.0
+  
+  dependencies:
+    kRaftController:
+      clusterRef:
+        name: kraftcontroller
+  
+  tls:
+    secretRef: tls-certs
+  
+  listeners:
+    internal:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+    external:
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      tls:
+        enabled: true
+  
+  passwordEncoder:
+    secretRef: password-encoder-secret
+  
+

@@ -1,0 +1,22 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftMigrationJob
+metadata:
+  name: kraftmigrationjob
+  namespace: confluent
+  annotations:
+    # Uncomment to trigger finalization (after dual-write testing)
+    # platform.confluent.io/kraft-migration-trigger-finalize-to-kraft: "true"
+
+    # Uncomment to rollback to ZooKeeper (if needed)
+    # platform.confluent.io/kraft-migration-trigger-rollback-to-zk: "true"
+spec:
+  dependencies:
+    kafka:
+      name: kafka
+      namespace: confluent
+    zookeeper:
+      name: zookeeper
+      namespace: confluent
+    kRaftController:
+      name: kraftcontroller
+      namespace: confluent

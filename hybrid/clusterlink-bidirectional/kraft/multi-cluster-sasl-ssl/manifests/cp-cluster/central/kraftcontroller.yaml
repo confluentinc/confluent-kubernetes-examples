@@ -1,0 +1,14 @@
+# KRaftController for central cluster (<central-cluster>, us-central1)
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: central
+spec:
+  replicas: 3
+  dataVolumeCapacity: 10Gi
+  image:
+    application: confluentinc/cp-server:7.9.6
+    init: confluentinc/confluent-init-container:3.2.0
+  tls:
+    secretRef: tls-kraftcontroller

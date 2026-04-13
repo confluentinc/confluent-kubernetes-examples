@@ -1,0 +1,12 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Zookeeper
+metadata:
+  name: zookeeper
+  namespace: confluent
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-zookeeper:7.9.6
+    init: confluentinc/confluent-init-container:3.2.0
+  dataVolumeCapacity: 10Gi
+  logVolumeCapacity: 10Gi

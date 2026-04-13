@@ -1,0 +1,135 @@
+---
+# OpenLDAP server for Confluent RBAC MDS authentication
+#
+# Users pre-configured:
+#   cn=admin,dc=test,dc=com          (password: admin-secret)    - LDAP root admin, also Kafka admin user
+#   cn=mds,dc=test,dc=com            (password: Developer!)      - readonly bind user for MDS LDAP lookups
+#   cn=kafka,dc=test,dc=com          (password: kafka-secret)    - Kafka service account
+#   cn=kafka_client,dc=test,dc=com   (password: kafka_client-secret) - Kafka client user
+#
+# NOTE: Uses osixia/openldap:1.5.0 — earlier versions (1.3.0) had different LDIF loading behavior.
+# Uses a StatefulSet with PVCs so LDAP data persists across pod restarts and bootstrap only runs once.
+#
+# LDAP address: ldap://ldap.confluent.svc.cluster.local:389
+
+---
+# Custom LDIF entries for Kafka users (loaded on first LDAP startup only)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ldap-ldifs
+  namespace: confluent
+data:
+  01-kafka.ldif: |
+    dn: cn=kafka,dc=test,dc=com
+    userPassword: kafka-secret
+    objectClass: simpleSecurityObject
+    objectClass: organizationalRole
+    cn: kafka
+  02-kafka-client.ldif: |
+    dn: cn=kafka_client,dc=test,dc=com
+    userPassword: kafka_client-secret
+    objectClass: simpleSecurityObject
+    objectClass: organizationalRole
+    cn: kafka_client
+  03-admin.ldif: |
+    dn: cn=admin,dc=test,dc=com
+    userPassword: admin-secret
+    objectClass: simpleSecurityObject
+    objectClass: organizationalRole
+    cn: admin
+
+---
+# Headless service — required by StatefulSet for stable pod DNS
+# Also serves as the client endpoint: ldap://ldap.confluent.svc.cluster.local:389
+apiVersion: v1
+kind: Service
+metadata:
+  name: ldap
+  namespace: confluent
+  labels:
+    app: ldap
+spec:
+  clusterIP: None
+  selector:
+    app: ldap
+  ports:
+  - name: ldap
+    port: 389
+    targetPort: 389
+  - name: ldaps
+    port: 636
+    targetPort: 636
+
+---
+# StatefulSet with PVCs so LDAP data survives pod restarts
+# On first startup: bootstraps DB + loads custom LDIFs
+# On subsequent startups: DB already exists, bootstrap is skipped (no re-add errors)
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ldap
+  namespace: confluent
+spec:
+  serviceName: ldap
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ldap
+  template:
+    metadata:
+      labels:
+        app: ldap
+    spec:
+      containers:
+      - name: ldap
+        image: osixia/openldap:1.5.0
+        args:
+        - --copy-service
+        - --loglevel=info
+        ports:
+        - containerPort: 389
+          name: ldap
+        - containerPort: 636
+          name: ldaps
+        env:
+        - name: LDAP_ORGANISATION
+          value: "Confluent"
+        - name: LDAP_DOMAIN
+          value: "test.com"
+        # LDAP_ADMIN_PASSWORD sets cn=admin,dc=test,dc=com — reused as the Kafka "admin" user
+        - name: LDAP_ADMIN_PASSWORD
+          value: "admin-secret"
+        # Readonly bind user for MDS to search the directory
+        - name: LDAP_READONLY_USER
+          value: "true"
+        - name: LDAP_READONLY_USER_USERNAME
+          value: "mds"
+        - name: LDAP_READONLY_USER_PASSWORD
+          value: "Developer!"
+        volumeMounts:
+        - name: ldap-data
+          mountPath: /var/lib/ldap
+        - name: ldap-config
+          mountPath: /etc/ldap/slapd.d
+        - name: ldap-ldifs
+          mountPath: /container/service/slapd/assets/config/bootstrap/ldif/custom
+      volumes:
+      - name: ldap-ldifs
+        configMap:
+          name: ldap-ldifs
+  volumeClaimTemplates:
+  - metadata:
+      name: ldap-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi
+  - metadata:
+      name: ldap-config
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi

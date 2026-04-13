@@ -1,0 +1,15 @@
+# Local KafkaRestClass for central cluster
+# Points to the local Kafka REST API with basic auth credentials
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: central-rest
+  namespace: central
+spec:
+  kafkaClusterRef:
+    name: kafka
+  kafkaRest:
+    authentication:
+      type: basic
+      basic:
+        secretRef: local-rest-credential

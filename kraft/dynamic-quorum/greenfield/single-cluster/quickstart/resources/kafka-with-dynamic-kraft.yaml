@@ -1,0 +1,19 @@
+---
+# Kafka brokers pointing to KRaft controllers with dynamic quorum
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+spec:
+  replicas: 3
+  dataVolumeCapacity: 10Gi
+  image:
+    application: confluentinc/cp-server:8.1.0
+    init: confluentinc/confluent-init-container:3.2.0
+  # Reference the KRaft controller cluster
+  dependencies:
+    kRaftController:
+      clusterRef:
+        name: kraftcontroller
+

@@ -1,0 +1,34 @@
+---
+# ServiceAccount for KRaftController pods
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kraftcontroller-sa
+  namespace: central
+---
+# Role to allow init container to update bootstrap ConfigMap
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: kraftcontroller-bootstrap-role
+  namespace: central
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  resourceNames: ["kraftcontroller-dynamic-quorum"]
+  verbs: ["get", "update", "patch"]
+---
+# RoleBinding to bind the role to the ServiceAccount
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kraftcontroller-bootstrap-rolebinding
+  namespace: central
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kraftcontroller-bootstrap-role
+subjects:
+- kind: ServiceAccount
+  name: kraftcontroller-sa
+  namespace: central

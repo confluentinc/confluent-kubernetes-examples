@@ -1,0 +1,22 @@
+# Kafka cluster for source namespace
+# This is the "public" cluster in the bidirectional link
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: src
+spec:
+  replicas: 3
+  dataVolumeCapacity: 10Gi
+  image:
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.10.0
+  # KRaft mode - reference the KRaft controller
+  dependencies:
+    kRaftController:
+      clusterRef:
+        name: kraftcontroller
+  # Password encoder is required for cluster linking
+  passwordEncoder:
+    secretRef: password-encoder-secret
+

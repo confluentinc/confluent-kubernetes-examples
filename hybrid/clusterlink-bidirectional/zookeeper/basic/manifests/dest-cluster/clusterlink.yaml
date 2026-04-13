@@ -1,0 +1,30 @@
+# ClusterLink on DESTINATION cluster - handles FORWARD mirroring (src -> dest)
+apiVersion: platform.confluent.io/v1beta1
+kind: ClusterLink
+metadata:
+  name: dest-cluster-link
+  namespace: dest
+spec:
+  name: bidirectional-link
+  
+  sourceInitiatedLink:
+    linkMode: Bidirectional
+  
+  sourceKafkaCluster:
+    bootstrapEndpoint: kafka.src.svc.cluster.local:9092
+    kafkaRestClassRef:
+      name: src-rest
+      namespace: src
+  
+  destinationKafkaCluster:
+    kafkaRestClassRef:
+      name: dest-rest
+      namespace: dest
+  
+  mirrorTopics:
+    - name: forward-topic
+      direction: toDestination
+  
+  configs:
+    consumer.offset.sync.enable: "true"
+

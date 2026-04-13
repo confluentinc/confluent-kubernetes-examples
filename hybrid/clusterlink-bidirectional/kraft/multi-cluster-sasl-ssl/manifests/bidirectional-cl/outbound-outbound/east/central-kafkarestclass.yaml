@@ -1,0 +1,16 @@
+# Remote KafkaRestClass on east cluster, pointing to central's REST API via LoadBalancer
+# Used by ClusterLink to manage mirror topics on the central cluster
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: central-rest
+  namespace: east
+spec:
+  kafkaRest:
+    endpoint: https://kafka-central-rest.my-domain.example.com:443
+    authentication:
+      type: basic
+      basic:
+        secretRef: central-rest-credential
+    tls:
+      secretRef: tls-kafka

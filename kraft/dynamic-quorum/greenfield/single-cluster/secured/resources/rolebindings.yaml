@@ -1,0 +1,54 @@
+---
+# ConfluentRolebinding for admin user (SystemAdmin on Kafka cluster)
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: admin-systemadmin
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: admin
+  role: SystemAdmin
+  resourcePatterns:
+    - name: kafka-cluster
+      patternType: LITERAL
+      resourceType: Cluster
+  kafkaRestClassRef:
+    name: default
+---
+# ConfluentRolebinding for kafka user (SystemAdmin for inter-broker operations)
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: kafka-systemadmin
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: kafka
+  role: SystemAdmin
+  resourcePatterns:
+    - name: kafka-cluster
+      patternType: LITERAL
+      resourceType: Cluster
+  kafkaRestClassRef:
+    name: default
+---
+# ConfluentRolebinding for client user (DeveloperWrite on all topics)
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: client-developerwrite
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: kafka_client
+  role: DeveloperWrite
+  resourcePatterns:
+    - name: "*"
+      patternType: LITERAL
+      resourceType: Topic
+  kafkaRestClassRef:
+    name: default

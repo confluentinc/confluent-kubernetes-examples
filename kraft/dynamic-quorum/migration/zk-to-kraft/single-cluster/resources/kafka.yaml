@@ -1,0 +1,21 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: confluent
+  annotations:
+    # IMPORTANT: Set IBP version for migration
+    # Default is 3.6 which is incompatible with dynamic quorum (kraft.version=1)
+    # For CP 7.9.x, use IBP 3.9
+    platform.confluent.io/kraft-migration-ibp-version: "3.9"
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cp-server:7.9.6
+    init: confluentinc/confluent-init-container:3.2.0
+  dataVolumeCapacity: 10Gi
+  metricReporter:
+    enabled: true
+  dependencies:
+    zookeeper:
+      endpoint: zookeeper.confluent.svc.cluster.local:2181

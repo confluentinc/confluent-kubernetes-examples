@@ -1,0 +1,15 @@
+# Topics for source cluster
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: forward-topic
+  namespace: src
+spec:
+  replicas: 3
+  partitionCount: 3
+  configs:
+    cleanup.policy: "delete"
+  kafkaRestClassRef:
+    name: src-rest
+

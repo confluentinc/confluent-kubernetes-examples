@@ -1,0 +1,52 @@
+# ClusterLink on PRIVATE cluster - INBOUND mode
+# This link only ACCEPTS connections from the public cluster
+# Handles FORWARD mirroring (public -> private)
+#
+# ⚠️ CRITICAL GOTCHAS:
+# 1. The sourceKafkaCluster.clusterID MUST be set for INBOUND mode
+# 2. Do NOT provide ClusterLinkId for bidirectional INBOUND links (API returns error)
+# 3. This link CANNOT become healthy until the OUTBOUND link initiates the connection
+# 4. Different credentials for src and dest clusters!
+apiVersion: platform.confluent.io/v1beta1
+kind: ClusterLink
+metadata:
+  name: dest-cluster-link
+  namespace: dest
+spec:
+  # Link name must match the public cluster's link
+  name: bidirectional-private-link
+  
+  # Bidirectional mode with INBOUND connection mode for private cluster
+  # The private cluster only accepts incoming connections from the public cluster
+  sourceInitiatedLink:
+    linkMode: Bidirectional
+    connectionMode: Inbound
+  
+  # For forward mirroring: source = public cluster, dest = private cluster
+  sourceKafkaCluster:
+    # INBOUND is passive — bootstrapEndpoint is CFK validation only, not functionally used
+    bootstrapEndpoint: placeholder-not-used-for-inbound:9092
+    # ⚠️ REQUIRED for INBOUND mode: Must explicitly provide the source cluster's ID
+    # since this cluster cannot reach out to discover it
+    # The ${SOURCE_CLUSTER_ID} placeholder is replaced by setup.sh
+    clusterID: "${SOURCE_CLUSTER_ID}"
+    # ⚠️ NOTE: authentication is NOT required for INBOUND mode links
+    # The INBOUND link is passive - it doesn't reach out to authenticate.
+    # The OUTBOUND link (on public cluster) handles authentication.
+    kafkaRestClassRef:
+      name: src-rest
+      namespace: src
+  
+  # INBOUND links don't need destinationKafkaCluster.authentication (no local.* configs needed)
+  destinationKafkaCluster:
+    kafkaRestClassRef:
+      name: dest-rest
+      namespace: dest
+  
+  # Mirror topics that this cluster wants from the remote cluster
+  mirrorTopics:
+    - name: forward-topic
+      direction: toDestination
+
+  configs:
+    consumer.offset.sync.enable: "true"

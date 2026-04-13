@@ -1,0 +1,21 @@
+# Topics for source cluster
+---
+# forward-topic: Original topic that will be mirrored TO destination
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: forward-topic
+  namespace: src
+spec:
+  replicas: 3
+  partitionCount: 3
+  configs:
+    cleanup.policy: "delete"
+    retention.ms: "604800000"  # 7 days
+  kafkaRestClassRef:
+    name: src-rest
+---
+# reverse-topic: Will become a MIRROR topic receiving data FROM destination
+# Note: This topic is created by ClusterLink as a mirror, so we don't need to create it manually
+# The ClusterLink CR's mirrorTopics field handles this
+
