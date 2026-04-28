@@ -93,6 +93,12 @@ class CFKExamples {
           );
         }
 
+        if (!contentResponse.ok) {
+          throw new Error(
+            `GitHub raw content error for ${metadata.download_url}: ${contentResponse.status} ${contentResponse.statusText}`
+          );
+        }
+
         const content = await contentResponse.text();
 
         return {
