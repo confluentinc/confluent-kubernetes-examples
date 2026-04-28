@@ -20,8 +20,8 @@ npm install -g cfk-examples-mcp
 ### Option 2: Local Development
 
 ```bash
-git clone <this-repo>
-cd cfk-examples-mcp
+git clone https://github.com/confluentinc/confluent-kubernetes-examples.git
+cd confluent-kubernetes-examples/tools/mcp-server
 npm install
 npm link  # Makes CLI globally available
 ```
@@ -51,13 +51,16 @@ cfk-examples readme quickstart-deploy
 
 #### Add the MCP Server
 
+For local development:
+
 ```bash
-claude mcp add cfk-examples node /path/to/cfk-examples-mcp/src/index.js
+claude mcp add cfk-examples node /path/to/confluent-kubernetes-examples/tools/mcp-server/src/index.js
 ```
 
 Or if installed globally via npm:
 
 ```bash
+# The npx command will run the MCP server (not the CLI)
 claude mcp add cfk-examples npx -y cfk-examples-mcp
 ```
 

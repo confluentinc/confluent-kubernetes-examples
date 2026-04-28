@@ -5,7 +5,8 @@
   "type": "module",
   "main": "src/index.js",
   "bin": {
-    "cfk-examples": "./src/cli.js"
+    "cfk-examples": "./src/cli.js",
+    "cfk-examples-mcp": "./src/index.js"
   },
   "scripts": {
     "start": "node src/index.js",

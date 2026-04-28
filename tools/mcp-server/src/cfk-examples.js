@@ -2,7 +2,6 @@ import fetch from 'node-fetch';
 
 const CFK_REPO = 'confluentinc/confluent-kubernetes-examples';
 const GITHUB_API = 'https://api.github.com';
-const RAW_GITHUB = 'https://raw.githubusercontent.com';
 
 class CFKExamples {
   constructor(githubToken = null) {
@@ -26,6 +25,11 @@ class CFKExamples {
       }
 
       const contents = await response.json();
+
+      // Handle non-array responses (e.g., when path points to a file)
+      if (!Array.isArray(contents)) {
+        throw new Error(`Path "${path}" does not point to a directory`);
+      }
 
       // Filter for directories and YAML/MD files
       const examples = contents
@@ -82,6 +86,13 @@ class CFKExamples {
       // Get raw content
       if (metadata.download_url) {
         const contentResponse = await fetch(metadata.download_url);
+
+        if (!contentResponse.ok) {
+          throw new Error(
+            `GitHub raw content error for ${metadata.download_url}: ${contentResponse.status} ${contentResponse.statusText}`
+          );
+        }
+
         const content = await contentResponse.text();
 
         return {
@@ -144,7 +155,12 @@ class CFKExamples {
       const content = await this.getExampleContent(readmePath);
       return content;
     } catch (error) {
-      return null;
+      // Only return null for genuine 404 (README not found)
+      if (error && error.message && /404\b|Not Found/i.test(error.message)) {
+        return null;
+      }
+      // Throw other errors (auth, rate-limit, network) so caller can handle them
+      throw error;
     }
   }
 }

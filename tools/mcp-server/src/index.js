@@ -6,14 +6,21 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import CFKExamples from './cfk-examples.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJson = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8'));
 
 const cfk = new CFKExamples();
 
 const server = new Server(
   {
     name: 'cfk-examples-mcp',
-    version: '1.0.0',
+    version: packageJson.version,
   },
   {
     capabilities: {
@@ -97,7 +104,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 // Handle tool calls
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   try {
-    const { name, arguments: args } = request.params;
+    const { name, arguments: args = {} } = request.params;
 
     switch (name) {
       case 'list_cfk_examples': {
