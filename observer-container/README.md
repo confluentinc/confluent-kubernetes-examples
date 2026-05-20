@@ -87,7 +87,7 @@ spec:
   services:
     observer:
       # Observer container image
-      image: "confluentinc/confluent-operator-observer:latest"
+      image: "confluentinc/confluent-observer-container:latest"
       
       # Authentication for observer endpoints
       authentication:
