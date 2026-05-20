@@ -11,7 +11,7 @@
 - Set the tutorial directory for this tutorial under the directory you downloaded
   the tutorial files:
 ```
-export TUTORIAL_HOME=<Tutorial directory>/hybrid/schemalink/mtls
+export TUTORIAL_HOME=<Tutorial directory>/hybrid/schemalink/basic
 ```
 
 - Deploy Confluent for Kubernetes (CFK) in cluster mode, so that the one CFK instance can manage Confluent deployments in multiple namespaces. Here, CFk is deployed to the `default` namespace.
