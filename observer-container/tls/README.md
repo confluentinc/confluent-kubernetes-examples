@@ -148,7 +148,7 @@ certs/
 spec:
   services:
     observer:
-      image: us.gcr.io/cc-devel/confluent-operator-observer:latest
+      image: us.gcr.io/cc-devel/confluent-observer-container:latest
       authentication:
         type: mtls
       tls:
@@ -161,7 +161,7 @@ spec:
 spec:
   services:
     observer:
-      image: us.gcr.io/cc-devel/confluent-operator-observer:latest
+      image: us.gcr.io/cc-devel/confluent-observer-container:latest
       authentication:
         type: mtls
       tls:
@@ -182,7 +182,7 @@ spec:
 spec:
   services:
     observer:
-      image: us.gcr.io/cc-devel/confluent-operator-observer:latest
+      image: us.gcr.io/cc-devel/confluent-observer-container:latest
       logLevel: debug
       authentication:
         type: mtls
