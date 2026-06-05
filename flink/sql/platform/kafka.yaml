@@ -1,0 +1,45 @@
+# Minimal KRaft-based Kafka + Schema Registry for the Flink SQL tutorial.
+# Kept intentionally small (single replica, internal plaintext listener) so the
+# focus stays on the Flink SQL CRD chain. The Flink SQL KafkaCatalog/KafkaDatabase
+# reach these over the in-cluster service DNS:
+#   bootstrap.servers : kafka.operator.svc.cluster.local:9071
+#   schema.registry.url: http://schemaregistry.operator.svc.cluster.local:8081
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: operator
+spec:
+  replicas: 1
+  dataVolumeCapacity: 10Gi
+  image:
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: operator
+spec:
+  replicas: 1
+  dataVolumeCapacity: 10Gi
+  image:
+    application: confluentinc/cp-server:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
+  dependencies:
+    kRaftController:
+      clusterRef:
+        name: kraftcontroller
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+  namespace: operator
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-schema-registry:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0

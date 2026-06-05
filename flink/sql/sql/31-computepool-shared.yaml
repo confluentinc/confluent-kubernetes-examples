@@ -1,0 +1,20 @@
+# Step 4b - FlinkComputePool (SHARED)
+#
+# A SHARED pool multiplexes statements across a common, elastically managed set of
+# resources. Only SHARED pools accept spec.state (RUNNING or SUSPENDED); set it to
+# SUSPENDED to pause scheduling without deleting the pool.
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: FlinkComputePool
+metadata:
+  name: shared-pool
+  namespace: operator
+spec:
+  type: SHARED
+  state: RUNNING
+  flinkEnvironment: flink-env1
+  clusterSpec:
+    flinkVersion: v1_19
+  cmfRestClassRef:
+    name: default
+    namespace: operator
