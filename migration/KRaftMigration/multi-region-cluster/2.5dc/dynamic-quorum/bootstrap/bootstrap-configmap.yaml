@@ -1,0 +1,25 @@
+# Dynamic quorum bootstrap ConfigMap -- tracks whether kraft-east-0 has
+# completed initial formatting (standalone bootstrap).
+#
+# Only needed in the namespace where the bootstrapPod lives (east).
+# Observer regions (central, west) do not need this ConfigMap.
+#
+# The init container reads this ConfigMap to decide whether to run
+# --standalone (first time) or --no-initial-controllers (rejoining).
+# After bootstrap formatting completes, the init container updates
+# bootstrap_formatted to true.
+#
+# IMPORTANT: If redeploying KRCs (e.g., after cleanup), reset this first:
+#   kubectl patch configmap kraftcontroller-east-dynamic-quorum -n east \
+#     --type='json' \
+#     -p='[{"op": "replace", "path": "/data/bootstrap-status", "value": "{\"bootstrap_formatted\":false}"}]'
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kraftcontroller-east-dynamic-quorum
+  namespace: east
+data:
+  bootstrap-status: |
+    {
+      "bootstrap_formatted": false
+    }

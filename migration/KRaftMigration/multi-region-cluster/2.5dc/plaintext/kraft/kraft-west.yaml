@@ -1,0 +1,37 @@
+# DC2 KRaft controller — full mode (has Kafka in namespace)
+# No zookeeper.connect override needed — CFK 3.3.0+ correctly
+# copies ZK endpoint from Kafka CR without double chroot.
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller-west
+  namespace: west
+  annotations:
+    platform.confluent.io/broker-id-offset: "9992"
+    platform.confluent.io/kraft-migration-hold-krc-creation: "true"
+    platform.confluent.io/use-log4j1: "true"
+spec:
+  controllerQuorumVoters:
+    - brokerEndpoint: kraft-east0.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9990
+    - brokerEndpoint: kraft-east1.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9991
+    - brokerEndpoint: kraft-west0.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9992
+    - brokerEndpoint: kraft-west1.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9993
+    - brokerEndpoint: kraft-central0.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9994
+  dataVolumeCapacity: 10G
+  image:
+    application: confluentinc/cp-server:7.9.6
+    init: confluentinc/confluent-init-container:3.3.0
+  listeners:
+    controller:
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          bootstrapPrefix: kraft-west-bootstrap
+          brokerPrefix: kraft-west
+          domain: platformops.dev.gcp.devel.cpdev.cloud
+  replicas: 2

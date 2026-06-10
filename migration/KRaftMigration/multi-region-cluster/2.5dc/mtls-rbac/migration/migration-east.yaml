@@ -1,0 +1,17 @@
+# DC1 KMJ — full mode, mTLS+RBAC
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftMigrationJob
+metadata:
+  name: kraftmigrationjob
+  namespace: east
+spec:
+  dependencies:
+    kafka:
+      name: kafka
+      namespace: east
+    zookeeper:
+      name: zookeeper
+      namespace: east
+    kRaftController:
+      name: kraftcontroller-east
+      namespace: east

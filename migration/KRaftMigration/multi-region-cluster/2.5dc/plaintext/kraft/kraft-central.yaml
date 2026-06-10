@@ -1,0 +1,51 @@
+# DC3 KRaft controller — lite mode (0.5DC tiebreaker, no Kafka in namespace)
+#
+# Key differences from DC1/DC2:
+#   - spec.dependencies.migration.zookeeper.endpoint: provides ZK connection for KMJ
+#     (in full mode, KMJ reads this from the Kafka CR instead)
+#   - spec.clusterID: must be set manually — lite KMJ cannot derive it from Kafka.
+#     Fetch from broker: kubectl exec kafka-0 -n east -- grep cluster.id /mnt/data/data0/logs/meta.properties | cut -d= -f2
+#   - kraft-migration-hold-krc-creation: set — lite KMJ releases it (unlike manual approach
+#     where this was NOT set because there was no KMJ in DC3)
+#   - No configOverrides for zookeeper.connect, migration.enable, or IBP — KMJ handles all of these
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller-central
+  namespace: central
+  annotations:
+    platform.confluent.io/broker-id-offset: "9994"
+    platform.confluent.io/kraft-migration-hold-krc-creation: "true"
+    platform.confluent.io/use-log4j1: "true"
+spec:
+  # clusterID: <PATCH_AFTER_DC1_KRC_GETS_CLUSTER_ID>
+  dependencies:
+    migration:
+      zookeeper:
+        endpoint: zk-central0.platformops.dev.gcp.devel.cpdev.cloud:2181,zk-east.platformops.dev.gcp.devel.cpdev.cloud:2181,zk-west.platformops.dev.gcp.devel.cpdev.cloud:2181/mrc
+  controllerQuorumVoters:
+    - brokerEndpoint: kraft-east0.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9990
+    - brokerEndpoint: kraft-east1.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9991
+    - brokerEndpoint: kraft-west0.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9992
+    - brokerEndpoint: kraft-west1.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9993
+    - brokerEndpoint: kraft-central0.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9994
+  dataVolumeCapacity: 10G
+  image:
+    application: confluentinc/cp-server:7.9.6
+    init: confluentinc/confluent-init-container:3.3.0
+  listeners:
+    replication:
+      enabled: true
+    controller:
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          bootstrapPrefix: kraft-central-bootstrap
+          brokerPrefix: kraft-central
+          domain: platformops.dev.gcp.devel.cpdev.cloud
+  replicas: 1

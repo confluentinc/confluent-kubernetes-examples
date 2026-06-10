@@ -1,0 +1,58 @@
+# DC3 KRaft controller -- lite mode (0.5DC tiebreaker, no Kafka in namespace)
+# Dynamic quorum (KIP-853): observer mode -- joins the quorum started by
+# kraft-east-0 (the bootstrap voter in DC1).
+# No bootstrapPod — starts as observer and gets promoted to voter.
+#
+# Lite mode differences from DC1/DC2:
+#   - spec.dependencies.migration.zookeeper.endpoint: provides ZK connection for KMJ
+#   - spec.clusterID: must be set manually (lite KMJ cannot derive from Kafka)
+#   - listeners.replication.enabled: true (needed for KMJ in lite mode)
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller-central
+  namespace: central
+  annotations:
+    platform.confluent.io/broker-id-offset: "9994"
+    platform.confluent.io/kraft-migration-hold-krc-creation: "true"
+    platform.confluent.io/use-log4j1: "true"
+spec:
+  # clusterID: <PATCH_AFTER_DC1_KRC_GETS_CLUSTER_ID>
+  replicas: 1
+  dataVolumeCapacity: 10G
+  dependencies:
+    migration:
+      zookeeper:
+        endpoint: zk-central0.platformops.dev.gcp.devel.cpdev.cloud:2181,zk-east.platformops.dev.gcp.devel.cpdev.cloud:2181,zk-west.platformops.dev.gcp.devel.cpdev.cloud:2181/mrc
+  image:
+    application: confluentinc/cp-server:7.9.6
+    init: confluentinc/confluent-init-container:3.3.0
+  listeners:
+    advertisedListenersEnabled: true
+    replication:
+      enabled: true
+    controller:
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          bootstrapPrefix: kraft-central-bootstrap
+          brokerPrefix: kraft-central
+          domain: platformops.dev.gcp.devel.cpdev.cloud
+
+  controllerQuorumVoters:
+    # East (DC1) - 2 controllers
+    - brokerEndpoint: kraft-east0.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9990
+    - brokerEndpoint: kraft-east1.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9991
+    # West (DC2) - 2 controllers
+    - brokerEndpoint: kraft-west0.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9992
+    - brokerEndpoint: kraft-west1.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9993
+    # Central (DC3) - 1 controller
+    - brokerEndpoint: kraft-central0.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9994
+
+  dynamicQuorumConfig:
+    enabled: true

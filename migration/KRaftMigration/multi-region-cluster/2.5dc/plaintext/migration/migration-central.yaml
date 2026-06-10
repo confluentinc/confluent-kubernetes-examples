@@ -1,0 +1,20 @@
+# DC3 KMJ — lite mode (no Kafka dependency, 0.5DC tiebreaker)
+#
+# This is the key difference from the manual approach: DC3 now gets its own KMJ.
+# Without a Kafka dep, KMJ runs in "lite mode" — it skips all Kafka-specific
+# sub-phases and sources ZK config from KRC's spec.dependencies.migration.zookeeper
+# instead of from a Kafka CR.
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftMigrationJob
+metadata:
+  name: kraftmigrationjob
+  namespace: central
+spec:
+  dependencies:
+    # No kafka dependency — this is what triggers lite mode
+    zookeeper:
+      name: zookeeper
+      namespace: central
+    kRaftController:
+      name: kraftcontroller-central
+      namespace: central
