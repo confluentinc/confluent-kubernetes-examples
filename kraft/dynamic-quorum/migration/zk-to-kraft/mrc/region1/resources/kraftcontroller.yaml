@@ -102,10 +102,6 @@ spec:
   configOverrides:
     jvm:
       - "-Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=http://keycloak.my-domain.example.com:8080/realms/sso_test/protocol/openid-connect/certs,http://keycloak.my-domain.example.com:8080/realms/sso_test/protocol/openid-connect/token,http://keycloak.my-domain.example.com:8080/"
-    # CFK bug: KMJ appends ZkNode to endpoint that already has /mrc chroot → /mrc/mrc
-    # This override fixes the double chroot. KMJ merges (doesn't replace) configOverrides.
-    server:
-      - "zookeeper.connect=zookeeper.central.svc.cluster.local:2182,zk-east.my-domain.example.com:2182/mrc"
 
   # Service account for ConfigMap updates (dynamic quorum bootstrap)
   podTemplate:

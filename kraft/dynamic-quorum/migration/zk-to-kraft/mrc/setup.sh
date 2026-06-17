@@ -519,20 +519,9 @@ step9() {
     echo_step "=== Step 9: Switch Kafka Dependency from ZooKeeper to KRaft ==="
     echo ""
     echo "This will:"
-    echo "  - Remove stale zookeeper.connect from KRaftController configOverrides"
     echo "  - Apply kafka-kraft-dependency.yaml on both clusters"
     echo "  - Kafka switches from ZK to KRaft dependency"
     echo ""
-
-    # KMJ doesn't clean zookeeper.connect from configOverrides.server during finalization.
-    # This was added as a workaround for the MRC double chroot bug.
-    # At this point KMJ already removed the other server overrides (migration enable, IBP).
-    # Only zookeeper.connect remains — safe to clear the server list.
-    echo_info "Removing stale zookeeper.connect from KRaftController configOverrides.server..."
-    run_cmd kube1 patch kraftcontroller "$KRAFTCONTROLLER_NAME" -n "$REGION1_NS" \
-        --type=merge -p '{"spec":{"configOverrides":{"server":[]}}}'
-    run_cmd kube2 patch kraftcontroller "$KRAFTCONTROLLER_NAME" -n "$REGION2_NS" \
-        --type=merge -p '{"spec":{"configOverrides":{"server":[]}}}'
 
     if ask_step "Switch Kafka to KRaft dependency on both clusters?"; then
         echo_info "Switching Region 1 Kafka to KRaft dependency..."
