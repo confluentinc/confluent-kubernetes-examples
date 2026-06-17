@@ -43,8 +43,11 @@ The `bootstrap/` directory contains resources needed only in the bootstrap voter
 2. Deploy bootstrap ConfigMap + RBAC in DC1 namespace
 3. Fetch `clusterID` from Kafka broker and set on the 0.5DC KRaftController
 4. Deploy KRaftControllers in all 3 DCs
-5. Deploy KRaftMigrationJobs (lite-mode for 0.5DC, full-mode for DC1/DC2)
-6. Wait for all KMJs to reach DUAL-WRITE
+5. Deploy KRaftMigrationJobs **one region at a time** — apply the KMJ in the first region and
+   wait for it to reach the `MIGRATE` phase with subphase `MigrateMonitorMigrationProgress`
+   before applying the next. See the [MRC migration sequencing](../README.md#mrc-migration-sequencing)
+   section for details on why this is necessary.
+6. Wait for all regions to reach `DUAL-WRITE`
 7. **Promote observers to voters** — run `add-controller` for each observer:
    ```bash
    kubectl exec kraftcontroller-east-0 -n east -- \
@@ -57,7 +60,9 @@ The `bootstrap/` directory contains resources needed only in the bootstrap voter
    kafka-metadata-quorum --bootstrap-controller <endpoint>:9074 \
      --command-config /tmp/admin.properties describe --replication
    ```
-8. Finalize migration on all 3 DCs
+8. Finalize migration **one region at a time** — trigger finalization in the first region and
+   wait for it to reach `COMPLETE` before proceeding to the next. See
+   [MRC migration sequencing](../README.md#mrc-migration-sequencing).
 9. Release CR locks and clean up ZooKeeper
 
 ## Files

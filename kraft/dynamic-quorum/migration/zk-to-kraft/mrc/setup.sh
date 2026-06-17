@@ -359,20 +359,32 @@ step4() {
 # Step 5: Create KRaftMigrationJob
 # ============================================================
 step5() {
-    echo_step "=== Step 5: Create KRaftMigrationJob (one per region) ==="
+    echo_step "=== Step 5: Create KRaftMigrationJob (one region at a time) ==="
     echo ""
-    echo "This will:"
-    echo "  - Create KRaftMigrationJob on both clusters"
-    echo "  - Triggers ZK->KRaft migration: SETUP -> MIGRATE -> DUAL_WRITE"
+    echo "IMPORTANT: Apply KRaftMigrationJob one region at a time and wait for each"
+    echo "region's broker rolls to complete before proceeding to the next."
+    echo "Triggering multiple regions simultaneously can cause brokers holding"
+    echo "replicas of the same partition to restart at the same time."
+    echo ""
+    echo "Wait for each region to reach MIGRATE phase with subphase"
+    echo "MigrateMonitorMigrationProgress before applying the next."
     echo ""
 
     echo_info "Creating KRaftMigrationJob in Region 1 (my-cluster)..."
     run_cmd kube1 apply -f "$SCRIPT_DIR/region1/resources/kraftmigrationjob.yaml"
 
+    echo_info "Waiting for Region 1 to reach MIGRATE/MigrateMonitorMigrationProgress..."
+    echo_info "Monitor: kubectl --context $REGION1_CONTEXT get kmj kraftmigrationjob -n $REGION1_NS -w -oyaml"
+    if ! ask_step "Has Region 1 reached MIGRATE/MigrateMonitorMigrationProgress? Proceed to Region 2?"; then
+        echo_info "Paused. Re-run 'step5' when ready to continue."
+        return 0
+    fi
+
     echo_info "Creating KRaftMigrationJob in Region 2 (my-clusterdev)..."
     run_cmd kube2 apply -f "$SCRIPT_DIR/region2/resources/kraftmigrationjob.yaml"
 
-    echo_info "Step 5 complete. KRaftMigrationJobs created."
+    echo_info "Step 5 complete. KRaftMigrationJobs created on both clusters."
+    echo_info "Once Region 2 completes broker rolls, both regions will transition to DUAL-WRITE."
 }
 
 # ============================================================
@@ -485,25 +497,37 @@ step7() {
 step8() {
     echo_step "=== Step 8: Finalize Migration (KRaft takes over from ZooKeeper) ==="
     echo ""
-    echo "This will:"
-    echo "  - Annotate KRaftMigrationJob to trigger finalization on BOTH clusters"
-    echo "  - Brokers will roll to remove ZooKeeper dependency"
+    echo "IMPORTANT: Finalize one region at a time. Wait for each region to reach"
+    echo "COMPLETE before proceeding to the next. Finalization is irreversible —"
+    echo "once ZooKeeper is removed from a region's brokers, that region cannot"
+    echo "roll back to ZooKeeper mode."
     echo ""
-    echo "IMPORTANT: Ensure all 6 controllers are voters before finalizing!"
+    echo "Ensure all 6 controllers are voters before finalizing!"
     echo ""
 
-    if ask_step "Finalize migration on both clusters?"; then
+    if ask_step "Finalize migration on Region 1?"; then
         echo_info "Finalizing Region 1..."
         run_cmd kube1 annotate kraftmigrationjob kraftmigrationjob -n "$REGION1_NS" \
-            platform.confluent.io/kraft-migration-trigger-finalize-to-kraft='true'
-
-        echo_info "Finalizing Region 2..."
-        run_cmd kube2 annotate kraftmigrationjob kraftmigrationjob -n "$REGION2_NS" \
             platform.confluent.io/kraft-migration-trigger-finalize-to-kraft='true'
 
         echo_info "Waiting for Kafka to be ready in Region 1..."
         run_cmd kube1 wait --for=condition=platform.confluent.io/cluster-ready \
             kafka/kafka -n "$REGION1_NS" --timeout=10m
+
+        echo_info "Region 1 finalization complete."
+        echo_info "Monitor: kubectl --context $REGION1_CONTEXT get kmj kraftmigrationjob -n $REGION1_NS -oyaml"
+    fi
+
+    if ! ask_step "Has Region 1 reached COMPLETE? Proceed to finalize Region 2?"; then
+        echo_info "Paused. Re-run 'step8' when ready to continue."
+        return 0
+    fi
+
+    if ask_step "Finalize migration on Region 2?"; then
+        echo_info "Finalizing Region 2..."
+        run_cmd kube2 annotate kraftmigrationjob kraftmigrationjob -n "$REGION2_NS" \
+            platform.confluent.io/kraft-migration-trigger-finalize-to-kraft='true'
+
         echo_info "Waiting for Kafka to be ready in Region 2..."
         run_cmd kube2 wait --for=condition=platform.confluent.io/cluster-ready \
             kafka/kafka -n "$REGION2_NS" --timeout=10m

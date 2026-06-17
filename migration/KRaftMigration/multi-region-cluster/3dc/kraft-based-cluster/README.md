@@ -31,12 +31,15 @@ This playbook sets up a Kraft-based multi-region cluster with the following conf
    - Deploy Kraft controllers with TLS enabled
    - Wait for all controllers to be in RUNNING state
 
-3. **Apply Migration Jobs**: After Kraft controllers are running, apply the migration jobs:
+3. **Apply Migration Jobs**: After Kraft controllers are running, apply migration jobs
+   **one region at a time**:
    ```bash
    ./apply-migration-jobs.sh
    ```
 
-   This will create KRaftMigrationJob resources in all three regions to migrate from Zookeeper to Kraft.
+   This script applies the KRaftMigrationJob in each region sequentially, waiting for each
+   region to complete its broker rolls before proceeding to the next. See
+   [MRC migration sequencing](#mrc-migration-sequencing) for why this is necessary.
 
 ## Teardown
 
@@ -98,6 +101,31 @@ kubectl get kmj kraftmigrationjob-west -n west --context mrc-west -w -oyaml
 - `type: platform.confluent.io/kraft-migration` with `status: "True"`
 - `reason: KRaftMigrationComplete`
 
+### Finalization
+Trigger finalization **one region at a time**. Wait for each region to reach the `COMPLETE`
+phase before proceeding to the next:
+
+```bash
+# Finalize central region
+kubectl annotate kmj kraftmigrationjob-central -n central \
+  platform.confluent.io/kraft-migration-trigger-finalize-to-kraft=true --overwrite --context mrc-central
+# Wait for COMPLETE phase before proceeding
+kubectl get kmj kraftmigrationjob-central -n central --context mrc-central -w -oyaml
+
+# Finalize east region
+kubectl annotate kmj kraftmigrationjob-east -n east \
+  platform.confluent.io/kraft-migration-trigger-finalize-to-kraft=true --overwrite --context mrc-east
+# Wait for COMPLETE phase before proceeding
+kubectl get kmj kraftmigrationjob-east -n east --context mrc-east -w -oyaml
+
+# Finalize west region
+kubectl annotate kmj kraftmigrationjob-west -n west \
+  platform.confluent.io/kraft-migration-trigger-finalize-to-kraft=true --overwrite --context mrc-west
+```
+
+> **Note:** Finalization is irreversible — once ZooKeeper is removed from a region's brokers,
+> that region cannot roll back to ZooKeeper mode.
+
 ### Post-Migration Steps
 After migration is complete:
 
@@ -115,6 +143,77 @@ After migration is complete:
    ```
 
 3. **Remove Zookeeper clusters**: After migration is complete, you can safely remove Zookeeper clusters in all three regions as they are no longer needed.
+
+## MRC migration sequencing
+
+In a Multi-Region Cluster (MRC), apply the KRaftMigrationJob to one region at a time and
+wait for each region to complete its broker rolls before proceeding to the next. This applies
+to both the migration and finalization stages.
+
+During migration, each region's Kafka brokers are rolled multiple times. During finalization,
+brokers are rolled again to remove the ZooKeeper dependency, and KRaft controllers are rolled
+to remove migration configs. Since each region's operator rolls brokers independently with no
+cross-region coordination, triggering multiple regions simultaneously can cause brokers holding
+replicas of the same partition to restart at the same time — potentially making topics
+unavailable even when the replication factor would otherwise survive a single-region restart.
+
+### Migration procedure
+
+1. Apply the KRaftMigrationJob CR in the first region. Monitor its status until it reaches
+   the `MIGRATE` phase with subphase `MigrateMonitorMigrationProgress`. At this point, all
+   broker rolls for this region are complete.
+2. Repeat for each subsequent region, waiting for the same status before moving to the next.
+3. Once the final region completes its broker rolls, the KRaft controllers across all regions
+   will detect that all voters have registered and transition the cluster to `DUAL-WRITE` state.
+4. Verify that all regions report the `DUAL-WRITE` phase before proceeding to finalization.
+
+> **Note:** `DUAL-WRITE` is a cluster-wide state, not a per-region state. The last region to
+> finish its broker rolls is the bottleneck for this transition.
+
+### Finalization procedure
+
+1. Trigger finalization in the first region. This removes the ZooKeeper dependency from Kafka
+   brokers and the migration configuration from KRaft controllers, each requiring a roll. Wait
+   for the region to reach the `COMPLETE` phase.
+2. Repeat for each subsequent region, waiting for `COMPLETE` before moving to the next.
+
+> **Note:** Finalization is irreversible — once ZooKeeper is removed from a region's brokers,
+> that region cannot roll back to ZooKeeper mode.
+
+### Rollback procedure
+
+If you need to roll back to ZooKeeper, trigger rollback one region at a time. Rollback
+involves up to multiple Kafka broker rolls per region, plus a manual step to delete ZooKeeper
+znodes.
+
+1. Trigger rollback in the first region. Monitor its status until it reaches
+   `RollbackToZkWaitForManualNodeRemovalFromZk`, which indicates the first broker roll is
+   complete and the job is waiting for manual intervention.
+2. Delete the `/controller` and `/migration` znodes from ZooKeeper as directed by the status
+   condition, then apply the continue annotation to resume the rollback. Wait for the region
+   to reach `RollbackToZkComplete`.
+3. Repeat for each subsequent region, waiting for `RollbackToZkComplete` before moving to
+   the next.
+
+### Parallel migration (advanced)
+
+If minimizing migration time is a priority and your cluster can tolerate multiple brokers
+restarting simultaneously across regions, you can trigger all regions in parallel. Before
+doing so, ensure:
+
+- **KRaft quorum availability**: The KRaft controller quorum must be large enough to maintain
+  a majority even when one controller per region is restarting simultaneously. In a 2-region
+  deployment, you need at least 6 KRaft controllers (3 per region); in a 3-region deployment,
+  you need at least 7. This ensures the quorum retains a majority even with one controller
+  down in every region at the same time.
+- **Topic availability**: The replication factor for all topics must be greater than the number
+  of regions, and `min.insync.replicas` must be configured so that writes can continue even
+  with one replica per region unavailable. For example, in a 3-region deployment, RF >= 4 with
+  `min.insync.replicas` <= RF - 3 ensures that one broker restarting per region does not cause
+  topic unavailability.
+
+If either condition is not met, use the sequential one-region-at-a-time approach described
+above.
 
 ## Files
 
