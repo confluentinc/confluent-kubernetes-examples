@@ -207,7 +207,9 @@ kubectl get flinkcomputepool -n operator
 ```
 
 `spec.type` is immutable. `spec.state` is valid only on SHARED pools (enforced by a CEL rule);
-set it to `SUSPENDED` to pause a SHARED pool without deleting it.
+set it to `SUSPENDED` to pause a SHARED pool without deleting it. `clusterSpec` sets the Flink
+version and the JobManager/TaskManager resources statements run with — these are required (the
+Flink operator rejects a deployment without `jobManager.resource.memory`).
 
 ## Step 5 – Create the source and sink tables
 

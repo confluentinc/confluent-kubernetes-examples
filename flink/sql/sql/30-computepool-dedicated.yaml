@@ -14,6 +14,14 @@ spec:
   flinkEnvironment: flink-env1
   clusterSpec:
     flinkVersion: v1_19
+    jobManager:
+      resource:
+        memory: "1024m"
+        cpu: 0.5
+    taskManager:
+      resource:
+        memory: "1024m"
+        cpu: 0.5
   cmfRestClassRef:
     name: default
     namespace: operator
