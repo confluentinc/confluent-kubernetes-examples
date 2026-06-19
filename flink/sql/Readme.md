@@ -28,6 +28,9 @@ provided under:
 1. `certs/` – certs in PEM
 2. `jks/` – keystore & truststore
 
+> These are demo materials shared with `flink/mTLS` (they include a private key and are
+> **expired**). Regenerate them for any real use; never reuse them outside this walkthrough.
+
 ## Prerequisites
 
 * `kubectl`, `helm`, and a Kubernetes cluster.
