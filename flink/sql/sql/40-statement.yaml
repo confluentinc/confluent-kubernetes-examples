@@ -15,6 +15,9 @@ metadata:
 spec:
   flinkEnvironment: flink-env1
   computePoolName: dedicated-pool
+  # A streaming INSERT requires checkpointing; enable it here (or on the compute pool).
+  flinkConfiguration:
+    execution.checkpointing.interval: "10s"
   statement: |
     INSERT INTO `kafka-catalog`.`clickstream`.`pageviews_by_user`
     SELECT user_id, COUNT(*) AS view_count

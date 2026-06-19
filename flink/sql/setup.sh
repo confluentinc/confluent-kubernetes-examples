@@ -109,6 +109,10 @@ echo "==> Step 1: FlinkSecret..."
 kubectl apply -f sql/00-flinksecret.yaml
 wait_for flinksecret/flink-connection-secret '{.status.cfkInternalState}' CREATED
 
+echo "==> Step 1b: FlinkEnvironmentSecretMapping (exposes the secret to the environment)..."
+kubectl apply -f sql/05-secretmapping.yaml
+wait_for flinkenvironmentsecretmapping/flink-connection-secret '{.status.cfkInternalState}' CREATED
+
 echo "==> Step 2: FlinkKafkaCatalog..."
 kubectl apply -f sql/10-kafkacatalog.yaml
 wait_for flinkkafkacatalog/kafka-catalog '{.status.cfkInternalState}' CREATED

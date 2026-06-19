@@ -17,6 +17,7 @@ kubectl delete -f sql/35-create-tables.yaml -n operator $ignore
 kubectl delete -f sql/31-computepool-shared.yaml -f sql/30-computepool-dedicated.yaml -n operator $ignore
 kubectl delete -f sql/20-kafkadatabase.yaml -n operator $ignore
 kubectl delete -f sql/10-kafkacatalog.yaml -n operator $ignore
+kubectl delete -f sql/05-secretmapping.yaml -n operator $ignore
 kubectl delete -f sql/00-flinksecret.yaml -n operator $ignore
 
 echo "==> Deleting FlinkEnvironment and CMFRestClass..."

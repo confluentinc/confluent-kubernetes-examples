@@ -1,9 +1,9 @@
 # Step 2 - FlinkKafkaCatalog
 #
-# A catalog groups a Schema Registry instance with one or more Kafka clusters.
-# Each Kafka cluster becomes a SQL "database" (databaseName) whose topics surface
-# as tables. connectionSecretId references the FlinkSecret created in step 1 (by
-# its CR name) so CMF can authenticate to Schema Registry and Kafka.
+# A catalog provides the Schema Registry instance that backs its databases.
+# connectionSecretId references the FlinkSecret from step 1 (by its CR name) so CMF
+# can authenticate to Schema Registry. Kafka-backed databases are added separately
+# via FlinkKafkaDatabase (step 3), not in the catalog spec.
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: FlinkKafkaCatalog
@@ -16,11 +16,6 @@ spec:
     connectionConfig:
       schema.registry.url: http://schemaregistry.operator.svc.cluster.local:8081
     connectionSecretId: flink-connection-secret
-  kafkaClusters:
-    - databaseName: clickstream
-      connectionConfig:
-        bootstrap.servers: kafka.operator.svc.cluster.local:9071
-      connectionSecretId: flink-connection-secret
   cmfRestClassRef:
     name: default
     namespace: operator

@@ -4,11 +4,13 @@ This playbook walks through the Confluent Platform Flink **SQL** Day-2 resources
 CFK through the Confluent Manager for Apache Flink (CMF). You will build the full chain:
 
 ```
-FlinkSecret → FlinkKafkaCatalog → FlinkKafkaDatabase → FlinkComputePool → FlinkStatement
+FlinkSecret + FlinkEnvironmentSecretMapping → FlinkKafkaCatalog → FlinkKafkaDatabase → FlinkComputePool → FlinkStatement
 ```
 
 - **FlinkSecret** – syncs a Kubernetes Secret (Kafka / Schema Registry credentials) to CMF.
-- **FlinkKafkaCatalog** – binds a Schema Registry instance and one or more Kafka clusters.
+- **FlinkEnvironmentSecretMapping** – exposes that secret to an environment so catalogs and
+  databases can reference it (by the mapping's name).
+- **FlinkKafkaCatalog** – binds a Schema Registry instance for its databases.
 - **FlinkKafkaDatabase** – a SQL database inside a catalog, mapped to a Kafka cluster.
 - **FlinkComputePool** – the compute that runs statements (DEDICATED and SHARED variants).
 - **FlinkStatement** – a single Flink SQL statement (a streaming job).
@@ -159,6 +161,19 @@ Expect `cfkInternalState: CREATED` and `cmfSync.status: Created`. (To source the
 Secret from Vault / Sealed Secrets / ESO instead, see [Using an external secret
 manager](#using-an-external-secret-manager).)
 
+## Step 1b – FlinkEnvironmentSecretMapping
+
+The secret must be mapped into the environment before a catalog can use it — otherwise CMF
+silently ignores the catalog. The mapping's **name must equal the `connectionSecretId`** the
+catalog/database reference (CMF keys an environment's secrets by the mapping name):
+
+```bash
+kubectl apply -f sql/05-secretmapping.yaml
+kubectl get flinkenvironmentsecretmapping flink-connection-secret -n operator -oyaml
+```
+
+Expect `cfkInternalState: CREATED` and `cmfSync.status: Created`.
+
 ## Step 2 – FlinkKafkaCatalog
 
 ```bash
@@ -166,8 +181,9 @@ kubectl apply -f sql/10-kafkacatalog.yaml
 kubectl get flinkkafkacatalog kafka-catalog -n operator -oyaml
 ```
 
-The catalog wires Schema Registry (`srInstance`) and a Kafka cluster (`kafkaClusters`, each
-exposed as a database). `connectionSecretId` references the FlinkSecret from step 1.
+The catalog binds a Schema Registry instance (`srInstance`); `connectionSecretId` references the
+secret mapping from step 1b. Kafka-backed databases are added via FlinkKafkaDatabase (next step),
+not in the catalog spec.
 
 ## Step 3 – FlinkKafkaDatabase
 
@@ -212,7 +228,8 @@ SR. CREATE TABLE is DDL, so each statement runs once and reaches `status.phase: 
 
 `sql/40-statement.yaml` runs a streaming SQL statement on the DEDICATED pool. It aggregates the
 `pageviews` source into `pageviews_by_user` (both in the `clickstream` database, created in
-step 5).
+step 5). A streaming INSERT requires checkpointing, so the statement sets
+`execution.checkpointing.interval` in its `flinkConfiguration`.
 
 ```bash
 kubectl apply -f sql/40-statement.yaml
@@ -248,6 +265,7 @@ kubectl delete -f sql/35-create-tables.yaml
 kubectl delete -f sql/31-computepool-shared.yaml -f sql/30-computepool-dedicated.yaml
 kubectl delete -f sql/20-kafkadatabase.yaml
 kubectl delete -f sql/10-kafkacatalog.yaml
+kubectl delete -f sql/05-secretmapping.yaml
 kubectl delete -f sql/00-flinksecret.yaml
 kubectl delete -f platform/flinkenvironment.yaml -f platform/cmfrestclass.yaml
 kubectl delete -f platform/kafka.yaml
