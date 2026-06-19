@@ -30,18 +30,40 @@ the `enableFlinkSQL` CFK build. To go step by step instead, follow the rest of t
 
 ## Setup Certs
 
-Certificates with appropriate Subject Alternate Names (SANs) for the CMF mTLS setup are
-provided under:
+This playbook **generates** the mTLS material for CMF at runtime — only the cert configs
+under `certs/server_configs/` are committed. `setup.sh` does this for you; to do it by hand
+(or to see what it creates), run from this directory:
 
-1. `certs/` – certs in PEM
-2. `jks/` – keystore & truststore
+```bash
+# 1. A throwaway CA
+mkdir -p certs/ca certs/generated
+openssl genrsa -out certs/ca/ca-key.pem 2048
+openssl req -new -x509 -days 1000 -key certs/ca/ca-key.pem -out certs/ca/ca.pem \
+  -subj "/C=US/ST=CA/L=MountainView/O=Confluent/OU=Operator/CN=TestCA"
 
-> These are throwaway demo materials and include a private key — for this walkthrough only.
-> Generate your own for any real deployment; never reuse these.
+# 2. A CMF server cert (CN/SANs come from certs/server_configs/cmf-server-config.json)
+cfssl gencert -ca=certs/ca/ca.pem -ca-key=certs/ca/ca-key.pem \
+  -config=certs/server_configs/ca-config.json \
+  -profile=server certs/server_configs/cmf-server-config.json | \
+  cfssljson -bare certs/generated/cmf-server
+
+# 3. The keystore/truststore CMF mounts (password: allpassword)
+REPO=https://raw.githubusercontent.com/confluentinc/confluent-kubernetes-examples/master
+curl -sSL "$REPO/scripts/create-truststore.sh" | bash -s -- certs/ca/ca.pem allpassword
+curl -sSL "$REPO/scripts/create-keystore.sh" | \
+  bash -s -- certs/generated/cmf-server.pem certs/generated/cmf-server-key.pem allpassword
+rm -rf certs/jks && mv jks certs/jks
+```
+
+This mirrors [`../oauth/clientCredentials`](../oauth/clientCredentials); the generated CA,
+server cert, and JKS (under `certs/ca`, `certs/generated`, `certs/jks`) are git-ignored.
+Minting fresh material each run means there is no committed private key to leak and no cert
+to expire.
 
 ## Prerequisites
 
 * `kubectl`, `helm`, and a Kubernetes cluster.
+* `openssl`, `cfssl` + `cfssljson`, and `keytool` (JDK) on PATH — used to generate the mTLS certs.
 * CFK >= 3.3.0 (with `enableFlinkSQL`) and a CMF version exposing the Flink SQL REST API.
 
 ## Install Confluent Platform for Apache Flink Kubernetes operator (FKO)
@@ -59,10 +81,10 @@ helm upgrade --install cp-flink-kubernetes-operator confluentinc/flink-kubernete
     ```bash
     kubectl create ns operator
     ```
-2. Create the keystore/truststore configMaps:
+2. Create the keystore/truststore configMaps (from the generated JKS):
     ```bash
-    kubectl create configmap cmf-keystore -n operator --from-file ./jks/keystore.jks
-    kubectl create configmap cmf-truststore -n operator --from-file ./jks/truststore.jks
+    kubectl create configmap cmf-keystore -n operator --from-file ./certs/jks/keystore.jks
+    kubectl create configmap cmf-truststore -n operator --from-file ./certs/jks/truststore.jks
     ```
 3. `local.yaml` for CMF with mTLS:
     ```yaml
@@ -134,9 +156,9 @@ kubectl get pods -n operator -w   # wait for kafka and schemaregistry to be Read
 1. Create the `cmf-day2-tls` secret and deploy the CMFRestClass:
     ```bash
     kubectl create secret generic cmf-day2-tls -n operator \
-      --from-file=fullchain.pem=./certs/server.pem \
-      --from-file=privkey.pem=./certs/server-key.pem \
-      --from-file=cacerts.pem=./certs/cacerts.pem
+      --from-file=fullchain.pem=./certs/generated/cmf-server.pem \
+      --from-file=privkey.pem=./certs/generated/cmf-server-key.pem \
+      --from-file=cacerts.pem=./certs/ca/ca.pem
     kubectl apply -f platform/cmfrestclass.yaml
     kubectl get cmfrestclass default -n operator -oyaml   # status.endpoint populated
     ```

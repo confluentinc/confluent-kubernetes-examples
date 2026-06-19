@@ -8,9 +8,9 @@
 # Mirrors Readme.md step for step. Two prerequisites the script does NOT paper over:
 #   1. Preview: needs a CFK build that ships `enableFlinkSQL` and a CMF build with the
 #      Flink SQL REST API. With the public chart this is not yet available.
-#   2. The committed certs/ + jks/ are demo material shared with flink/mTLS and are
-#      EXPIRED; regenerate them (and the cmf-keystore/cmf-truststore inputs) for a real
-#      run, or mTLS to CMF will fail.
+#   2. Cert generation needs `openssl`, `cfssl`/`cfssljson`, and `keytool` on PATH. The
+#      script mints a throwaway CA + CMF server cert and builds the JKS pair at runtime
+#      (mirroring flink/oauth/clientCredentials); nothing under certs/ is committed.
 #
 # Optional env vars:
 #   CMF_LICENSE_FILE   path to a CMF license.txt (if set, a license secret is created)
@@ -22,6 +22,7 @@ TUTORIAL_HOME="$(cd "$(dirname "$0")" && pwd)"
 cd "$TUTORIAL_HOME"
 
 CMF_LICENSE_FILE="${CMF_LICENSE_FILE:-}"
+CFK_EXAMPLES_REPO_HOME="https://raw.githubusercontent.com/confluentinc/confluent-kubernetes-examples/master"
 
 # wait_for <kind/name> <jsonpath> <expected> [timeout]
 wait_for() {
@@ -35,11 +36,25 @@ kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.8
 kubectl wait --for=condition=available --timeout=300s deployment --all -n cert-manager
 helm upgrade --install cp-flink-kubernetes-operator confluentinc/flink-kubernetes-operator
 
+echo "==> Generating the mTLS material (throwaway CA + CMF server cert + JKS pair)..."
+mkdir -p certs/ca certs/generated
+openssl genrsa -out certs/ca/ca-key.pem 2048
+openssl req -new -x509 -days 1000 -key certs/ca/ca-key.pem -out certs/ca/ca.pem \
+  -subj "/C=US/ST=CA/L=MountainView/O=Confluent/OU=Operator/CN=TestCA"
+cfssl gencert -ca=certs/ca/ca.pem -ca-key=certs/ca/ca-key.pem \
+  -config=certs/server_configs/ca-config.json \
+  -profile=server certs/server_configs/cmf-server-config.json | \
+  cfssljson -bare certs/generated/cmf-server
+curl -sSL "$CFK_EXAMPLES_REPO_HOME/scripts/create-truststore.sh" | bash -s -- certs/ca/ca.pem allpassword
+curl -sSL "$CFK_EXAMPLES_REPO_HOME/scripts/create-keystore.sh" | \
+  bash -s -- certs/generated/cmf-server.pem certs/generated/cmf-server-key.pem allpassword
+rm -rf certs/jks && mv jks certs/jks
+
 echo "==> Creating the operator namespace and CMF keystore/truststore configMaps..."
 kubectl create namespace operator --dry-run=client -o yaml | kubectl apply -f -
-kubectl create configmap cmf-keystore -n operator --from-file ./jks/keystore.jks \
+kubectl create configmap cmf-keystore -n operator --from-file ./certs/jks/keystore.jks \
   --dry-run=client -o yaml | kubectl apply -f -
-kubectl create configmap cmf-truststore -n operator --from-file ./jks/truststore.jks \
+kubectl create configmap cmf-truststore -n operator --from-file ./certs/jks/truststore.jks \
   --dry-run=client -o yaml | kubectl apply -f -
 
 echo "==> Deploying CMF with mTLS..."
@@ -97,9 +112,9 @@ kubectl wait --for=condition=ready --timeout=600s pod -l app=schemaregistry -n o
 
 echo "==> Creating the cmf-day2-tls secret and deploying CMFRestClass + FlinkEnvironment..."
 kubectl create secret generic cmf-day2-tls -n operator \
-  --from-file=fullchain.pem=./certs/server.pem \
-  --from-file=privkey.pem=./certs/server-key.pem \
-  --from-file=cacerts.pem=./certs/cacerts.pem \
+  --from-file=fullchain.pem=./certs/generated/cmf-server.pem \
+  --from-file=privkey.pem=./certs/generated/cmf-server-key.pem \
+  --from-file=cacerts.pem=./certs/ca/ca.pem \
   --dry-run=client -o yaml | kubectl apply -f -
 kubectl apply -f platform/cmfrestclass.yaml
 kubectl apply -f platform/flinkenvironment.yaml

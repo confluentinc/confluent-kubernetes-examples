@@ -36,6 +36,9 @@ kubectl delete secret cmf-license -n operator $ignore
 echo "==> Uninstalling the Flink Kubernetes Operator..."
 helm uninstall cp-flink-kubernetes-operator || true
 
+echo "==> Removing the generated certs (certs/ca, certs/generated, certs/jks)..."
+rm -rf "$TUTORIAL_HOME"/certs/ca "$TUTORIAL_HOME"/certs/generated "$TUTORIAL_HOME"/certs/jks
+
 echo ""
 echo "Teardown complete. The 'operator' namespace and cert-manager are left in place;"
 echo "remove them manually if you no longer need them:"

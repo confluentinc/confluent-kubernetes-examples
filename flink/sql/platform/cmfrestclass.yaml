@@ -1,6 +1,6 @@
 # CMFRestClass tells CFK how to reach the Confluent Manager for Apache Flink (CMF)
 # REST API. This tutorial uses mTLS, mirroring flink/mTLS. The cmf-day2-tls secret
-# is created from the committed certs/ in the README.
+# is created from the generated certs/ in the README.
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: CMFRestClass
