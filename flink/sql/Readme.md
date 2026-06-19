@@ -164,11 +164,11 @@ exposed as a database). `connectionSecretId` references the FlinkSecret from ste
 
 ```bash
 kubectl apply -f sql/20-kafkadatabase.yaml
-kubectl get flinkkafkadatabase examples -n operator -oyaml
+kubectl get flinkkafkadatabase clickstream -n operator -oyaml
 ```
 
 The database belongs to the catalog (`catalogRef`) and is the SQL namespace your statements
-read and write. Topics in the bound Kafka cluster surface as tables.
+read and write; existing Kafka topics surface as tables, and `CREATE TABLE` (step 5) adds new ones.
 
 ## Step 4 – FlinkComputePool (DEDICATED and SHARED)
 
@@ -184,20 +184,37 @@ kubectl get flinkcomputepool -n operator
 `spec.type` is immutable. `spec.state` is valid only on SHARED pools (enforced by a CEL rule);
 set it to `SUSPENDED` to pause a SHARED pool without deleting it.
 
-## Step 5 – FlinkStatement
+## Step 5 – Create the source and sink tables
 
-`sql/40-statement.yaml` runs a streaming SQL statement on the DEDICATED pool. It reads a
-`pageviews` table and writes per-user counts to `pageviews_by_user`, both in the `examples`
-database. Create those tables first (or point at existing Kafka topics) — for example, run
-`CREATE TABLE` statements as their own FlinkStatements, or let the database map existing topics.
+The statement in step 6 reads a `pageviews` table and writes per-user counts to
+`pageviews_by_user`. Create both in the `clickstream` database — DDL runs as a FlinkStatement,
+gated by the database's `ddlEnvironments`:
+
+```bash
+kubectl apply -f sql/35-create-tables.yaml
+kubectl get flinkstatement create-pageviews create-pageviews-by-user -n operator
+```
+
+On a Kafka-backed catalog the connector is `confluent` and the bootstrap servers / Schema
+Registry come from the catalog binding, so each table maps to a Kafka topic with its schema in
+SR. CREATE TABLE is DDL, so each statement runs once and reaches `status.phase: COMPLETED`.
+
+## Step 6 – FlinkStatement
+
+`sql/40-statement.yaml` runs a streaming SQL statement on the DEDICATED pool. It aggregates the
+`pageviews` source into `pageviews_by_user` (both in the `clickstream` database, created in
+step 5).
 
 ```bash
 kubectl apply -f sql/40-statement.yaml
 kubectl get flinkstatement pageviews-by-user -n operator -oyaml
 ```
 
-Expect `cfkInternalState: CREATED`, `cmfSync.status: Created`, and `status.phase: RUNNING`.
-`spec.statement` is immutable once running; set `spec.stopped: true` to stop without deleting.
+Expect `cfkInternalState: CREATED`, `cmfSync.status: Created`, and `status.phase: RUNNING`. The
+`pageviews` topic starts empty, so the job runs but emits nothing until rows arrive — seed a few
+with an `INSERT INTO ... pageviews VALUES (...)` statement, or point the source at an existing
+topic. `spec.statement` is immutable once running; set `spec.stopped: true` to stop without
+deleting.
 
 ## Using an external secret manager
 
@@ -218,6 +235,7 @@ Delete in reverse so each CMF-side resource is removed before its parent:
 
 ```bash
 kubectl delete -f sql/40-statement.yaml
+kubectl delete -f sql/35-create-tables.yaml
 kubectl delete -f sql/31-computepool-shared.yaml -f sql/30-computepool-dedicated.yaml
 kubectl delete -f sql/20-kafkadatabase.yaml
 kubectl delete -f sql/10-kafkacatalog.yaml

@@ -8,7 +8,7 @@
 apiVersion: platform.confluent.io/v1beta1
 kind: FlinkKafkaDatabase
 metadata:
-  name: examples
+  name: clickstream
   namespace: operator
 spec:
   flinkEnvironment: flink-env1

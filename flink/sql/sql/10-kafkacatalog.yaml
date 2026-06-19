@@ -17,7 +17,7 @@ spec:
       schema.registry.url: http://schemaregistry.operator.svc.cluster.local:8081
     connectionSecretId: flink-connection-secret
   kafkaClusters:
-    - databaseName: examples
+    - databaseName: clickstream
       connectionConfig:
         bootstrap.servers: kafka.operator.svc.cluster.local:9071
       connectionSecretId: flink-connection-secret

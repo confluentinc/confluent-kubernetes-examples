@@ -1,0 +1,47 @@
+# Step 5 - Create the source and sink tables
+#
+# CREATE TABLE runs as a FlinkStatement; DDL is gated by the database's
+# ddlEnvironments. On a Kafka-backed catalog the connector is 'confluent' and the
+# bootstrap servers / Schema Registry come from the catalog binding, so each table
+# maps to a Kafka topic with its schema registered in SR. The aggregation result
+# keeps one row per user_id, so the sink is an upsert table with a primary key.
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: FlinkStatement
+metadata:
+  name: create-pageviews
+  namespace: operator
+spec:
+  flinkEnvironment: flink-env1
+  computePoolName: dedicated-pool
+  statement: |
+    CREATE TABLE `kafka-catalog`.`clickstream`.`pageviews` (
+      `user_id` INT,
+      `page_id` STRING
+    ) WITH (
+      'connector' = 'confluent'
+    );
+  cmfRestClassRef:
+    name: default
+    namespace: operator
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: FlinkStatement
+metadata:
+  name: create-pageviews-by-user
+  namespace: operator
+spec:
+  flinkEnvironment: flink-env1
+  computePoolName: dedicated-pool
+  statement: |
+    CREATE TABLE `kafka-catalog`.`clickstream`.`pageviews_by_user` (
+      `user_id` INT,
+      `view_count` BIGINT,
+      PRIMARY KEY (`user_id`) NOT ENFORCED
+    ) WITH (
+      'connector' = 'confluent',
+      'changelog.mode' = 'upsert'
+    );
+  cmfRestClassRef:
+    name: default
+    namespace: operator

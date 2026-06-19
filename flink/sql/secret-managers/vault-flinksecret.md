@@ -1,8 +1,7 @@
 # HashiCorp Vault → FlinkSecret
 
-A `FlinkSecret` consumes a standard Kubernetes Secret, so any tool that materializes
-one works. With Vault, use the **Vault Secrets Operator (VSO)**, which syncs a Vault
-path into a real Kubernetes Secret — exactly what `spec.secretRef` needs.
+With Vault, use the **Vault Secrets Operator (VSO)**, which syncs a Vault path into a
+real Kubernetes Secret — exactly what a FlinkSecret's `spec.secretRef` needs.
 
 > Note: the repo's existing Vault example, [`security/configure-with-vault`](../../../security/configure-with-vault),
 > uses the **vault-agent-injector**, which mounts secrets as files *inside a pod*.

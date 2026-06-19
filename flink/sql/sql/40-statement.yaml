@@ -1,14 +1,11 @@
-# Step 5 - FlinkStatement
+# Step 6 - FlinkStatement
 #
 # A FlinkStatement runs a single Flink SQL statement on a compute pool within an
-# environment. This streaming INSERT continuously aggregates a source table into a
-# sink table; both live in the `examples` database created above (fully qualified
-# as `<catalog>`.`<database>`.`<table>`). spec.statement is immutable once the
-# statement is running - change the SQL by creating a new FlinkStatement.
-#
-# The `pageviews` source maps to a Kafka topic in the `examples` database. Create
-# the source/sink tables (or point at existing topics) before running this; see the
-# README. Set spec.stopped: true to stop the running statement without deleting it.
+# environment. This streaming INSERT continuously aggregates the `pageviews` source
+# into the `pageviews_by_user` sink (both created in step 5, in the `clickstream`
+# database). spec.statement is immutable once the statement is running - change the
+# SQL by creating a new FlinkStatement. Set spec.stopped: true to stop the running
+# statement without deleting it.
 ---
 apiVersion: platform.confluent.io/v1beta1
 kind: FlinkStatement
@@ -19,9 +16,9 @@ spec:
   flinkEnvironment: flink-env1
   computePoolName: dedicated-pool
   statement: |
-    INSERT INTO `kafka-catalog`.`examples`.`pageviews_by_user`
+    INSERT INTO `kafka-catalog`.`clickstream`.`pageviews_by_user`
     SELECT user_id, COUNT(*) AS view_count
-    FROM `kafka-catalog`.`examples`.`pageviews`
+    FROM `kafka-catalog`.`clickstream`.`pageviews`
     GROUP BY user_id;
   cmfRestClassRef:
     name: default
