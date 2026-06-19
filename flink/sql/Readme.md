@@ -20,6 +20,12 @@ Schema Registry for the catalog to connect to.
 > CFK release and a CMF version that ship them (CFK >= 3.3.0, CMF with the Flink SQL REST API).
 > Pin these versions for your environment before running.
 
+## Quick start with scripts
+
+[`setup.sh`](setup.sh) runs the whole walkthrough end to end and [`teardown.sh`](teardown.sh)
+reverses it; both encode exactly the commands documented below. Use them once your cluster has
+the `enableFlinkSQL` CFK build. To go step by step instead, follow the rest of this guide.
+
 ## Setup Certs
 
 Certificates with appropriate Subject Alternate Names (SANs) for the CMF mTLS setup are
