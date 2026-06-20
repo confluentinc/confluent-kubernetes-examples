@@ -23,11 +23,39 @@ Schema Registry for the catalog to connect to.
 > **`confluentinc/cp-flink-sql:1.19-cp7`** (set on the compute pool `clusterSpec.image`). Pin these
 > versions before running.
 >
-> CFK 3.3.0 is not on public DockerHub yet. Until it ships, use the internal build — operator image
-> `519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/confluent-operator:v0.1710.0`
-> and helm chart `oci://519856050701.dkr.ecr.us-west-2.amazonaws.com/helm/prod/confluentinc/confluent-operator`
-> (version `0.1710.0`). Switch these to the public `confluentinc/confluent-operator:0.1710.0` once
-> CFK 3.3.0 is released (CF-3569).
+> CFK 3.3.0 is not on the public Helm repo / DockerHub yet. Until it ships, use the internal build:
+> - operator **image** `519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/confluent-operator:v0.1710.0`
+> - Helm **chart** `oci://519856050701.dkr.ecr.us-west-2.amazonaws.com/helm/prod/confluentinc/confluent-for-kubernetes`,
+>   version `0.1710.0` — note the chart is named **`confluent-for-kubernetes`** while the image is
+>   **`confluent-operator`**.
+>
+> Fetching these needs Confluent ECR auth — see [Pre-GA build access](#pre-ga-build-access-internal-ecr).
+> At GA, use the public `confluentinc/confluent-for-kubernetes` chart + `confluentinc/confluent-operator:0.1710.0`
+> image and skip that section (CF-3569).
+
+## Pre-GA build access (internal ECR)
+
+While CFK 3.3.0 is unreleased, its image and chart live in Confluent's internal ECR, which needs auth.
+**Skip this entire section once CFK 3.3.0 is public.**
+
+```bash
+# 1. Log Docker + Helm in to the ECR registry (uses your Confluent AWS credentials).
+aws ecr get-login-password --region us-west-2 \
+  | docker login --username AWS --password-stdin 519856050701.dkr.ecr.us-west-2.amazonaws.com
+aws ecr get-login-password --region us-west-2 \
+  | helm registry login --username AWS --password-stdin 519856050701.dkr.ecr.us-west-2.amazonaws.com
+
+# 2. Make the operator image reachable by the cluster. On minikube, load it locally:
+docker pull 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/confluent-operator:v0.1710.0
+docker tag  519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/confluent-operator:v0.1710.0 \
+            confluentinc/confluent-operator:0.1710.0
+minikube image load confluentinc/confluent-operator:0.1710.0
+# On a real cluster instead create the `confluent-registry` imagePullSecret in the operator namespace.
+
+# 3. Point the scripts / Helm at the ECR chart (honored by setup.sh and the Deploy CFK step below).
+export CFK_CHART=oci://519856050701.dkr.ecr.us-west-2.amazonaws.com/helm/prod/confluentinc/confluent-for-kubernetes
+export CFK_CHART_VERSION=0.1710.0
+```
 
 ## Quick start with scripts
 
@@ -120,27 +148,41 @@ helm upgrade --install cp-flink-kubernetes-operator confluentinc/flink-kubernete
           configMap:
             name: cmf-keystore
     ```
-4. Deploy via Helm:
+4. Deploy via Helm. Pin CMF to the version aligned with your runtime image (2.3.0 for
+   `cp-flink-sql:1.19-cp7`). CMF ships an embedded trial license, so a license secret is **optional**:
     ```bash
-    kubectl create secret generic <license-secret-name> --from-file=license.txt -n operator
+    # Trial license (no secret needed):
     helm upgrade --install -f local.yaml cmf confluentinc/confluent-manager-for-apache-flink \
-      --set license.secretRef=<license-secret-name> --namespace operator
+      --version 2.3.0 --namespace operator
+
+    # Or, with your own Confluent Platform license:
+    kubectl create secret generic cmf-license --from-file=license.txt -n operator
+    helm upgrade --install -f local.yaml cmf confluentinc/confluent-manager-for-apache-flink \
+      --version 2.3.0 --set license.secretRef=cmf-license --namespace operator
     ```
-5. Add the local name to `/etc/hosts` and port-forward:
+5. **Optional — only to reach the CMF REST API from your laptop.** The CFK operator talks to CMF
+   in-cluster (via the CMFRestClass endpoint), so the chain below does not need this. To curl CMF
+   yourself, add the local name to `/etc/hosts`:
     ```
     127.0.0.1       confluent-manager-for-apache-flink.operator.svc.cluster.local
     ```
+   then port-forward in a **separate terminal** (the loop reconnects on drop and blocks that terminal):
     ```bash
     while true; do kubectl port-forward service/cmf-service 8080:80 -n operator; done
     ```
 
 ## Deploy CFK
 
-Deploy CFK with both Day-2 flags so it reconciles the CMF and Flink SQL CRs:
+Deploy CFK with both Day-2 flags so it reconciles the CMF and Flink SQL CRs. Pre-GA, use the ECR
+chart from [Pre-GA build access](#pre-ga-build-access-internal-ecr) — the public
+`confluentinc/confluent-for-kubernetes` chart does not yet carry `enableFlinkSQL` or the SQL CRDs, so
+Helm would silently ignore the flag:
 
 ```bash
+# GA: chart = confluentinc/confluent-for-kubernetes. Pre-GA: CFK_CHART/CFK_CHART_VERSION from above.
 helm upgrade --install confluent-operator \
-  confluentinc/confluent-for-kubernetes \
+  "${CFK_CHART:-confluentinc/confluent-for-kubernetes}" \
+  ${CFK_CHART_VERSION:+--version "$CFK_CHART_VERSION"} \
   --set enableCMFDay2Ops=true \
   --set enableFlinkSQL=true
 ```
@@ -237,8 +279,10 @@ kubectl get flinkcomputepool -n operator
 
 `spec.type` is immutable. `spec.state` is valid only on SHARED pools (enforced by a CEL rule);
 set it to `SUSPENDED` to pause a SHARED pool without deleting it. `clusterSpec` sets the Flink
-version and the JobManager/TaskManager resources statements run with — these are required (the
-Flink operator rejects a deployment without `jobManager.resource.memory`).
+version, the statement runtime `image` (`confluentinc/cp-flink-sql:1.19-cp7` here — it must match
+your CMF version, or the JobManager fails to load the statement plan), and the JobManager/TaskManager
+resources statements run with — these are required (the Flink operator rejects a deployment without
+`jobManager.resource.memory`).
 
 ## Step 5 – Create the source and sink tables
 
