@@ -340,9 +340,12 @@ To use one, install that operator, apply its manifest instead of the inline Secr
 
 ## Tear down
 
-Delete in reverse so each CMF-side resource is removed before its parent:
+[`teardown.sh`](teardown.sh) reverses the whole walkthrough. To do it by hand, delete the chain in
+reverse (so each CMF-side resource is removed before its parent), then uninstall the operators and
+clean up:
 
 ```bash
+# 1. The Flink SQL chain (reverse order)
 kubectl delete -f sql/40-statement.yaml
 kubectl delete -f sql/35-create-tables.yaml
 kubectl delete -f sql/31-computepool-shared.yaml -f sql/30-computepool-dedicated.yaml
@@ -350,6 +353,23 @@ kubectl delete -f sql/20-kafkadatabase.yaml
 kubectl delete -f sql/10-kafkacatalog.yaml
 kubectl delete -f sql/05-secretmapping.yaml
 kubectl delete -f sql/00-flinksecret.yaml
+
+# 2. FlinkEnvironment, CMFRestClass, and the Day-2 TLS secret
 kubectl delete -f platform/flinkenvironment.yaml -f platform/cmfrestclass.yaml
+kubectl delete secret cmf-day2-tls -n operator
+
+# 3. Kafka and Schema Registry
 kubectl delete -f platform/kafka.yaml
+
+# 4. CFK, CMF, and the Flink Kubernetes Operator (plus the CMF keystore/truststore configMaps)
+helm uninstall confluent-operator -n operator
+helm uninstall cmf -n operator
+kubectl delete configmap cmf-keystore cmf-truststore -n operator
+helm uninstall cp-flink-kubernetes-operator
+
+# 5. The generated cert material
+rm -rf certs/ca certs/generated certs/jks
 ```
+
+The `operator` namespace and cert-manager are left in place; remove them with
+`kubectl delete namespace operator` if you no longer need them.

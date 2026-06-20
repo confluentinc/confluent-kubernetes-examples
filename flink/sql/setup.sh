@@ -41,7 +41,7 @@ wait_for() {
 }
 
 echo "==> Installing the Flink Kubernetes Operator (FKO) and cert-manager..."
-helm repo add confluentinc https://packages.confluent.io/helm
+helm repo add --force-update confluentinc https://packages.confluent.io/helm
 helm repo update
 kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.8.2/cert-manager.yaml
 kubectl wait --for=condition=available --timeout=300s deployment --all -n cert-manager
@@ -69,7 +69,9 @@ kubectl create configmap cmf-truststore -n operator --from-file ./certs/jks/trus
   --dry-run=client -o yaml | kubectl apply -f -
 
 echo "==> Deploying CMF with mTLS..."
-cat > /tmp/cmf-local.yaml <<'EOF'
+cmf_values="$(mktemp)"
+trap 'rm -f "$cmf_values"' EXIT
+cat > "$cmf_values" <<'EOF'
 cmf:
   ssl:
     keystore: /opt/keystore/keystore.jks
@@ -98,12 +100,12 @@ EOF
 if [ -n "$CMF_LICENSE_FILE" ]; then
   kubectl create secret generic cmf-license -n operator \
     --from-file=license.txt="$CMF_LICENSE_FILE" --dry-run=client -o yaml | kubectl apply -f -
-  helm upgrade --install -f /tmp/cmf-local.yaml cmf \
+  helm upgrade --install -f "$cmf_values" cmf \
     confluentinc/confluent-manager-for-apache-flink --version "$CMF_CHART_VERSION" \
     --set license.secretRef=cmf-license --namespace operator
 else
   echo "    (no CMF_LICENSE_FILE set; deploying CMF on its embedded trial license)"
-  helm upgrade --install -f /tmp/cmf-local.yaml cmf \
+  helm upgrade --install -f "$cmf_values" cmf \
     confluentinc/confluent-manager-for-apache-flink --version "$CMF_CHART_VERSION" --namespace operator
 fi
 kubectl wait --for=condition=available --timeout=300s \
