@@ -15,6 +15,7 @@ spec:
   flinkEnvironment: flink-env1
   clusterSpec:
     flinkVersion: v1_19
+    image: confluentinc/cp-flink-sql:1.19-cp7
     jobManager:
       resource:
         memory: "1024m"

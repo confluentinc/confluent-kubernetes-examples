@@ -25,6 +25,12 @@ metadata:
 spec:
   replicas: 1
   dataVolumeCapacity: 10Gi
+  # Flink's exactly-once Kafka sink requests a transaction.timeout.ms (~1h) larger than the
+  # broker default transaction.max.timeout.ms (15m); raise it so streaming INSERT sinks don't
+  # fail InitProducerId and leave the job restart-looping.
+  configOverrides:
+    server:
+      - transaction.max.timeout.ms=3600000
   image:
     application: confluentinc/cp-server:7.9.0
     init: confluentinc/confluent-init-container:2.11.0

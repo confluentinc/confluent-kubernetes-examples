@@ -107,7 +107,13 @@ kubectl rollout status deployment/confluent-operator -n operator --timeout=300s
 
 echo "==> Deploying Kafka and Schema Registry..."
 kubectl apply -f platform/kafka.yaml
+# Pods come up sequentially (kraftcontroller -> kafka -> schemaregistry); sleep before each
+# wait so the pod exists first, otherwise `kubectl wait` errors "no matching resources found".
+sleep 30
+kubectl wait --for=condition=ready --timeout=600s pod -l app=kraftcontroller -n operator
+sleep 30
 kubectl wait --for=condition=ready --timeout=600s pod -l app=kafka -n operator
+sleep 30
 kubectl wait --for=condition=ready --timeout=600s pod -l app=schemaregistry -n operator
 
 echo "==> Creating the cmf-day2-tls secret and deploying CMFRestClass + FlinkEnvironment..."

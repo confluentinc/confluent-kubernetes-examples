@@ -18,9 +18,16 @@ FlinkSecret + FlinkEnvironmentSecretMapping → FlinkKafkaCatalog → FlinkKafka
 It uses the same minimal **mTLS** CMF setup as [`../mTLS`](../mTLS), plus a small Kafka +
 Schema Registry for the catalog to connect to.
 
-> **Preview.** The Flink SQL controllers are an opt-in CFK feature (`enableFlinkSQL`). Use a
-> CFK release and a CMF version that ship them (CFK >= 3.3.0, CMF with the Flink SQL REST API).
-> Pin these versions for your environment before running.
+> **Preview.** Flink SQL is a preview feature in **CFK 3.3.0** (opt-in via `enableFlinkSQL`, nested
+> under `enableCMFDay2Ops`), paired with **CMF 2.3.0** and the runtime image
+> **`confluentinc/cp-flink-sql:1.19-cp7`** (set on the compute pool `clusterSpec.image`). Pin these
+> versions before running.
+>
+> CFK 3.3.0 is not on public DockerHub yet. Until it ships, use the internal build — operator image
+> `519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/confluent-operator:v0.1710.0`
+> and helm chart `oci://519856050701.dkr.ecr.us-west-2.amazonaws.com/helm/prod/confluentinc/confluent-operator`
+> (version `0.1710.0`). Switch these to the public `confluentinc/confluent-operator:0.1710.0` once
+> CFK 3.3.0 is released (CF-3569).
 
 ## Quick start with scripts
 

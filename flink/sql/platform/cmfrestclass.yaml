@@ -9,7 +9,7 @@ metadata:
   namespace: operator
 spec:
   cmfRest:
-    endpoint: https://confluent-manager-for-apache-flink.operator.svc.cluster.local:8080
+    endpoint: https://cmf-service:80
     authentication:
       type: mtls
       sslClientAuthentication: true
