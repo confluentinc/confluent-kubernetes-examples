@@ -308,11 +308,19 @@ step 5). A streaming INSERT requires checkpointing, so the statement sets
 
 ```bash
 kubectl apply -f sql/40-statement.yaml
-kubectl get flinkstatement pageviews-by-user -n operator -oyaml
+kubectl get flinkstatement pageviews-by-user -n operator \
+  -o jsonpath='cfkInternalState={.status.cfkInternalState} cmfSync={.status.cmfSync.status}{"\n"}'
 ```
 
-Expect `cfkInternalState: CREATED`, `cmfSync.status: Created`, and `status.phase: RUNNING`. The
-`pageviews` topic starts empty, so the job runs but emits nothing until rows arrive — seed a few
+Expect `cfkInternalState: CREATED` and `cmfSync.status: Created`. CMF runs the statement as a Flink
+job in the environment's namespace (`default`); confirm the job is up by checking its FlinkDeployment:
+
+```bash
+kubectl get flinkdeployment pageviews-by-user -n default \
+  -o jsonpath='{.status.jobStatus.state}{"\n"}'   # RUNNING
+```
+
+The `pageviews` topic starts empty, so the job runs but emits nothing until rows arrive — seed a few
 with an `INSERT INTO ... pageviews VALUES (...)` statement, or point the source at an existing
 topic. `spec.statement` is immutable once running; set `spec.stopped: true` to stop without
 deleting.

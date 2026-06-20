@@ -167,7 +167,21 @@ wait_for flinkstatement/create-pageviews-by-user '{.status.phase}' COMPLETED
 
 echo "==> Step 6: FlinkStatement (streaming aggregation)..."
 kubectl apply -f sql/40-statement.yaml
-wait_for flinkstatement/pageviews-by-user '{.status.phase}' RUNNING
+wait_for flinkstatement/pageviews-by-user '{.status.cfkInternalState}' CREATED
+# CMF runs the statement as a Flink job (a FlinkDeployment) in the environment's
+# namespace (default); wait for that job to come up and report RUNNING.
+echo "    waiting for the pageviews-by-user Flink job to reach RUNNING..."
+job_state=""
+for _ in $(seq 1 60); do
+  job_state="$(kubectl get flinkdeployment pageviews-by-user -n default \
+    -o jsonpath='{.status.jobStatus.state}' 2>/dev/null || true)"
+  [ "$job_state" = "RUNNING" ] && break
+  sleep 5
+done
+if [ "$job_state" != "RUNNING" ]; then
+  echo "pageviews-by-user did not reach RUNNING (last state: ${job_state:-<none>})" >&2
+  exit 1
+fi
 
 echo ""
 echo "Setup complete. The chain is up; the pageviews topic starts empty, so the"
