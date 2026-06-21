@@ -354,20 +354,25 @@ kubectl delete -f sql/10-kafkacatalog.yaml
 kubectl delete -f sql/05-secretmapping.yaml
 kubectl delete -f sql/00-flinksecret.yaml
 
-# 2. FlinkEnvironment, CMFRestClass, and the Day-2 TLS secret
-kubectl delete -f platform/flinkenvironment.yaml -f platform/cmfrestclass.yaml
+# 2. Wait for the statements'/pools' Flink jobs to drain while CMF + FKO are still up
+#    (FKO owns the FlinkDeployment finalizer; removing it before they drain orphans the jobs)
+kubectl wait --for=delete flinkdeployment --all -n default --timeout=180s
+
+# 3. FlinkEnvironment first (its delete finalizer reaches CMF via the CMFRestClass), then CMFRestClass
+kubectl delete -f platform/flinkenvironment.yaml
+kubectl delete -f platform/cmfrestclass.yaml
 kubectl delete secret cmf-day2-tls -n operator
 
-# 3. Kafka and Schema Registry
+# 4. Kafka and Schema Registry
 kubectl delete -f platform/kafka.yaml
 
-# 4. CFK, CMF, and the Flink Kubernetes Operator (plus the CMF keystore/truststore configMaps)
+# 5. CFK, CMF, and the Flink Kubernetes Operator (plus the CMF keystore/truststore configMaps)
 helm uninstall confluent-operator -n operator
 helm uninstall cmf -n operator
 kubectl delete configmap cmf-keystore cmf-truststore -n operator
 helm uninstall cp-flink-kubernetes-operator
 
-# 5. The generated cert material
+# 6. The generated cert material
 rm -rf certs/ca certs/generated certs/jks
 ```
 
