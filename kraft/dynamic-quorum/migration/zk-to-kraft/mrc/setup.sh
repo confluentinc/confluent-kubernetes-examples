@@ -359,32 +359,26 @@ step4() {
 # Step 5: Create KRaftMigrationJob
 # ============================================================
 step5() {
-    echo_step "=== Step 5: Create KRaftMigrationJob (one region at a time) ==="
+    echo_step "=== Step 5: Create KRaftMigrationJob (both regions) ==="
     echo ""
-    echo "IMPORTANT: Apply KRaftMigrationJob one region at a time and wait for each"
-    echo "region's broker rolls to complete before proceeding to the next."
-    echo "Triggering multiple regions simultaneously can cause brokers holding"
-    echo "replicas of the same partition to restart at the same time."
+    echo "KRaftMigrationJobs must be applied in ALL regions for migration to proceed."
+    echo "The KMJ releases the hold on KRaft controllers — without all KMJs applied,"
+    echo "controllers in remaining regions stay in HOLD and the quorum cannot form."
     echo ""
-    echo "Wait for each region to reach MIGRATE phase with subphase"
-    echo "MigrateMonitorMigrationProgress before applying the next."
+    echo "The operator's cluster-wide URP=0 check serializes broker restarts at the"
+    echo "partition level — at most one replica of any given partition is offline at"
+    echo "a time. Requires >= 2 brokers per region for zero downtime."
     echo ""
 
     echo_info "Creating KRaftMigrationJob in Region 1 (my-cluster)..."
     run_cmd kube1 apply -f "$SCRIPT_DIR/region1/resources/kraftmigrationjob.yaml"
 
-    echo_info "Waiting for Region 1 to reach MIGRATE/MigrateMonitorMigrationProgress..."
-    echo_info "Monitor: kubectl --context $REGION1_CONTEXT get kmj kraftmigrationjob -n $REGION1_NS -w -oyaml"
-    if ! ask_step "Has Region 1 reached MIGRATE/MigrateMonitorMigrationProgress? Proceed to Region 2?"; then
-        echo_info "Paused. Re-run 'step5' when ready to continue."
-        return 0
-    fi
-
     echo_info "Creating KRaftMigrationJob in Region 2 (my-clusterdev)..."
     run_cmd kube2 apply -f "$SCRIPT_DIR/region2/resources/kraftmigrationjob.yaml"
 
     echo_info "Step 5 complete. KRaftMigrationJobs created on both clusters."
-    echo_info "Once Region 2 completes broker rolls, both regions will transition to DUAL-WRITE."
+    echo_info "Both regions will progress through SETUP -> MIGRATE -> DUAL-WRITE."
+    echo_info "DUAL-WRITE is cluster-wide — the last region to finish broker rolls is the bottleneck."
 }
 
 # ============================================================

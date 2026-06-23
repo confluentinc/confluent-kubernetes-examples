@@ -32,14 +32,14 @@ This playbook sets up a Kraft-based multi-region cluster with the following conf
    - Wait for all controllers to be in RUNNING state
 
 3. **Apply Migration Jobs**: After Kraft controllers are running, apply migration jobs
-   **one region at a time**:
+   in all regions:
    ```bash
    ./apply-migration-jobs.sh
    ```
 
-   This script applies the KRaftMigrationJob in each region sequentially, waiting for each
-   region to complete its broker rolls before proceeding to the next. See
-   [MRC migration sequencing](#mrc-migration-sequencing) for why this is necessary.
+   This script applies the KRaftMigrationJob in all three regions. All KMJs must be applied
+   for the KRaft controller quorum to form and migration to proceed. See
+   [MRC migration sequencing](#mrc-migration-sequencing) for availability considerations.
 
 ## Teardown
 
@@ -146,36 +146,47 @@ After migration is complete:
 
 ## MRC migration sequencing
 
-In a Multi-Region Cluster (MRC), apply the KRaftMigrationJob to one region at a time and
-wait for each region to complete its broker rolls before proceeding to the next. This applies
-to both the migration and finalization stages.
+KRaftMigrationJobs must be applied in **all regions** for migration to proceed. The KMJ in
+each region releases the `kraft-migration-hold-krc-creation` annotation on that region's
+KRaft controllers — without all KMJs applied, controllers in the remaining regions stay in
+HOLD, the quorum cannot form a majority, and the migration gets stuck (controllers crash-loop
+on secured clusters because the RBAC authorizer cannot initialize without a quorum leader).
 
-During migration, each region's Kafka brokers are rolled multiple times. During finalization,
-brokers are rolled again to remove the ZooKeeper dependency, and KRaft controllers are rolled
-to remove migration configs. Since each region's operator rolls brokers independently with no
-cross-region coordination, triggering multiple regions simultaneously can cause brokers holding
-replicas of the same partition to restart at the same time — potentially making topics
-unavailable even when the replication factor would otherwise survive a single-region restart.
+During migration, each region's Kafka brokers are rolled multiple times. Each region's
+operator rolls brokers independently — within a region, only one broker restarts at a time,
+and the operator gates on cluster-wide URP=0 (under-replicated partitions = 0) before rolling
+the next. Because the URP check is cluster-wide, a broker restart in one region blocks other
+regions from rolling a broker that shares a partition replica.
+
+However, there is no distributed lock across regions — each region's operator evaluates the
+URP check on its own loop. There is a small theoretical timing window where two operators
+could both read URP=0 and begin a restart before either shutdown registers.
+
+### Prerequisites
+
+- **>= 2 brokers per region.** Restarting a region's only broker leaves that region with
+  nothing running — guaranteed outage.
+- **`zookeeper.connect` on KRaftController must exactly match the Kafka CR's ZK endpoint**
+  (same hosts, same chroot). A mismatch causes the migration to loop indefinitely.
 
 ### Migration procedure
 
-1. Apply the KRaftMigrationJob CR in the first region. Monitor its status until it reaches
-   the `MIGRATE` phase with subphase `MigrateMonitorMigrationProgress`. At this point, all
-   broker rolls for this region are complete.
-2. Repeat for each subsequent region, waiting for the same status before moving to the next.
-3. Once the final region completes its broker rolls, the KRaft controllers across all regions
-   will detect that all voters have registered and transition the cluster to `DUAL-WRITE` state.
-4. Verify that all regions report the `DUAL-WRITE` phase before proceeding to finalization.
+Apply KRaftMigrationJobs in all regions. The operator's cluster-wide URP=0 check serializes
+broker restarts at the partition-availability level — at most one replica of any given
+partition is offline at a time. With >= 2 brokers per region and appropriate RF, this provides
+zero downtime. You can stagger the KMJ starts by a few minutes across regions to further
+reduce the small URP race window.
+
+To further protect availability, you can increase the replication factor for all topics before
+starting migration. In a 3-region deployment: RF >= 4 with `min.insync.replicas` <= RF - 3.
 
 > **Note:** `DUAL-WRITE` is a cluster-wide state, not a per-region state. The last region to
 > finish its broker rolls is the bottleneck for this transition.
 
 ### Finalization procedure
 
-1. Trigger finalization in the first region. This removes the ZooKeeper dependency from Kafka
-   brokers and the migration configuration from KRaft controllers, each requiring a roll. Wait
-   for the region to reach the `COMPLETE` phase.
-2. Repeat for each subsequent region, waiting for `COMPLETE` before moving to the next.
+Trigger finalization **one region at a time**. Wait for each region to reach `COMPLETE`
+before proceeding to the next.
 
 > **Note:** Finalization is irreversible — once ZooKeeper is removed from a region's brokers,
 > that region cannot roll back to ZooKeeper mode.
@@ -194,26 +205,6 @@ znodes.
    to reach `RollbackToZkComplete`.
 3. Repeat for each subsequent region, waiting for `RollbackToZkComplete` before moving to
    the next.
-
-### Parallel migration (advanced)
-
-If minimizing migration time is a priority and your cluster can tolerate multiple brokers
-restarting simultaneously across regions, you can trigger all regions in parallel. Before
-doing so, ensure:
-
-- **KRaft quorum availability**: The KRaft controller quorum must be large enough to maintain
-  a majority even when one controller per region is restarting simultaneously. In a 2-region
-  deployment, you need at least 6 KRaft controllers (3 per region); in a 3-region deployment,
-  you need at least 7. This ensures the quorum retains a majority even with one controller
-  down in every region at the same time.
-- **Topic availability**: The replication factor for all topics must be greater than the number
-  of regions, and `min.insync.replicas` must be configured so that writes can continue even
-  with one replica per region unavailable. For example, in a 3-region deployment, RF >= 4 with
-  `min.insync.replicas` <= RF - 3 ensures that one broker restarting per region does not cause
-  topic unavailability.
-
-If either condition is not met, use the sequential one-region-at-a-time approach described
-above.
 
 ## Files
 
