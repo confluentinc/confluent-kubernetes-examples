@@ -8,6 +8,15 @@ This playbook sets up a Kraft-based multi-region cluster with the following conf
 - **East Region**: 2 Kraft controller replicas  
 - **West Region**: 2 Kraft controller replicas
 
+> **Recommended target — dynamic quorum.** This playbook migrates to **static quorum**
+> (`kraft.version=0`). For new MRC migrations, **dynamic quorum (`kraft.version=1`, KIP-853) is
+> the recommended target**: it supports `add-controller` / `remove-controller` and
+> `force-standalone` disaster recovery (static quorum cannot `remove-controller`), and during the
+> migration its bootstrap voter forms the quorum on its own — so quorum formation does not wait
+> for a cross-region voter majority, avoiding the static-quorum minority-region wedge (where
+> starting in a minority-voter region leaves controllers unable to elect a leader). Requires
+> CP 7.9.6+. See the [dynamic-quorum migration examples](../../../../../kraft/dynamic-quorum/migration/).
+
 ## Prerequisites
 
 - Three Kubernetes clusters with contexts: `mrc-central`, `mrc-east`, `mrc-west`
@@ -162,18 +171,11 @@ However, there is no distributed lock across regions — each region's operator 
 URP check on its own loop. There is a small theoretical timing window where two operators
 could both read URP=0 and begin a restart before either shutdown registers.
 
-### Prerequisites
-
-- **>= 2 brokers per region.** Restarting a region's only broker leaves that region with
-  nothing running — guaranteed outage.
-- **`zookeeper.connect` on KRaftController must exactly match the Kafka CR's ZK endpoint**
-  (same hosts, same chroot). A mismatch causes the migration to loop indefinitely.
-
 ### Migration procedure
 
 Apply KRaftMigrationJobs in all regions. The operator's cluster-wide URP=0 check serializes
 broker restarts at the partition-availability level — at most one replica of any given
-partition is offline at a time. With >= 2 brokers per region and appropriate RF, this provides
+partition is offline at a time. With an appropriate replication factor, this provides
 zero downtime. You can stagger the KMJ starts by a few minutes across regions to further
 reduce the small URP race window.
 

@@ -4,6 +4,8 @@ Migrate a multi-region ZooKeeper-based Kafka cluster to KRaft with KIP-853 dynam
 
 > **Note**: This example migrates from ZooKeeper to KRaft with dynamic quorum (`kraft.version=1`). If you want to migrate to KRaft with static quorum (`kraft.version=0`), refer to the [KRaftMigrationJob examples](../../../../../migration/KRaftMigration/).
 
+> **Recommended for MRC.** Dynamic quorum is the recommended KRaft target for MRC: it enables `add-controller` / `remove-controller` and `force-standalone` disaster recovery (static quorum cannot `remove-controller`), and during migration the bootstrap voter forms the quorum on its own — so quorum formation does not wait for a cross-region voter majority, avoiding the static-quorum minority-region wedge. Requires CP 7.9.6+.
+
 ### Security Configuration
 
 | Layer | Setting |
@@ -128,10 +130,6 @@ kubectl --context $REGION2_CONTEXT apply -f $TUTORIAL_HOME/region2/resources/kra
 >   until region 2's KMJ runs. Do not leave a region un-applied expecting the first to finish
 >   on its own — it will sit in the `MIGRATE` phase, waiting (this is expected, not a failure),
 >   until the other region's KMJ is applied.
-> - **>= 2 brokers per region** (this example has 2 per region). Restarting a region's only
->   broker leaves that region with nothing serving — a guaranteed outage.
-> - **`zookeeper.connect` on each KRaftController must exactly match the Kafka CR's ZK endpoint**
->   (same hosts, same chroot). A mismatch causes the migration to loop indefinitely.
 > - **Broker-roll availability.** During migration each region's brokers roll multiple times.
 >   Within a region the operator rolls one broker at a time and gates on cluster-wide
 >   `URP=0` (under-replicated partitions) before rolling the next, so a restart in one region

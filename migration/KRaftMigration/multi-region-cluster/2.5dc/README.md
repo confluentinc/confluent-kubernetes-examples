@@ -43,11 +43,40 @@ In the 0.5DC datacenter:
 - **No `zookeeper.connect` configOverride needed**: CFK 3.3.0+ correctly derives the ZK
   endpoint for KRaft controllers.
 
+## Recommended target: KRaft with dynamic quorum (KIP-853)
+
+For new migrations — and **especially MRC** — dynamic quorum (`kraft.version=1`) is the
+recommended end state, not static quorum (`kraft.version=0`). Dynamic quorum lets you
+add/remove controllers (`add-controller` / `remove-controller`) and reshape the voter set
+**without** rewriting every node's `controller.quorum.voters` and rolling, and it enables KRaft
+disaster-recovery tooling (`force-standalone` / controller re-join). For MRC this directly
+mitigates the static-quorum rigidity that makes a lost or split-quorum region hard to recover
+(static quorum cannot `remove-controller` at all).
+
+**It also de-risks the migration itself — dynamic quorum does not wait for a majority to form.**
+With dynamic quorum the bootstrap voter forms the quorum on its own and the other controllers
+join as observers, so **quorum formation does not wait for a cross-region voter majority.** You 
+still apply all regions' KMJs — that is required to reach cluster-wide DUAL-WRITE — but with 
+dynamic quorum the quorum no longer has to wait for a cross-region majority to form first, so 
+the migration is far more forgiving of cross-region timing and ordering.
+
+**Version requirement.** The ZK→KRaft migration runs only on CP 7.9.x (ZooKeeper is removed in
+CP 8.0+). On **CP 7.9.6+** you can land directly on `kraft.version=1` in a single migration —
+this is the recommended path; use the [`dynamic-quorum/`](dynamic-quorum/) scenario.
+
+If you are not adopting dynamic quorum yet, the `plaintext/` and `mtls-rbac/` scenarios migrate
+to static quorum (`kraft.version=0`) instead. Static quorum works, but be aware of the
+cross-region quorum-formation constraint described in
+[MRC migration sequencing](#mrc-migration-sequencing), and that a lost region cannot be recovered
+with `remove-controller`.
+
 ## Scenarios
 
 ### plaintext/
 
-Non-secured 2.5DC migration with static quorum. Start here for the simplest example.
+Non-secured 2.5DC migration with **static quorum** — the simplest example for learning the
+migration flow. For a production target, prefer `dynamic-quorum/` (see
+[Recommended target](#recommended-target-kraft-with-dynamic-quorum-kip-853)).
 
 ### mtls-rbac/
 
@@ -122,25 +151,11 @@ URP check on its own loop. There is a small theoretical timing window where two 
 could both read URP=0 and begin a restart before either shutdown registers. To close this
 gap, the recommended approaches are described below.
 
-### Prerequisites
-
-- **>= 2 brokers per region.** Restarting a region's only broker leaves that region with
-  nothing running — guaranteed outage. This was the root cause of downtime in production
-  incidents.
-- **`zookeeper.connect` on KRaftController must exactly match the Kafka CR's ZK endpoint**
-  (same hosts, same chroot). A mismatch causes the migration to loop indefinitely.
-
 ### Migration procedure
 
-There are three valid approaches — they trade off migration speed vs. simplicity:
-
-**Approach 1 (Recommended) — Apply all regions, rely on URP gating**
-
-Apply KRaftMigrationJobs in all regions. The operator's cluster-wide URP=0 check serializes
-broker restarts at the partition-availability level — at most one replica of any given
-partition is offline at a time. With >= 2 brokers per region and appropriate RF, this provides
-zero downtime. You can stagger the KMJ starts by a few minutes across regions to further
-reduce the small URP race window.
+Apply the KRaftMigrationJob in **all regions**. Within each region the operator rolls one broker
+at a time and gates on cluster-wide `URP=0`, so at most one replica of any partition is offline
+at a time — with an appropriate replication factor, this is a zero-downtime migration.
 
 ```bash
 kubectl --context $CTX1 apply -f migration-east.yaml
@@ -158,21 +173,15 @@ kubectl --context $CTX3 get kmj kraftmigrationjob -n central -w -oyaml
 > **Note:** `DUAL-WRITE` is a cluster-wide state, not a per-region state. The last region to
 > finish its broker rolls is the bottleneck for this transition.
 
-**Approach 2 — Increase RF before migration**
+**Optional — hardening the cross-region broker-roll window.** The per-region URP gate already
+makes this safe for almost all clusters. The only residual risk is the small timing window where
+two regions' operators both read `URP=0` and roll replicas of the *same* partition at once. If a
+partition could have one replica per region, close the window with either (or both):
 
-If you want extra protection against the URP race window, increase the replication factor for
-all topics before starting migration. The extra replicas give headroom so that even if brokers
-in multiple regions restart concurrently, partitions stay above `min.insync.replicas`. Then
-apply all KMJs simultaneously.
-
-- In a 3-region deployment: RF >= 4 with `min.insync.replicas` <= RF - 3
-- In a 2-region deployment: RF >= 4 with `min.insync.replicas` <= RF - 2
-
-**Approach 3 — Staggered starts**
-
-If you cannot change RF: apply the KMJ in the first region, wait a short gap (e.g., until
-its brokers have started their first roll), then apply the next region. This keeps the
-per-region rolling restarts from aligning in time.
+- **Stagger** the KMJ applies by a few minutes across regions, so the per-region rolls don't
+  align in time.
+- **Increase RF** before migrating, for headroom above `min.insync.replicas`: 3-region →
+  RF >= 4 (`min.insync.replicas` <= RF - 3); 2-region → RF >= 4 (`min.insync.replicas` <= RF - 2).
 
 ### Finalization procedure
 

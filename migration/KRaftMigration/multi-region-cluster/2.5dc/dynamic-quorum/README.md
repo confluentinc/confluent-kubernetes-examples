@@ -1,7 +1,14 @@
 # 2.5DC KRaft Migration with Dynamic Quorum (KIP-853)
 
 Example YAMLs for migrating a 2.5DC multi-region cluster from ZooKeeper to KRaft
-using dynamic quorum (KIP-853). Requires CFK 3.3.0+ and CP 7.9.0+.
+using dynamic quorum (KIP-853). Requires CFK 3.3.0+ and CP 7.9.6+.
+
+> **This is the recommended target for 2.5DC migrations.** Dynamic quorum enables
+> `add-controller` / `remove-controller` and `force-standalone` disaster recovery (static quorum
+> cannot `remove-controller`), and during migration the bootstrap voter forms the quorum on its
+> own — so quorum formation does not wait for a cross-region voter majority, avoiding the
+> static-quorum minority-region wedge. See the
+> [2.5DC migration overview](../README.md#recommended-target-kraft-with-dynamic-quorum-kip-853).
 
 ## How dynamic quorum differs from static quorum
 
