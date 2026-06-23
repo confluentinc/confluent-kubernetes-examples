@@ -95,8 +95,19 @@ for the full step-by-step MRC migration procedure.
 KRaftMigrationJobs must be applied in **all regions** for migration to proceed. The KMJ in
 each region releases the `kraft-migration-hold-krc-creation` annotation on that region's
 KRaft controllers — without all KMJs applied, controllers in the remaining regions stay in
-HOLD, the quorum cannot form a majority, and the migration gets stuck (controllers crash-loop
-on secured clusters because the RBAC authorizer cannot initialize without a quorum leader).
+HOLD and the migration gets stuck.
+
+> **Static vs dynamic quorum — why all KMJs are required:**
+> - **Static quorum** (the `plaintext/` and `mtls-rbac/` scenarios): every controller across
+>   all regions is a voter, so a quorum **majority cannot form** until enough regions' KMJs
+>   are applied to bring up a majority of voters. Starting in only a minority-voter region is
+>   the most common stuck-migration cause — on secured clusters the controllers crash-loop
+>   because the RBAC authorizer cannot initialize without a quorum leader.
+> - **Dynamic quorum** (the `dynamic-quorum/` scenario): the bootstrap voter forms the quorum
+>   on its own and the other controllers join as **observers**, so quorum-majority is not the
+>   blocker. All KMJs are still required because **DUAL-WRITE is cluster-wide** — it cannot
+>   begin until every region's brokers are in migration mode, and each region's controllers
+>   stay in HOLD until that region's KMJ runs.
 
 During migration, each region's Kafka brokers are rolled multiple times. During finalization,
 brokers are rolled again to remove the ZooKeeper dependency, and KRaft controllers are rolled
@@ -161,9 +172,7 @@ apply all KMJs simultaneously.
 
 If you cannot change RF: apply the KMJ in the first region, wait a short gap (e.g., until
 its brokers have started their first roll), then apply the next region. This keeps the
-per-region rolling restarts from aligning in time. Do **not** wait for
-`MigrateMonitorMigrationProgress` — that subphase cannot be reached until all regions'
-controllers are online.
+per-region rolling restarts from aligning in time.
 
 ### Finalization procedure
 

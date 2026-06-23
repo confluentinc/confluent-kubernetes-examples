@@ -118,6 +118,29 @@ kubectl --context $REGION1_CONTEXT apply -f $TUTORIAL_HOME/region1/resources/kra
 kubectl --context $REGION2_CONTEXT apply -f $TUTORIAL_HOME/region2/resources/kraftmigrationjob.yaml
 ```
 
+> **MRC migration sequencing — read before applying:**
+> - **Apply the KMJ in *both* regions.** Each region's KMJ releases the
+>   `kraft-migration-hold-krc-creation` annotation on *that region's* KRaft controllers only.
+>   With dynamic quorum the bootstrap voter (region 1) forms the quorum on its own and the
+>   region 2 controllers join as observers — so quorum-majority is not the blocker here.
+>   Both KMJs are required because **`DUAL_WRITE` is cluster-wide**: it cannot begin until
+>   every region's brokers are in migration mode, and region 2's controllers stay in `HOLD`
+>   until region 2's KMJ runs. Do not leave a region un-applied expecting the first to finish
+>   on its own — it will sit in the `MIGRATE` phase, waiting (this is expected, not a failure),
+>   until the other region's KMJ is applied.
+> - **>= 2 brokers per region** (this example has 2 per region). Restarting a region's only
+>   broker leaves that region with nothing serving — a guaranteed outage.
+> - **`zookeeper.connect` on each KRaftController must exactly match the Kafka CR's ZK endpoint**
+>   (same hosts, same chroot). A mismatch causes the migration to loop indefinitely.
+> - **Broker-roll availability.** During migration each region's brokers roll multiple times.
+>   Within a region the operator rolls one broker at a time and gates on cluster-wide
+>   `URP=0` (under-replicated partitions) before rolling the next, so a restart in one region
+>   blocks another region from rolling a broker that shares a partition replica. There is no
+>   distributed lock across regions, so a small timing window remains where two regions could
+>   both read `URP=0` and roll at once. To close it: **stagger the two KMJ applies by a few
+>   minutes**, or increase topic replication factor (e.g. RF >= number of regions + 1) before
+>   migrating.
+
 #### Step 4: Monitor migration
 
 Poll KRaftMigrationJob status until DUAL_WRITE:
@@ -193,14 +216,25 @@ done
 
 #### Step 7: Finalize migration
 
-Annotate KRaftMigrationJob on both clusters to trigger finalization:
+Trigger finalization **one region at a time**. Finalization rolls each region's brokers (to
+remove the ZooKeeper dependency) and controllers (to remove migration config), so applying it
+to both regions at once reintroduces the same cross-region broker-restart risk described in
+Step 3. Annotate region 1, wait for it to reach `COMPLETE`, then do region 2:
 
 ```bash
+# Region 1 — then wait for COMPLETE before proceeding
 kubectl --context $REGION1_CONTEXT annotate kraftmigrationjob kraftmigrationjob -n $REGION1_NS \
   platform.confluent.io/kraft-migration-trigger-finalize-to-kraft='true'
+kubectl --context $REGION1_CONTEXT get kraftmigrationjob -n $REGION1_NS -w
+
+# Region 2 — only after region 1 is COMPLETE
 kubectl --context $REGION2_CONTEXT annotate kraftmigrationjob kraftmigrationjob -n $REGION2_NS \
   platform.confluent.io/kraft-migration-trigger-finalize-to-kraft='true'
+kubectl --context $REGION2_CONTEXT get kraftmigrationjob -n $REGION2_NS -w
 ```
+
+> **Note:** Finalization is irreversible — once ZooKeeper is removed from a region's brokers,
+> that region cannot roll back to ZooKeeper mode.
 
 #### Step 8: Switch Kafka to KRaft dependency
 
@@ -210,6 +244,11 @@ Apply the updated Kafka YAML that points to KRaft instead of ZooKeeper:
 kubectl --context $REGION1_CONTEXT apply -f $TUTORIAL_HOME/region1/resources/kafka-kraft-dependency.yaml
 kubectl --context $REGION2_CONTEXT apply -f $TUTORIAL_HOME/region2/resources/kafka-kraft-dependency.yaml
 ```
+
+> **Note:** This triggers a cross-region Kafka broker roll. Within each region the operator
+> rolls one broker at a time and gates on cluster-wide `URP=0`, but to avoid the small
+> cross-region timing window — especially if topic replication factor is low — stagger the two
+> applies by a few minutes, or apply one region at a time.
 
 #### Step 9: Decommission ZooKeeper
 
