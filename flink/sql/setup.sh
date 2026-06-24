@@ -14,14 +14,6 @@
 #
 # Optional env vars:
 #   CMF_LICENSE_FILE    path to a CMF license.txt. If unset, CMF runs on its embedded trial license.
-#   CFK_CHART           CFK Helm chart. Default confluentinc/confluent-for-kubernetes (the public GA
-#                       repo). CFK 3.3.0 is not on the public repo yet, so until it ships point this at
-#                       the internal build, e.g.
-#                       oci://519856050701.dkr.ecr.us-west-2.amazonaws.com/helm/prod/confluentinc/confluent-for-kubernetes
-#                       (and make the operator image reachable: create the confluent-registry pull
-#                       secret, or on minikube `minikube image load confluentinc/confluent-operator:0.1710.0`).
-#   CFK_CHART_VERSION   CFK chart version (e.g. 0.1710.0 for the pre-GA build). Default: chart latest.
-#   CMF_CHART_VERSION   CMF chart version. Default 2.3.0 (the version aligned with cp-flink-sql:1.19-cp7).
 
 set -euo pipefail
 
@@ -30,9 +22,6 @@ TUTORIAL_HOME="$(cd "$(dirname "$0")" && pwd)"
 cd "$TUTORIAL_HOME"
 
 CMF_LICENSE_FILE="${CMF_LICENSE_FILE:-}"
-CFK_CHART="${CFK_CHART:-confluentinc/confluent-for-kubernetes}"
-CFK_CHART_VERSION="${CFK_CHART_VERSION:-}"
-CMF_CHART_VERSION="${CMF_CHART_VERSION:-2.3.0}"
 CFK_EXAMPLES_REPO_HOME="https://raw.githubusercontent.com/confluentinc/confluent-kubernetes-examples/master"
 
 # wait_for <kind/name> <jsonpath> <expected> [timeout]
@@ -101,19 +90,18 @@ if [ -n "$CMF_LICENSE_FILE" ]; then
   kubectl create secret generic cmf-license -n operator \
     --from-file=license.txt="$CMF_LICENSE_FILE" --dry-run=client -o yaml | kubectl apply -f -
   helm upgrade --install -f "$cmf_values" cmf \
-    confluentinc/confluent-manager-for-apache-flink --version "$CMF_CHART_VERSION" \
+    confluentinc/confluent-manager-for-apache-flink --version 2.3.0 \
     --set license.secretRef=cmf-license --namespace operator
 else
   echo "    (no CMF_LICENSE_FILE set; deploying CMF on its embedded trial license)"
   helm upgrade --install -f "$cmf_values" cmf \
-    confluentinc/confluent-manager-for-apache-flink --version "$CMF_CHART_VERSION" --namespace operator
+    confluentinc/confluent-manager-for-apache-flink --version 2.3.0 --namespace operator
 fi
 kubectl wait --for=condition=available --timeout=300s \
   deployment/confluent-manager-for-apache-flink -n operator
 
 echo "==> Deploying CFK with the CMF Day-2 and Flink SQL feature flags..."
-helm upgrade --install confluent-operator "$CFK_CHART" \
-  ${CFK_CHART_VERSION:+--version "$CFK_CHART_VERSION"} \
+helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes --version 0.1718.10 \
   --namespace operator \
   --set enableCMFDay2Ops=true \
   --set enableFlinkSQL=true
@@ -171,10 +159,11 @@ echo "==> Step 6: FlinkStatement (streaming aggregation)..."
 kubectl apply -f sql/40-statement.yaml
 wait_for flinkstatement/pageviews-by-user '{.status.cfkInternalState}' CREATED
 # CMF runs the statement as a Flink job (a FlinkDeployment) in the environment's
-# namespace (default); wait for that job to come up and report RUNNING.
+# namespace (default); wait for that job to come up and report RUNNING. The first
+# pull of the cp-flink-sql runtime image can take several minutes, so allow ~10m.
 echo "    waiting for the pageviews-by-user Flink job to reach RUNNING..."
 job_state=""
-for _ in $(seq 1 60); do
+for _ in $(seq 1 120); do
   job_state="$(kubectl get flinkdeployment pageviews-by-user -n default \
     -o jsonpath='{.status.jobStatus.state}' 2>/dev/null || true)"
   [ "$job_state" = "RUNNING" ] && break

@@ -20,42 +20,9 @@ Schema Registry for the catalog to connect to.
 
 > **Preview.** Flink SQL is a preview feature in **CFK 3.3.0** (opt-in via `enableFlinkSQL`, nested
 > under `enableCMFDay2Ops`), paired with **CMF 2.3.0** and the runtime image
-> **`confluentinc/cp-flink-sql:1.19-cp7`** (set on the compute pool `clusterSpec.image`). Pin these
-> versions before running.
->
-> CFK 3.3.0 is not on the public Helm repo / DockerHub yet. Until it ships, use the internal build:
-> - operator **image** `519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/confluent-operator:v0.1710.0`
-> - Helm **chart** `oci://519856050701.dkr.ecr.us-west-2.amazonaws.com/helm/prod/confluentinc/confluent-for-kubernetes`,
->   version `0.1710.0` — note the chart is named **`confluent-for-kubernetes`** while the image is
->   **`confluent-operator`**.
->
-> Fetching these needs Confluent ECR auth — see [Pre-GA build access](#pre-ga-build-access-internal-ecr).
-> At GA, use the public `confluentinc/confluent-for-kubernetes` chart + `confluentinc/confluent-operator:0.1710.0`
-> image and skip that section (CF-3569).
-
-## Pre-GA build access (internal ECR)
-
-While CFK 3.3.0 is unreleased, its image and chart live in Confluent's internal ECR, which needs auth.
-**Skip this entire section once CFK 3.3.0 is public.**
-
-```bash
-# 1. Log Docker + Helm in to the ECR registry (uses your Confluent AWS credentials).
-aws ecr get-login-password --region us-west-2 \
-  | docker login --username AWS --password-stdin 519856050701.dkr.ecr.us-west-2.amazonaws.com
-aws ecr get-login-password --region us-west-2 \
-  | helm registry login --username AWS --password-stdin 519856050701.dkr.ecr.us-west-2.amazonaws.com
-
-# 2. Make the operator image reachable by the cluster. On minikube, load it locally:
-docker pull 519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/confluent-operator:v0.1710.0
-docker tag  519856050701.dkr.ecr.us-west-2.amazonaws.com/docker/prod/confluentinc/confluent-operator:v0.1710.0 \
-            confluentinc/confluent-operator:0.1710.0
-minikube image load confluentinc/confluent-operator:0.1710.0
-# On a real cluster instead create the `confluent-registry` imagePullSecret in the operator namespace.
-
-# 3. Point the scripts / Helm at the ECR chart (honored by setup.sh and the Deploy CFK step below).
-export CFK_CHART=oci://519856050701.dkr.ecr.us-west-2.amazonaws.com/helm/prod/confluentinc/confluent-for-kubernetes
-export CFK_CHART_VERSION=0.1710.0
-```
+> **`confluentinc/cp-flink-sql:1.19-cp7`** (set on the compute pool `clusterSpec.image`). This guide
+> pins those versions — the CFK chart is `confluentinc/confluent-for-kubernetes` `0.1718.10` (the
+> 3.3.0 build). All are on the public Helm repo / DockerHub, so no extra registry access is needed.
 
 ## Quick start with scripts
 
@@ -173,16 +140,11 @@ helm upgrade --install cp-flink-kubernetes-operator confluentinc/flink-kubernete
 
 ## Deploy CFK
 
-Deploy CFK with both Day-2 flags so it reconciles the CMF and Flink SQL CRs. Pre-GA, use the ECR
-chart from [Pre-GA build access](#pre-ga-build-access-internal-ecr) — the public
-`confluentinc/confluent-for-kubernetes` chart does not yet carry `enableFlinkSQL` or the SQL CRDs, so
-Helm would silently ignore the flag:
+Deploy CFK with both Day-2 flags so it reconciles the CMF and Flink SQL CRs:
 
 ```bash
-# GA: chart = confluentinc/confluent-for-kubernetes. Pre-GA: CFK_CHART/CFK_CHART_VERSION from above.
 helm upgrade --install confluent-operator \
-  "${CFK_CHART:-confluentinc/confluent-for-kubernetes}" \
-  ${CFK_CHART_VERSION:+--version "$CFK_CHART_VERSION"} \
+  confluentinc/confluent-for-kubernetes --version 0.1718.10 \
   --set enableCMFDay2Ops=true \
   --set enableFlinkSQL=true
 ```
