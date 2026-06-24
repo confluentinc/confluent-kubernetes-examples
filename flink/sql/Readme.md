@@ -1,4 +1,4 @@
-# CP Flink SQL on CFK (Day-2, mTLS)
+# CP Flink SQL on CFK (Day-2)
 
 This playbook walks through the Confluent Platform Flink **SQL** Day-2 resources managed by
 CFK through the Confluent Manager for Apache Flink (CMF). You will build the full chain:
@@ -20,7 +20,7 @@ Schema Registry for the catalog to connect to.
 
 > **Preview.** Flink SQL is a preview feature in **CFK 3.3.0** (opt-in via `enableFlinkSQL`, nested
 > under `enableCMFDay2Ops`), paired with **CMF 2.3.0** and the runtime image
-> **`confluentinc/cp-flink-sql:1.19-cp7`** (set on the compute pool `clusterSpec.image`). This guide
+> **`confluentinc/cp-flink-sql:1.19-cp8`** (set on the compute pool `clusterSpec.image`). This guide
 > pins those versions — the CFK chart is `confluentinc/confluent-for-kubernetes` `0.1718.10` (the
 > 3.3.0 build). All are on the public Helm repo / DockerHub, so no extra registry access is needed.
 
@@ -116,7 +116,7 @@ helm upgrade --install cp-flink-kubernetes-operator confluentinc/flink-kubernete
             name: cmf-keystore
     ```
 4. Deploy via Helm. Pin CMF to the version aligned with your runtime image (2.3.0 for
-   `cp-flink-sql:1.19-cp7`). CMF ships an embedded trial license, so a license secret is **optional**:
+   `cp-flink-sql:1.19-cp8`). CMF ships an embedded trial license, so a license secret is **optional**:
     ```bash
     # Trial license (no secret needed):
     helm upgrade --install -f local.yaml cmf confluentinc/confluent-manager-for-apache-flink \
@@ -241,7 +241,7 @@ kubectl get flinkcomputepool -n operator
 
 `spec.type` is immutable. `spec.state` is valid only on SHARED pools (enforced by a CEL rule);
 set it to `SUSPENDED` to pause a SHARED pool without deleting it. `clusterSpec` sets the Flink
-version, the statement runtime `image` (`confluentinc/cp-flink-sql:1.19-cp7` here — it must match
+version, the statement runtime `image` (`confluentinc/cp-flink-sql:1.19-cp8` here — it must match
 your CMF version, or the JobManager fails to load the statement plan), and the JobManager/TaskManager
 resources statements run with — these are required (the Flink operator rejects a deployment without
 `jobManager.resource.memory`).
