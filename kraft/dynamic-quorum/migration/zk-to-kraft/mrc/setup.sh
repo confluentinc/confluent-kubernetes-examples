@@ -359,26 +359,44 @@ step4() {
 # Step 5: Create KRaftMigrationJob
 # ============================================================
 step5() {
-    echo_step "=== Step 5: Create KRaftMigrationJob (both regions) ==="
+    echo_step "=== Step 5: Create KRaftMigrationJob (one region at a time) ==="
     echo ""
-    echo "KRaftMigrationJobs must be applied in ALL regions for migration to proceed."
-    echo "The KMJ releases the hold on KRaft controllers — without all KMJs applied,"
-    echo "controllers in remaining regions stay in HOLD and the quorum cannot form."
-    echo ""
-    echo "The operator's cluster-wide URP=0 check serializes broker restarts at the"
-    echo "partition level — at most one replica of any given partition is offline at"
-    echo "a time. Requires >= 2 brokers per region for zero downtime."
+    echo "With dynamic quorum, apply KMJs sequentially — one region at a time."
+    echo "The bootstrap voter (region 1) forms the quorum on its own, so region 1's"
+    echo "migration proceeds independently. Wait for region 1's broker rolls to"
+    echo "complete (MigrateMonitorMigrationProgress) before applying region 2's KMJ."
+    echo "This eliminates the cross-region URP race window entirely."
     echo ""
 
     echo_info "Creating KRaftMigrationJob in Region 1 (my-cluster)..."
     run_cmd kube1 apply -f "$SCRIPT_DIR/region1/resources/kraftmigrationjob.yaml"
 
+    echo_info "Waiting for Region 1 to reach MIGRATE / MigrateMonitorMigrationProgress..."
+    echo_info "Polling every 15s... (Ctrl+C to stop, re-run step5 to continue)"
+    while true; do
+        PHASE1=$(kube1 get kraftmigrationjob kraftmigrationjob -n "$REGION1_NS" \
+            -o jsonpath='{.status.phase}' 2>/dev/null)
+        SUBPHASE1=$(kube1 get kraftmigrationjob kraftmigrationjob -n "$REGION1_NS" \
+            -o jsonpath='{.status.subPhase}' 2>/dev/null)
+        echo_info "Region 1: Phase=$PHASE1 SubPhase=$SUBPHASE1"
+
+        if [[ "$SUBPHASE1" == "MigrateMonitorMigrationProgress" ]]; then
+            echo_info "Region 1 broker rolls complete."
+            break
+        fi
+        if [[ "$PHASE1" == "FAILED" || "$PHASE1" == "ERROR" ]]; then
+            echo_error "Region 1 migration failed! Check:"
+            echo "  kubectl --context $REGION1_CONTEXT describe kraftmigrationjob kraftmigrationjob -n $REGION1_NS"
+            return 1
+        fi
+        sleep 15
+    done
+
     echo_info "Creating KRaftMigrationJob in Region 2 (my-clusterdev)..."
     run_cmd kube2 apply -f "$SCRIPT_DIR/region2/resources/kraftmigrationjob.yaml"
 
     echo_info "Step 5 complete. KRaftMigrationJobs created on both clusters."
-    echo_info "Both regions will progress through SETUP -> MIGRATE -> DUAL-WRITE."
-    echo_info "DUAL-WRITE is cluster-wide — the last region to finish broker rolls is the bottleneck."
+    echo_info "Both regions will now progress to DUAL-WRITE."
 }
 
 # ============================================================

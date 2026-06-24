@@ -109,7 +109,7 @@ The following secrets must exist in each namespace before deploying KRaftControl
 
 ## Migration steps
 
-1. Deploy KRaftControllers with hold annotation in all DCs (set `clusterID` on the 0.5DC KRaftController)
+1. Deploy KRaftControllers with hold annotation in all DCs (set `clusterID` on the 0.5DC KRaftController — full DCs get it automatically from the KMJ's Kafka dependency; the 0.5DC runs in lite mode with no Kafka, so `clusterID` must be set manually)
 2. Deploy KRaftMigrationJobs in all DCs (see [MRC migration sequencing](#mrc-migration-sequencing) below)
 3. Monitor migration to DUAL-WRITE
 4. For dynamic quorum: promote observer KRCs to voters during DUAL-WRITE
@@ -126,17 +126,16 @@ each region releases the `kraft-migration-hold-krc-creation` annotation on that 
 KRaft controllers — without all KMJs applied, controllers in the remaining regions stay in
 HOLD and the migration gets stuck.
 
-> **Static vs dynamic quorum — why all KMJs are required:**
+> **Static vs dynamic quorum — how KMJ sequencing differs:**
 > - **Static quorum** (the `plaintext/` and `mtls-rbac/` scenarios): every controller across
 >   all regions is a voter, so a quorum **majority cannot form** until enough regions' KMJs
->   are applied to bring up a majority of voters. Starting in only a minority-voter region is
->   the most common stuck-migration cause — on secured clusters the controllers crash-loop
->   because the RBAC authorizer cannot initialize without a quorum leader.
+>   are applied to bring up a majority of voters. KMJs must be applied in all regions up front.
 > - **Dynamic quorum** (the `dynamic-quorum/` scenario): the bootstrap voter forms the quorum
->   on its own and the other controllers join as **observers**, so quorum-majority is not the
->   blocker. All KMJs are still required because **DUAL-WRITE is cluster-wide** — it cannot
->   begin until every region's brokers are in migration mode, and each region's controllers
->   stay in HOLD until that region's KMJ runs.
+>   on its own, so KMJs can be applied **one region at a time**. Apply the bootstrap voter's
+>   region first, wait for it to reach the `MIGRATE` phase with subphase
+>   `MigrateMonitorMigrationProgress` (all broker rolls in that region complete), then apply
+>   the next region. This sequences the broker rolls so only one region rolls at a time,
+>   eliminating the cross-region URP race window entirely.
 
 During migration, each region's Kafka brokers are rolled multiple times. During finalization,
 brokers are rolled again to remove the ZooKeeper dependency, and KRaft controllers are rolled
@@ -148,14 +147,13 @@ shares a partition replica.
 
 However, there is no distributed lock across regions — each region's operator evaluates the
 URP check on its own loop. There is a small theoretical timing window where two operators
-could both read URP=0 and begin a restart before either shutdown registers. To close this
-gap, the recommended approaches are described below.
+could both read URP=0 and begin a restart before either shutdown registers.
 
-### Migration procedure
+### Migration procedure — static quorum
 
-Apply the KRaftMigrationJob in **all regions**. Within each region the operator rolls one broker
-at a time and gates on cluster-wide `URP=0`, so at most one replica of any partition is offline
-at a time — with an appropriate replication factor, this is a zero-downtime migration.
+Apply KRaftMigrationJobs in **all regions** (required for quorum formation). Within each
+region the operator rolls one broker at a time and gates on cluster-wide `URP=0`, so at most
+one replica of any partition is offline at a time.
 
 ```bash
 kubectl --context $CTX1 apply -f migration-east.yaml
@@ -173,15 +171,34 @@ kubectl --context $CTX3 get kmj kraftmigrationjob -n central -w -oyaml
 > **Note:** `DUAL-WRITE` is a cluster-wide state, not a per-region state. The last region to
 > finish its broker rolls is the bottleneck for this transition.
 
-**Optional — hardening the cross-region broker-roll window.** The per-region URP gate already
-makes this safe for almost all clusters. The only residual risk is the small timing window where
-two regions' operators both read `URP=0` and roll replicas of the *same* partition at once. If a
-partition could have one replica per region, close the window with either (or both):
+### Migration procedure — dynamic quorum
 
-- **Stagger** the KMJ applies by a few minutes across regions, so the per-region rolls don't
-  align in time.
-- **Increase RF** before migrating, for headroom above `min.insync.replicas`: 3-region →
-  RF >= 4 (`min.insync.replicas` <= RF - 3); 2-region → RF >= 4 (`min.insync.replicas` <= RF - 2).
+Apply KRaftMigrationJobs **one region at a time**, starting with the bootstrap voter's region.
+Wait for each region to reach `MIGRATE` phase with subphase `MigrateMonitorMigrationProgress`
+(all broker rolls complete) before applying the next. This sequences the broker rolls so only
+one region rolls at a time, eliminating the cross-region URP race window entirely.
+
+```bash
+# Region 1 (bootstrap voter) — quorum forms, brokers roll through SETUP into MIGRATE
+kubectl --context $CTX1 apply -f migration-east.yaml
+# Wait for: phase=MIGRATE, subPhase=MigrateMonitorMigrationProgress
+
+# Region 2 — only after region 1 broker rolls are done
+kubectl --context $CTX2 apply -f migration-west.yaml
+# Wait for: phase=MIGRATE, subPhase=MigrateMonitorMigrationProgress
+
+# Region 3 (0.5DC) — lite mode, no Kafka to roll
+kubectl --context $CTX3 apply -f migration-central.yaml
+```
+
+Monitor all regions until they reach `DUAL-WRITE`:
+```bash
+kubectl --context $CTX1 get kmj kraftmigrationjob -n east -w -oyaml
+kubectl --context $CTX2 get kmj kraftmigrationjob -n west -w -oyaml
+kubectl --context $CTX3 get kmj kraftmigrationjob -n central -w -oyaml
+```
+
+> **Note:** `DUAL-WRITE` is a cluster-wide state. The last region to finish is the bottleneck.
 
 ### Finalization procedure
 
@@ -194,9 +211,10 @@ Wait for each region to reach the `COMPLETE` phase before proceeding to the next
 
 ### Rollback procedure
 
-If you need to roll back to ZooKeeper, trigger rollback one region at a time. Rollback
-involves up to multiple Kafka broker rolls per region, plus a manual step to delete ZooKeeper
-znodes.
+If you need to roll back to ZooKeeper, trigger rollback **one region at a time** to avoid
+simultaneous cross-region broker rolls (same URP-race concern as migration). Rollback involves
+up to multiple Kafka broker rolls per region, plus a manual step to delete ZooKeeper znodes.
+Wait for each region to reach `RollbackToZkComplete` before starting the next.
 
 1. Trigger rollback in the first region. Monitor its status until it reaches
    `RollbackToZkWaitForManualNodeRemovalFromZk`, which indicates the first broker roll is

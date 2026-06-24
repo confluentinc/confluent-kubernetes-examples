@@ -50,13 +50,13 @@ The `bootstrap/` directory contains resources needed only in the bootstrap voter
 2. Deploy bootstrap ConfigMap + RBAC in DC1 namespace
 3. Fetch `clusterID` from Kafka broker and set on the 0.5DC KRaftController
 4. Deploy KRaftControllers in all 3 DCs
-5. Deploy KRaftMigrationJobs in **all DCs** — all KMJs must be applied for migration to
-   proceed. With dynamic quorum the bootstrap voter forms the quorum on its own and the other
-   controllers join as observers, so the reason every KMJ is required is that **DUAL-WRITE is
-   cluster-wide**: it cannot begin until every region's brokers are in migration mode, and
-   each region's controllers stay in HOLD until that region's KMJ runs. See the
-   [MRC migration sequencing](../README.md#mrc-migration-sequencing) section for approaches
-   to protect availability during the concurrent broker rolls.
+5. Deploy KRaftMigrationJobs **one region at a time** — start with the bootstrap voter's
+   region (DC1). With dynamic quorum the bootstrap voter forms the quorum on its own, so
+   DC1's migration proceeds independently. Wait for each region to reach the `MIGRATE` phase
+   with subphase `MigrateMonitorMigrationProgress` (all broker rolls complete) before applying
+   the next region's KMJ. This sequences the broker rolls so only one region rolls at a time,
+   eliminating the cross-region URP race window entirely. See the
+   [MRC migration sequencing](../README.md#mrc-migration-sequencing) section for details.
 6. Wait for all regions to reach `DUAL-WRITE`
 7. **Promote observers to voters** — run `add-controller` for each observer:
    ```bash

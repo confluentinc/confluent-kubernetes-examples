@@ -113,31 +113,33 @@ kubectl --context $REGION2_CONTEXT apply -f $TUTORIAL_HOME/region2/resources/kra
 
 #### Step 3: Create KRaftMigrationJob
 
-One KRaftMigrationJob per region triggers the ZK-to-KRaft migration:
+One KRaftMigrationJob per region triggers the ZK-to-KRaft migration. Apply sequentially —
+start with region 1 (bootstrap voter), wait for its broker rolls to complete, then apply
+region 2:
 
 ```bash
+# Region 1 — bootstrap voter forms quorum and migration begins
 kubectl --context $REGION1_CONTEXT apply -f $TUTORIAL_HOME/region1/resources/kraftmigrationjob.yaml
+
+# Wait for Region 1 to reach MIGRATE / MigrateMonitorMigrationProgress
+# (all broker rolls in region 1 complete)
+kubectl --context $REGION1_CONTEXT get kraftmigrationjob -n $REGION1_NS -w
+
+# Region 2 — only after region 1 broker rolls are done
 kubectl --context $REGION2_CONTEXT apply -f $TUTORIAL_HOME/region2/resources/kraftmigrationjob.yaml
 ```
 
-> **MRC migration sequencing — read before applying:**
-> - **Apply the KMJ in *both* regions.** Each region's KMJ releases the
->   `kraft-migration-hold-krc-creation` annotation on *that region's* KRaft controllers only.
->   With dynamic quorum the bootstrap voter (region 1) forms the quorum on its own and the
->   region 2 controllers join as observers — so quorum-majority is not the blocker here.
->   Both KMJs are required because **`DUAL_WRITE` is cluster-wide**: it cannot begin until
->   every region's brokers are in migration mode, and region 2's controllers stay in `HOLD`
->   until region 2's KMJ runs. Do not leave a region un-applied expecting the first to finish
->   on its own — it will sit in the `MIGRATE` phase, waiting (this is expected, not a failure),
->   until the other region's KMJ is applied.
-> - **Broker-roll availability.** During migration each region's brokers roll multiple times.
->   Within a region the operator rolls one broker at a time and gates on cluster-wide
->   `URP=0` (under-replicated partitions) before rolling the next, so a restart in one region
->   blocks another region from rolling a broker that shares a partition replica. There is no
->   distributed lock across regions, so a small timing window remains where two regions could
->   both read `URP=0` and roll at once. To close it: **stagger the two KMJ applies by a few
->   minutes**, or increase topic replication factor (e.g. RF >= number of regions + 1) before
->   migrating.
+> **MRC migration sequencing — apply KMJs one region at a time:**
+> - **Start with the bootstrap voter's region (region 1).** With dynamic quorum the bootstrap
+>   voter forms the quorum on its own, so region 1's migration proceeds independently — its
+>   brokers roll through SETUP into MIGRATE. Wait for region 1 to reach the `MIGRATE` phase
+>   with subphase `MigrateMonitorMigrationProgress` (all broker rolls in that region complete),
+>   then apply region 2's KMJ. This sequences the broker rolls so only one region rolls at a
+>   time, eliminating the cross-region URP race window entirely.
+> - Region 2's controllers join the quorum as observers once their KMJ releases the hold.
+>   Both regions then progress to `DUAL_WRITE` (a cluster-wide state).
+> - **Finalization and rollback** also trigger broker rolls — apply these one region at a time,
+>   waiting for each region to complete before proceeding to the next.
 
 #### Step 4: Monitor migration
 

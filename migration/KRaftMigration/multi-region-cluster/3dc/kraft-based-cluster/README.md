@@ -158,8 +158,7 @@ After migration is complete:
 KRaftMigrationJobs must be applied in **all regions** for migration to proceed. The KMJ in
 each region releases the `kraft-migration-hold-krc-creation` annotation on that region's
 KRaft controllers — without all KMJs applied, controllers in the remaining regions stay in
-HOLD, the quorum cannot form a majority, and the migration gets stuck (controllers crash-loop
-on secured clusters because the RBAC authorizer cannot initialize without a quorum leader).
+HOLD, the quorum cannot form a majority, and the migration gets stuck.
 
 During migration, each region's Kafka brokers are rolled multiple times. Each region's
 operator rolls brokers independently — within a region, only one broker restarts at a time,
@@ -179,9 +178,6 @@ partition is offline at a time. With an appropriate replication factor, this pro
 zero downtime. You can stagger the KMJ starts by a few minutes across regions to further
 reduce the small URP race window.
 
-To further protect availability, you can increase the replication factor for all topics before
-starting migration. In a 3-region deployment: RF >= 4 with `min.insync.replicas` <= RF - 3.
-
 > **Note:** `DUAL-WRITE` is a cluster-wide state, not a per-region state. The last region to
 > finish its broker rolls is the bottleneck for this transition.
 
@@ -195,9 +191,10 @@ before proceeding to the next.
 
 ### Rollback procedure
 
-If you need to roll back to ZooKeeper, trigger rollback one region at a time. Rollback
-involves up to multiple Kafka broker rolls per region, plus a manual step to delete ZooKeeper
-znodes.
+If you need to roll back to ZooKeeper, trigger rollback **one region at a time** to avoid
+simultaneous cross-region broker rolls (same URP-race concern as migration). Rollback involves
+up to multiple Kafka broker rolls per region, plus a manual step to delete ZooKeeper znodes.
+Wait for each region to reach `RollbackToZkComplete` before starting the next.
 
 1. Trigger rollback in the first region. Monitor its status until it reaches
    `RollbackToZkWaitForManualNodeRemovalFromZk`, which indicates the first broker roll is
