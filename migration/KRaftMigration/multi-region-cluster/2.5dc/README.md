@@ -123,7 +123,7 @@ for the full step-by-step MRC migration procedure.
 
 Every region needs a KRaftMigrationJob — the KMJ releases the
 `kraft-migration-hold-krc-creation` annotation on that region's KRaft controllers, and
-DUAL-WRITE cannot begin until all regions' brokers are in migration mode. However, the KMJs
+DUAL-WRITE cannot begin until all regions are in migration mode. However, the KMJs
 do **not** have to be applied all at once; the sequencing depends on the quorum type.
 
 > **Static vs dynamic quorum — how KMJ sequencing differs:**
@@ -136,9 +136,9 @@ do **not** have to be applied all at once; the sequencing depends on the quorum 
 >   See the static-quorum migration procedure below.
 > - **Dynamic quorum** (the `dynamic-quorum/` scenario): the bootstrap voter forms the quorum
 >   on its own. Apply the bootstrap voter's region + the 0.5DC tiebreaker (no brokers)
->   together, wait for the broker region to reach `MIGRATE` / `MigrateMonitorMigrationProgress`
->   (all broker rolls complete), then apply the remaining broker region. This keeps only one
->   broker-bearing region rolling at a time.
+>   together, wait for DC1 to reach `MIGRATE` / `MigrateMonitorMigrationProgress`
+>   (all DC1 broker rolls complete), then apply DC2. This keeps only one broker-bearing
+>   region rolling at a time.
 
 During migration, each region's Kafka brokers are rolled multiple times. During finalization,
 brokers are rolled again to remove the ZooKeeper dependency, and KRaft controllers are rolled
