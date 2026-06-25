@@ -158,7 +158,9 @@ After migration is complete:
 KRaftMigrationJobs must be applied in **all regions** for migration to proceed. The KMJ in
 each region releases the `kraft-migration-hold-krc-creation` annotation on that region's
 KRaft controllers — without all KMJs applied, controllers in the remaining regions stay in
-HOLD, the quorum cannot form a majority, and the migration gets stuck.
+HOLD. Until a **majority of voters** is up the quorum cannot elect a leader, and — because
+DUAL-WRITE is cluster-wide — it cannot begin until all regions' KMJs are applied. So apply all
+KMJs.
 
 During migration, each region's Kafka brokers are rolled multiple times. Each region's
 operator rolls brokers independently — within a region, only one broker restarts at a time,
@@ -172,11 +174,32 @@ could both read URP=0 and begin a restart before either shutdown registers.
 
 ### Migration procedure
 
-Apply KRaftMigrationJobs in all regions. The operator's cluster-wide URP=0 check serializes
-broker restarts at the partition-availability level — at most one replica of any given
-partition is offline at a time. With an appropriate replication factor, this provides
-zero downtime. You can stagger the KMJ starts by a few minutes across regions to further
-reduce the small URP race window.
+Unlike 2.5DC, this is a full 3-DC: **every region has Kafka brokers** (2 each) and there is no
+brokerless tiebreaker, and **no single region holds a voter majority**. Under
+static quorum, brokers don't roll until a majority of voters is up — and the smallest majority
+spans **two broker-bearing regions** (e.g. central + east = 3 of 5). Those two must come up
+together to form the quorum, so they roll brokers at the same time. **Broker rolls cannot be
+fully serialized here the way 2.5DC can.** For fully serialized, one-region-at-a-time rolls, use
+**dynamic quorum** (see the *Recommended target* note above and the
+[dynamic-quorum migration examples](../../../../../kraft/dynamic-quorum/migration/)).
+
+To minimize concurrency under static quorum:
+
+1. Apply the KMJs for the two regions that form the voter majority (e.g. central + east). When
+   the quorum forms they roll brokers together, but the operator's cluster-wide `URP=0` gate
+   keeps at most one replica of any partition offline at a time — so with an appropriate
+   replication factor this is still zero-downtime. **Stagger the two applies by a few minutes**
+   to narrow the small cross-region URP race window.
+   ```bash
+   kubectl --context mrc-central apply -f .../migration-central.yaml
+   # small gap
+   kubectl --context mrc-east apply -f .../migration-east.yaml
+   ```
+2. Wait for those regions to reach `MIGRATE` / `MigrateMonitorMigrationProgress` (their broker
+   rolls complete).
+3. Apply the remaining region's KMJ — it now rolls alone:
+   ```bash
+   kubectl --context mrc-west apply -f .../migration-west.yaml
 
 > **Note:** `DUAL-WRITE` is a cluster-wide state, not a per-region state. The last region to
 > finish its broker rolls is the bottleneck for this transition.
