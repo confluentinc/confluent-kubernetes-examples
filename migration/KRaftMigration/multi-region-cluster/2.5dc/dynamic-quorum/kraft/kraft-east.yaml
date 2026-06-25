@@ -1,0 +1,56 @@
+# DC1 KRaft controller -- full mode (has Kafka in namespace)
+# Dynamic quorum (KIP-853): kraft-east-0 is the bootstrap voter.
+# All other KRCs start as observers and get promoted to voters.
+#
+# controllerQuorumVoters lists ALL controllers across all DCs so the
+# migration driver knows the expected quorum size. Without the full list,
+# migration stays stuck at PRE_MIGRATION with a single-voter quorum.
+# advertisedListenersEnabled: true is required so voters advertise external
+# DNS endpoints — without it, cross-cluster add-controller fails because
+# voters advertise internal svc.cluster.local addresses.
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller-east
+  namespace: east
+  annotations:
+    platform.confluent.io/broker-id-offset: "9990"
+    platform.confluent.io/kraft-migration-hold-krc-creation: "true"
+    platform.confluent.io/use-log4j1: "true"
+spec:
+  replicas: 2
+  dataVolumeCapacity: 10G
+  image:
+    application: confluentinc/cp-server:7.9.6
+    init: confluentinc/confluent-init-container:3.3.0
+  listeners:
+    advertisedListenersEnabled: true
+    controller:
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          bootstrapPrefix: kraft-east-bootstrap
+          brokerPrefix: kraft-east
+          domain: platformops.dev.gcp.devel.cpdev.cloud
+
+  controllerQuorumVoters:
+    # East (DC1) - 2 controllers
+    - brokerEndpoint: kraft-east0.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9990
+    - brokerEndpoint: kraft-east1.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9991
+    # West (DC2) - 2 controllers
+    - brokerEndpoint: kraft-west0.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9992
+    - brokerEndpoint: kraft-west1.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9993
+    # Central (DC3) - 1 controller
+    - brokerEndpoint: kraft-central0.platformops.dev.gcp.devel.cpdev.cloud:9074
+      nodeId: 9994
+
+  dynamicQuorumConfig:
+    enabled: true
+    bootstrapPod: 0
+
+  podTemplate:
+    serviceAccountName: kraftcontroller-sa

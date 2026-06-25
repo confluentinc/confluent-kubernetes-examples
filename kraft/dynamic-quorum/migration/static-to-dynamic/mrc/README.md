@@ -184,6 +184,11 @@ kubectl --context $REGION1_CONTEXT exec kraftcontroller-0 -n $REGION1_NS -- bash
 
 Force a rolling restart of Kafka brokers on both clusters:
 
+> **Note:** Patching both regions at once rolls Kafka brokers across regions concurrently.
+> Within each region the operator rolls one broker at a time and gates on cluster-wide
+> `URP=0`, but to avoid the small cross-region timing window — especially if topic replication
+> factor is low — stagger the two patches by a few minutes, or roll one region at a time.
+
 ```bash
 kubectl --context $REGION1_CONTEXT patch kafka kafka -n $REGION1_NS --type merge \
     -p '{"spec":{"podTemplate":{"annotations":{"kafkacluster-manual-roll":"phase4"}}}}'

@@ -7,10 +7,6 @@ metadata:
     platform.confluent.io/broker-id-offset: "9992"
     platform.confluent.io/kraft-migration-hold-krc-creation: "true"
 spec:
-  configOverrides:
-    server:
-      # Manual Override as KMJ doesn't handle MRC well
-      - zookeeper.connect=zk-central.platformops.dev.gcp.devel.cpdev.cloud:2182,zk-east.platformops.dev.gcp.devel.cpdev.cloud:2182,zookeeper.west.svc.cluster.local:2182/mrc
   authorization:
     superUsers:
       - User:kafka

@@ -1,0 +1,32 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: west
+  annotations:
+    platform.confluent.io/broker-id-offset: "20"
+spec:
+  dependencies:
+    zookeeper:
+      endpoint: zk-central0.platformops.dev.gcp.devel.cpdev.cloud:2181,zk-east.platformops.dev.gcp.devel.cpdev.cloud:2181,zookeeper.west.svc.cluster.local:2181/mrc
+  image:
+    application: confluentinc/cp-server:7.9.6
+    init: confluentinc/confluent-init-container:3.3.0
+
+  listeners:
+    external:
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          bootstrapPrefix: kraft-kafka-mrc-west-ext
+          brokerPrefix: kraft-kafka-mrc-west-ext
+          domain: platformops.dev.gcp.devel.cpdev.cloud
+    replication:
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          bootstrapPrefix: kraft-kafka-mrc-west-rep
+          brokerPrefix: kraft-kafka-mrc-west-rep
+          domain: platformops.dev.gcp.devel.cpdev.cloud
+  replicas: 2
+  dataVolumeCapacity: 10Gi

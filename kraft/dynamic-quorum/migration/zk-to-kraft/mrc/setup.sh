@@ -359,20 +359,44 @@ step4() {
 # Step 5: Create KRaftMigrationJob
 # ============================================================
 step5() {
-    echo_step "=== Step 5: Create KRaftMigrationJob (one per region) ==="
+    echo_step "=== Step 5: Create KRaftMigrationJob (one region at a time) ==="
     echo ""
-    echo "This will:"
-    echo "  - Create KRaftMigrationJob on both clusters"
-    echo "  - Triggers ZK->KRaft migration: SETUP -> MIGRATE -> DUAL_WRITE"
+    echo "With dynamic quorum, apply KMJs sequentially — one region at a time."
+    echo "The bootstrap voter (region 1) forms the quorum on its own, so region 1's"
+    echo "migration proceeds independently. Wait for region 1's broker rolls to"
+    echo "complete (MigrateMonitorMigrationProgress) before applying region 2's KMJ."
+    echo "This eliminates the cross-region URP race window entirely."
     echo ""
 
     echo_info "Creating KRaftMigrationJob in Region 1 (my-cluster)..."
     run_cmd kube1 apply -f "$SCRIPT_DIR/region1/resources/kraftmigrationjob.yaml"
 
+    echo_info "Waiting for Region 1 to reach MIGRATE / MigrateMonitorMigrationProgress..."
+    echo_info "Polling every 15s... (Ctrl+C to stop, re-run step5 to continue)"
+    while true; do
+        PHASE1=$(kube1 get kraftmigrationjob kraftmigrationjob -n "$REGION1_NS" \
+            -o jsonpath='{.status.phase}' 2>/dev/null)
+        SUBPHASE1=$(kube1 get kraftmigrationjob kraftmigrationjob -n "$REGION1_NS" \
+            -o jsonpath='{.status.subPhase}' 2>/dev/null)
+        echo_info "Region 1: Phase=$PHASE1 SubPhase=$SUBPHASE1"
+
+        if [[ "$SUBPHASE1" == "MigrateMonitorMigrationProgress" ]]; then
+            echo_info "Region 1 broker rolls complete."
+            break
+        fi
+        if [[ "$PHASE1" == "FAILED" || "$PHASE1" == "ERROR" ]]; then
+            echo_error "Region 1 migration failed! Check:"
+            echo "  kubectl --context $REGION1_CONTEXT describe kraftmigrationjob kraftmigrationjob -n $REGION1_NS"
+            return 1
+        fi
+        sleep 15
+    done
+
     echo_info "Creating KRaftMigrationJob in Region 2 (my-clusterdev)..."
     run_cmd kube2 apply -f "$SCRIPT_DIR/region2/resources/kraftmigrationjob.yaml"
 
-    echo_info "Step 5 complete. KRaftMigrationJobs created."
+    echo_info "Step 5 complete. KRaftMigrationJobs created on both clusters."
+    echo_info "Both regions will now progress to DUAL-WRITE."
 }
 
 # ============================================================
@@ -485,25 +509,37 @@ step7() {
 step8() {
     echo_step "=== Step 8: Finalize Migration (KRaft takes over from ZooKeeper) ==="
     echo ""
-    echo "This will:"
-    echo "  - Annotate KRaftMigrationJob to trigger finalization on BOTH clusters"
-    echo "  - Brokers will roll to remove ZooKeeper dependency"
+    echo "IMPORTANT: Finalize one region at a time. Wait for each region to reach"
+    echo "COMPLETE before proceeding to the next. Finalization is irreversible —"
+    echo "once ZooKeeper is removed from a region's brokers, that region cannot"
+    echo "roll back to ZooKeeper mode."
     echo ""
-    echo "IMPORTANT: Ensure all 6 controllers are voters before finalizing!"
+    echo "Ensure all 6 controllers are voters before finalizing!"
     echo ""
 
-    if ask_step "Finalize migration on both clusters?"; then
+    if ask_step "Finalize migration on Region 1?"; then
         echo_info "Finalizing Region 1..."
         run_cmd kube1 annotate kraftmigrationjob kraftmigrationjob -n "$REGION1_NS" \
-            platform.confluent.io/kraft-migration-trigger-finalize-to-kraft='true'
-
-        echo_info "Finalizing Region 2..."
-        run_cmd kube2 annotate kraftmigrationjob kraftmigrationjob -n "$REGION2_NS" \
             platform.confluent.io/kraft-migration-trigger-finalize-to-kraft='true'
 
         echo_info "Waiting for Kafka to be ready in Region 1..."
         run_cmd kube1 wait --for=condition=platform.confluent.io/cluster-ready \
             kafka/kafka -n "$REGION1_NS" --timeout=10m
+
+        echo_info "Region 1 finalization complete."
+        echo_info "Monitor: kubectl --context $REGION1_CONTEXT get kmj kraftmigrationjob -n $REGION1_NS -oyaml"
+    fi
+
+    if ! ask_step "Has Region 1 reached COMPLETE? Proceed to finalize Region 2?"; then
+        echo_info "Paused. Re-run 'step8' when ready to continue."
+        return 0
+    fi
+
+    if ask_step "Finalize migration on Region 2?"; then
+        echo_info "Finalizing Region 2..."
+        run_cmd kube2 annotate kraftmigrationjob kraftmigrationjob -n "$REGION2_NS" \
+            platform.confluent.io/kraft-migration-trigger-finalize-to-kraft='true'
+
         echo_info "Waiting for Kafka to be ready in Region 2..."
         run_cmd kube2 wait --for=condition=platform.confluent.io/cluster-ready \
             kafka/kafka -n "$REGION2_NS" --timeout=10m
@@ -519,20 +555,9 @@ step9() {
     echo_step "=== Step 9: Switch Kafka Dependency from ZooKeeper to KRaft ==="
     echo ""
     echo "This will:"
-    echo "  - Remove stale zookeeper.connect from KRaftController configOverrides"
     echo "  - Apply kafka-kraft-dependency.yaml on both clusters"
     echo "  - Kafka switches from ZK to KRaft dependency"
     echo ""
-
-    # KMJ doesn't clean zookeeper.connect from configOverrides.server during finalization.
-    # This was added as a workaround for the MRC double chroot bug.
-    # At this point KMJ already removed the other server overrides (migration enable, IBP).
-    # Only zookeeper.connect remains — safe to clear the server list.
-    echo_info "Removing stale zookeeper.connect from KRaftController configOverrides.server..."
-    run_cmd kube1 patch kraftcontroller "$KRAFTCONTROLLER_NAME" -n "$REGION1_NS" \
-        --type=merge -p '{"spec":{"configOverrides":{"server":[]}}}'
-    run_cmd kube2 patch kraftcontroller "$KRAFTCONTROLLER_NAME" -n "$REGION2_NS" \
-        --type=merge -p '{"spec":{"configOverrides":{"server":[]}}}'
 
     if ask_step "Switch Kafka to KRaft dependency on both clusters?"; then
         echo_info "Switching Region 1 Kafka to KRaft dependency..."

@@ -1,0 +1,15 @@
+# DC3 KMJ — lite mode (no Kafka dependency, 0.5DC tiebreaker), mTLS+RBAC
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftMigrationJob
+metadata:
+  name: kraftmigrationjob
+  namespace: central
+spec:
+  dependencies:
+    # No kafka dependency — this is what triggers lite mode
+    zookeeper:
+      name: zookeeper
+      namespace: central
+    kRaftController:
+      name: kraftcontroller-central
+      namespace: central

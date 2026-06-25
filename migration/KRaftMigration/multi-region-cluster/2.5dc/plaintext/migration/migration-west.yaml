@@ -1,0 +1,17 @@
+# DC2 KMJ — full mode (has Kafka dependency)
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftMigrationJob
+metadata:
+  name: kraftmigrationjob
+  namespace: west
+spec:
+  dependencies:
+    kafka:
+      name: kafka
+      namespace: west
+    zookeeper:
+      name: zookeeper
+      namespace: west
+    kRaftController:
+      name: kraftcontroller-west
+      namespace: west

@@ -4,6 +4,8 @@ Migrate a multi-region ZooKeeper-based Kafka cluster to KRaft with KIP-853 dynam
 
 > **Note**: This example migrates from ZooKeeper to KRaft with dynamic quorum (`kraft.version=1`). If you want to migrate to KRaft with static quorum (`kraft.version=0`), refer to the [KRaftMigrationJob examples](../../../../../migration/KRaftMigration/).
 
+> **Recommended for MRC.** Dynamic quorum is the recommended KRaft target for MRC: it enables `add-controller` / `remove-controller` and `force-standalone` disaster recovery (static quorum cannot `remove-controller`), and during migration the bootstrap voter forms the quorum on its own — so quorum formation does not wait for a cross-region voter majority, avoiding the static-quorum minority-region wedge. Requires CP 7.9.6+.
+
 ### Security Configuration
 
 | Layer | Setting |
@@ -111,12 +113,33 @@ kubectl --context $REGION2_CONTEXT apply -f $TUTORIAL_HOME/region2/resources/kra
 
 #### Step 3: Create KRaftMigrationJob
 
-One KRaftMigrationJob per region triggers the ZK-to-KRaft migration:
+One KRaftMigrationJob per region triggers the ZK-to-KRaft migration. Apply sequentially —
+start with region 1 (bootstrap voter), wait for its broker rolls to complete, then apply
+region 2:
 
 ```bash
+# Region 1 — bootstrap voter forms quorum and migration begins
 kubectl --context $REGION1_CONTEXT apply -f $TUTORIAL_HOME/region1/resources/kraftmigrationjob.yaml
+
+# Wait for Region 1 to reach MIGRATE / MigrateMonitorMigrationProgress
+# (all broker rolls in region 1 complete)
+kubectl --context $REGION1_CONTEXT get kraftmigrationjob -n $REGION1_NS -w
+
+# Region 2 — only after region 1 broker rolls are done
 kubectl --context $REGION2_CONTEXT apply -f $TUTORIAL_HOME/region2/resources/kraftmigrationjob.yaml
 ```
+
+> **MRC migration sequencing — apply KMJs one region at a time:**
+> - **Start with the bootstrap voter's region (region 1).** With dynamic quorum the bootstrap
+>   voter forms the quorum on its own, so region 1's migration proceeds independently — its
+>   brokers roll through SETUP into MIGRATE. Wait for region 1 to reach the `MIGRATE` phase
+>   with subphase `MigrateMonitorMigrationProgress` (all broker rolls in that region complete),
+>   then apply region 2's KMJ. This sequences the broker rolls so only one region rolls at a
+>   time, eliminating the cross-region URP race window entirely.
+> - Region 2's controllers join the quorum as observers once their KMJ releases the hold.
+>   Both regions then progress to `DUAL_WRITE` (a cluster-wide state).
+> - **Finalization and rollback** also trigger broker rolls — apply these one region at a time,
+>   waiting for each region to complete before proceeding to the next.
 
 #### Step 4: Monitor migration
 
@@ -193,14 +216,25 @@ done
 
 #### Step 7: Finalize migration
 
-Annotate KRaftMigrationJob on both clusters to trigger finalization:
+Trigger finalization **one region at a time**. Finalization rolls each region's brokers (to
+remove the ZooKeeper dependency) and controllers (to remove migration config), so applying it
+to both regions at once reintroduces the same cross-region broker-restart risk described in
+Step 3. Annotate region 1, wait for it to reach `COMPLETE`, then do region 2:
 
 ```bash
+# Region 1 — then wait for COMPLETE before proceeding
 kubectl --context $REGION1_CONTEXT annotate kraftmigrationjob kraftmigrationjob -n $REGION1_NS \
   platform.confluent.io/kraft-migration-trigger-finalize-to-kraft='true'
+kubectl --context $REGION1_CONTEXT get kraftmigrationjob -n $REGION1_NS -w
+
+# Region 2 — only after region 1 is COMPLETE
 kubectl --context $REGION2_CONTEXT annotate kraftmigrationjob kraftmigrationjob -n $REGION2_NS \
   platform.confluent.io/kraft-migration-trigger-finalize-to-kraft='true'
+kubectl --context $REGION2_CONTEXT get kraftmigrationjob -n $REGION2_NS -w
 ```
+
+> **Note:** Finalization is irreversible — once ZooKeeper is removed from a region's brokers,
+> that region cannot roll back to ZooKeeper mode.
 
 #### Step 8: Switch Kafka to KRaft dependency
 
@@ -210,6 +244,11 @@ Apply the updated Kafka YAML that points to KRaft instead of ZooKeeper:
 kubectl --context $REGION1_CONTEXT apply -f $TUTORIAL_HOME/region1/resources/kafka-kraft-dependency.yaml
 kubectl --context $REGION2_CONTEXT apply -f $TUTORIAL_HOME/region2/resources/kafka-kraft-dependency.yaml
 ```
+
+> **Note:** This triggers a cross-region Kafka broker roll. Within each region the operator
+> rolls one broker at a time and gates on cluster-wide `URP=0`, but to avoid the small
+> cross-region timing window — especially if topic replication factor is low — stagger the two
+> applies by a few minutes, or apply one region at a time.
 
 #### Step 9: Decommission ZooKeeper
 
