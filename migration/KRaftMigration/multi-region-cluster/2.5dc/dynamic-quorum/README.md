@@ -10,11 +10,10 @@ using dynamic quorum (KIP-853). Requires CFK 3.3.0+ and CP 7.9.6+.
 > static-quorum minority-region wedge. See the
 > [2.5DC migration overview](../README.md#recommended-target-kraft-with-dynamic-quorum-kip-853).
 
-This example is **plaintext** (no security). For a dynamic quorum MRC migration with
-**TLS + SASL/PLAIN + RBAC + OAuth**, see the
-[secured dynamic quorum MRC migration](../../../../../kraft/dynamic-quorum/migration/zk-to-kraft/mrc/)
-— it covers `--command-config` setup, admin.properties creation, and observer promotion on
-secured clusters.
+This example is **plaintext** (no security) and includes 2.5DC-specific resources: lite-mode
+KMJ for the 0.5DC, KRaftController with manual `clusterID`, and the tiebreaker topology. For
+the secured variant of admin commands (`--command-config`, admin.properties creation), see the
+[secured dynamic quorum MRC migration](../../../../../kraft/dynamic-quorum/migration/zk-to-kraft/mrc/).
 
 ## How dynamic quorum differs from static quorum
 
