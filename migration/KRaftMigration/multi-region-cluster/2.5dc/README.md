@@ -129,10 +129,11 @@ HOLD and the migration gets stuck.
 > **Static vs dynamic quorum — how KMJ sequencing differs:**
 > - **Static quorum** (the `plaintext/` and `mtls-rbac/` scenarios): every controller across
 >   all regions is a voter, so the quorum needs a **majority of voters** up to elect a leader
->   (e.g. 3 of 5) — not all of them. KMJs must reach a voter majority for the quorum to form,
->   and all regions' KMJs to reach cluster-wide DUAL-WRITE. Because the 0.5DC tiebreaker has a
->   voter but no brokers, you can sequence so only one broker-bearing region rolls at a time —
->   see the static-quorum migration procedure below.
+>   (e.g. 3 of 5) — not all of them, and all regions' KMJs are needed to reach cluster-wide
+>   DUAL-WRITE. Because the 0.5DC tiebreaker has a voter but **no brokers**, you can form the
+>   quorum with the tiebreaker + one broker region and keep only one broker-bearing region
+>   rolling at a time — this is **safe for both plaintext and secured (`mtls-rbac/`)** clusters.
+>   See the static-quorum migration procedure below.
 > - **Dynamic quorum** (the `dynamic-quorum/` scenario): the bootstrap voter forms the quorum
 >   on its own, so KMJs can be applied **one region at a time**. Apply the bootstrap voter's
 >   region first, wait for it to reach the `MIGRATE` phase with subphase
@@ -157,9 +158,7 @@ could both read URP=0 and begin a restart before either shutdown registers.
 The quorum needs a **majority of voters** up to elect a leader, and a region's brokers don't
 roll until the quorum has formed. The 0.5DC tiebreaker (central) has a voter but **no brokers**,
 so you can form the quorum with the tiebreaker plus one broker region and keep broker rolls
-serialized.
-
-**Recommended — no concurrent broker rolls:**
+serialized — this works for **both the plaintext and secured (`mtls-rbac/`) scenarios**:
 
 1. Apply the 0.5DC tiebreaker + the first broker region. Their voters are a majority
    (e.g. central 1 + east 2 = 3 of 5), so the quorum forms; only the broker region rolls

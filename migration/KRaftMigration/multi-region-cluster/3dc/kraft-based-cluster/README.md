@@ -174,32 +174,47 @@ could both read URP=0 and begin a restart before either shutdown registers.
 
 ### Migration procedure
 
-Unlike 2.5DC, this is a full 3-DC: **every region has Kafka brokers** (2 each) and there is no
-brokerless tiebreaker, and **no single region holds a voter majority**. Under
-static quorum, brokers don't roll until a majority of voters is up — and the smallest majority
-spans **two broker-bearing regions** (e.g. central + east = 3 of 5). Those two must come up
-together to form the quorum, so they roll brokers at the same time. **Broker rolls cannot be
-fully serialized here the way 2.5DC can.** For fully serialized, one-region-at-a-time rolls, use
-**dynamic quorum** (see the *Recommended target* note above and the
-[dynamic-quorum migration examples](../../../../../kraft/dynamic-quorum/migration/)).
+Unlike 2.5DC, a full 3-DC has **brokers in every region** (2 each), **no brokerless tiebreaker**,
+and no single region with a voter majority (1 + 2 + 2 of 5). How you sequence — and whether broker
+rolls can be fully serialized — depends on the security mode:
 
-To minimize concurrency under static quorum:
+**Plaintext — one region at a time (fully serialized).** On a non-secured cluster, controller
+readiness is just a listener check, so each region's KMJ advances to the `MIGRATE` phase /
+`MigrateMonitorMigrationProgress` **on its own**, without a cross-region quorum. Apply one region,
+wait for it to park, then the next — no concurrent broker rolls:
 
-1. Apply the KMJs for the two regions that form the voter majority (e.g. central + east). When
-   the quorum forms they roll brokers together, but the operator's cluster-wide `URP=0` gate
-   keeps at most one replica of any partition offline at a time — so with an appropriate
-   replication factor this is still zero-downtime. **Stagger the two applies by a few minutes**
-   to narrow the small cross-region URP race window.
+```bash
+kubectl --context mrc-central apply -f .../migration-central.yaml
+kubectl get kmj kraftmigrationjob-central -n central --context mrc-central -w -oyaml   # wait: MIGRATE / MigrateMonitorMigrationProgress
+kubectl --context mrc-east apply -f .../migration-east.yaml
+kubectl get kmj kraftmigrationjob-east -n east --context mrc-east -w -oyaml
+kubectl --context mrc-west apply -f .../migration-west.yaml
+```
+
+**Secured (mTLS + RBAC — this example) — cannot be fully serialized under static quorum.** The RBAC
+authorizer must read metadata from the quorum at startup, so a region's controller can't become
+ready until a voter **majority** is up — and the smallest majority spans **two broker-bearing
+regions**, which must come up together and therefore roll brokers at
+the same time. To minimize concurrency:
+
+1. Apply the two regions that form the voter majority (e.g. central + east). When the quorum forms
+   they roll together, but the cluster-wide `URP=0` gate keeps at most one replica of any partition
+   offline at a time — with an appropriate replication factor this is still zero-downtime.
+   **Stagger the two applies by a few minutes** to narrow the URP race window.
    ```bash
    kubectl --context mrc-central apply -f .../migration-central.yaml
    # small gap
    kubectl --context mrc-east apply -f .../migration-east.yaml
    ```
-2. Wait for those regions to reach `MIGRATE` / `MigrateMonitorMigrationProgress` (their broker
-   rolls complete).
-3. Apply the remaining region's KMJ — it now rolls alone:
+2. Wait for those regions to reach `MIGRATE` / `MigrateMonitorMigrationProgress`.
+3. Apply the remaining region — it now rolls alone:
    ```bash
    kubectl --context mrc-west apply -f .../migration-west.yaml
+   ```
+
+For fully serialized rolls on a secured cluster, use **dynamic quorum** (see the *Recommended
+target* note above and the
+[dynamic-quorum migration examples](../../../../../kraft/dynamic-quorum/migration/)).
 
 > **Note:** `DUAL-WRITE` is a cluster-wide state, not a per-region state. The last region to
 > finish its broker rolls is the bottleneck for this transition.
