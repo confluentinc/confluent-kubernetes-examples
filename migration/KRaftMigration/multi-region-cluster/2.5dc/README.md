@@ -121,10 +121,10 @@ for the full step-by-step MRC migration procedure.
 
 ## MRC migration sequencing
 
-KRaftMigrationJobs must be applied in **all regions** for migration to proceed. The KMJ in
-each region releases the `kraft-migration-hold-krc-creation` annotation on that region's
-KRaft controllers — without all KMJs applied, controllers in the remaining regions stay in
-HOLD and the migration gets stuck.
+Every region needs a KRaftMigrationJob — the KMJ releases the
+`kraft-migration-hold-krc-creation` annotation on that region's KRaft controllers, and
+DUAL-WRITE cannot begin until all regions are in migration mode. However, the KMJs
+do **not** have to be applied all at once; the sequencing depends on the quorum type.
 
 > **Static vs dynamic quorum — how KMJ sequencing differs:**
 > - **Static quorum** (the `plaintext/` and `mtls-rbac/` scenarios): every controller across
@@ -135,11 +135,10 @@ HOLD and the migration gets stuck.
 >   rolling at a time — this is **safe for both plaintext and secured (`mtls-rbac/`)** clusters.
 >   See the static-quorum migration procedure below.
 > - **Dynamic quorum** (the `dynamic-quorum/` scenario): the bootstrap voter forms the quorum
->   on its own, so KMJs can be applied **one region at a time**. Apply the bootstrap voter's
->   region first, wait for it to reach the `MIGRATE` phase with subphase
->   `MigrateMonitorMigrationProgress` (all broker rolls in that region complete), then apply
->   the next region. This sequences the broker rolls so only one region rolls at a time,
->   eliminating the cross-region URP race window entirely.
+>   on its own. Apply the bootstrap voter's region + the 0.5DC tiebreaker (no brokers)
+>   together, wait for DC1 to reach `MIGRATE` / `MigrateMonitorMigrationProgress`
+>   (all DC1 broker rolls complete), then apply DC2. This keeps only one broker-bearing
+>   region rolling at a time.
 
 During migration, each region's Kafka brokers are rolled multiple times. During finalization,
 brokers are rolled again to remove the ZooKeeper dependency, and KRaft controllers are rolled
@@ -189,22 +188,19 @@ kubectl --context $CTX3 get kmj kraftmigrationjob -n central -w -oyaml
 
 ### Migration procedure — dynamic quorum
 
-Apply KRaftMigrationJobs **one region at a time**, starting with the bootstrap voter's region.
-Wait for each region to reach `MIGRATE` phase with subphase `MigrateMonitorMigrationProgress`
-(all broker rolls complete) before applying the next. This sequences the broker rolls so only
-one region rolls at a time, eliminating the cross-region URP race window entirely.
+Apply the bootstrap voter's region (DC1) + the 0.5DC tiebreaker (central, lite mode)
+together. The 0.5DC has no Kafka, so it never rolls brokers — applying it alongside DC1 is
+safe. Wait for DC1 to reach `MIGRATE` / `MigrateMonitorMigrationProgress` (all broker rolls
+complete), then apply DC2. This keeps only one broker-bearing region rolling at a time.
 
 ```bash
-# Region 1 (bootstrap voter) — quorum forms, brokers roll through SETUP into MIGRATE
+# DC1 (bootstrap voter) + 0.5DC tiebreaker (no brokers) — apply together
 kubectl --context $CTX1 apply -f migration-east.yaml
-# Wait for: phase=MIGRATE, subPhase=MigrateMonitorMigrationProgress
-
-# Region 2 — only after region 1 broker rolls are done
-kubectl --context $CTX2 apply -f migration-west.yaml
-# Wait for: phase=MIGRATE, subPhase=MigrateMonitorMigrationProgress
-
-# Region 3 (0.5DC) — lite mode, no Kafka to roll
 kubectl --context $CTX3 apply -f migration-central.yaml
+# Wait for DC1: phase=MIGRATE, subPhase=MigrateMonitorMigrationProgress
+
+# DC2 — only after DC1 broker rolls are done
+kubectl --context $CTX2 apply -f migration-west.yaml
 ```
 
 Monitor all regions until they reach `DUAL-WRITE`:
