@@ -65,23 +65,22 @@ The `bootstrap/` directory contains resources needed only in the bootstrap voter
 6. Wait for all regions to reach `DUAL-WRITE`
 7. **Promote observers to voters (during DUAL-WRITE).** Run `add-controller` on each
    observer pod — it promotes the controller it is run on. Skip `kraftcontroller-east-0`
-   (already a voter). Point `--bootstrap-controller` at the bootstrap voter's external DNS, and
-   pass the controller's own on-pod config (`/opt/confluentinc/etc/kafka/kafka.properties`,
-   present on every controller pod) as `--command-config`. For secured clusters, see the
-   [secured MRC example](../../../../../kraft/dynamic-quorum/migration/zk-to-kraft/mrc/#step-6-promote-observers-to-voters-dual_write).
+   (already a voter). Point `--bootstrap-controller` at the bootstrap voter's external DNS.
+   No `--command-config` is needed for plaintext. For secured clusters, pass
+   `--command-config /opt/confluentinc/etc/kafka/kafka-client.properties` (CFK 3.3.x+) — see
+   the [secured MRC example](../../../../../kraft/dynamic-quorum/migration/zk-to-kraft/mrc/#step-6-promote-observers-to-voters-dual_write).
 
    ```bash
    BOOTSTRAP=<bootstrap-voter-external-dns>:9074
-   CC=/opt/confluentinc/etc/kafka/kafka.properties
 
    kubectl --context $CTX_EAST    exec kraftcontroller-east-1    -n east    -- \
-     kafka-metadata-quorum --bootstrap-controller $BOOTSTRAP --command-config $CC add-controller
+     kafka-metadata-quorum --bootstrap-controller $BOOTSTRAP add-controller
    kubectl --context $CTX_WEST    exec kraftcontroller-west-0    -n west    -- \
-     kafka-metadata-quorum --bootstrap-controller $BOOTSTRAP --command-config $CC add-controller
+     kafka-metadata-quorum --bootstrap-controller $BOOTSTRAP add-controller
    kubectl --context $CTX_WEST    exec kraftcontroller-west-1    -n west    -- \
-     kafka-metadata-quorum --bootstrap-controller $BOOTSTRAP --command-config $CC add-controller
+     kafka-metadata-quorum --bootstrap-controller $BOOTSTRAP add-controller
    kubectl --context $CTX_CENTRAL exec kraftcontroller-central-0 -n central -- \
-     kafka-metadata-quorum --bootstrap-controller $BOOTSTRAP --command-config $CC add-controller
+     kafka-metadata-quorum --bootstrap-controller $BOOTSTRAP add-controller
    ```
 
    Verify all controllers are now voters:
