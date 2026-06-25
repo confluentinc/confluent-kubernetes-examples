@@ -10,6 +10,11 @@ using dynamic quorum (KIP-853). Requires CFK 3.3.0+ and CP 7.9.6+.
 > static-quorum minority-region wedge. See the
 > [2.5DC migration overview](../README.md#recommended-target-kraft-with-dynamic-quorum-kip-853).
 
+This example is **plaintext** (no security) and includes 2.5DC-specific resources: lite-mode
+KMJ for the 0.5DC, KRaftController with manual `clusterID`, and the tiebreaker topology. For
+the secured variant of admin commands (`--command-config`, admin.properties creation), see the
+[secured dynamic quorum MRC migration](../../../../../kraft/dynamic-quorum/migration/zk-to-kraft/mrc/).
+
 ## How dynamic quorum differs from static quorum
 
 In static quorum, all KRaft controllers start as voters with a fixed
@@ -58,17 +63,30 @@ The `bootstrap/` directory contains resources needed only in the bootstrap voter
    eliminating the cross-region URP race window entirely. See the
    [MRC migration sequencing](../README.md#mrc-migration-sequencing) section for details.
 6. Wait for all regions to reach `DUAL-WRITE`
-7. **Promote observers to voters** — run `add-controller` for each observer:
+7. **Promote observers to voters (during DUAL-WRITE).** Run `add-controller` on each
+   observer pod — it promotes the controller it is run on. Skip `kraftcontroller-east-0`
+   (already a voter). Point `--bootstrap-controller` at the bootstrap voter's external DNS.
+   No `--command-config` is needed for plaintext. For secured clusters, pass
+   `--command-config /opt/confluentinc/etc/kafka/kafka-client.properties` (CFK 3.3.x+) — see
+   the [secured MRC example](../../../../../kraft/dynamic-quorum/migration/zk-to-kraft/mrc/#step-6-promote-observers-to-voters-dual_write).
+
    ```bash
-   kubectl exec kraftcontroller-east-0 -n east -- \
-     kafka-metadata-quorum --bootstrap-controller <bootstrap-endpoint>:9074 \
-       --command-config /tmp/admin.properties \
-       add-controller --controller-id <id> --controller-directory-id <dir-id>
+   BOOTSTRAP=<bootstrap-voter-external-dns>:9074
+
+   kubectl --context $CTX_EAST    exec kraftcontroller-east-1    -n east    -- \
+     kafka-metadata-quorum --bootstrap-controller $BOOTSTRAP add-controller
+   kubectl --context $CTX_WEST    exec kraftcontroller-west-0    -n west    -- \
+     kafka-metadata-quorum --bootstrap-controller $BOOTSTRAP add-controller
+   kubectl --context $CTX_WEST    exec kraftcontroller-west-1    -n west    -- \
+     kafka-metadata-quorum --bootstrap-controller $BOOTSTRAP add-controller
+   kubectl --context $CTX_CENTRAL exec kraftcontroller-central-0 -n central -- \
+     kafka-metadata-quorum --bootstrap-controller $BOOTSTRAP add-controller
    ```
-   Get `controller-id` and `controller-directory-id` from:
+
+   Verify all controllers are now voters:
    ```bash
-   kafka-metadata-quorum --bootstrap-controller <endpoint>:9074 \
-     --command-config /tmp/admin.properties describe --replication
+   kubectl --context $CTX_EAST exec kraftcontroller-east-0 -n east -- \
+     kafka-metadata-quorum --bootstrap-controller localhost:9074 describe --replication
    ```
 8. Finalize migration **one region at a time** — trigger finalization in the first region
    and wait for it to reach `COMPLETE` before proceeding to the next.
