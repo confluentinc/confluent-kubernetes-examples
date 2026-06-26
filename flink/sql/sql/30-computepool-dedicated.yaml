@@ -1,0 +1,28 @@
+# Step 4a - FlinkComputePool (DEDICATED)
+#
+# A DEDICATED pool owns a fixed set of resources reserved for its statements.
+# spec.type is immutable. spec.state must be omitted for DEDICATED pools (it is
+# only valid for SHARED pools - enforced by a CEL rule on the CRD).
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: FlinkComputePool
+metadata:
+  name: dedicated-pool
+  namespace: operator
+spec:
+  type: DEDICATED
+  flinkEnvironment: flink-env1
+  clusterSpec:
+    flinkVersion: v1_19
+    image: confluentinc/cp-flink-sql:1.19-cp8
+    jobManager:
+      resource:
+        memory: "1024m"
+        cpu: 0.5
+    taskManager:
+      resource:
+        memory: "1024m"
+        cpu: 0.5
+  cmfRestClassRef:
+    name: default
+    namespace: operator
