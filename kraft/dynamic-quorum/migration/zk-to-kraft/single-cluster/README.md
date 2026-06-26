@@ -244,15 +244,13 @@ kubectl wait --for=condition=platform.confluent.io/cluster-ready \
 
 #### Step 4: Deploy Kafka with ZooKeeper dependency
 
-**Critical**: The Kafka CR must have the IBP 3.9 annotation:
+**IBP version**: the migration needs `inter.broker.protocol.version` at 3.9 (default 3.6 is incompatible with `kraft.version=1`). On standard CP images CFK auto-infers this from the image tag (CFK-4300) — you don't set it. The annotation is only needed for custom images CFK can't map:
 
 ```yaml
 metadata:
   annotations:
-    platform.confluent.io/kraft-migration-ibp-version: "3.9"
+    platform.confluent.io/kraft-migration-ibp-version: "3.9"   # only for custom images
 ```
-
-Without this, default IBP 3.6 is incompatible with `kraft.version=1` and controllers will fail.
 
 ```bash
 kubectl apply -f $TUTORIAL_HOME/resources/kafka.yaml

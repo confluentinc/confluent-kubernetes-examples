@@ -535,7 +535,7 @@ kubectl --context $REGION2_CONTEXT wait --for=condition=platform.confluent.io/cl
 
 Kafka with SASL/PLAIN, RBAC, OAuth MDS, pointing to ZooKeeper.
 
-**Critical**: IBP 3.9 annotation is required for dynamic quorum compatibility.
+**IBP version**: dynamic-quorum migration needs `inter.broker.protocol.version` 3.9. On standard CP images CFK auto-infers it from the image tag (CFK-4300); the `kraft-migration-ibp-version` annotation is only needed for custom images.
 
 ```bash
 kubectl --context $REGION1_CONTEXT apply -f $TUTORIAL_HOME/region1/resources/kafka.yaml

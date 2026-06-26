@@ -23,7 +23,7 @@ Deploy a greenfield multi-region KRaft cluster with dynamic quorum (`kraft.versi
 
 - Two Kubernetes clusters with cross-cluster networking (LoadBalancer + DNS)
 - CFK 3.2+ operator (will be deployed by the setup steps below)
-- CP 7.9.6+ or 8.1.2+ images (8.0.x and 8.2.0 affected by KMETA-2851 for MRC greenfield)
+- A CP image with the KMETA-2851 fix: 7.9.6+, 8.0.5+, 8.1.2+, 8.2.1+, 8.3.0+. CP 8.0.0-8.0.4 and 8.2.0 are affected by KMETA-2851 for MRC greenfield.
 - `openssl` installed locally (for certificate generation)
 - `helm` installed (for operator deployment)
 - GCP Cloud DNS zone configured for the domain (or equivalent DNS provider)

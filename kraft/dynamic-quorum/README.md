@@ -19,7 +19,7 @@ This document provides a comprehensive overview of the Dynamic KRaft feature ([K
 |---------|---------|--------|--------|
 | **KRaft (Static Quorum)** | CP 7.4+ | All active CFK versions | Supported (continues in all future versions) |
 | **KRaft (Dynamic Quorum)** | CP 7.9+ | CFK 3.2+ | Using latest CP patch recommended |
-| **KRaft (Dynamic Quorum) MRC** | CP 7.9.6+ (in 7.9.x), 8.1.2+ (in 8.1.x) | CFK 3.2+ | 8.0.x and 8.2.x have known issues for MRC. See [KMETA-2851](#kmeta-2851-mrc-version-compatibility). Expected Fix Version - 8.0.5, 8.2.1 (Q2 2026 Patch Release) |
+| **KRaft (Dynamic Quorum) MRC** | 7.9.6+, 8.0.5+, 8.1.2+, 8.2.1+, 8.3.0+ | CFK 3.2+ | Needs the [KMETA-2851](#kmeta-2851-mrc-version-compatibility) fix. Earlier patches (8.0.0-8.0.4, 8.2.0) have the MRC bug. |
 | **Auto-Join Dynamic Quorum** | CP 8.2+ | CFK 3.2+ | Simplifies observer promotion (no manual `add-controller`) |
 | **ZK to KRaft (Dynamic Quorum) Migration** | CP 7.9.6+ | CFK 3.2+ | Use CP 7.9 only -- ZK is removed in CP 8.0+ |
 | **Static to Dynamic KRaft Migration** | CP 8.0+ | CFK 3.2+ | Works on all 8.0+ versions for both single region and MRC -- not affected by KMETA-2851 |
@@ -32,7 +32,7 @@ Users must upgrade to **CFK 3.2+** to use dynamic quorum features. See [CFK upgr
 - All active CFK versions support KRaft static quorum deployment.
 - **CFK 3.2+** adds dynamic quorum support and KRaft Migration Job (KMJ).
 - ZK to KRaft migration with dynamic quorum is only on CP 7.9.6+ (ZK removed in 8.0).
-- **Scale-up/scale-down of KRaft controllers is not yet supported via CFK.** Controller membership changes (add/remove) must be done manually using `kafka-metadata-quorum` CLI. Automated scale operations can be added in a future CFK release.
+- **KRaft controller scale-up is supported via CFK** (requires `dynamicQuorumConfig.enabled: true`). Increasing `KRaftController.spec.replicas` adds controllers without rolling the existing controllers or the Kafka brokers; on CP 8.2+ the new controllers auto-join the quorum as voters, and on CP < 8.2 they come up as observers you promote with `kafka-metadata-quorum add-controller`. **Scale-down is not supported** — the operator rejects a `replicas` decrease, because a StatefulSet shrink drops the highest-ordinal pod regardless of voter status and could drop a live voter and lose quorum.
 
 ### KMETA-2851: MRC Version Compatibility
 
@@ -40,8 +40,8 @@ MRC deployments require `advertisedListenersEnabled: true` on KRaft for cross-cl
 
 | Deployment Path | Affected by KMETA-2851? | CP Versions That Work |
 |----------------|------------------------|----------------------|
-| **MRC Greenfield** (advertised listeners from start) | Yes | CP 7.9.6, 8.1.2 |
-| **MRC ZK to KRaft (Dynamic Quorum) Migration** (advertised listeners from start) | Yes | CP 7.9.6 |
+| **MRC Greenfield** (advertised listeners from start) | Yes | 7.9.6+, 8.0.5+, 8.1.2+, 8.2.1+, 8.3.0+ |
+| **MRC ZK to KRaft (Dynamic Quorum) Migration** (advertised listeners from start) | Yes | 7.9.6+ (ZK only ships in 7.9.x) |
 | **MRC Static to Dynamic Migration** (advertised listeners added after quorum formed) | No | All CP 8.0+ |
 | **Single-cluster** (no advertised listeners) | No | All CP versions |
 
@@ -451,9 +451,9 @@ Defining `advertised.listeners` in the KRaft server properties from the start tr
 
 **Root cause**: When the initial `ControllerRegistration` RPC times out, `failedRPC` is incremented but `pendingRPC` is not reset to `false`. All subsequent registration attempts see `pendingRPC = true` and skip sending, so the controller never retries registration. The bootstrap voter cannot register itself and the cluster is stuck.
 
-**Affected versions**: CP 7.9.5, 8.0.4, 8.1.1, 8.2.0 (and earlier patch releases).
+**Affected versions**: CP 7.9.5, 8.0.0-8.0.4, 8.1.1, 8.2.0 (and earlier patch releases).
 
-**Fixed in**: CP 7.9.6, 8.1.2. NOT fixed in 8.0.x (incl 8.0.4) or 8.2.0. Expected fix in 8.0.5 and 8.2.1 (Q2 2026 patch release).
+**Fixed in**: CP 7.9.6, 8.1.2, and the Q2 2026 patch line — **8.0.5+, 8.2.1+, and 8.3.0+**. (8.0.0-8.0.4 and 8.2.0 shipped before the fix was merged.)
 
 **Important**: This bug affects **ALL MRC greenfield** deployments where `advertised.listeners` is present from the start, regardless of external access type. Tested and confirmed on both `type: loadBalancer` and `type: staticForHostBasedRouting` with pre-created static IPs and DNS -- even with DNS resolving before pod startup, the LB forwarding rules take seconds to provision, causing the first registration RPC to time out.
 
@@ -464,7 +464,7 @@ Defining `advertised.listeners` in the KRaft server properties from the start tr
 | Deployment | Dynamic Quorum Support | Notes |
 |------------|----------------------|-------|
 | **Single-cluster** | All CP versions | No advertised listeners needed |
-| **MRC greenfield** | CP 7.9.6+, 8.1.2+ | Needs KMETA-2851 fix (8.0.4 confirmed NOT fixed) |
+| **MRC greenfield** | 7.9.6+, 8.0.5+, 8.1.2+, 8.2.1+, 8.3.0+ | Needs KMETA-2851 fix (in 7.9.6/8.1.2 and the Q2 2026 patch line; 8.0.0-8.0.4 and 8.2.0 NOT fixed) |
 | **MRC static-to-dynamic migration** | All CP versions | Advertised listeners added after quorum formed -- not affected by KMETA-2851 |
 
 **Single-Region Deployment** (works today):
@@ -481,8 +481,7 @@ MRC with dynamic quorum requires:
 2. `controller.quorum.bootstrap.servers` with all public DNS endpoints
 3. LoadBalancer external access on the controller listener
 
-**CP versions which have this fix**: 7.9.6 and 8.1.2.
-Note: 8.0.4 and 8.2.0 were shipped before this fix was merged.
+**CP versions which have this fix**: 7.9.6+, 8.1.2+, and the Q2 2026 patch line (8.0.5+, 8.2.1+, 8.3.0+). 8.0.0-8.0.4 and 8.2.0 shipped before the fix was merged.
 
 ---
 
@@ -543,23 +542,20 @@ spec:
 - **CP 7.9.6+** required for dynamic quorum during migration
 - **CP 7.9.0** has a bug where it formats KRaft with kraft.version=0 (static quorum). If you then try to do observer promotion, it crashes the observer and leader. Even converting the quorum from version 0 to 1 still has issues. Not recommended to use older patches for migration.
 
-**IBP Version Annotation** (CRITICAL):
-Must set on the Kafka CR before starting migration:
+**IBP Version**:
+The migration needs `inter.broker.protocol.version` at 3.9 (default 3.6 is incompatible with kraft.version=1). On standard CP images **CFK auto-infers this from the image tag** (CFK 7.0-7.9 → IBP 3.0-3.9) — you don't set it. The `platform.confluent.io/kraft-migration-ibp-version` annotation is only needed for custom images CFK can't map:
 ```yaml
 apiVersion: platform.confluent.io/v1beta1
 kind: Kafka
 metadata:
   annotations:
-    platform.confluent.io/kraft-migration-ibp-version: "3.9"  # MUST SET
+    platform.confluent.io/kraft-migration-ibp-version: "3.9"   # only for custom images
 spec:
   image:
     application: confluentinc/cp-server:7.9.6
 ```
 
-**Why**: Default IBP 3.6 is incompatible with kraft.version=1 (dynamic quorum). Without this annotation:
-- kraft.version cannot be finalized to 1
-- Direct-to-controller APIs blocked
-- Observer promotion fails
+If IBP stays below 3.9 (e.g. a custom image without the annotation), kraft.version can't finalize to 1, direct-to-controller APIs are blocked, and observer promotion fails.
 
 **Observer-to-Voter Promotion Timing** (promoting KRaft controllers from observer to voter):
 - Promote DURING DUAL_WRITE phase (before finalization)
