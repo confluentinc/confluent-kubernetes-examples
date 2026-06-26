@@ -5,7 +5,7 @@
 # (FlinkSecret -> FlinkKafkaCatalog -> FlinkKafkaDatabase -> FlinkComputePool ->
 # CREATE TABLE -> FlinkStatement). Run from this directory: ./setup.sh
 #
-# Mirrors Readme.md step for step. Two prerequisites the script does NOT paper over:
+# Mirrors README.md step for step. Two prerequisites the script does NOT paper over:
 #   1. Preview: needs a CFK build that ships `enableFlinkSQL` and a CMF build with the
 #      Flink SQL REST API. With the public chart this is not yet available.
 #   2. Cert generation needs `openssl`, `cfssl`/`cfssljson`, and `keytool` on PATH. The
@@ -176,7 +176,7 @@ fi
 
 echo ""
 echo "Setup complete. The chain is up; the pageviews topic starts empty, so the"
-echo "statement is RUNNING but emits nothing until rows arrive (see Readme.md, Step 6)."
+echo "statement is RUNNING but emits nothing until rows arrive (see README.md, Step 6)."
 echo "To reach the CMF REST API from your machine:"
 echo "  echo '127.0.0.1 confluent-manager-for-apache-flink.operator.svc.cluster.local' | sudo tee -a /etc/hosts"
 echo "  while true; do kubectl port-forward service/cmf-service 8080:80 -n operator; done"

@@ -133,9 +133,9 @@ helm upgrade --install cp-flink-kubernetes-operator confluentinc/flink-kubernete
     ```
     127.0.0.1       confluent-manager-for-apache-flink.operator.svc.cluster.local
     ```
-   then port-forward in a **separate terminal** (the loop reconnects on drop and blocks that terminal):
+   then port-forward in a **separate terminal**:
     ```bash
-    while true; do kubectl port-forward service/cmf-service 8080:80 -n operator; done
+    kubectl port-forward service/cmf-service 8080:80 -n operator
     ```
 
 ## Deploy CFK
@@ -145,6 +145,7 @@ Deploy CFK with both Day-2 flags so it reconciles the CMF and Flink SQL CRs:
 ```bash
 helm upgrade --install confluent-operator \
   confluentinc/confluent-for-kubernetes --version 0.1718.10 \
+  --namespace operator \
   --set enableCMFDay2Ops=true \
   --set enableFlinkSQL=true
 ```
