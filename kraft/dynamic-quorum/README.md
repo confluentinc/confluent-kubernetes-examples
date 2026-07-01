@@ -23,6 +23,9 @@ This document provides a comprehensive overview of the Dynamic KRaft feature ([K
 | **Auto-Join Dynamic Quorum** | CP 8.2+ | CFK 3.2+ | Simplifies observer promotion (no manual `add-controller`) |
 | **ZK → KRaft (Dynamic Quorum) Migration** | CP 7.9.6+ | CFK 3.2+ | Use CP 7.9 only — ZK is removed in CP 8.0+ |
 | **Static → Dynamic KRaft Migration** | CP 8.0+ | CFK 3.2+ | Works on all 8.0+ versions for both Single Region and MRC — not affected by the MRC advertised-listeners bug |
+| **KRaft controller scale-up (roll-free)** | CP 7.9+ (voter auto-join CP 8.2+) | **CFK 3.3+** | Increase `replicas` without rolling existing controllers/brokers; scale-down not supported |
+| **Auto-mounted admin `kafka-client.properties`** | — | **CFK 3.3+** | Admin CLI config mounted on kraft pods; pre-3.3 requires a manually built admin properties file |
+| **`kubectl confluent kraft` quorum-loss DR plugin** | — | **CFK 3.3+** | 2-click quorum-loss recovery (`log-length`/`recover-region`); pre-3.3 uses the manual DR procedure |
 
 
 Users must upgrade to **CFK 3.2+** to use dynamic quorum features. See [CFK upgrade documentation](https://docs.confluent.io/operator/current/co-upgrade.html).
@@ -33,11 +36,11 @@ Users must upgrade to **CFK 3.2+** to use dynamic quorum features. See [CFK upgr
 - All active CFK versions support KRaft static quorum deployment
 - **CFK 3.2+** adds dynamic quorum support and KRaft Migration Job (KMJ)
 - ZK → KRaft migration with dynamic quorum is only on CP 7.9.6+ (ZK removed in 8.0)
-- **KRaft controller scale-up is supported via CFK** (requires `dynamicQuorumConfig.enabled: true`). Increasing `KRaftController.spec.replicas` adds controllers without rolling the existing controllers or the Kafka brokers; on CP 8.2+ the new controllers auto-join the quorum as voters, and on CP < 8.2 they come up as observers that you promote manually with `kafka-metadata-quorum add-controller`. **Scale-down is not supported** — the operator rejects a `replicas` decrease, because a StatefulSet shrink drops the highest-ordinal pod regardless of voter status and could drop a live voter and lose quorum.
+- **KRaft controller scale-up is supported on CFK 3.3+** (requires `dynamicQuorumConfig.enabled: true`). Increasing `KRaftController.spec.replicas` adds controllers without rolling the existing controllers or the Kafka brokers; on CP 8.2+ the new controllers auto-join the quorum as voters, and on CP < 8.2 they come up as observers that you promote manually with `kafka-metadata-quorum add-controller`. **Scale-down is not supported** — the operator rejects a `replicas` decrease, because a StatefulSet shrink drops the highest-ordinal pod regardless of voter status and could drop a live voter and lose quorum.
 
 ### MRC Version Compatibility
 
-> Any MRC setup with dynamic quorum needs advertised listeners for cross-cluster communication. Defining them from initial cluster creation triggers a known CP registration-timeout bug, fixed in the versions below.
+> Any MRC setup with dynamic quorum needs advertised listeners for cross-cluster communication. Defining them from initial cluster creation triggers a known CP registration-timeout bug ([KAFKA-20247](https://issues.apache.org/jira/browse/KAFKA-20247)), fixed in the versions below.
 
 **Why advertised listeners are mandatory for dynamic MRC**: In **static quorum** MRC, `advertised.listeners` on KRaft controllers was not mandatory — `controller.quorum.voters` already carried all endpoints. In **dynamic quorum** MRC it **is** mandatory in the KRaft server properties: without it a KRaft controller sends its local in-cluster DNS to the others, which a controller in the other K8s cluster can't resolve, so it fails to join the quorum. (The `advertised.listeners` in the **client** properties file passed to `--command-config` is a separate thing and is unaffected — see [Troubleshooting](#45-troubleshooting-tips) item 3.)
 

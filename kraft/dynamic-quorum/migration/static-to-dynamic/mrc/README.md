@@ -17,7 +17,7 @@ Migrate a multi-region KRaft cluster from static quorum (`kraft.version=0`) to d
 | Component | Minimum Version | Notes |
 |-----------|----------------|-------|
 | **CFK** | 3.2+ | Dynamic quorum support |
-| **CP** | 8.0+ | Works on all CP 8.0+ versions. Not affected by the MRC advertised-listeners bug. |
+| **CP** | 8.0+ | Works on all CP 8.0+ versions. Not affected by the MRC advertised-listeners bug ([KAFKA-20247](https://issues.apache.org/jira/browse/KAFKA-20247)). |
 
 This migration path is not affected by the MRC advertised-listeners bug because advertised listeners are added in Step 1, after the quorum is already formed.
 

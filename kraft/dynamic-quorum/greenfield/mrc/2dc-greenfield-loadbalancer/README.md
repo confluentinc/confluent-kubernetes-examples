@@ -23,7 +23,7 @@ Deploy a greenfield multi-region KRaft cluster with dynamic quorum (`kraft.versi
 
 - Two Kubernetes clusters with cross-cluster networking (LoadBalancer + DNS)
 - CFK 3.2+ operator (will be deployed by the setup steps below)
-- A CP image with the MRC advertised-listeners fix: 7.9.6+, 8.0.5+, 8.1.2+, 8.2.1+, 8.3.0+. CP 8.0.0-8.0.4 and 8.2.0 are affected by the MRC advertised-listeners bug for MRC greenfield.
+- A CP image with the MRC advertised-listeners fix ([KAFKA-20247](https://issues.apache.org/jira/browse/KAFKA-20247)): 7.9.6+, 8.0.5+, 8.1.2+, 8.2.1+, 8.3.0+. CP 8.0.0-8.0.4 and 8.2.0 are affected by the MRC advertised-listeners bug for MRC greenfield.
 - `openssl` installed locally (for certificate generation)
 - `helm` installed (for operator deployment)
 - GCP Cloud DNS zone configured for the domain (or equivalent DNS provider)
