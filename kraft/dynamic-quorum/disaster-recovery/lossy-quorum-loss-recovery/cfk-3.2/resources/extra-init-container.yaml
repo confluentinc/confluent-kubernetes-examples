@@ -1,0 +1,76 @@
+# Pod overlay for the "saviour" init container.
+# Wrapped in a ConfigMap (key: pod-template.yaml) and referenced via annotation
+#   platform.confluent.io/pod-overlay-configmap-name=<configmap name>
+# on the KRaftController CR. Setting/removing the annotation triggers a roll.
+#
+# The saviour:
+#   - runs the cp-server image (so kafka-metadata-recovery + kafka CLIs are on PATH)
+#   - mounts the same data0 PVC the main kraft container uses
+#   - waits indefinitely for a sentinel file (/tmp/saviour-done). The recovery
+#     script `kubectl exec`s touch on the sentinel when ready to release the
+#     main container. There is no time cap by default; recovery can take as
+#     long as it needs. The command body documents how to add a cap if you
+#     want one.
+#
+# Why init container (not sidecar): kafka-metadata-recovery takes an exclusive
+# file lock on the metadata log dir. The main controller would also hold that
+# lock, so we must run while main is parked. Init containers must complete
+# before main starts, which is exactly the parking we need.
+#
+# Usage in disaster-recovery/quorum-loss/recover.sh:
+#   1. kubectl create configmap <region>-pod-overlay --from-file=pod-template.yaml=extra-init-container.yaml
+#   2. kubectl annotate kraftcontroller kraftcontroller \
+#        platform.confluent.io/pod-overlay-configmap-name=<region>-pod-overlay
+#   (operator must be started with --podoverlay-enabled=true)
+spec:
+  template:
+    spec:
+      # Force config-init-container to run BEFORE saviour. Without this,
+      # K8s strategic merge patch places saviour first by default, and saviour
+      # starts before pod-shared-workdir has been populated with kafka.properties.
+      # The "name: config-init-container" entry below the directive is an
+      # empty anchor — it must exist in the patch's initContainers list for
+      # $setElementOrder to reorder it. See the README for the experiment
+      # details (verified end-to-end 2026-05-19 on CFK / CP 7.9.6).
+      $setElementOrder/initContainers:
+        - name: config-init-container
+        - name: saviour
+      initContainers:
+        - name: config-init-container
+        - name: saviour
+          image: confluentinc/cp-server:8.1.2
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              echo "saviour: waiting for /tmp/saviour-done sentinel (no time cap)"
+              while [ ! -f /tmp/saviour-done ]; do
+                sleep 5
+              done
+              echo "saviour: sentinel observed, exiting cleanly"
+              # To add a safety cap (e.g. so a botched DR drill can't park a
+              # pod indefinitely), use a timer instead:
+              #   T0=$(date +%s); CAP_SECONDS=3600
+              #   while [ ! -f /tmp/saviour-done ]; do
+              #     if [ $(($(date +%s) - T0)) -gt $CAP_SECONDS ]; then
+              #       echo "saviour: cap reached, exiting"; exit 0
+              #     fi
+              #     sleep 5
+              #   done
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+          volumeMounts:
+            - mountPath: /mnt/data/data0
+              name: data0
+            # pod-shared-workdir is the emptyDir that config-init-container
+            # populates with the rendered kafka.properties (node.id, log.dirs,
+            # process.roles, controller.quorum.bootstrap.servers — everything
+            # kafka-metadata-recovery needs). Mount at the same path the main
+            # container uses so saviour can pass
+            #   --config /opt/confluentinc/etc/kafka/kafka.properties
+            # directly, no rebuilding.
+            - mountPath: /opt/confluentinc/etc/kafka
+              name: pod-shared-workdir

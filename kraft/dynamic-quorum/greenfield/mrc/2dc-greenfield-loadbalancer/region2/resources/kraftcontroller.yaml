@@ -1,6 +1,6 @@
 ---
 # KRaftController for Region 2 (East) - Greenfield with Dynamic Quorum (Observer)
-# Cluster: my-clusterdev
+# Cluster: rbadiani-dev
 # Namespace: east
 #
 # Observer: no bootstrapPod — joins existing quorum from Region 1
@@ -63,25 +63,25 @@ spec:
       externalAccess:
         type: loadBalancer
         loadBalancer:
-          domain: my-domain.example.com
+          domain: example.com
           brokerPrefix: kraft-east
 
   # Cross-Cluster Quorum Voters (used by dynamicQuorumConfig to generate bootstrap.servers)
   controllerQuorumVoters:
-    # Region 1 (central namespace on my-cluster) - 3 controllers
+    # Region 1 (central namespace on rbadiani-2) - 3 controllers
     - nodeId: 100
-      brokerEndpoint: kraft-central0.my-domain.example.com:9074
+      brokerEndpoint: kraft-central0.example.com:9074
     - nodeId: 101
-      brokerEndpoint: kraft-central1.my-domain.example.com:9074
+      brokerEndpoint: kraft-central1.example.com:9074
     - nodeId: 102
-      brokerEndpoint: kraft-central2.my-domain.example.com:9074
-    # Region 2 (east namespace on my-clusterdev) - 3 controllers
+      brokerEndpoint: kraft-central2.example.com:9074
+    # Region 2 (east namespace on rbadiani-dev) - 3 controllers
     - nodeId: 200
-      brokerEndpoint: kraft-east0.my-domain.example.com:9074
+      brokerEndpoint: kraft-east0.example.com:9074
     - nodeId: 201
-      brokerEndpoint: kraft-east1.my-domain.example.com:9074
+      brokerEndpoint: kraft-east1.example.com:9074
     - nodeId: 202
-      brokerEndpoint: kraft-east2.my-domain.example.com:9074
+      brokerEndpoint: kraft-east2.example.com:9074
 
   # Dynamic Quorum Configuration — observer (NO bootstrapPod, joins existing quorum)
   dynamicQuorumConfig:
@@ -90,12 +90,12 @@ spec:
   # MDS Kafka Cluster dependency for RBAC (OAuth auth to Kafka's MDS)
   dependencies:
     mdsKafkaCluster:
-      bootstrapEndpoint: kafka-east-rep.my-domain.example.com:9073
+      bootstrapEndpoint: kafka-east-rep.example.com:9073
       authentication:
         type: oauth
         jaasConfig:
           secretRef: oauth-jass
         oauthSettings:
-          tokenEndpointUri: http://keycloak.my-domain.example.com:8080/realms/sso_test/protocol/openid-connect/token
+          tokenEndpointUri: http://keycloak.example.com:8080/realms/sso_test/protocol/openid-connect/token
       tls:
         enabled: true

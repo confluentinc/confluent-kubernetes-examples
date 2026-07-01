@@ -10,8 +10,8 @@ Greenfield deployments start from scratch with no existing infrastructure. These
 
 | Example | Security | MRC | Description |
 |---------|----------|-----|-------------|
-| [Quickstart](./single-cluster/quickstart/) | None | No | Single-region, plaintext. Simplest way to try dynamic quorum. |
-| [Secured (LDAP RBAC)](./single-cluster/secured/) | TLS + SASL/PLAIN + LDAP RBAC | No | Single-region with full security stack. |
+| [Quickstart](./quickstart/) | None | No | Single-region, plaintext. Simplest way to try dynamic quorum. |
+| [Secured (LDAP RBAC)](./secured/) | TLS + SASL/PLAIN + LDAP RBAC | No | Single-region with full security stack. |
 | [MRC LoadBalancer (Secured)](./mrc/2dc-greenfield-loadbalancer/) | TLS + SASL/PLAIN + OAuth + RBAC | Yes | Two-datacenter MRC with LoadBalancer external access. |
 
 ### Key Concepts

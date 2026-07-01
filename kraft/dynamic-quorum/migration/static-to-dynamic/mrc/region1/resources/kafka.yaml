@@ -1,6 +1,6 @@
 ---
 # Kafka Cluster for Region 1 (Central)
-# Cluster: my-cluster
+# Cluster: rbadiani-2
 # Phase 0-3: voters only. Phase 4: force roll — CFK auto-generates bootstrap.servers from KRaft dependency
 #
 # Security: TLS (secretRef) + SASL/PLAIN on all listeners + RBAC with OAuth MDS (Keycloak)
@@ -41,7 +41,7 @@ spec:
       externalAccess:
         type: loadBalancer
         loadBalancer:
-          domain: my-domain.example.com
+          domain: example.com
           prefix: kafka-central-mds
           advertisedURL:
             enabled: true
@@ -49,8 +49,8 @@ spec:
       provider:
         oauth:
           configurations:
-            expectedIssuer: http://keycloak.my-domain.example.com:8080/realms/sso_test
-            jwksEndpointUri: http://keycloak.my-domain.example.com:8080/realms/sso_test/protocol/openid-connect/certs
+            expectedIssuer: http://keycloak.example.com:8080/realms/sso_test
+            jwksEndpointUri: http://keycloak.example.com:8080/realms/sso_test/protocol/openid-connect/certs
             subClaimName: client_id
     # Embedded REST proxy — OAuth auth for RBAC operations
     kafkaRest:
@@ -59,9 +59,9 @@ spec:
         oauth:
           secretRef: oauth-jass
           configuration:
-            tokenEndpointUri: http://keycloak.my-domain.example.com:8080/realms/sso_test/protocol/openid-connect/token
-            expectedIssuer: http://keycloak.my-domain.example.com:8080/realms/sso_test
-            jwksEndpointUri: http://keycloak.my-domain.example.com:8080/realms/sso_test/protocol/openid-connect/certs
+            tokenEndpointUri: http://keycloak.example.com:8080/realms/sso_test/protocol/openid-connect/token
+            expectedIssuer: http://keycloak.example.com:8080/realms/sso_test
+            jwksEndpointUri: http://keycloak.example.com:8080/realms/sso_test/protocol/openid-connect/certs
             subClaimName: client_id
 
   # Listeners for MRC — all secured with TLS + SASL/PLAIN
@@ -85,7 +85,7 @@ spec:
       externalAccess:
         type: loadBalancer
         loadBalancer:
-          domain: my-domain.example.com
+          domain: example.com
           brokerPrefix: kafka-central-ext
           bootstrapPrefix: kafka-central-ext
     # Replication listener (for inter-broker communication across clusters)
@@ -99,7 +99,7 @@ spec:
       externalAccess:
         type: loadBalancer
         loadBalancer:
-          domain: my-domain.example.com
+          domain: example.com
           brokerPrefix: kafka-central-rep
           bootstrapPrefix: kafka-central-rep
 
@@ -121,16 +121,16 @@ spec:
         jaasConfig:
           secretRef: oauth-jass
         oauthSettings:
-          tokenEndpointUri: http://keycloak.my-domain.example.com:8080/realms/sso_test/protocol/openid-connect/token
-          expectedIssuer: http://keycloak.my-domain.example.com:8080/realms/sso_test
-          jwksEndpointUri: http://keycloak.my-domain.example.com:8080/realms/sso_test/protocol/openid-connect/certs
+          tokenEndpointUri: http://keycloak.example.com:8080/realms/sso_test/protocol/openid-connect/token
+          expectedIssuer: http://keycloak.example.com:8080/realms/sso_test
+          jwksEndpointUri: http://keycloak.example.com:8080/realms/sso_test/protocol/openid-connect/certs
           subClaimName: client_id
 
   # Metrics reporter — must use public DNS (replication listener) so producer can
   # reach ALL brokers including cross-cluster ones. Internal DNS fails cross-cluster.
   metricReporter:
     enabled: true
-    bootstrapEndpoint: kafka-central-rep.my-domain.example.com:9072
+    bootstrapEndpoint: kafka-central-rep.example.com:9072
     authentication:
       type: plain
       jaasConfig:

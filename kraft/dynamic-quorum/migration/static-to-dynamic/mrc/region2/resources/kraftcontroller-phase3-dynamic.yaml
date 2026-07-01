@@ -54,34 +54,34 @@ spec:
       externalAccess:
         type: loadBalancer
         loadBalancer:
-          domain: my-domain.example.com
+          domain: example.com
           brokerPrefix: kraft-east
 
   controllerQuorumVoters:
     - nodeId: 100
-      brokerEndpoint: kraft-central0.my-domain.example.com:9074
+      brokerEndpoint: kraft-central0.example.com:9074
     - nodeId: 101
-      brokerEndpoint: kraft-central1.my-domain.example.com:9074
+      brokerEndpoint: kraft-central1.example.com:9074
     - nodeId: 102
-      brokerEndpoint: kraft-central2.my-domain.example.com:9074
+      brokerEndpoint: kraft-central2.example.com:9074
     - nodeId: 200
-      brokerEndpoint: kraft-east0.my-domain.example.com:9074
+      brokerEndpoint: kraft-east0.example.com:9074
     - nodeId: 201
-      brokerEndpoint: kraft-east1.my-domain.example.com:9074
+      brokerEndpoint: kraft-east1.example.com:9074
     - nodeId: 202
-      brokerEndpoint: kraft-east2.my-domain.example.com:9074
+      brokerEndpoint: kraft-east2.example.com:9074
 
   dynamicQuorumConfig:
     enabled: true
 
   dependencies:
     mdsKafkaCluster:
-      bootstrapEndpoint: kafka-east-rep.my-domain.example.com:9073
+      bootstrapEndpoint: kafka-east-rep.example.com:9073
       authentication:
         type: oauth
         jaasConfig:
           secretRef: oauth-jass
         oauthSettings:
-          tokenEndpointUri: http://keycloak.my-domain.example.com:8080/realms/sso_test/protocol/openid-connect/token
+          tokenEndpointUri: http://keycloak.example.com:8080/realms/sso_test/protocol/openid-connect/token
       tls:
         enabled: true
