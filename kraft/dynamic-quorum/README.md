@@ -529,7 +529,7 @@ kubectl logs kraftcontroller-0 -n central
     ```
     If you see this while bringing up a **dynamic-quorum MRC** cluster (advertised listeners present from initial creation), **you're on a CP version with the advertised-listeners bug**. **Root cause**: the initial `ControllerRegistration` RPC times out; `failedRPC` increments but `pendingRPC` is never reset, so every later attempt skips sending and the bootstrap voter never registers — the cluster is stuck. It triggers on any external-access type (`loadBalancer` or `staticForHostBasedRouting`): even with DNS pre-resolved, LB forwarding rules take seconds to provision, so the first RPC times out. **Fix**: use a CP version with the fix — **7.9.6+, 8.0.5+, 8.1.2+, 8.2.1+, or 8.3.0+** (affected: 7.9.5, 8.0.0-8.0.4, 8.1.1, 8.2.0). Background: [MRC Version Compatibility](#mrc-version-compatibility).
 
-11. **ZK→KRaft migration: do I need to set `kraft-migration-ibp-version`?** Not for standard CP images — CFK auto-infers the IBP (`inter.broker.protocol.version`) from the Kafka image tag (; CP 7.0-7.9 → IBP 3.0-3.9). The `platform.confluent.io/kraft-migration-ibp-version` annotation is only needed for **custom images** or CP versions CFK doesn't have a mapping for (it then errors and asks you to set it). If you do set it on a standard image, CFK ignores it (and warns if it disagrees with the derived value).
+11. **ZK→KRaft migration: do I need to set `kraft-migration-ibp-version`?** On **CFK 3.3.0+**: not for standard CP images — CFK auto-infers the IBP (`inter.broker.protocol.version`) from the Kafka image tag (CP 7.0-7.9 → IBP 3.0-3.9). The `platform.confluent.io/kraft-migration-ibp-version` annotation is then only needed for **custom images** or CP versions CFK doesn't have a mapping for (it errors and asks you to set it); if you set it on a standard image, CFK ignores it (and warns if it disagrees with the derived value). **On CFK earlier than 3.3.0 the annotation is mandatory** — auto-inference isn't available, so set `platform.confluent.io/kraft-migration-ibp-version` yourself (e.g. `"3.9"` for the dynamic-quorum migration).
 
 12. **Pod stuck `Pending` / `FailedAttachVolume … NotFound … Error 404 … disks/pvc-…` — the underlying cloud disk was deleted**: `reclaimPolicy: Retain` protects the PVC, not against a direct cloud-API disk deletion (e.g. a stray `delete_unattached_disks` job). Confirm with `gcloud compute disks list --filter="name=<pv-name>"` (empty = gone). Recovery — replace each lost PV with a fresh disk so pods can schedule, then the normal Observer→Voter promotion applies. You do **not** hand-craft PVs; you delete the orphan PVC/PV and let CFK recreate real ones (your storage class, not the `dummy` volumeClaimTemplate placeholder):
     ```bash
@@ -565,7 +565,7 @@ Two paths into dynamic quorum, each with a full worked example under [`migration
 Full examples: [`migration/zk-to-kraft/quickstart/`](migration/zk-to-kraft/quickstart/) and [`migration/zk-to-kraft/secured/`](migration/zk-to-kraft/secured/).
 
 - **CP version**: use **CP 7.9.6+**. CP 7.9.0 has a bug that formats KRaft at `kraft.version=0` (static); observer promotion then crashes the observer and the leader, and converting 0→1 afterward is unreliable. (ZK ships only in 7.9.x — it's removed in CP 8.0.)
-- **IBP**: no longer set by hand — CFK auto-infers `inter.broker.protocol.version` from the image; the `kraft-migration-ibp-version` annotation is only for custom images (see [Troubleshooting](#45-troubleshooting-tips) item 11).
+- **IBP**: on **CFK 3.3.0+** no longer set by hand — CFK auto-infers `inter.broker.protocol.version` from the image, and the `kraft-migration-ibp-version` annotation is only for custom images. On CFK earlier than 3.3.0 you must set the annotation manually (see [Troubleshooting](#45-troubleshooting-tips) item 11).
 - **Promote observers during the `DUAL_WRITE` phase** (`SETUP → MIGRATE → DUAL_WRITE → MoveToKRaftControllerOnly → FINALIZED`), before finalization — `kraft.version=1` is active then; promoting after finalization is too late.
 - **`add-controller` connects to an existing voter**, run from the observer pod (not to another observer). On secured clusters use the mounted client config, not `kafka.properties` ([Troubleshooting](#45-troubleshooting-tips) item 2).
 
@@ -607,6 +607,8 @@ For detailed disaster recovery procedures when more than half of KRaft controlle
 ## 8. References
 
 - **KIP-853**: Dynamic Controller Quorum (https://cwiki.apache.org/confluence/display/KAFKA/KIP-853)
-- **CFK Documentation**: playbooks/features/dynamic-quorum/
-- **MRC Setup**: playbooks/features/dynamic-quorum/greenfield/mrc/2dc-greenfield-loadbalancer/
-- **DR Scenarios**: playbooks/features/dynamic-quorum/disaster-recovery/
+- **CFK documentation**: [Confluent for Kubernetes docs](https://docs.confluent.io/operator/current/overview.html)
+- **Greenfield examples**: [`greenfield/`](greenfield/)
+- **MRC setup**: [`greenfield/mrc/2dc-greenfield-loadbalancer/`](greenfield/mrc/2dc-greenfield-loadbalancer/)
+- **Migration examples**: [`migration/`](migration/)
+- **DR scenarios**: [`disaster-recovery/`](disaster-recovery/)

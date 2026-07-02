@@ -212,7 +212,7 @@ kubectl get configmap kraftcontroller-dynamic-quorum -n confluent -o yaml | grep
 
 **add-controller fails**: Common mistake is connecting to a non-voter observer via `--bootstrap-controller localhost:9074`. Always point `--bootstrap-controller` to an existing voter's FQDN.
 
-**Direct-to-controller APIs blocked**: `UnsupportedVersionException`. Causes: CP 7.9.0 (upgrade to 7.9.6), IBP below 3.9 (auto-inferred from the image on standard CP; only an issue on a custom image without the annotation), or not yet in DUAL_WRITE phase.
+**Direct-to-controller APIs blocked**: `UnsupportedVersionException`. Causes: CP 7.9.0 (upgrade to 7.9.6), IBP below 3.9 (on CFK 3.3.0+ auto-inferred from the image on standard CP — only an issue on a custom image without the annotation, or on CFK < 3.3.0 where the annotation is required), or not yet in DUAL_WRITE phase.
 
 ### Reference: Setting Up a Test Cluster
 
@@ -245,12 +245,12 @@ kubectl wait --for=condition=platform.confluent.io/cluster-ready \
 
 #### Step 4: Deploy Kafka with ZooKeeper dependency
 
-**IBP version**: the migration needs `inter.broker.protocol.version` at 3.9 (default 3.6 is incompatible with `kraft.version=1`). On standard CP images **CFK auto-infers this from the image tag** — you don't set it. The `platform.confluent.io/kraft-migration-ibp-version` annotation is only needed for custom images CFK can't map:
+**IBP version**: the migration needs `inter.broker.protocol.version` at 3.9 (default 3.6 is incompatible with `kraft.version=1`). On **CFK 3.3.0+** with standard CP images **CFK auto-infers this from the image tag** — you don't set it; the `platform.confluent.io/kraft-migration-ibp-version` annotation is then only needed for custom images CFK can't map. On **CFK earlier than 3.3.0 the annotation is mandatory** (auto-inference isn't available) — set it yourself:
 
 ```yaml
 metadata:
   annotations:
-    platform.confluent.io/kraft-migration-ibp-version: "3.9"   # only for custom images
+    platform.confluent.io/kraft-migration-ibp-version: "3.9"   # required on CFK < 3.3.0; only for custom images on 3.3.0+
 ```
 
 ```bash
