@@ -10,8 +10,8 @@ metadata:
   labels:
     app: keycloak
   annotations:
-    # external-dns will create: keycloak.my-domain.example.com
-    external-dns.alpha.kubernetes.io/hostname: keycloak.my-domain.example.com
+    # external-dns will create: keycloak.example.com
+    external-dns.alpha.kubernetes.io/hostname: keycloak.example.com
 spec:
   type: LoadBalancer
   selector:

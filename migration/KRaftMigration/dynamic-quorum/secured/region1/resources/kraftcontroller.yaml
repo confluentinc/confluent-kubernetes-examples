@@ -1,0 +1,112 @@
+---
+# KRaftController for Region 1 (Central) - Dynamic Quorum
+# Cluster: <region1-cluster>, Namespace: central
+# Node IDs: 100-102 (bootstrapPod: 0 — this region bootstraps the quorum)
+#
+# Held until KRaftMigrationJob triggers it via kraft-migration-hold-krc-creation annotation.
+# Security: TLS (secretRef) + SASL/PLAIN on controller listener + RBAC
+apiVersion: platform.confluent.io/v1beta1
+kind: KRaftController
+metadata:
+  name: kraftcontroller
+  namespace: central
+  annotations:
+    platform.confluent.io/use-log4j1: "true"
+    platform.confluent.io/use-old-jetty9: "true"
+    platform.confluent.io/broker-id-offset: "100"
+    # Hold KRC creation until KRaftMigrationJob triggers it
+    platform.confluent.io/kraft-migration-hold-krc-creation: "true"
+spec:
+  replicas: 3
+  dataVolumeCapacity: 10Gi
+  storageClass:
+    name: standard-rwo
+
+  mountedVolumes:
+    volumes:
+      - name: admin-config
+        configMap:
+          name: kraft-admin-config
+    volumeMounts:
+      - name: admin-config
+        mountPath: /mnt/admin-config
+
+  image:
+    application: confluentinc/cp-server:7.9.6
+    init: confluentinc/confluent-init-container:3.2.0
+
+  tls:
+    secretRef: tls-kraftcontroller
+
+  authorization:
+    type: rbac
+    superUsers:
+      - User:kafka
+      - User:ssologin
+
+  listeners:
+    # Required for MRC: advertise LB public DNS so cross-cluster clients can reach this controller
+    advertisedListenersEnabled: true
+    controller:
+      tls:
+        enabled: true
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: credential
+      externalAccess:
+        type: loadBalancer
+        loadBalancer:
+          domain: example.com
+          brokerPrefix: kraft-central
+
+  # Cross-cluster quorum voters — required for MRC so observers can discover the quorum
+  controllerQuorumVoters:
+    # Region 1 (central) - 3 controllers
+    - nodeId: 100
+      brokerEndpoint: kraft-central0.example.com:9074
+    - nodeId: 101
+      brokerEndpoint: kraft-central1.example.com:9074
+    - nodeId: 102
+      brokerEndpoint: kraft-central2.example.com:9074
+    # Region 2 (east) - 3 controllers
+    - nodeId: 200
+      brokerEndpoint: kraft-east0.example.com:9074
+    - nodeId: 201
+      brokerEndpoint: kraft-east1.example.com:9074
+    - nodeId: 202
+      brokerEndpoint: kraft-east2.example.com:9074
+
+  # Dynamic quorum configuration (KIP-853)
+  dynamicQuorumConfig:
+    enabled: true
+    bootstrapPod: 0
+
+  # KRaft RBAC: reference Kafka's TOKEN listener (port 9073) via public DNS
+  # TOKEN listener is auto-created by CFK when MDS OAuth is enabled
+  dependencies:
+    mdsKafkaCluster:
+      bootstrapEndpoint: kafka-central-rep.example.com:9073
+      authentication:
+        type: oauth
+        jaasConfig:
+          secretRef: oauth-jass
+        oauthSettings:
+          tokenEndpointUri: http://keycloak.example.com:8080/realms/sso_test/protocol/openid-connect/token
+      tls:
+        enabled: true
+
+  # CP 7.9.6 doesn't support wildcard (*) for OAuth allowed URLs (CVE-2025-27817).
+  # CFK JVM template sets -Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=*
+  # configOverrides.jvm replaces the template value in the ConfigMap directly.
+  configOverrides:
+    jvm:
+      - "-Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=http://keycloak.example.com:8080/realms/sso_test/protocol/openid-connect/certs,http://keycloak.example.com:8080/realms/sso_test/protocol/openid-connect/token,http://keycloak.example.com:8080/"
+    # CFK bug: KMJ appends ZkNode to endpoint that already has /mrc chroot → /mrc/mrc
+    # This override fixes the double chroot. KMJ merges (doesn't replace) configOverrides.
+    server:
+      - "zookeeper.connect=zookeeper.central.svc.cluster.local:2182,zk-east.example.com:2182/mrc"
+
+  # Service account for ConfigMap updates (dynamic quorum bootstrap)
+  podTemplate:
+    serviceAccountName: kraftcontroller-sa

@@ -64,7 +64,7 @@ spec:
         args:
         - --source=service
         - --namespace=__REGION2_NS__
-        - --domain-filter=my-domain.example.com
+        - --domain-filter=example.com
         - --provider=google
         - --google-project=__PROJECT_ID__
         - --policy=sync

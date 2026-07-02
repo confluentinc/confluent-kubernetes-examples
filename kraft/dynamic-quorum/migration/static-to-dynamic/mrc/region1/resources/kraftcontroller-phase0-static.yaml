@@ -1,6 +1,6 @@
 ---
 # KRaftController for Region 1 (Central) - Phase 0: Static Quorum
-# Cluster: my-cluster
+# Cluster: <region1-cluster>
 # Namespace: central
 # kraft.version=0, no dynamicQuorumConfig
 # CFK generates controller.quorum.voters automatically from controllerQuorumVoters
@@ -57,38 +57,38 @@ spec:
       externalAccess:
         type: loadBalancer
         loadBalancer:
-          domain: my-domain.example.com
+          domain: example.com
           brokerPrefix: kraft-central
 
   # Cross-Cluster Quorum Voters (3+3 split, 6 total, quorum needs 4)
   controllerQuorumVoters:
-    # Region 1 (central namespace on my-cluster) - 3 controllers
+    # Region 1 (central namespace on <region1-cluster>) - 3 controllers
     - nodeId: 100
-      brokerEndpoint: kraft-central0.my-domain.example.com:9074
+      brokerEndpoint: kraft-central0.example.com:9074
     - nodeId: 101
-      brokerEndpoint: kraft-central1.my-domain.example.com:9074
+      brokerEndpoint: kraft-central1.example.com:9074
     - nodeId: 102
-      brokerEndpoint: kraft-central2.my-domain.example.com:9074
-    # Region 2 (east namespace on my-clusterdev) - 3 controllers
+      brokerEndpoint: kraft-central2.example.com:9074
+    # Region 2 (east namespace on <region2-cluster>) - 3 controllers
     - nodeId: 200
-      brokerEndpoint: kraft-east0.my-domain.example.com:9074
+      brokerEndpoint: kraft-east0.example.com:9074
     - nodeId: 201
-      brokerEndpoint: kraft-east1.my-domain.example.com:9074
+      brokerEndpoint: kraft-east1.example.com:9074
     - nodeId: 202
-      brokerEndpoint: kraft-east2.my-domain.example.com:9074
+      brokerEndpoint: kraft-east2.example.com:9074
 
   # KRaft RBAC: reference Kafka's TOKEN listener (port 9073) via public DNS
   # TOKEN listener is auto-created by CFK when MDS OAuth is enabled
   # Must use public DNS — MDS auth consumer discovers all brokers across regions
   dependencies:
     mdsKafkaCluster:
-      bootstrapEndpoint: kafka-central-rep.my-domain.example.com:9073
+      bootstrapEndpoint: kafka-central-rep.example.com:9073
       authentication:
         type: oauth
         jaasConfig:
           secretRef: oauth-jass
         oauthSettings:
-          tokenEndpointUri: http://keycloak.my-domain.example.com:8080/realms/sso_test/protocol/openid-connect/token
+          tokenEndpointUri: http://keycloak.example.com:8080/realms/sso_test/protocol/openid-connect/token
       tls:
         enabled: true
 
