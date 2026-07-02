@@ -1,6 +1,6 @@
 ---
 # Kafka with ZooKeeper dependency (pre-migration) for Region 2 (East)
-# Cluster: rbadiani-dev, Namespace: east
+# Cluster: <region2-cluster>, Namespace: east
 # Security: TLS (secretRef) + SASL/PLAIN + RBAC with OAuth MDS (Keycloak)
 apiVersion: platform.confluent.io/v1beta1
 kind: Kafka

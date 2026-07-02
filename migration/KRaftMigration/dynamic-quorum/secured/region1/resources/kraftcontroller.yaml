@@ -1,6 +1,6 @@
 ---
 # KRaftController for Region 1 (Central) - Dynamic Quorum
-# Cluster: rbadiani-2, Namespace: central
+# Cluster: <region1-cluster>, Namespace: central
 # Node IDs: 100-102 (bootstrapPod: 0 — this region bootstraps the quorum)
 #
 # Held until KRaftMigrationJob triggers it via kraft-migration-hold-krc-creation annotation.

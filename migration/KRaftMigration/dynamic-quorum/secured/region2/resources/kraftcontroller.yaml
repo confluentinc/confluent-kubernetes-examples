@@ -1,6 +1,6 @@
 ---
 # KRaftController for Region 2 (East) - Dynamic Quorum (Observer)
-# Cluster: rbadiani-dev, Namespace: east
+# Cluster: <region2-cluster>, Namespace: east
 # Node IDs: 200-202 (observer — joins quorum started by region1 bootstrapPod: 0)
 # clusterID must match region1 — set after region1 bootstrap completes
 #

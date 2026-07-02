@@ -76,7 +76,7 @@ The admin client speaks the "direct to controller" RPC path that requires a `met
 
 1. **No leader (quorum is currently lost).** No pod can answer the admin RPC. Verify by hitting JMX directly on any kraft pod:
    ```bash
-   kubectl exec <kraft-pod> -- curl -sk \
+   kubectl exec <kraft-pod> -n <ns> -- curl -sk \
      http://localhost:7777/jolokia/read/kafka.server:type=raft-metrics
    ```
    If `current-leader=-1` (or `current-state=unattached-voted` / `candidate`), the quorum is genuinely down. Run the quorum-loss-recovery procedure in [`disaster-recovery/`](disaster-recovery/).

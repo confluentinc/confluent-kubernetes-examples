@@ -1,6 +1,6 @@
 ---
 # KRaftController for Region 1 (Central) - Phase 0: Static Quorum
-# Cluster: rbadiani-2
+# Cluster: <region1-cluster>
 # Namespace: central
 # kraft.version=0, no dynamicQuorumConfig
 # CFK generates controller.quorum.voters automatically from controllerQuorumVoters
@@ -62,14 +62,14 @@ spec:
 
   # Cross-Cluster Quorum Voters (3+3 split, 6 total, quorum needs 4)
   controllerQuorumVoters:
-    # Region 1 (central namespace on rbadiani-2) - 3 controllers
+    # Region 1 (central namespace on <region1-cluster>) - 3 controllers
     - nodeId: 100
       brokerEndpoint: kraft-central0.example.com:9074
     - nodeId: 101
       brokerEndpoint: kraft-central1.example.com:9074
     - nodeId: 102
       brokerEndpoint: kraft-central2.example.com:9074
-    # Region 2 (east namespace on rbadiani-dev) - 3 controllers
+    # Region 2 (east namespace on <region2-cluster>) - 3 controllers
     - nodeId: 200
       brokerEndpoint: kraft-east0.example.com:9074
     - nodeId: 201

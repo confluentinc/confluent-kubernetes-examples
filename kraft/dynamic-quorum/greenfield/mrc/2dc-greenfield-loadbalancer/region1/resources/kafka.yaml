@@ -1,6 +1,6 @@
 ---
 # Kafka Cluster for Region 1 (Central)
-# Cluster: rbadiani-2
+# Cluster: <region1-cluster>
 # Greenfield deployment with full security
 #
 # Security: TLS (secretRef) + SASL/PLAIN on all listeners + RBAC with OAuth MDS (Keycloak)

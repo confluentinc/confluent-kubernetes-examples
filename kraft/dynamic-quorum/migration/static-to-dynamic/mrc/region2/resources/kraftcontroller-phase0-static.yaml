@@ -1,6 +1,6 @@
 ---
 # KRaftController for Region 2 (East) - Phase 0: Static Quorum
-# Cluster: rbadiani-dev
+# Cluster: <region2-cluster>
 # Namespace: east
 # kraft.version=0, no dynamicQuorumConfig
 #

@@ -1,6 +1,6 @@
 ---
 # KRaftController for Region 2 (East) - Greenfield with Dynamic Quorum (Observer)
-# Cluster: rbadiani-dev
+# Cluster: <region2-cluster>
 # Namespace: east
 #
 # Observer: no bootstrapPod — joins existing quorum from Region 1
@@ -68,14 +68,14 @@ spec:
 
   # Cross-Cluster Quorum Voters (used by dynamicQuorumConfig to generate bootstrap.servers)
   controllerQuorumVoters:
-    # Region 1 (central namespace on rbadiani-2) - 3 controllers
+    # Region 1 (central namespace on <region1-cluster>) - 3 controllers
     - nodeId: 100
       brokerEndpoint: kraft-central0.example.com:9074
     - nodeId: 101
       brokerEndpoint: kraft-central1.example.com:9074
     - nodeId: 102
       brokerEndpoint: kraft-central2.example.com:9074
-    # Region 2 (east namespace on rbadiani-dev) - 3 controllers
+    # Region 2 (east namespace on <region2-cluster>) - 3 controllers
     - nodeId: 200
       brokerEndpoint: kraft-east0.example.com:9074
     - nodeId: 201

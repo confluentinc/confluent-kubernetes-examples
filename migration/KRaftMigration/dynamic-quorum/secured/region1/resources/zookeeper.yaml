@@ -1,6 +1,6 @@
 ---
 # ZooKeeper for Region 1 (Central)
-# Cluster: rbadiani-2, Namespace: central
+# Cluster: <region1-cluster>, Namespace: central
 # MRC: 3 central + 2 east = 5 total (odd, required for ZK quorum)
 # Security: TLS (secretRef) + Digest authentication
 apiVersion: platform.confluent.io/v1beta1

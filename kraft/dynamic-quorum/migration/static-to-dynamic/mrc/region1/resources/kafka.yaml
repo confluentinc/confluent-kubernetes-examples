@@ -1,6 +1,6 @@
 ---
 # Kafka Cluster for Region 1 (Central)
-# Cluster: rbadiani-2
+# Cluster: <region1-cluster>
 # Phase 0-3: voters only. Phase 4: force roll — CFK auto-generates bootstrap.servers from KRaft dependency
 #
 # Security: TLS (secretRef) + SASL/PLAIN on all listeners + RBAC with OAuth MDS (Keycloak)
