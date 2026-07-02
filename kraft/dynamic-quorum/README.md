@@ -160,11 +160,11 @@ kafka-storage format \
   --no-initial-controllers
 ```
 
-**Key Difference**: Only the **bootstrap controller** it voter initially and thus also becomes leader. Then all the observer join and eventually get promoted to voters vs in static quorum all are voters and thus anyone can become the leader in begining
+**Key Difference**: Only the **bootstrap controller** is a voter initially and thus also becomes leader. The other controllers join as observers and are eventually promoted to voters — in static quorum, by contrast, all controllers are voters and any of them can become leader from the beginning.
 
 #### Advertised Listeners
 
-**Static KRaft**: Here we didnt need to define this `advertised.listeners` property. It uses the `controller.quorum.voters=100@kraft-central0.example.com:9093,101@kraft-central1.example.com:9093,102@kraft-central2.example.com:9093,200@kraft-east0.example.com:9093,201@kraft-east1.example.com:9093` to figure out the advertised listeners.
+**Static KRaft**: Here we didn't need to define this `advertised.listeners` property. It uses the `controller.quorum.voters=100@kraft-central0.example.com:9093,101@kraft-central1.example.com:9093,102@kraft-central2.example.com:9093,200@kraft-east0.example.com:9093,201@kraft-east1.example.com:9093` to figure out the advertised listeners.
 
 **Dynamic KRaft**:
 Here we need to define `advertised.listeners` in MRC clusters. (If the cluster is limited to single region then no need as kraft/kafka can resolve each others internal k8s dns.)
@@ -178,7 +178,7 @@ advertised.listeners=CONTROLLER://kraft-east1.example.com:9074 #pod5
 advertised.listeners=CONTROLLER://kraft-east2.example.com:9074 #pod6
 ```
 
-This is because here it doesnt use `controller.quorum.bootstrap.servers` property to pick advertised listeners. `controller.quorum.bootstrap.servers=kraft-central0.example.com:9074,kraft-central1.example.com:9074,kraft-central2.example.com:9074,kraft-east0.example.com:9074,kraft-east1.example.com:9074`
+This is because here it doesn't use `controller.quorum.bootstrap.servers` property to pick advertised listeners. `controller.quorum.bootstrap.servers=kraft-central0.example.com:9074,kraft-central1.example.com:9074,kraft-central2.example.com:9074,kraft-east0.example.com:9074,kraft-east1.example.com:9074`
 
 ### Checking Quorum Mode
 

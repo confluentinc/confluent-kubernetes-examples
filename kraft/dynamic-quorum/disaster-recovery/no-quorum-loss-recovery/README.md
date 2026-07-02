@@ -2,7 +2,7 @@
 
 One region fails but the survivors still hold a **majority of KRaft voters** — quorum is intact, the controller still elects a leader and accepts metadata writes. Recovery is a simple `remove-controller` → (region returns) → `add-controller`; **no `kafka-metadata-recovery`, no pod overlay, no data-loss risk.** If quorum is actually *lost*, use [`quorum-loss-recovery/`](../quorum-loss-recovery/) (data-safe 2DC) or [`lossy-quorum-loss-recovery/`](../lossy-quorum-loss-recovery/) (lossy 2.5DC) instead.
 
-> **⚠ This example targets 2.5DC 2-2-1.** Shrink-to-3 only makes sense for the tiebreaker-augmented layout, where dropping `5 → 3 voters` cuts `needed` from 3 to 2 and restores headroom. In 2DC 3-3 there's no shrink scenario: losing 1 pod is still healthy, losing 2 leaves quorum but shrinking opens the asymmetric-durability hole, and losing 3 (a full DC) is already quorum-lost. To run this, **deploy a dynamic-quorum cluster in the 2.5DC 2-2-1 layout** (adapt the greenfield MRC example, [`../../../greenfield/mrc/`](../../../greenfield/mrc/)).
+> **⚠ This example targets 2.5DC 2-2-1.** Shrink-to-3 only makes sense for the tiebreaker-augmented layout, where dropping `5 → 3 voters` cuts `needed` from 3 to 2 and restores headroom. In 2DC 3-3 there's no shrink scenario: losing 1 pod is still healthy, losing 2 leaves quorum but shrinking opens the asymmetric-durability hole, and losing 3 (a full DC) is already quorum-lost. To run this, **deploy a dynamic-quorum cluster in the 2.5DC 2-2-1 layout** (adapt the greenfield MRC example, [`../../greenfield/mrc/`](../../greenfield/mrc/)).
 
 ## Topology
 

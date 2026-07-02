@@ -111,7 +111,7 @@ kubectl exec kraftcontroller-0 -n confluent -- \
 Apply KRaftController with `dynamicQuorumConfig.enabled: true`. CFK generates `controller.quorum.bootstrap.servers` (replacing the static `controller.quorum.voters`). This triggers a rolling restart of KRaft controllers.
 
 ```bash
-kubectl apply -f $TUTORIAL_HOME/resources/kraftcontroller-phase2-dynamic.yaml -n confluent
+kubectl apply -f $TUTORIAL_HOME/resources/kraftcontroller-phase3-dynamic.yaml -n confluent
 
 kubectl wait --for=condition=platform.confluent.io/cluster-ready \
     kraftcontroller/kraftcontroller -n confluent --timeout=10m
@@ -257,5 +257,5 @@ kubectl delete namespace confluent
 | File | Description |
 |------|-------------|
 | `resources/kraftcontroller-phase0-static.yaml` | Static quorum, no dynamicQuorumConfig |
-| `resources/kraftcontroller-phase2-dynamic.yaml` | dynamicQuorumConfig enabled |
+| `resources/kraftcontroller-phase3-dynamic.yaml` | dynamicQuorumConfig enabled |
 | `resources/kafka.yaml` | Kafka brokers (unchanged throughout migration) |
