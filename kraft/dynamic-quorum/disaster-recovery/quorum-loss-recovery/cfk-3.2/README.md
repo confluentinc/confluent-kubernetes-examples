@@ -181,6 +181,6 @@ For the data-safe case the scale-to-zero path above is recommended — fewer mov
 ## References
 
 - **Adapt, don't run as-is.** These commands are tied to specific region names, contexts, and voter IDs; set your own contexts, namespaces, and credentials as environment variables. See the DR README's [procedural-reference note](../../README.md#this-is-a-procedural-reference-not-a-copy-paste-runbook) for how to adapt them, and keep an adapted copy ready before an incident. The conceptual flow (sidecar → log-length → force-standalone on the most up-to-date survivor — **largest epoch, then offset** — → observer rejoin → `add-controller`) is topology-independent.
-- **Underlying-disk-deleted** edge case during restore → [Troubleshooting item 12](../../../README.md#47-troubleshooting-tips) in the main dynamic-quorum README.
+- **Underlying-disk-deleted** edge case during restore → [deleted-disk recovery](../../../TROUBLESHOOTING.md#disk-deleted) in the main dynamic-quorum README.
 - **Public references:** [KIP-853](https://cwiki.apache.org/confluence/display/KAFKA/KIP-853%3A+KRaft+Controller+Membership+Changes).
 - **In-repo concepts:** [`FAULT_TOLERANCE.md`](../../../FAULT_TOLERANCE.md) · [`ack-semantics.md`](../../../ack-semantics.md) · [`topology-guides/2dc.md`](../../../topology-guides/2dc.md) · [`choosing-a-topology.md`](../../../choosing-a-topology.md) · [`pod-and-replica-placement.md`](../../../pod-and-replica-placement.md).

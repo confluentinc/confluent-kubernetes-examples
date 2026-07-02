@@ -67,7 +67,7 @@ Phase 2 restores N-voter resilience and is **not urgent**.
 All the gotchas from the [canonical README](../../quorum-loss-recovery/cfk-3.2/README.md#gotchas)
 apply (sidecar-only-on-reachable-region, `--podoverlay-enabled`, element-ordering fix,
 controller-must-be-down, narrow move scope, CP<8.2 no auto-join, stale overlay annotation,
-PVC-race), as does the underlying-disk-deleted edge case ([main README troubleshooting item 12](../../../README.md#47-troubleshooting-tips)).
+PVC-race), as does the underlying-disk-deleted edge case ([deleted-disk recovery](../../../TROUBLESHOOTING.md#disk-deleted)).
 One is lossy-specific:
 
 - **Split-brain hazard on dead-region return.** If a dead region's kraft pods come back with

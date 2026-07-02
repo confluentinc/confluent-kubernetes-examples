@@ -42,7 +42,7 @@ Users must upgrade to **CFK 3.2+** to use dynamic quorum features. See [CFK upgr
 
 > Any MRC setup with dynamic quorum needs advertised listeners for cross-cluster communication. Defining them from initial cluster creation triggers a known CP registration-timeout bug ([KAFKA-20247](https://issues.apache.org/jira/browse/KAFKA-20247)), fixed in the versions below.
 
-**Why advertised listeners are mandatory for dynamic MRC**: In **static quorum** MRC, `advertised.listeners` on KRaft controllers was not mandatory — `controller.quorum.voters` already carried all endpoints. In **dynamic quorum** MRC it **is** mandatory in the KRaft server properties: without it a KRaft controller sends its local in-cluster DNS to the others, which a controller in the other K8s cluster can't resolve, so it fails to join the quorum. (The `advertised.listeners` in the **client** properties file passed to `--command-config` is a separate thing and is unaffected — see [Troubleshooting](#45-troubleshooting-tips) item 3.)
+**Why advertised listeners are mandatory for dynamic MRC**: In **static quorum** MRC, `advertised.listeners` on KRaft controllers was not mandatory — `controller.quorum.voters` already carried all endpoints. In **dynamic quorum** MRC it **is** mandatory in the KRaft server properties: without it a KRaft controller sends its local in-cluster DNS to the others, which a controller in the other K8s cluster can't resolve, so it fails to join the quorum. (The `advertised.listeners` in the **client** properties file passed to `--command-config` is a separate thing and is unaffected — see [Troubleshooting](TROUBLESHOOTING.md#advertised-listeners-command-config).)
 
 Which CP versions work, by deployment path:
 
@@ -53,7 +53,7 @@ Which CP versions work, by deployment path:
 | **MRC Static→Dynamic Migration** (advertised listeners added after quorum formed) | No | All CP 8.0+ |
 | **Single-cluster** (no advertised listeners) | No | All CP versions |
 
-The static→dynamic migration path avoids the bug because advertised listeners are added **after** the quorum is already formed — the bug only triggers when they're present at initial pod startup. If you hit the registration-timeout symptom on MRC greenfield, you're on an affected CP version — see [Troubleshooting](#45-troubleshooting-tips) item 10.
+The static→dynamic migration path avoids the bug because advertised listeners are added **after** the quorum is already formed — the bug only triggers when they're present at initial pod startup. If you hit the registration-timeout symptom on MRC greenfield, you're on an affected CP version — see [Troubleshooting](TROUBLESHOOTING.md#mrc-greenfield-hang).
 
 ## 1. Why is Dynamic KRaft Needed?
 
@@ -413,7 +413,7 @@ controller.quorum.auto.join.enable=true  # CP 8.2+ only
 - Version detection can fail with custom images (e.g. ones with added diagnostic tools).
 - CFK doesn't currently expose an explicit toggle; a future enhancement may add `autoJoin: true/false` to the CRD spec.
 
-See [Troubleshooting](#45-troubleshooting-tips) item 9 for the `remove-controller` + auto-join interaction.
+See [Troubleshooting](TROUBLESHOOTING.md#remove-controller-auto-join) for the `remove-controller` + auto-join interaction.
 
 ### 4.4 Greenfield Quick Reference
 
@@ -438,122 +438,9 @@ Single-cluster vs MRC differences:
 
 MRC additionally hits the [MRC advertised-listeners bug](#mrc-version-compatibility) — see that section for supported CP versions. Full worked example: [`greenfield/mrc/2dc-greenfield-loadbalancer/`](greenfield/mrc/2dc-greenfield-loadbalancer/).
 
-### 4.5 Troubleshooting Tips
+### 4.5 Troubleshooting
 
-**Check Bootstrap Status**:
-```bash
-kubectl get cm kraftcontroller-dynamic-quorum -n central -o yaml
-```
-
-**Check Main Container Logs** (bootstrap tool runs in the main container's configure script, not the init container):
-```bash
-kubectl logs kraftcontroller-0 -n central
-```
-
-**Common Issues**:
-
-1. **Kafka CLI tool OutOfMemoryError (Java heap space)**:
-   If any `kafka-*` CLI tool (e.g. `kafka-metadata-quorum`, `kafka-features`) crashes with:
-   ```
-   ERROR Uncaught exception in thread 'kafka-admin-client-thread | adminclient-1'
-   java.lang.OutOfMemoryError: Java heap space
-   ```
-   **The most common cause is missing security configuration**, not insufficient heap. When the CLI cannot authenticate with the KRaft controller (e.g., missing `--command-config` with SSL/SASL properties), it retries internally and leaks memory until it hits the default 256MB ceiling. Increasing heap with `KAFKA_HEAP_OPTS="-Xmx512m"` only delays the crash — the real fix is providing the correct `--command-config` properties file. On CFK 3.3+ that's the mounted `/opt/confluentinc/etc/kafka/kafka-client.properties`; on older versions see [Running Admin CLI Tools on Secured KRaft](admin-cli-on-secured-kraft.md).
-
-   If you are certain the security config is correct and the OOM is genuine (e.g., large metadata on a plaintext cluster), then increase heap:
-   ```bash
-   KAFKA_HEAP_OPTS="-Xmx512m" kafka-metadata-quorum ...
-   ```
-
-2. **`add-controller` / admin CLI properties file** <a name="add-controller-properties-file"></a>:
-
-   `kafka.properties` cannot be used directly as `--command-config` for `kafka-metadata-quorum` or `kafka-features` on secured clusters. It only contains **listener-level** security properties (e.g., `listener.name.controller.ssl.truststore.location`, `listener.name.controller.plain.sasl.jaas.config`), which the admin client ignores. Admin CLI tools are Kafka clients — they need **global-level** properties (`ssl.truststore.location`, `sasl.jaas.config`, `security.protocol`, etc.). With listener-prefixed-only config the client has effectively no security config and fails with a `TimeoutException` or `OutOfMemoryError` (the underlying Kafka error is unhelpfully generic, which is why this gotcha exists).
-
-   **On CFK 3.3+ you don't build this file yourself.** The operator generates and mounts `/opt/confluentinc/etc/kafka/kafka-client.properties` on every KRaft pod — it's `kafka.properties` plus the global `security.protocol` / `sasl.*` / `ssl.*` overlay and a fallback `advertised.listeners`, so it works as `--command-config` as-is (including for `add-controller`, which also needs `node.id`, `process.roles`, `log.dirs`, `advertised.listeners`):
-   ```bash
-   kafka-metadata-quorum --command-config /opt/confluentinc/etc/kafka/kafka-client.properties \
-     --bootstrap-controller localhost:9074 describe --replication
-   ```
-   Only on older CFK versions that don't mount this file do you build one by hand — see [Running Admin CLI Tools on Secured KRaft](admin-cli-on-secured-kraft.md) (kept as a fallback).
-
-3. **`advertised.listeners` missing/empty in the `--command-config` file** (two symptoms, same root cause):
-
-   When you run `add-controller`, the leader reads the new voter's endpoint from the `advertised.listeners` in the properties file you pass via `--command-config`. If that file has no `advertised.listeners`, or has the empty-host form `CONTROLLER://:9074`, it misbehaves:
-
-   - **`No subject alternative DNS name matching localhost found`** — the empty host resolves to `localhost`, so the leader tries to connect back to its **own** localhost (not the new voter's pod); the leader's cert has a different FQDN as SAN, so the SSL handshake fails.
-   - **`Voter key for VOTE or BEGIN_QUORUM_EPOCH request didn't match the receiver's replica key` spam** — a bug in the `kafka-metadata-quorum` CLI (not the controller): with no `advertised.listeners` in the command-config, the leader spams this. If you already hit it and the quorum is otherwise formed, **kill the leader pod once** — the stale CLI state doesn't survive a restart.
-
-   Fix: set `advertised.listeners=CONTROLLER://<real-fqdn>:9074` in the **client properties file** passed via `--command-config`. This is separate from `advertisedListenersEnabled` in the KRaftController CR spec — the CR spec controls the KRaft **server** properties and is only needed for MRC (cross-cluster DNS resolution, where the [MRC advertised-listeners bug](#mrc-version-compatibility) comes into play). On CFK 3.3+ the mounted `kafka-client.properties` already carries a usable `advertised.listeners`. **CP 8.2+ avoids both symptoms entirely** — with `controller.quorum.auto.join.enable=true`, observer-to-voter promotion happens automatically and never invokes the CLI.
-
-4. **SSL endpoint identification and cert SANs**:
-
-   CFK auto-generated certs include the pod FQDN (`<pod>.<statefulset>.<namespace>.svc.cluster.local`) as a SAN, not `localhost`. So:
-   - `--bootstrap-controller localhost:9074` → cert SAN mismatch → SSL fails
-   - `--bootstrap-controller <pod-fqdn>:9074` → matches SAN → works without disabling endpoint identification
-
-   Do not disable `ssl.endpoint.identification.algorithm` — use the FQDN in `--bootstrap-controller` instead.
-
-5. **Init container stuck**: Check RBAC permissions. The init container (bootstrap pod only) must be able to update the dynamic-quorum bootstrap ConfigMap. Replace `<namespace>` and `<service-account-name>` with your KRaftController namespace and `spec.podTemplate.serviceAccountName` (e.g. `central` and `kraftcontroller-sa` in the playbooks).
-   ```bash
-   kubectl auth can-i update configmaps --as=system:serviceaccount:<namespace>:<service-account-name> -n <namespace>
-   ```
-   Example (playbook default):
-   ```bash
-   kubectl auth can-i update configmaps --as=system:serviceaccount:central:kraftcontroller-sa -n central
-   ```
-
-6. **Cluster ID mismatch**: In MRC you must pass the cluster ID in the specs. If you don't, the second region generates its own cluster ID and acts as a separate cluster instead of a second region of the MRC cluster. Check in the KRaftController CR status or in the `meta.properties` file.
-  ```bash
-   # Verify cluster IDs match across all controllers
-   for i in 0 1 2; do
-     echo "kraftcontroller-$i:"
-     kubectl exec kraftcontroller-$i -n central -- \
-       cat /var/lib/kafka/data/meta.properties | grep cluster.id
-   done
-   ```
-
-7. **Bootstrap ConfigMap has `bootstrap_formatted: true` too early → setup stuck with zero voters**: If the `kraftcontroller-dynamic-quorum` ConfigMap reads `true` before the bootstrap pod has actually formatted (e.g. it was hand-edited, or carried over from a previous cluster), the bootstrap pod formats with `--no-initial-controllers` (rejoin mode) instead of `--standalone` (bootstrap mode) → no initial voter is created → setup hangs. Recovery: delete the bootstrap pod's PVC (it goes `Pending`), then delete the bootstrap pod. On restart the PVC is recreated, the volume formats with `--standalone`, and the pod becomes the leader as intended.
-
-8. **`advertisedListeners` changes don't auto-roll the controllers**: CFK deliberately does **not** roll pods when the `init-config` ConfigMap changes — init-config holds per-pod metadata (`node.id`, `log.dirs`, `process.roles`) not expected to change at runtime, so the operator only rolls on `shared-config` changes (TLS, SASL, quorum config, JVM, etc.). `advertised.listeners` is the exception: it lives in init-config (it's pod-specific) but **does** need a restart to take effect in `kafka.properties`. So after adding/changing external access / `advertisedListeners` on a running cluster, the operator updates `init-config` but the pods do **not** restart on their own. Trigger an operator-managed rolling restart by bumping a pod-template annotation (do **not** patch the StatefulSet directly — the operator overwrites it):
-   ```bash
-   kubectl patch kraftcontroller kraftcontroller -n <namespace> --type=merge \
-     -p '{"spec":{"podTemplate":{"annotations":{"kafkacluster-manual-roll":"2"}}}}'
-   ```
-   Increment the value (`"2"` → `"3"`) each time you need another roll.
-
-9. **`remove-controller` has no lasting effect with auto-join (CP 8.2+)**: with `controller.quorum.auto.join.enable=true` (default on CP 8.2+), running `remove-controller` on a controller whose pod is still running does nothing permanent — the controller re-joins as an observer and promotes itself back to voter. `remove-controller` only sticks if the target pod is **stopped** (scaled down, deleted, or crashed) or auto-join is disabled. To test it manually, stop the removed controller's pod immediately after removal. This is the desired production behavior — auto-join provides automatic recovery from transient controller failures.
-
-10. **MRC greenfield startup hangs with `channel manager timed out before sending the request` (advertised-listeners bug)**:
-    ```
-    [ControllerRegistrationManager id=100] RegistrationResponseHandler: channel manager timed out before sending the request
-    ```
-    If you see this while bringing up a **dynamic-quorum MRC** cluster (advertised listeners present from initial creation), **you're on a CP version with the advertised-listeners bug**. **Root cause**: the initial `ControllerRegistration` RPC times out; `failedRPC` increments but `pendingRPC` is never reset, so every later attempt skips sending and the bootstrap voter never registers — the cluster is stuck. It triggers on any external-access type (`loadBalancer` or `staticForHostBasedRouting`): even with DNS pre-resolved, LB forwarding rules take seconds to provision, so the first RPC times out. **Fix**: use a CP version with the fix — **7.9.6+, 8.0.5+, 8.1.2+, 8.2.1+, or 8.3.0+** (affected: 7.9.5, 8.0.0-8.0.4, 8.1.1, 8.2.0). Background: [MRC Version Compatibility](#mrc-version-compatibility).
-
-11. **ZK→KRaft migration: do I need to set `kraft-migration-ibp-version`?** On **CFK 3.3.0+**: not for standard CP images — CFK auto-infers the IBP (`inter.broker.protocol.version`) from the Kafka image tag (CP 7.0-7.9 → IBP 3.0-3.9). The `platform.confluent.io/kraft-migration-ibp-version` annotation is then only needed for **custom images** or CP versions CFK doesn't have a mapping for (it errors and asks you to set it); if you set it on a standard image, CFK ignores it (and warns if it disagrees with the derived value). **On CFK earlier than 3.3.0 the annotation is mandatory** — auto-inference isn't available, so set `platform.confluent.io/kraft-migration-ibp-version` yourself (e.g. `"3.9"` for the dynamic-quorum migration).
-
-12. **Pod stuck `Pending` / `FailedAttachVolume … NotFound … Error 404 … disks/pvc-…` — the underlying cloud disk was deleted**: `reclaimPolicy: Retain` protects the PVC, not against a direct cloud-API disk deletion (e.g. a stray `delete_unattached_disks` job). Confirm with `gcloud compute disks list --filter="name=<pv-name>"` (empty = gone). Recovery — replace each lost PV with a fresh disk so pods can schedule, then the normal Observer→Voter promotion applies. You do **not** hand-craft PVs; you delete the orphan PVC/PV and let CFK recreate real ones (your storage class, not the `dummy` volumeClaimTemplate placeholder):
-    ```bash
-    CTX=<region-ctx>;  REGION=<region>
-    # 1. Force-delete the stuck pods.
-    kubectl --context $CTX delete pod -n $REGION --grace-period=0 --force kafka-0 kafka-1 kraftcontroller-0 kraftcontroller-1
-    # 2. Delete the orphan PVCs (strip the pvc-protection finalizer if they hang).
-    kubectl --context $CTX delete pvc -n $REGION data0-kafka-0 data0-kafka-1 data0-kraftcontroller-0 data0-kraftcontroller-1 --timeout=10s || true
-    for p in data0-kafka-0 data0-kafka-1 data0-kraftcontroller-0 data0-kraftcontroller-1; do
-      kubectl --context $CTX patch pvc $p -n $REGION -p '{"metadata":{"finalizers":null}}'
-    done
-    # 3. Delete the orphan PVs (they reference disks that no longer exist).
-    for pv in <orphan-pv-names>; do
-      kubectl --context $CTX delete pv $pv --timeout=10s || true
-      kubectl --context $CTX patch pv $pv -p '{"metadata":{"finalizers":null}}'
-    done
-    # 4. Re-delete the pods, then scale the STS to 0 and back so CFK creates real PVCs bound to fresh PVs.
-    kubectl --context $CTX delete pod -n $REGION --grace-period=0 --force kafka-0 kafka-1 kraftcontroller-0 kraftcontroller-1
-    kubectl --context $CTX scale statefulset kafka -n $REGION --replicas=0
-    kubectl --context $CTX scale statefulset kafka -n $REGION --replicas=2
-    ```
-    (Validated 2026-05-07: PVCs deleted, fresh PVs auto-provisioned, pods came up empty, fetched from the leader, promoted via `add-controller` — no manual disk creation.)
-
-
+Common issues — admin-CLI / `--command-config` gotchas, SSL cert SANs, bootstrap RBAC, cluster-ID mismatch, `bootstrap_formatted` pitfalls, `advertisedListeners` / MRC startup problems, IBP for migration, and storage/PVC recovery — are collected in **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)**.
 ---
 
 ## 5. Migration
@@ -565,9 +452,9 @@ Two paths into dynamic quorum, each with a full worked example under [`migration
 Full examples: [`migration/zk-to-kraft/quickstart/`](migration/zk-to-kraft/quickstart/) and [`migration/zk-to-kraft/secured/`](migration/zk-to-kraft/secured/).
 
 - **CP version**: use **CP 7.9.6+**. CP 7.9.0 has a bug that formats KRaft at `kraft.version=0` (static); observer promotion then crashes the observer and the leader, and converting 0→1 afterward is unreliable. (ZK ships only in 7.9.x — it's removed in CP 8.0.)
-- **IBP**: on **CFK 3.3.0+** no longer set by hand — CFK auto-infers `inter.broker.protocol.version` from the image, and the `kraft-migration-ibp-version` annotation is only for custom images. On CFK earlier than 3.3.0 you must set the annotation manually (see [Troubleshooting](#45-troubleshooting-tips) item 11).
+- **IBP**: on **CFK 3.3.0+** no longer set by hand — CFK auto-infers `inter.broker.protocol.version` from the image, and the `kraft-migration-ibp-version` annotation is only for custom images. On CFK earlier than 3.3.0 you must set the annotation manually (see [Troubleshooting](TROUBLESHOOTING.md#ibp-migration)).
 - **Promote observers during the `DUAL_WRITE` phase** (`SETUP → MIGRATE → DUAL_WRITE → MoveToKRaftControllerOnly → FINALIZED`), before finalization — `kraft.version=1` is active then; promoting after finalization is too late.
-- **`add-controller` connects to an existing voter**, run from the observer pod (not to another observer). On secured clusters use the mounted client config, not `kafka.properties` ([Troubleshooting](#45-troubleshooting-tips) item 2).
+- **`add-controller` connects to an existing voter**, run from the observer pod (not to another observer). On secured clusters use the mounted client config, not `kafka.properties` ([Troubleshooting](TROUBLESHOOTING.md#admin-cli-command-config)).
 
 ### 5.2 Static → Dynamic KRaft Migration (kraft.version 0 → 1)
 
@@ -600,7 +487,7 @@ For detailed disaster recovery procedures when more than half of KRaft controlle
 4. **Bootstrap setup** (greenfield / ZK→KRaft): provide a bootstrap ConfigMap + ServiceAccount/Role/RoleBinding + `dynamicQuorumConfig.bootstrapPod` on the CR
 5. **RBAC**: the bootstrap ServiceAccount needs `get`/`update` on that ConfigMap
 6. **One bootstrap controller**: exactly one controller formats as the bootstrap; the rest join and are promoted (and it won't re-format on restart)
-7. **advertisedListeners changes require a manual roll** — patch `spec.podTemplate.annotations` on the CR (see [Troubleshooting](#45-troubleshooting-tips) item 8)
+7. **advertisedListeners changes require a manual roll** — patch `spec.podTemplate.annotations` on the CR (see [Troubleshooting](TROUBLESHOOTING.md#advertisedlisteners-no-auto-roll))
 
 ---
 
