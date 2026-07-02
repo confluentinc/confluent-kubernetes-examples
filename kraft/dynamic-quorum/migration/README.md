@@ -17,11 +17,11 @@ No bootstrapPod, ConfigMap, or RBAC needed -- the cluster is already formatted.
 ### ZooKeeper to KRaft (with Dynamic Quorum)
 
 For clusters running ZooKeeper that need to migrate directly to KRaft with dynamic quorum (`kraft.version=1`).
-Requires bootstrapPod, ConfigMap, RBAC for initial cluster formatting.
+Requires bootstrapPod, ConfigMap, RBAC for initial cluster formatting. These examples now live with the other KRaft-migration playbooks:
 
 | Example | Description |
 |---------|-------------|
-| [Quickstart](zk-to-kraft/quickstart/) | Single-cluster ZK to KRaft migration (no security) |
-| [MRC (Secured)](zk-to-kraft/secured/) | True multi-cluster MRC ZK to KRaft migration with full security |
+| [Quickstart](../../../migration/KRaftMigration/dynamic-quorum/quickstart/) | Single-cluster ZK to KRaft migration (no security) |
+| [MRC (Secured)](../../../migration/KRaftMigration/dynamic-quorum/secured/) | True multi-cluster MRC ZK to KRaft migration with full security |
 
 **Note**: These examples migrate to KRaft with dynamic quorum (`kraft.version=1`). If you want to migrate to KRaft with static quorum (`kraft.version=0`), refer to the [KRaftMigrationJob examples in the confluent-kubernetes-examples repo](https://github.com/confluentinc/confluent-kubernetes-examples).

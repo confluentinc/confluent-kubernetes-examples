@@ -276,8 +276,8 @@ Each example has its own README with step-by-step instructions and resource YAML
 | | MRC — LoadBalancer (Secured) | [greenfield/mrc/2dc-greenfield-loadbalancer/](greenfield/mrc/2dc-greenfield-loadbalancer/) | TLS + SASL/PLAIN + OAuth + RBAC | Yes (LB) |
 | **Static→Dynamic Migration** | Quickstart | [migration/static-to-dynamic/quickstart/](migration/static-to-dynamic/quickstart/) | None | No |
 | | MRC (Secured) | [migration/static-to-dynamic/mrc/](migration/static-to-dynamic/mrc/) | TLS + SASL/PLAIN + OAuth + RBAC | Yes (LB) |
-| **ZK→KRaft Migration** | Quickstart | [migration/zk-to-kraft/quickstart/](migration/zk-to-kraft/quickstart/) | None | No |
-| | MRC (Secured) | [migration/zk-to-kraft/secured/](migration/zk-to-kraft/secured/) | TLS + SASL/PLAIN + OAuth + RBAC | Yes (LB) |
+| **ZK→KRaft Migration** | Quickstart | [KRaftMigration/dynamic-quorum/quickstart/](../../migration/KRaftMigration/dynamic-quorum/quickstart/) | None | No |
+| | MRC (Secured) | [KRaftMigration/dynamic-quorum/secured/](../../migration/KRaftMigration/dynamic-quorum/secured/) | TLS + SASL/PLAIN + OAuth + RBAC | Yes (LB) |
 | **Disaster Recovery** | No quorum loss (2.5DC) | [disaster-recovery/no-quorum-loss-recovery/](disaster-recovery/no-quorum-loss-recovery/) | TLS + SASL/PLAIN + OAuth + RBAC | Yes (2 GKE clusters) |
 | | Quorum loss — data-safe 2DC | [disaster-recovery/quorum-loss-recovery/](disaster-recovery/quorum-loss-recovery/) — `cfk-3.2/` (pod-overlay sidecar), `cfk-3.3/manual-recovery/`, `cfk-3.3/kubectl-plugin-recovery/` (2-click) | TLS + SASL/PLAIN + OAuth + RBAC | Yes (2 GKE clusters) |
 | | Quorum loss — lossy 2.5DC | [disaster-recovery/lossy-quorum-loss-recovery/](disaster-recovery/lossy-quorum-loss-recovery/) — same three paths; data loss possible | TLS + SASL/PLAIN + OAuth + RBAC | Yes (2 GKE clusters) |
@@ -449,7 +449,7 @@ Two paths into dynamic quorum, each with a full worked example under [`migration
 
 ### 5.1 ZK→KRaft Migration
 
-Full examples: [`migration/zk-to-kraft/quickstart/`](migration/zk-to-kraft/quickstart/) and [`migration/zk-to-kraft/secured/`](migration/zk-to-kraft/secured/).
+Full examples (now colocated with the other migration playbooks): [`KRaftMigration/dynamic-quorum/quickstart/`](../../migration/KRaftMigration/dynamic-quorum/quickstart/) and [`KRaftMigration/dynamic-quorum/secured/`](../../migration/KRaftMigration/dynamic-quorum/secured/).
 
 - **CP version**: use **CP 7.9.6+**. CP 7.9.0 has a bug that formats KRaft at `kraft.version=0` (static); observer promotion then crashes the observer and the leader, and converting 0→1 afterward is unreliable. (ZK ships only in 7.9.x — it's removed in CP 8.0.)
 - **IBP**: on **CFK 3.3.0+** no longer set by hand — CFK auto-infers `inter.broker.protocol.version` from the image, and the `kraft-migration-ibp-version` annotation is only for custom images. On CFK earlier than 3.3.0 you must set the annotation manually (see [Troubleshooting](TROUBLESHOOTING.md#ibp-migration)).

@@ -13,7 +13,7 @@ using dynamic quorum (KIP-853). Requires CFK 3.3.0+ and CP 7.9.6+.
 This example is **plaintext** (no security) and includes 2.5DC-specific resources: lite-mode
 KMJ for the 0.5DC, KRaftController with manual `clusterID`, and the tiebreaker topology. For
 the secured variant of admin commands (`--command-config`, admin.properties creation), see the
-[secured dynamic quorum MRC migration](../../../../../kraft/dynamic-quorum/migration/zk-to-kraft/mrc/).
+[secured dynamic quorum MRC migration](../../../dynamic-quorum/secured/).
 
 ## How dynamic quorum differs from static quorum
 
@@ -67,7 +67,7 @@ The `bootstrap/` directory contains resources needed only in the bootstrap voter
    (already a voter). Point `--bootstrap-controller` at the bootstrap voter's external DNS.
    No `--command-config` is needed for plaintext. For secured clusters, pass
    `--command-config /opt/confluentinc/etc/kafka/kafka-client.properties` (CFK 3.3.x+) — see
-   the [secured MRC example](../../../../../kraft/dynamic-quorum/migration/zk-to-kraft/mrc/#step-6-promote-observers-to-voters-dual_write).
+   the [secured MRC example](../../../dynamic-quorum/secured/#step-6-promote-observers-to-voters-dual_write).
 
    ```bash
    BOOTSTRAP=<bootstrap-voter-external-dns>:9074

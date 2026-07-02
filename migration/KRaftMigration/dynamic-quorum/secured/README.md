@@ -46,7 +46,7 @@ If you do not have a running cluster, see [Reference: Setting Up a Test Cluster]
 ### Set the Tutorial Home
 
 ```bash
-export TUTORIAL_HOME=<Tutorial directory>/kraft/dynamic-quorum/migration/zk-to-kraft/secured
+export TUTORIAL_HOME=<Tutorial directory>/migration/KRaftMigration/dynamic-quorum/secured
 ```
 
 
