@@ -290,7 +290,7 @@ Each example has its own README with step-by-step instructions and resource YAML
 
 ---
 
-## 4. CFK Implementation
+## 4. Setting Up Dynamic Quorum in CFK
 
 This section covers what you need to provide for CFK to deploy Dynamic KRaft.
 
@@ -597,9 +597,9 @@ For detailed disaster recovery procedures when more than half of KRaft controlle
 1. **Dynamic KRaft (KIP-853)** enables controller membership changes without cluster recreation
 2. **Static vs Dynamic**: `controller.quorum.voters` → `controller.quorum.bootstrap.servers`
 3. **Observer-to-Voter Promotion**: New controllers join as observers, must be manually promoted
-4. **CFK Implementation**: Uses ConfigMap + init container to coordinate bootstrap controller selection
-5. **RBAC Required**: Init container needs permissions to read/update ConfigMap
-6. **Split-Brain Prevention**: Kubernetes atomic ConfigMap updates ensure only one bootstrap controller
+4. **Bootstrap setup** (greenfield / ZK→KRaft): provide a bootstrap ConfigMap + ServiceAccount/Role/RoleBinding + `dynamicQuorumConfig.bootstrapPod` on the CR
+5. **RBAC**: the bootstrap ServiceAccount needs `get`/`update` on that ConfigMap
+6. **One bootstrap controller**: exactly one controller formats as the bootstrap; the rest join and are promoted (and it won't re-format on restart)
 7. **advertisedListeners changes require a manual roll** — patch `spec.podTemplate.annotations` on the CR (see [Troubleshooting](#45-troubleshooting-tips) item 8)
 
 ---
