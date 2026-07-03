@@ -17,9 +17,9 @@ Migrate a multi-region KRaft cluster from static quorum (`kraft.version=0`) to d
 | Component | Minimum Version | Notes |
 |-----------|----------------|-------|
 | **CFK** | 3.2+ | Dynamic quorum support |
-| **CP** | 8.0+ | Works on all CP 8.0+ versions. Not affected by KMETA-2851. |
+| **CP** | 8.0+ | Works on all CP 8.0+ versions. Not affected by the MRC advertised-listeners bug ([KAFKA-20247](https://issues.apache.org/jira/browse/KAFKA-20247)). |
 
-This migration path is not affected by KMETA-2851 because advertised listeners are added in Step 1, after the quorum is already formed.
+This migration path is not affected by the MRC advertised-listeners bug because advertised listeners are added in Step 1, after the quorum is already formed.
 
 ### Prerequisites
 
@@ -36,6 +36,7 @@ If you do not have a running cluster, see [Reference: Setting Up a Test Cluster]
 ```bash
 export TUTORIAL_HOME=<Tutorial directory>/kraft/dynamic-quorum/migration/static-to-dynamic/mrc
 ```
+
 
 ### Configuration
 
@@ -183,11 +184,6 @@ kubectl --context $REGION1_CONTEXT exec kraftcontroller-0 -n $REGION1_NS -- bash
 #### Phase 4: Roll Kafka to Pick Up Bootstrap Servers
 
 Force a rolling restart of Kafka brokers on both clusters:
-
-> **Note:** Patching both regions at once rolls Kafka brokers across regions concurrently.
-> Within each region the operator rolls one broker at a time and gates on cluster-wide
-> `URP=0`, but to avoid the small cross-region timing window — especially if topic replication
-> factor is low — stagger the two patches by a few minutes, or roll one region at a time.
 
 ```bash
 kubectl --context $REGION1_CONTEXT patch kafka kafka -n $REGION1_NS --type merge \
@@ -361,7 +357,7 @@ openssl rsa -in /tmp/mds-tokenkeypair.pem -outform PEM -pubout -out /tmp/mds-pub
 # OAuth credentials
 cat > /tmp/oauth.txt <<'EOF'
 clientId=ssologin
-clientSecret=my-oauth-client-secret
+clientSecret=KbLRih1HzjDC267PefuKU7QIoZ8hgHDK
 EOF
 
 for ctx_ns in "$REGION1_CONTEXT:$REGION1_NS" "$REGION2_CONTEXT:$REGION2_NS"; do

@@ -23,7 +23,7 @@ Deploy a greenfield multi-region KRaft cluster with dynamic quorum (`kraft.versi
 
 - Two Kubernetes clusters with cross-cluster networking (LoadBalancer + DNS)
 - CFK 3.2+ operator (will be deployed by the setup steps below)
-- CP 7.9.6+ or 8.1.2+ images (8.0.x and 8.2.0 affected by KMETA-2851 for MRC greenfield)
+- A CP image with the MRC advertised-listeners fix ([KAFKA-20247](https://issues.apache.org/jira/browse/KAFKA-20247)): 7.9.6+, 8.0.5+, 8.1.2+, 8.2.1+, 8.3.0+. CP 8.0.0-8.0.4 and 8.2.0 are affected by the MRC advertised-listeners bug for MRC greenfield.
 - `openssl` installed locally (for certificate generation)
 - `helm` installed (for operator deployment)
 - GCP Cloud DNS zone configured for the domain (or equivalent DNS provider)
@@ -33,6 +33,7 @@ Deploy a greenfield multi-region KRaft cluster with dynamic quorum (`kraft.versi
 ```bash
 export TUTORIAL_HOME=<Tutorial directory>/kraft/dynamic-quorum/greenfield/mrc/2dc-greenfield-loadbalancer
 ```
+
 
 ### Configuration
 
@@ -194,7 +195,7 @@ OAuth client credentials for Keycloak (used by ERP and KafkaRest dependency).
 ```bash
 cat > /tmp/oauth.txt <<'EOF'
 clientId=ssologin
-clientSecret=my-oauth-client-secret
+clientSecret=KbLRih1HzjDC267PefuKU7QIoZ8hgHDK
 EOF
 
 for ctx_ns in "$REGION1_CONTEXT:$REGION1_NS" "$REGION2_CONTEXT:$REGION2_NS"; do
@@ -389,10 +390,15 @@ kubectl --context $REGION1_CONTEXT exec kraftcontroller-0 -n $REGION1_NS -- bash
     --command-config /tmp/admin.properties describe" | grep kraft.version
 ```
 
-Check DNS sync:
+Check that each LoadBalancer hostname resolves to its assigned external IP:
 
 ```bash
-$TUTORIAL_HOME/check-dns-sync.sh watch
+# List the LoadBalancer services and their external IPs
+kubectl get svc -n $REGION1_NS -o wide | grep LoadBalancer
+kubectl get svc -n $REGION2_NS -o wide | grep LoadBalancer
+
+# Confirm DNS resolution for each advertised hostname
+nslookup kafka-central-rep.$DOMAIN
 ```
 
 ### DNS Endpoints
@@ -472,5 +478,5 @@ rm -rf $TUTORIAL_HOME/.generated-certs
 - **Certificate SANs** use wildcards (`*.$DOMAIN`) to cover all LoadBalancer DNS names across both regions.
 - **All admin commands require `--command-config`** when security is enabled. The setup creates `/mnt/admin-config/security.properties` on each pod.
 - **Observer promotion order** does not matter, but all must be promoted before the cluster is production-ready.
-- **external-dns** handles DNS for all LoadBalancer services. Check DNS sync with `./check-dns-sync.sh watch`.
+- **external-dns** handles DNS for all LoadBalancer services. Confirm each LoadBalancer hostname resolves to its external IP (e.g. `nslookup <hostname>`) before proceeding.
 - Replace `my-domain.example.com` with your actual domain in all YAML files and commands.
