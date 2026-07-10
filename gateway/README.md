@@ -24,3 +24,4 @@
 | [authswap-sasl-plain-none](./authswap-sasl-plain-none) | Authentication Swap | Port | None | None | PLAIN | NONE | Authentication swap from SASL/PLAIN clients to no authentication |
 | [authswap-sasl-scram-sasl-plain](./authswap-sasl-scram-sasl-plain) | Authentication Swap | Port | None | None | SCRAM | PLAIN | Authentication swap from SASL/SCRAM to SASL/PLAIN |
 | [authswap-sasl-scram-sasl-oauth](./authswap-sasl-scram-sasl-oauth) | Authentication Swap | Port | None | None | SCRAM | OAUTHBEARER | Authentication swap from SASL/SCRAM to OAUTHBEARER |
+| [authswap-sasl-oauth](./authswap-sasl-oauth) | Authentication Swap | Port | None | None | OAUTHBEARER | OAUTHBEARER | Authentication swap from OAUTHBEARER to swapped OAUTHBEARER credentials |
