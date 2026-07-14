@@ -27,7 +27,7 @@ spec:
       authentication:
         type: oauth
         jaasConfig:
-          secretRef: oauth-jass
+          secretRef: oauth-jaas
         oauthSettings:
           tokenEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
       tls:
@@ -77,7 +77,7 @@ spec:
         sso:
           enabled: true
           clientCredentials:
-            secretRef: oauth-jass-oidc
+            secretRef: oauth-jaas-oidc
           configurations:
             groupsClaimName: profile_groups
             subClaimName: sub
@@ -101,7 +101,7 @@ spec:
       authentication:
         type: oauth
         jaasConfig:
-          secretRef: oauth-jass
+          secretRef: oauth-jaas
         oauthSettings:
           tokenEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
           expectedIssuer: http://keycloak:8080/realms/sso_test
@@ -118,7 +118,7 @@ spec:
     authentication:
       type: oauth
       oauth:
-        secretRef: oauth-jass
+        secretRef: oauth-jaas
         configuration:
           tokenEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
 ---
@@ -148,7 +148,7 @@ spec:
       authentication:
         type: oauth
         oauth:
-          secretRef: oauth-jass
+          secretRef: oauth-jaas
           configuration:
             tokenEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
             expectedIssuer: http://keycloak:8080/realms/sso_test
@@ -202,7 +202,7 @@ spec:
       authentication:
         type: oauth
         oauth:
-          secretRef: oauth-jass
+          secretRef: oauth-jaas
           configuration:
             tokenEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
             expectedIssuer: http://keycloak:8080/realms/sso_test
@@ -257,7 +257,7 @@ spec:
       authentication:
         type: oauth
         oauth:
-          secretRef: oauth-jass
+          secretRef: oauth-jaas
           configuration:
             tokenEndpointUri: http://keycloak:8080/realms/sso_test/protocol/openid-connect/token
             expectedIssuer: http://keycloak:8080/realms/sso_test
