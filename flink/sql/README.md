@@ -289,9 +289,9 @@ with an `INSERT INTO ... pageviews VALUES (...)` statement, or point the source 
 topic. `spec.statement` is immutable once running; set `spec.stopped: true` to stop without
 deleting.
 
-Note: Reading a statement's results is not supported at the moment — a FlinkStatement writes to the sink's Kafka topic rather than returning rows; read that topic directly to inspect the output.
+Note: Reading a statement's results isn't supported through these CFK resources at the moment; results are accessed via the CMF statements API.
 
-## Step 7 – Seed the source and read the results
+## Step 7 – Seed the source
 
 With the streaming statement RUNNING, seed a few rows into `pageviews`. A bounded
 `INSERT ... VALUES` runs once and reaches `status.phase: COMPLETED`:
@@ -302,18 +302,7 @@ kubectl get flinkstatement seed-pageviews -n operator \
   -o jsonpath='{.status.phase}{"\n"}'   # COMPLETED
 ```
 
-The aggregation counts the seeded rows per user and upserts them into `pageviews_by_user`.
-Read that topic to see the result — one row per `user_id` (`1 → 3`, `2 → 1`, `3 → 1`):
-
-```bash
-kubectl -n operator exec -it schemaregistry-0 -- \
-  kafka-avro-console-consumer --bootstrap-server kafka.operator.svc.cluster.local:9071 \
-  --topic pageviews_by_user --from-beginning --property print.key=true \
-  --property schema.registry.url=http://localhost:8081
-```
-
-It's an upsert changelog, so counts appear as they accrue; the latest value per `user_id`
-is the final count. Press Ctrl-C to stop consuming.
+The streaming statement then aggregates these rows into `pageviews_by_user`, one row per `user_id`.
 
 ## Using an external secret manager
 

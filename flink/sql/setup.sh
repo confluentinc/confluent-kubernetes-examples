@@ -179,8 +179,8 @@ kubectl apply -f sql/seed-pageviews.yaml
 wait_for flinkstatement/seed-pageviews '{.status.phase}' COMPLETED
 
 echo ""
-echo "Setup complete and seeded. The statement aggregated the seeded pageviews into"
-echo "pageviews_by_user; read the sink topic to see the counts (see README.md, Step 7)."
+echo "Setup complete and seeded. The statement aggregates the seeded pageviews into"
+echo "pageviews_by_user (see README.md, Step 7)."
 echo "To reach the CMF REST API from your machine:"
 echo "  echo '127.0.0.1 confluent-manager-for-apache-flink.operator.svc.cluster.local' | sudo tee -a /etc/hosts"
 echo "  while true; do kubectl port-forward service/cmf-service 8080:80 -n operator; done"
