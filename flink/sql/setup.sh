@@ -6,8 +6,8 @@
 # CREATE TABLE -> FlinkStatement). Run from this directory: ./setup.sh
 #
 # Mirrors README.md step for step. Two prerequisites the script does NOT paper over:
-#   1. Preview: needs a CFK build that ships `enableFlinkSQL` and a CMF build with the
-#      Flink SQL REST API. With the public chart this is not yet available.
+#   1. Preview: Flink SQL is a preview feature — this script opts in via `enableFlinkSQL=true`
+#      on the public CFK 3.3.0 chart (0.1718.10) and pins CMF 2.3.0 (see the README's Preview note).
 #   2. Cert generation needs `openssl`, `cfssl`/`cfssljson`, and `keytool` on PATH. The
 #      script mints a throwaway CA + CMF server cert and builds the JKS pair at runtime
 #      (mirroring flink/oauth/clientCredentials); nothing under certs/ is committed.

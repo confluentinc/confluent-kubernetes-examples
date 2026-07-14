@@ -18,8 +18,9 @@ FlinkSecret + FlinkEnvironmentSecretMapping → FlinkKafkaCatalog → FlinkKafka
 It uses the same minimal **mTLS** CMF setup as [`../mTLS`](../mTLS), plus a small Kafka +
 Schema Registry for the catalog to connect to.
 
-> **Preview.** Flink SQL is a preview feature in **CFK 3.3.0** (opt-in via `enableFlinkSQL`, nested
-> under `enableCMFDay2Ops`), paired with **CMF 2.3.0** and the runtime image
+> **Preview.** Flink SQL is a preview feature in **CFK 3.3.0** (opt-in via the top-level
+> `enableFlinkSQL` chart value, which takes effect only when `enableCMFDay2Ops` is also
+> enabled), paired with **CMF 2.3.0** and the runtime image
 > **`confluentinc/cp-flink-sql:1.19-cp8`** (set on the compute pool `clusterSpec.image`). This guide
 > pins those versions — the CFK chart is `confluentinc/confluent-for-kubernetes` `0.1718.10` (the
 > 3.3.0 build). All are on the public Helm repo / DockerHub, so no extra registry access is needed.
@@ -27,8 +28,8 @@ Schema Registry for the catalog to connect to.
 ## Quick start with scripts
 
 [`setup.sh`](setup.sh) runs the whole walkthrough end to end and [`teardown.sh`](teardown.sh)
-reverses it; both encode exactly the commands documented below. Use them once your cluster has
-the `enableFlinkSQL` CFK build. To go step by step instead, follow the rest of this guide.
+reverses it; both encode exactly the commands documented below (including installing the pinned
+CFK 3.3.0 and CMF 2.3.0 builds). To go step by step instead, follow the rest of this guide.
 
 ## Setup Certs
 
@@ -242,8 +243,8 @@ kubectl get flinkcomputepool -n operator
 
 `spec.type` is immutable. `spec.state` is valid only on SHARED pools (enforced by a CEL rule);
 set it to `SUSPENDED` to pause a SHARED pool without deleting it. `clusterSpec` sets the Flink
-version, the statement runtime `image` (`confluentinc/cp-flink-sql:1.19-cp8` here — it must match
-your CMF version, or the JobManager fails to load the statement plan), and the JobManager/TaskManager
+version, the statement runtime `image` (`confluentinc/cp-flink-sql:1.19-cp8` here — it must be at
+least the minimum SQL image version documented for your CMF version), and the JobManager/TaskManager
 resources statements run with — these are required (the Flink operator rejects a deployment without
 `jobManager.resource.memory`).
 
