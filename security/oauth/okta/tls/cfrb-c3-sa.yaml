@@ -1,0 +1,55 @@
+# Grant RBAC Permissions to default `Everyone` Okta group
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: cfrb-c3-kafka-sa
+  namespace: confluent
+spec:
+  principal:
+    type: group
+    name: Everyone
+  role: SystemAdmin
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: cfrb-c3-sr-sa
+  namespace: confluent
+spec:
+  principal:
+    type: group
+    name: Everyone
+  clustersScopeByIds:
+    schemaRegistryClusterId: id_schemaregistry_confluent
+  role: SystemAdmin
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: cfrb-c3-connect-sa
+  namespace: confluent
+spec:
+  principal:
+    type: group
+    name: Everyone
+  clustersScopeByIds:
+    connectClusterId: confluent.connect
+  role: ClusterAdmin
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: cfrb-c3-ksql-sa
+  namespace: confluent
+spec:
+  principal:
+    type: group
+    name: Everyone
+  clustersScopeByIds:
+    ksqlClusterId: confluent.ksqldb_
+  role: ResourceOwner
+  resourcePatterns:
+    - name: ksql-cluster
+      patternType: LITERAL
+      resourceType: KsqlCluster
+---
