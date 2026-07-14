@@ -188,7 +188,7 @@ CMF needs credentials to reach Kafka and Schema Registry. A FlinkSecret syncs a 
 Secret to CMF under the FlinkSecret's name; the catalog/database reference it by that name.
 
 ```bash
-kubectl apply -f sql/00-flinksecret.yaml
+kubectl apply -f sql/flinksecret.yaml
 kubectl get flinksecret flink-connection-secret -n operator -oyaml
 ```
 
@@ -203,7 +203,7 @@ silently ignores the catalog. The mapping's **name must equal the `connectionSec
 catalog/database reference (CMF keys an environment's secrets by the mapping name):
 
 ```bash
-kubectl apply -f sql/05-secretmapping.yaml
+kubectl apply -f sql/secretmapping.yaml
 kubectl get flinkenvironmentsecretmapping flink-connection-secret -n operator -oyaml
 ```
 
@@ -212,7 +212,7 @@ Expect `cfkInternalState: CREATED` and `cmfSync.status: Created`.
 ## Step 2 – FlinkKafkaCatalog
 
 ```bash
-kubectl apply -f sql/10-kafkacatalog.yaml
+kubectl apply -f sql/kafkacatalog.yaml
 kubectl get flinkkafkacatalog kafka-catalog -n operator -oyaml
 ```
 
@@ -223,7 +223,7 @@ not in the catalog spec.
 ## Step 3 – FlinkKafkaDatabase
 
 ```bash
-kubectl apply -f sql/20-kafkadatabase.yaml
+kubectl apply -f sql/kafkadatabase.yaml
 kubectl get flinkkafkadatabase clickstream -n operator -oyaml
 ```
 
@@ -236,8 +236,8 @@ A statement runs on a compute pool. Deploy a DEDICATED pool (reserved resources)
 pool (multiplexed, supports `state: RUNNING|SUSPENDED`):
 
 ```bash
-kubectl apply -f sql/30-computepool-dedicated.yaml
-kubectl apply -f sql/31-computepool-shared.yaml
+kubectl apply -f sql/computepool-dedicated.yaml
+kubectl apply -f sql/computepool-shared.yaml
 kubectl get flinkcomputepool -n operator
 ```
 
@@ -255,7 +255,7 @@ The statement in step 6 reads a `pageviews` table and writes per-user counts to
 gated by the database's `ddlEnvironments`:
 
 ```bash
-kubectl apply -f sql/35-create-tables.yaml
+kubectl apply -f sql/create-tables.yaml
 kubectl get flinkstatement create-pageviews create-pageviews-by-user -n operator
 ```
 
@@ -265,13 +265,13 @@ SR. CREATE TABLE is DDL, so each statement runs once and reaches `status.phase: 
 
 ## Step 6 – FlinkStatement
 
-`sql/40-statement.yaml` runs a streaming SQL statement on the DEDICATED pool. It aggregates the
+`sql/statement.yaml` runs a streaming SQL statement on the DEDICATED pool. It aggregates the
 `pageviews` source into `pageviews_by_user` (both in the `clickstream` database, created in
 step 5). A streaming INSERT requires checkpointing, so the statement sets
 `execution.checkpointing.interval` in its `flinkConfiguration`.
 
 ```bash
-kubectl apply -f sql/40-statement.yaml
+kubectl apply -f sql/statement.yaml
 kubectl get flinkstatement pageviews-by-user -n operator \
   -o jsonpath='cfkInternalState={.status.cfkInternalState} cmfSync={.status.cmfSync.status}{"\n"}'
 ```
@@ -300,7 +300,7 @@ materializes the same Secret; the FlinkSecret CR is unchanged.
 - **HashiCorp Vault (VSO)** – [`secret-managers/vault-flinksecret.md`](secret-managers/vault-flinksecret.md)
 
 To use one, install that operator, apply its manifest instead of the inline Secret in
-`sql/00-flinksecret.yaml`, then apply the FlinkSecret as in step 1.
+`sql/flinksecret.yaml`, then apply the FlinkSecret as in step 1.
 
 ## Tear down
 
@@ -310,13 +310,13 @@ clean up:
 
 ```bash
 # 1. The Flink SQL chain (reverse order)
-kubectl delete -f sql/40-statement.yaml
-kubectl delete -f sql/35-create-tables.yaml
-kubectl delete -f sql/31-computepool-shared.yaml -f sql/30-computepool-dedicated.yaml
-kubectl delete -f sql/20-kafkadatabase.yaml
-kubectl delete -f sql/10-kafkacatalog.yaml
-kubectl delete -f sql/05-secretmapping.yaml
-kubectl delete -f sql/00-flinksecret.yaml
+kubectl delete -f sql/statement.yaml
+kubectl delete -f sql/create-tables.yaml
+kubectl delete -f sql/computepool-shared.yaml -f sql/computepool-dedicated.yaml
+kubectl delete -f sql/kafkadatabase.yaml
+kubectl delete -f sql/kafkacatalog.yaml
+kubectl delete -f sql/secretmapping.yaml
+kubectl delete -f sql/flinksecret.yaml
 
 # 2. Wait for the statements'/pools' Flink jobs to drain while CMF + FKO are still up
 #    (FKO owns the FlinkDeployment finalizer; removing it before they drain orphans the jobs)

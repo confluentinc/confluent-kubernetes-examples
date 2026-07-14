@@ -129,34 +129,34 @@ kubectl apply -f platform/flinkenvironment.yaml
 wait_for flinkenvironment/flink-env1 '{.status.cfkInternalState}' CREATED
 
 echo "==> Step 1: FlinkSecret..."
-kubectl apply -f sql/00-flinksecret.yaml
+kubectl apply -f sql/flinksecret.yaml
 wait_for flinksecret/flink-connection-secret '{.status.cfkInternalState}' CREATED
 
 echo "==> Step 1b: FlinkEnvironmentSecretMapping (exposes the secret to the environment)..."
-kubectl apply -f sql/05-secretmapping.yaml
+kubectl apply -f sql/secretmapping.yaml
 wait_for flinkenvironmentsecretmapping/flink-connection-secret '{.status.cfkInternalState}' CREATED
 
 echo "==> Step 2: FlinkKafkaCatalog..."
-kubectl apply -f sql/10-kafkacatalog.yaml
+kubectl apply -f sql/kafkacatalog.yaml
 wait_for flinkkafkacatalog/kafka-catalog '{.status.cfkInternalState}' CREATED
 
 echo "==> Step 3: FlinkKafkaDatabase..."
-kubectl apply -f sql/20-kafkadatabase.yaml
+kubectl apply -f sql/kafkadatabase.yaml
 wait_for flinkkafkadatabase/clickstream '{.status.cfkInternalState}' CREATED
 
 echo "==> Step 4: FlinkComputePool (DEDICATED and SHARED)..."
-kubectl apply -f sql/30-computepool-dedicated.yaml
-kubectl apply -f sql/31-computepool-shared.yaml
+kubectl apply -f sql/computepool-dedicated.yaml
+kubectl apply -f sql/computepool-shared.yaml
 wait_for flinkcomputepool/dedicated-pool '{.status.cfkInternalState}' CREATED
 wait_for flinkcomputepool/shared-pool '{.status.cfkInternalState}' CREATED
 
 echo "==> Step 5: create the source and sink tables..."
-kubectl apply -f sql/35-create-tables.yaml
+kubectl apply -f sql/create-tables.yaml
 wait_for flinkstatement/create-pageviews '{.status.phase}' COMPLETED
 wait_for flinkstatement/create-pageviews-by-user '{.status.phase}' COMPLETED
 
 echo "==> Step 6: FlinkStatement (streaming aggregation)..."
-kubectl apply -f sql/40-statement.yaml
+kubectl apply -f sql/statement.yaml
 wait_for flinkstatement/pageviews-by-user '{.status.cfkInternalState}' CREATED
 # CMF runs the statement as a Flink job (a FlinkDeployment) in the environment's
 # namespace (default); wait for that job to come up and report RUNNING. The first

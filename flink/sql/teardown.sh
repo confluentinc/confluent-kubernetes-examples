@@ -12,13 +12,13 @@ cd "$TUTORIAL_HOME" || exit 1
 ignore="--ignore-not-found=true"
 
 echo "==> Deleting the Flink SQL chain (reverse order)..."
-kubectl delete -f sql/40-statement.yaml -n operator $ignore
-kubectl delete -f sql/35-create-tables.yaml -n operator $ignore
-kubectl delete -f sql/31-computepool-shared.yaml -f sql/30-computepool-dedicated.yaml -n operator $ignore
-kubectl delete -f sql/20-kafkadatabase.yaml -n operator $ignore
-kubectl delete -f sql/10-kafkacatalog.yaml -n operator $ignore
-kubectl delete -f sql/05-secretmapping.yaml -n operator $ignore
-kubectl delete -f sql/00-flinksecret.yaml -n operator $ignore
+kubectl delete -f sql/statement.yaml -n operator $ignore
+kubectl delete -f sql/create-tables.yaml -n operator $ignore
+kubectl delete -f sql/computepool-shared.yaml -f sql/computepool-dedicated.yaml -n operator $ignore
+kubectl delete -f sql/kafkadatabase.yaml -n operator $ignore
+kubectl delete -f sql/kafkacatalog.yaml -n operator $ignore
+kubectl delete -f sql/secretmapping.yaml -n operator $ignore
+kubectl delete -f sql/flinksecret.yaml -n operator $ignore
 
 # Deleting the statements/pools above asks CMF to delete each one's FlinkDeployment, and FKO owns
 # the FlinkDeployment finalizer. Wait for those jobs to drain while CMF and FKO are both still up;

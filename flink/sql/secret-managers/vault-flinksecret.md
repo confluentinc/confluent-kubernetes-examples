@@ -40,6 +40,6 @@ real Kubernetes Secret — exactly what a FlinkSecret's `spec.secretRef` needs.
        name: flink-connection-credentials   # matches FlinkSecret spec.secretRef
    ```
 
-The `FlinkSecret` in [`../sql/00-flinksecret.yaml`](../sql/00-flinksecret.yaml) is
+The `FlinkSecret` in [`../sql/flinksecret.yaml`](../sql/flinksecret.yaml) is
 unchanged — drop the inline `Secret` and let VSO own `flink-connection-credentials`.
 On rotation, VSO updates the Secret and CFK re-syncs CMF automatically.
