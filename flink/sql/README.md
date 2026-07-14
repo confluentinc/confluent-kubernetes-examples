@@ -289,6 +289,8 @@ with an `INSERT INTO ... pageviews VALUES (...)` statement, or point the source 
 topic. `spec.statement` is immutable once running; set `spec.stopped: true` to stop without
 deleting.
 
+Note: Reading a statement's results is not supported at the moment — a FlinkStatement writes to the sink's Kafka topic rather than returning rows; read that topic directly to inspect the output.
+
 ## Using an external secret manager
 
 The FlinkSecret consumes a standard Kubernetes Secret, so the backing Secret
