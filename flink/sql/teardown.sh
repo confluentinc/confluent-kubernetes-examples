@@ -12,6 +12,7 @@ cd "$TUTORIAL_HOME" || exit 1
 ignore="--ignore-not-found=true"
 
 echo "==> Deleting the Flink SQL chain (reverse order)..."
+kubectl delete -f sql/seed-pageviews.yaml -n operator $ignore
 kubectl delete -f sql/statement.yaml -n operator $ignore
 kubectl delete -f sql/create-tables.yaml -n operator $ignore
 kubectl delete -f sql/computepool-shared.yaml -f sql/computepool-dedicated.yaml -n operator $ignore

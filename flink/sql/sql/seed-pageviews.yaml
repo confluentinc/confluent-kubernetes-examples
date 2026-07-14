@@ -1,0 +1,23 @@
+# Step 7 - Seed the pageviews source
+#
+# A bounded INSERT ... VALUES runs once (status.phase: COMPLETED), writing sample
+# rows into the pageviews topic for the streaming aggregation to count per user.
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: FlinkStatement
+metadata:
+  name: seed-pageviews
+  namespace: operator
+spec:
+  flinkEnvironment: flink-env1
+  computePoolName: dedicated-pool
+  statement: |
+    INSERT INTO `kafka-catalog`.`clickstream`.`pageviews` VALUES
+      (1, 'home'),
+      (1, 'products'),
+      (2, 'home'),
+      (3, 'checkout'),
+      (1, 'home');
+  cmfRestClassRef:
+    name: default
+    namespace: operator

@@ -291,6 +291,30 @@ deleting.
 
 Note: Reading a statement's results is not supported at the moment — a FlinkStatement writes to the sink's Kafka topic rather than returning rows; read that topic directly to inspect the output.
 
+## Step 7 – Seed the source and read the results
+
+With the streaming statement RUNNING, seed a few rows into `pageviews`. A bounded
+`INSERT ... VALUES` runs once and reaches `status.phase: COMPLETED`:
+
+```bash
+kubectl apply -f sql/seed-pageviews.yaml
+kubectl get flinkstatement seed-pageviews -n operator \
+  -o jsonpath='{.status.phase}{"\n"}'   # COMPLETED
+```
+
+The aggregation counts the seeded rows per user and upserts them into `pageviews_by_user`.
+Read that topic to see the result — one row per `user_id` (`1 → 3`, `2 → 1`, `3 → 1`):
+
+```bash
+kubectl -n operator exec -it kafka-0 -- \
+  kafka-avro-console-consumer --bootstrap-server localhost:9071 \
+  --topic pageviews_by_user --from-beginning --property print.key=true \
+  --property schema.registry.url=http://schemaregistry.operator.svc.cluster.local:8081
+```
+
+It's an upsert changelog, so counts appear as they accrue; the latest value per `user_id`
+is the final count. Press Ctrl-C to stop consuming.
+
 ## Using an external secret manager
 
 The FlinkSecret consumes a standard Kubernetes Secret, so the backing Secret
@@ -312,6 +336,7 @@ clean up:
 
 ```bash
 # 1. The Flink SQL chain (reverse order)
+kubectl delete -f sql/seed-pageviews.yaml
 kubectl delete -f sql/statement.yaml
 kubectl delete -f sql/create-tables.yaml
 kubectl delete -f sql/computepool-shared.yaml -f sql/computepool-dedicated.yaml
