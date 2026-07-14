@@ -306,10 +306,10 @@ The aggregation counts the seeded rows per user and upserts them into `pageviews
 Read that topic to see the result — one row per `user_id` (`1 → 3`, `2 → 1`, `3 → 1`):
 
 ```bash
-kubectl -n operator exec -it kafka-0 -- \
-  kafka-avro-console-consumer --bootstrap-server localhost:9071 \
+kubectl -n operator exec -it schemaregistry-0 -- \
+  kafka-avro-console-consumer --bootstrap-server kafka.operator.svc.cluster.local:9071 \
   --topic pageviews_by_user --from-beginning --property print.key=true \
-  --property schema.registry.url=http://schemaregistry.operator.svc.cluster.local:8081
+  --property schema.registry.url=http://localhost:8081
 ```
 
 It's an upsert changelog, so counts appear as they accrue; the latest value per `user_id`

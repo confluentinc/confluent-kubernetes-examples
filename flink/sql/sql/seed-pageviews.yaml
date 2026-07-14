@@ -11,6 +11,9 @@ metadata:
 spec:
   flinkEnvironment: flink-env1
   computePoolName: dedicated-pool
+  # CMF requires checkpointing for INSERT INTO queries, even a bounded VALUES seed.
+  flinkConfiguration:
+    execution.checkpointing.interval: "10s"
   statement: |
     INSERT INTO `kafka-catalog`.`clickstream`.`pageviews` VALUES
       (1, 'home'),
