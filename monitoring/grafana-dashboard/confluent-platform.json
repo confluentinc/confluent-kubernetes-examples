@@ -57,7 +57,7 @@
   "panels": [
     {
       "collapsed": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -74,7 +74,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "",
       "fieldConfig": {
         "defaults": {},
@@ -118,7 +118,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "io_confluent_caas_volumemetrics_used{app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"}",
+          "expr": "io_confluent_caas_volumemetrics_used{platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -127,7 +127,7 @@
         },
         {
           "exemplar": true,
-          "expr": "io_confluent_caas_volumemetrics_total{app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"}",
+          "expr": "io_confluent_caas_volumemetrics_total{platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"}",
           "hide": false,
           "instant": false,
           "interval": "",
@@ -183,7 +183,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Kafka Broker Pods Disk Usage",
       "fieldConfig": {
         "defaults": {},
@@ -227,7 +227,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "io_confluent_caas_volumemetrics_percentused{app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"}",
+          "expr": "io_confluent_caas_volumemetrics_percentused{platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -283,7 +283,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Kafka Broker Pods Disk Usage",
       "fieldConfig": {
         "defaults": {},
@@ -327,7 +327,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "io_confluent_caas_volumemetrics_percentavailable{app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"}",
+          "expr": "io_confluent_caas_volumemetrics_percentavailable{platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"}",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -380,7 +380,7 @@
     },
     {
       "collapsed": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -397,7 +397,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Aggregated Kafka Broker Pods CPU Usage",
       "fieldConfig": {
         "defaults": {},
@@ -495,7 +495,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Kafka Broker Pods Memory Usage",
       "fieldConfig": {
         "defaults": {},
@@ -590,7 +590,7 @@
     },
     {
       "collapsed": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -612,7 +612,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#299c46"
       ],
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Number of Brokers Online",
       "fieldConfig": {
         "defaults": {},
@@ -671,7 +671,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "count(kafka_server_replicamanager_value{name=\"LeaderCount\",kubernetes_namespace=~\"$namespace\",app=~\"$component_name\",platform_confluent_io_type=~\"$controller_type\"})",
+          "expr": "count(kafka_server_replicamanager_value{name=\"LeaderCount\",namespace=~\"$namespace\",platform_confluent_io_type=~\"$component_name\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "",
@@ -700,7 +700,7 @@
         "#e5ac0e",
         "#bf1b00"
       ],
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Number of active controllers in the cluster.",
       "fieldConfig": {
         "defaults": {},
@@ -757,7 +757,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(sum(kafka_controller_kafkacontroller_value{name=\"ActiveControllerCount\",kubernetes_namespace=~\"$namespace\",app=~\"$component_name\",platform_confluent_io_type=~\"$controller_type\"}))",
+          "expr": "sum(sum(kafka_controller_kafkacontroller_value{name=\"ActiveControllerCount\",namespace=~\"$namespace\",platform_confluent_io_type=~\"$component_name\"}))",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -785,7 +785,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Unclean leader election rate",
       "fieldConfig": {
         "defaults": {},
@@ -842,7 +842,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(kafka_controller_controllerstats_oneminuterate{name=~\"UncleanLeaderElectionsPerSec\",kubernetes_namespace=~\"$namespace\",app=~\"$component_name\",platform_confluent_io_type=~\"$controller_type\"})",
+          "expr": "sum(kafka_controller_controllerstats_oneminuterate{name=~\"UncleanLeaderElectionsPerSec\",namespace=~\"$namespace\",platform_confluent_io_type=~\"$component_name\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -870,7 +870,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#299c46"
       ],
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Partitions that are online",
       "fieldConfig": {
         "defaults": {},
@@ -927,7 +927,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(kafka_server_replicamanager_value{name=~\"PartitionCount\",kubernetes_namespace=~\"$namespace\",app=~\"$component_name\",platform_confluent_io_type=~\"$controller_type\"})",
+          "expr": "sum(kafka_server_replicamanager_value{name=~\"PartitionCount\",namespace=~\"$namespace\",platform_confluent_io_type=~\"$component_name\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -955,7 +955,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#bf1b00"
       ],
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Number of under-replicated partitions (| ISR | < | all replicas |).",
       "fieldConfig": {
         "defaults": {},
@@ -1012,7 +1012,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(kafka_server_replicamanager_value{name=~\"UnderReplicatedPartitions\",kubernetes_namespace=~\"$namespace\",app=~\"$component_name\",platform_confluent_io_type=~\"$controller_type\"})",
+          "expr": "sum(kafka_server_replicamanager_value{name=~\"UnderReplicatedPartitions\",namespace=~\"$namespace\",platform_confluent_io_type=~\"$component_name\"})",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 2,
@@ -1041,7 +1041,7 @@
         "#ef843c",
         "#bf1b00"
       ],
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Number of partitions that don’t have an active leader and are hence not writable or readable.",
       "fieldConfig": {
         "defaults": {},
@@ -1098,7 +1098,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(kafka_server_replicamanager_value{name=~\"OfflineReplicaCount\",kubernetes_namespace=~\"$namespace\",app=~\"$component_name\",platform_confluent_io_type=~\"$controller_type\"})",
+          "expr": "sum(kafka_server_replicamanager_value{name=~\"OfflineReplicaCount\",namespace=~\"$namespace\",platform_confluent_io_type=~\"$component_name\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -1122,7 +1122,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Byte Rate",
       "fieldConfig": {
         "defaults": {},
@@ -1169,7 +1169,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"BytesInPerSec\",kubernetes_namespace=~\"$namespace\",app=~\"$component_name\",platform_confluent_io_type=~\"$controller_type\"})",
+          "expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"BytesInPerSec\",namespace=~\"$namespace\",platform_confluent_io_type=~\"$component_name\"})",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -1178,7 +1178,7 @@
           "refId": "A"
         },
         {
-          "expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"BytesOutPerSec\",kubernetes_namespace=~\"$namespace\",app=~\"$component_name\",platform_confluent_io_type=~\"$controller_type\"})",
+          "expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"BytesOutPerSec\",namespace=~\"$namespace\",platform_confluent_io_type=~\"$component_name\"})",
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
@@ -1233,7 +1233,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -1277,7 +1277,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"MessagesInPerSec\",kubernetes_namespace=~\"$namespace\",app=~\"$component_name\",platform_confluent_io_type=~\"$controller_type\"})",
+          "expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"MessagesInPerSec\",namespace=~\"$namespace\",platform_confluent_io_type=~\"$component_name\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1331,7 +1331,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Request Handler Avg Idle Percent",
       "fieldConfig": {
         "defaults": {},
@@ -1375,7 +1375,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "kafka_server_kafkarequesthandlerpool_oneminuterate{name=~\"RequestHandlerAvgIdlePercent\",kubernetes_namespace=~\"$namespace\",app=~\"$component_name\",platform_confluent_io_type=~\"$controller_type\"}*100",
+          "expr": "kafka_server_kafkarequesthandlerpool_oneminuterate{name=~\"RequestHandlerAvgIdlePercent\",namespace=~\"$namespace\",platform_confluent_io_type=~\"$component_name\"}*100",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1429,7 +1429,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Produce Request Rate.",
       "fieldConfig": {
         "defaults": {},
@@ -1472,14 +1472,14 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"TotalProduceRequestsPerSec\",kubernetes_namespace=~\"$namespace\",app=~\"$component_name\",platform_confluent_io_type=~\"$controller_type\"})",
+          "expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"TotalProduceRequestsPerSec\",namespace=~\"$namespace\",platform_confluent_io_type=~\"$component_name\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Total Produce Request Rate",
           "refId": "A"
         },
         {
-          "expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"FailedProduceRequestsPerSec\",kubernetes_namespace=~\"$namespace\",app=~\"$component_name\",platform_confluent_io_type=~\"$controller_type\"})",
+          "expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=\"FailedProduceRequestsPerSec\",namespace=~\"$namespace\",platform_confluent_io_type=~\"$component_name\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Failed Produce Request Rate",
@@ -1532,7 +1532,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Fetch Request Rate",
       "fieldConfig": {
         "defaults": {},
@@ -1576,7 +1576,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=~\"TotalFetchRequestsPerSec\",kubernetes_namespace=~\"$namespace\",app=~\"$component_name\",platform_confluent_io_type=~\"$controller_type\"})",
+          "expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=~\"TotalFetchRequestsPerSec\",namespace=~\"$namespace\",platform_confluent_io_type=~\"$component_name\"})",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1584,7 +1584,7 @@
           "refId": "A"
         },
         {
-          "expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=~\"FailedFetchRequestsPerSec\",kubernetes_namespace=~\"$namespace\",app=~\"$component_name\",platform_confluent_io_type=~\"$controller_type\"})",
+          "expr": "sum(kafka_server_brokertopicmetrics_oneminuterate{name=~\"FailedFetchRequestsPerSec\",namespace=~\"$namespace\",platform_confluent_io_type=~\"$component_name\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Failed Fetch Request Rate",
@@ -1637,7 +1637,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Network Processor Avg Idle Percent",
       "fieldConfig": {
         "defaults": {},
@@ -1681,7 +1681,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "kafka_network_socketserver_value{name=~\"NetworkProcessorAvgIdlePercent\",kubernetes_namespace=~\"$namespace\",app=~\"$component_name\",platform_confluent_io_type=~\"$controller_type\"}*100",
+          "expr": "kafka_network_socketserver_value{name=~\"NetworkProcessorAvgIdlePercent\",namespace=~\"$namespace\",platform_confluent_io_type=~\"$component_name\"}*100",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1732,7 +1732,7 @@
     },
     {
       "collapsed": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -1754,7 +1754,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#299c46"
       ],
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Quorum Size of Zookeeper ensemble",
       "fieldConfig": {
         "defaults": {},
@@ -1811,7 +1811,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "avg({__name__=~\"org_apache_zookeeperservice_replicatedserver_.*_quorumsize\",app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"})",
+          "expr": "avg({__name__=~\"org_apache_zookeeperservice_replicatedserver_.*_quorumsize\",platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -1896,7 +1896,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum({__name__=~\"org_apache_zookeeperservice_replicatedserver_.*_numaliveconnections\",app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"})",
+          "expr": "sum({__name__=~\"org_apache_zookeeperservice_replicatedserver_.*_numaliveconnections\",platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"})",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -2003,7 +2003,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "{__name__=~\"org_apache_zookeeperservice_replicatedserver_.*_outstandingrequests\",app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"}  ",
+          "expr": "{__name__=~\"org_apache_zookeeperservice_replicatedserver_.*_outstandingrequests\",platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"}  ",
           "format": "time_series",
           "instant": false,
           "interval": "",
@@ -2127,7 +2127,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "avg({__name__=~\"org_apache_zookeeperservice_replicatedserver_.*_nodecount\",app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"})",
+          "expr": "avg({__name__=~\"org_apache_zookeeperservice_replicatedserver_.*_nodecount\",platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -2155,7 +2155,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Number of Watchers",
       "fieldConfig": {
         "defaults": {},
@@ -2212,7 +2212,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum({__name__=~\"org_apache_zookeeperservice_replicatedserver_.*_watchcount\",app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"})",
+          "expr": "sum({__name__=~\"org_apache_zookeeperservice_replicatedserver_.*_watchcount\",platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -2236,7 +2236,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Amount of time it takes for the server to respond to a client request",
       "fieldConfig": {
         "defaults": {},
@@ -2279,7 +2279,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "{__name__=~\"org_apache_zookeeperservice_replicatedserver_.*_minrequestlatency\",app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"}",
+          "expr": "{__name__=~\"org_apache_zookeeperservice_replicatedserver_.*_minrequestlatency\",platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{kubernetes_pod_name}}",
@@ -2332,7 +2332,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Zookeeper Disk Usage (txnlog)",
       "fieldConfig": {
         "defaults": {},
@@ -2463,7 +2463,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Amount of time it takes for the server to respond to a client request",
       "fieldConfig": {
         "defaults": {},
@@ -2506,7 +2506,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "{__name__=~\"org_apache_zookeeperservice_replicatedserver_.*_maxrequestlatency\",app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"}",
+          "expr": "{__name__=~\"org_apache_zookeeperservice_replicatedserver_.*_maxrequestlatency\",platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{kubernetes_pod_name}}",
@@ -2601,7 +2601,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "Amount of time it takes for the server to respond to a client request",
       "fieldConfig": {
         "defaults": {},
@@ -2644,7 +2644,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "{__name__=~\"org_apache_zookeeperservice_replicatedserver_.*_avgrequestlatency\",app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"}",
+          "expr": "{__name__=~\"org_apache_zookeeperservice_replicatedserver_.*_avgrequestlatency\",platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{kubernetes_pod_name}}",
@@ -2703,7 +2703,7 @@
     },
     {
       "collapsed": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -2781,7 +2781,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(kafka_connect_connect_worker_metrics_connector_count{app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"})",
+          "expr": "sum(kafka_connect_connect_worker_metrics_connector_count{platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"})",
           "format": "time_series",
           "instant": false,
           "intervalFactor": 1,
@@ -2811,7 +2811,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "The total number of connector starts that succeeded.",
       "fieldConfig": {
         "defaults": {},
@@ -2868,7 +2868,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(kafka_connect_connect_worker_metrics_connector_startup_success_total{app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"})",
+          "expr": "sum(kafka_connect_connect_worker_metrics_connector_startup_success_total{platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -2896,7 +2896,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "The total number of connector starts that failed.",
       "fieldConfig": {
         "defaults": {},
@@ -2953,7 +2953,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(kafka_connect_connect_worker_metrics_connector_startup_failure_total{app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"})",
+          "expr": "sum(kafka_connect_connect_worker_metrics_connector_startup_failure_total{platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -2981,7 +2981,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -3037,7 +3037,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(kafka_connect_connect_worker_metrics_task_count{app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"})",
+          "expr": "sum(kafka_connect_connect_worker_metrics_task_count{platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -3065,7 +3065,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "The total number of task starts that succeeded.",
       "fieldConfig": {
         "defaults": {},
@@ -3122,7 +3122,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(kafka_connect_connect_worker_metrics_task_startup_success_total{app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"})",
+          "expr": "sum(kafka_connect_connect_worker_metrics_task_startup_success_total{platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -3150,7 +3150,7 @@
         "rgba(237, 129, 40, 0.89)",
         "#d44a3a"
       ],
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "description": "The total number of task starts that failed.",
       "fieldConfig": {
         "defaults": {},
@@ -3207,7 +3207,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(kafka_connect_connect_worker_metrics_task_startup_failure_total{app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"})",
+          "expr": "sum(kafka_connect_connect_worker_metrics_task_startup_failure_total{platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -3231,7 +3231,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -3273,7 +3273,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "kafka_connect_connect_metrics_io_ratio{app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"}",
+          "expr": "kafka_connect_connect_metrics_io_ratio{platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{ kubernetes_pod_name }}",
@@ -3326,7 +3326,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -3368,7 +3368,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "kafka_connect_connect_metrics_incoming_byte_rate{app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"}",
+          "expr": "kafka_connect_connect_metrics_incoming_byte_rate{platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{kubernetes_pod_name}}",
@@ -3421,7 +3421,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -3463,7 +3463,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "kafka_connect_connect_metrics_network_io_rate{app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"}",
+          "expr": "kafka_connect_connect_metrics_network_io_rate{platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"}",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "{{kubernetes_pod_name}}",
@@ -3513,7 +3513,7 @@
     },
     {
       "collapsed": true,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -3573,7 +3573,7 @@
           "targets": [
             {
               "exemplar": true,
-              "expr": "{__name__=~\"io_confluent_ksql_metrics_confluent_ksql_engine_query_stats_bytes_consumed_total\",app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"}",
+              "expr": "{__name__=~\"io_confluent_ksql_metrics_confluent_ksql_engine_query_stats_bytes_consumed_total\",platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"}",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -3672,7 +3672,7 @@
           "targets": [
             {
               "exemplar": true,
-              "expr": "{__name__=~\"io_confluent_ksql_metrics_confluent_ksql_engine_query_stats_messages_consumed_per_sec\",app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"}",
+              "expr": "{__name__=~\"io_confluent_ksql_metrics_confluent_ksql_engine_query_stats_messages_consumed_per_sec\",platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"}",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -3770,7 +3770,7 @@
           "targets": [
             {
               "exemplar": true,
-              "expr": "{__name__=~\"io_confluent_ksql_metrics_confluent_ksql_engine_query_stats_messages_produced_per_sec\",app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"}",
+              "expr": "{__name__=~\"io_confluent_ksql_metrics_confluent_ksql_engine_query_stats_messages_produced_per_sec\",platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"}",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -3868,7 +3868,7 @@
           "targets": [
             {
               "exemplar": true,
-              "expr": "{__name__=~\"io_confluent_ksql_metrics_confluent_ksql_engine_query_stats_num_active_queries\",app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"}",
+              "expr": "{__name__=~\"io_confluent_ksql_metrics_confluent_ksql_engine_query_stats_num_active_queries\",platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"}",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -3966,7 +3966,7 @@
           "targets": [
             {
               "exemplar": true,
-              "expr": "{__name__=~\"io_confluent_ksql_metrics_confluent_ksql_engine_query_stats_num_idle_queries\",app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"}",
+              "expr": "{__name__=~\"io_confluent_ksql_metrics_confluent_ksql_engine_query_stats_num_idle_queries\",platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"}",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -4064,7 +4064,7 @@
           "targets": [
             {
               "exemplar": true,
-              "expr": "{__name__=~\"io_confluent_ksql_metrics_confluent_ksql_engine_query_stats_num_persistent_queries\",app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"}",
+              "expr": "{__name__=~\"io_confluent_ksql_metrics_confluent_ksql_engine_query_stats_num_persistent_queries\",platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"}",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -4119,7 +4119,7 @@
     },
     {
       "collapsed": true,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -4137,7 +4137,7 @@
             "rgba(237, 129, 40, 0.89)",
             "#299c46"
           ],
-          "datasource": null,
+          "datasource": "${DS_PROMETHEUS}",
           "description": "Number of Kafka Schema Registry servers",
           "fieldConfig": {
             "defaults": {},
@@ -4195,7 +4195,7 @@
           "targets": [
             {
               "exemplar": true,
-              "expr": "count({__name__=~\"schemaregistry_.*_jetty_metrics_connections_active\",app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"})",
+              "expr": "count({__name__=~\".*schema.*registry.*jetty_metrics_connections_active\",platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"})",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -4225,7 +4225,7 @@
             "rgba(237, 129, 40, 0.89)",
             "#299c46"
           ],
-          "datasource": null,
+          "datasource": "${DS_PROMETHEUS}",
           "description": "Total number of active TCP connections.",
           "fieldConfig": {
             "defaults": {},
@@ -4282,7 +4282,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum({__name__=~\"schemaregistry_.*_jetty_metrics_connections_active\",app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"})",
+              "expr": "sum({__name__=~\".*schema.*registry.*jetty_metrics_connections_active\",platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"})",
               "format": "time_series",
               "intervalFactor": 1,
               "refId": "A"
@@ -4310,7 +4310,7 @@
             "rgba(237, 129, 40, 0.89)",
             "#d44a3a"
           ],
-          "datasource": null,
+          "datasource": "${DS_PROMETHEUS}",
           "description": "The average rate per second of opened TCP connections.",
           "fieldConfig": {
             "defaults": {},
@@ -4367,7 +4367,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "avg({__name__=~\"schemaregistry_.*_jetty_metrics_connections_opened_rate\",app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"})",
+              "expr": "avg({__name__=~\".*schema.*registry.*jetty_metrics_connections_opened_rate\",platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"})",
               "format": "time_series",
               "intervalFactor": 1,
               "refId": "A"
@@ -4395,7 +4395,7 @@
             "rgba(237, 129, 40, 0.89)",
             "#d44a3a"
           ],
-          "datasource": null,
+          "datasource": "${DS_PROMETHEUS}",
           "description": "The average rate per second of closed TCP connections.",
           "fieldConfig": {
             "defaults": {},
@@ -4452,7 +4452,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "avg({__name__=~\"schemaregistry_.*_jetty_metrics_connections_closed_rate\",app=~\"$component_name\", platform_confluent_io_type=~\"$controller_type\",kubernetes_namespace=~\"$namespace\"})",
+              "expr": "avg({__name__=~\".*schema.*registry.*jetty_metrics_connections_closed_rate\",platform_confluent_io_type=~\"$component_name\",namespace=~\"$namespace\"})",
               "format": "time_series",
               "intervalFactor": 1,
               "refId": "A"
@@ -4477,7 +4477,7 @@
     },
     {
       "collapsed": true,
-      "datasource": null,
+      "datasource": "${DS_PROMETHEUS}",
       "gridPos": {
         "h": 1,
         "w": 24,
@@ -4491,7 +4491,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": null,
+          "datasource": "${DS_PROMETHEUS}",
           "fieldConfig": {
             "defaults": {},
             "overrides": []
@@ -4533,7 +4533,7 @@
           "targets": [
             {
               "exemplar": true,
-              "expr": "confluent_controlcenter_healthcheck_streams_status{kubernetes_namespace=~\"$namespace\",app=~\"$component_name\",platform_confluent_io_type=~\"$controller_type\"}",
+              "expr": "confluent_controlcenter_healthcheck_streams_status{namespace=~\"$namespace\",platform_confluent_io_type=~\"$component_name\"}",
               "format": "time_series",
               "instant": false,
               "interval": "",
@@ -4603,7 +4603,7 @@
         "allValue": ".+",
         "current": {},
         "datasource": "${DS_PROMETHEUS}",
-        "definition": "label_values(kubernetes_namespace)",
+        "definition": "label_values(namespace)",
         "description": null,
         "error": null,
         "hide": 0,
@@ -4613,7 +4613,7 @@
         "name": "namespace",
         "options": [],
         "query": {
-          "query": "label_values(kubernetes_namespace)",
+          "query": "label_values(namespace)",
           "refId": "Prometheus-namespace-Variable-Query"
         },
         "refresh": 1,
@@ -4627,37 +4627,10 @@
         "useTags": false
       },
       {
-        "allValue": ".+",
-        "current": {},
-        "datasource": "${DS_PROMETHEUS}",
-        "definition": "label_values(platform_confluent_io_type)",
-        "description": null,
-        "error": null,
-        "hide": 0,
-        "includeAll": false,
-        "label": "ClusterType",
-        "multi": false,
-        "name": "controller_type",
-        "options": [],
-        "query": {
-          "query": "label_values(platform_confluent_io_type)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 1,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 1,
-        "tagValuesQuery": "",
-        "tags": [],
-        "tagsQuery": "",
-        "type": "query",
-        "useTags": false
-      },
-      {
         "allValue": null,
         "current": {},
         "datasource": "${DS_PROMETHEUS}",
-        "definition": "label_values(kube_pod_labels{label_confluent_platform=\"true\",label_platform_confluent_io_type=\"$controller_type\"}, label_app)",
+        "definition": "label_values(platform_confluent_io_type)",
         "description": null,
         "error": null,
         "hide": 0,
@@ -4667,7 +4640,7 @@
         "name": "component_name",
         "options": [],
         "query": {
-          "query": "label_values(kube_pod_labels{label_confluent_platform=\"true\",label_platform_confluent_io_type=\"$controller_type\"}, label_app)",
+          "query": "label_values(platform_confluent_io_type)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -4712,7 +4685,7 @@
     ]
   },
   "timezone": "",
-  "title": "Confluent Platform",
-  "uid": "platform",
+  "title": "Confluent Platform - Zookeeper Edition",
+  "uid": "confluentplatformzk",
   "version": 10
 }
