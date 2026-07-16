@@ -109,8 +109,7 @@ rules:
   - watch # needed for nonnamespaced deployments
 # Required for CFK 3.3.0+.
 # Hot-reload canary (Gateway): operator creates/observes Jobs to validate new
-# config before promoting it into the shared ConfigMap. See
-# pkg/workflow/hotreload.
+# config before promoting it into the shared ConfigMap.
 - apiGroups:
   - batch
   resources:
