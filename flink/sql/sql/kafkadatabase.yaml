@@ -1,0 +1,26 @@
+# Step 3 - FlinkKafkaDatabase
+#
+# A database belongs to a catalog (catalogRef) and binds to a specific Kafka
+# cluster. It is the SQL namespace your statements read from and write to.
+# connectionSecretRef points at the FlinkSecret holding the Kafka credentials;
+# ddlEnvironments lists the environments allowed to run DDL against this database.
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: FlinkKafkaDatabase
+metadata:
+  name: clickstream
+  namespace: operator
+spec:
+  flinkEnvironment: flink-env1
+  catalogRef:
+    name: kafka-catalog
+  kafkaCluster:
+    connectionConfig:
+      bootstrap.servers: kafka.operator.svc.cluster.local:9071
+  connectionSecretRef:
+    name: flink-connection-secret
+  ddlEnvironments:
+    - flink-env1
+  cmfRestClassRef:
+    name: default
+    namespace: operator
