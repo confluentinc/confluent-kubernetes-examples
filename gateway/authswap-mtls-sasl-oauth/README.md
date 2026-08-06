@@ -76,7 +76,7 @@ kubectl create secret generic file-store-config --from-literal=separator="/" -n 
 - Create JAAS template secret for gateway to Kafka cluster connection.
 ```
 kubectl create secret generic oauth-jaas \
-  --from-literal=oauth-jaas.conf='org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required clientId="%s" clientSecret="%s";' \
+  --from-literal=oauth-jass.conf='org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required clientId="%s" clientSecret="%s";' \
   -n confluent
 ```
 

@@ -65,14 +65,14 @@ kubectl create secret generic file-store-config --from-literal=separator="/" -n 
 - Create the JAAS config secret used by the Gateway to validate inbound client tokens. No client credentials are needed here - the Gateway only verifies the token signature/claims against the IdP's JWKS endpoint.
 ```
 kubectl create secret generic client-oauth-jaas \
-  --from-literal=oauth-jaas.conf='org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;' \
+  --from-literal=oauth-jass.conf='org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;' \
   -n confluent
 ```
 
 - Create the JAAS template secret used by the Gateway for the swapped connection to the Kafka cluster.
 ```
 kubectl create secret generic oauth-jaas \
-  --from-literal=oauth-jaas.conf='org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required clientId="%s" clientSecret="%s";' \
+  --from-literal=oauth-jass.conf='org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required clientId="%s" clientSecret="%s";' \
   -n confluent
 ```
 
