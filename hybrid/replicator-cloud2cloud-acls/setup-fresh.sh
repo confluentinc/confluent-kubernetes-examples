@@ -4,10 +4,10 @@
 set -euo pipefail
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
-ENV=env-26m77m
-SRC=lkc-0x90x6p
-DST=lkc-57wk738
-NS=destination
+ENV="${ENV:-env-26m77m}"
+SRC="${SRC_CLUSTER:-lkc-0x90x6p}"
+DST="${DST_CLUSTER:-lkc-57wk738}"
+NS="${NS:-destination}"
 
 confluent environment use "$ENV" >/dev/null
 
