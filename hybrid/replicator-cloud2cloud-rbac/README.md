@@ -12,7 +12,6 @@ Sibling demos:
 - [`../replicator-cloud2cloud/`](../replicator-cloud2cloud/) — original cloud-to-cloud tutorial (Control Center)
 - [`../replicator-cloud2cloud-acls/`](../replicator-cloud2cloud-acls/) — same SMT pattern with **ACLs**
 
-Personal notes on shared vs separate Schema Registry: [`NOTES-schema-registry.md`](NOTES-schema-registry.md).
 
 ## What you deploy
 
