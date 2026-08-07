@@ -1,0 +1,156 @@
+---
+# Source topics
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: src-orders
+  namespace: ${NS}
+spec:
+  name: demo.orders.avro.v1
+  replicas: 3
+  partitionCount: 3
+  kafkaRest:
+    endpoint: ${KAFKA_REST}
+    kafkaClusterID: ${SRC_CLUSTER}
+    authentication:
+      type: basic
+      basic:
+        secretRef: eu-rbac-source-rest
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: src-customers
+  namespace: ${NS}
+spec:
+  name: demo.customers.avro.v1
+  replicas: 3
+  partitionCount: 3
+  kafkaRest:
+    endpoint: ${KAFKA_REST}
+    kafkaClusterID: ${SRC_CLUSTER}
+    authentication:
+      type: basic
+      basic:
+        secretRef: eu-rbac-source-rest
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: src-inventory
+  namespace: ${NS}
+spec:
+  name: demo.inventory.avro.v1
+  replicas: 3
+  partitionCount: 3
+  kafkaRest:
+    endpoint: ${KAFKA_REST}
+    kafkaClusterID: ${SRC_CLUSTER}
+    authentication:
+      type: basic
+      basic:
+        secretRef: eu-rbac-source-rest
+---
+# Pre-SMT names on DEST (Replicator admin with topic.rename.format=${topic})
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: dest-presmt-orders
+  namespace: ${NS}
+spec:
+  name: demo.orders.avro.v1
+  replicas: 3
+  partitionCount: 3
+  kafkaRest:
+    endpoint: ${KAFKA_REST}
+    kafkaClusterID: ${DST_CLUSTER}
+    authentication:
+      type: basic
+      basic:
+        secretRef: eu-rbac-dest-rest
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: dest-presmt-customers
+  namespace: ${NS}
+spec:
+  name: demo.customers.avro.v1
+  replicas: 3
+  partitionCount: 3
+  kafkaRest:
+    endpoint: ${KAFKA_REST}
+    kafkaClusterID: ${DST_CLUSTER}
+    authentication:
+      type: basic
+      basic:
+        secretRef: eu-rbac-dest-rest
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: dest-presmt-inventory
+  namespace: ${NS}
+spec:
+  name: demo.inventory.avro.v1
+  replicas: 3
+  partitionCount: 3
+  kafkaRest:
+    endpoint: ${KAFKA_REST}
+    kafkaClusterID: ${DST_CLUSTER}
+    authentication:
+      type: basic
+      basic:
+        secretRef: eu-rbac-dest-rest
+---
+# Post-SMT destination topics (RegexRouter: ^(.*)$ -> cloud.$1)
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: dest-cloud-orders
+  namespace: ${NS}
+spec:
+  name: cloud.demo.orders.avro.v1
+  replicas: 3
+  partitionCount: 3
+  kafkaRest:
+    endpoint: ${KAFKA_REST}
+    kafkaClusterID: ${DST_CLUSTER}
+    authentication:
+      type: basic
+      basic:
+        secretRef: eu-rbac-dest-rest
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: dest-cloud-customers
+  namespace: ${NS}
+spec:
+  name: cloud.demo.customers.avro.v1
+  replicas: 3
+  partitionCount: 3
+  kafkaRest:
+    endpoint: ${KAFKA_REST}
+    kafkaClusterID: ${DST_CLUSTER}
+    authentication:
+      type: basic
+      basic:
+        secretRef: eu-rbac-dest-rest
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: dest-cloud-inventory
+  namespace: ${NS}
+spec:
+  name: cloud.demo.inventory.avro.v1
+  replicas: 3
+  partitionCount: 3
+  kafkaRest:
+    endpoint: ${KAFKA_REST}
+    kafkaClusterID: ${DST_CLUSTER}
+    authentication:
+      type: basic
+      basic:
+        secretRef: eu-rbac-dest-rest

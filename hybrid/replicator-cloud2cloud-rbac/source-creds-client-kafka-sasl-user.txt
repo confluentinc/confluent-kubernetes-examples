@@ -1,0 +1,2 @@
+username=<source-ccloud-key>
+password=<source-ccloud-pass>

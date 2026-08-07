@@ -1,0 +1,36 @@
+# Connect worker — dest cluster (RBAC: CloudClusterAdmin). Avro via Schema Registry.
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: replicator-smt-rbac
+  namespace: ${NS}
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-replicator:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
+  podTemplate:
+    envVars:
+      - name: CLASSPATH
+        value: /usr/share/java/kafka-connect-replicator/replicator-rest-extension-7.9.0.jar
+  configOverrides:
+    server:
+      - rest.extension.classes=io.confluent.connect.replicator.monitoring.ReplicatorMonitoringExtension
+      - connector.class=io.confluent.connect.replicator.ReplicatorSourceConnector
+      - connect.protocol=eager
+  dependencies:
+    kafka:
+      bootstrapEndpoint: ${BOOTSTRAP}
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: smt-rbac-worker-plain
+      tls:
+        enabled: true
+        ignoreTrustStoreConfig: true
+    schemaRegistry:
+      url: ${SR_URL}
+      authentication:
+        type: basic
+        basic:
+          secretRef: destination-cloud-sr-access
