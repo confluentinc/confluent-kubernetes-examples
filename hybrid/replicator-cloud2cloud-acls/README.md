@@ -33,10 +33,11 @@ Set the tutorial directory:
 export TUTORIAL_HOME=<Tutorial directory>/hybrid/replicator-cloud2cloud-acls
 ```
 
-Create the namespace:
+Create the namespace (default `destination`; override with `NS=...`):
 
 ```bash
-kubectl create ns destination
+export NS=destination   # optional; this is the default
+kubectl create ns "$NS"
 ```
 
 ### Deploy Confluent for Kubernetes
@@ -44,8 +45,8 @@ kubectl create ns destination
 ```bash
 helm repo add confluentinc https://packages.confluent.io/helm
 helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes \
-  --namespace destination
-kubectl --namespace destination get pods
+  --namespace "$NS"
+kubectl --namespace "$NS" get pods
 ```
 
 ### Prep Confluent Cloud admin credentials
@@ -70,17 +71,14 @@ Defaults match a lab environment. Override as needed before setup:
 
 ```bash
 export ENV=env-xxxxx
+export NS=destination
 export SRC_CLUSTER=lkc-xxxxx
 export DST_CLUSTER=lkc-xxxxx
 export BOOTSTRAP=pkc-xxxxx.region.aws.confluent.cloud:9092
 export KAFKA_REST=https://pkc-xxxxx.region.aws.confluent.cloud:443
 ```
 
-If you change clusters, also update hardcoded bootstrap / cluster IDs in:
-
-- `components-replicator-smt-eu.yaml`
-- `topics.yaml`
-- `connector-smt-eu.yaml.template`
+If you change clusters or endpoints, also update values in the templates under `$TUTORIAL_HOME` (or extend `setup-fresh.sh` the same way as the RBAC demo).
 
 ## Deploy the demo
 
@@ -115,15 +113,15 @@ See `acls.sh` for the exact ACL set. Notable destination ACLs:
 ## Verify
 
 ```bash
-kubectl get connect,connector -n destination | grep smt-eu
+kubectl get connect,connector -n "$NS" | grep smt-eu
 
-kubectl exec -n destination replicator-smt-eu-0 -c replicator-smt-eu -- \
+kubectl exec -n "$NS" replicator-smt-eu-0 -c replicator-smt-eu -- \
   curl -sS http://localhost:8083/connectors/replicator-smt-eu/status
 
-kubectl exec -n destination replicator-smt-eu-0 -c replicator-smt-eu -- \
+kubectl exec -n "$NS" replicator-smt-eu-0 -c replicator-smt-eu -- \
   curl -sS http://localhost:8083/connectors/replicator-smt-eu/topics
 
-kubectl logs -n destination merchant-producer-0 --tail=20
+kubectl logs -n "$NS" merchant-producer-0 --tail=20
 ```
 
 ## Tear down
@@ -142,7 +140,7 @@ Removes this demo’s Connect/connector/producer, topics, secrets, service accou
 | `setup-fresh.sh` | End-to-end deploy |
 | `cleanup-all.sh` | Tear down |
 | `acls.sh` | Minimal ACLs |
-| `components-replicator-smt-eu.yaml` | Connect worker |
-| `connector-smt-eu.yaml.template` | Replicator connector (credentials substituted at apply time) |
-| `topics.yaml` | Source + pre-SMT dest + post-SMT dest topics |
-| `producer.yaml` | Sample producer |
+| `components-replicator-smt-eu.yaml.template` | Connect worker |
+| `connector-smt-eu.yaml.template` | Replicator connector (credentials + namespace substituted at apply time) |
+| `topics.yaml.template` | Source + pre-SMT dest + post-SMT dest topics |
+| `producer.yaml.template` | Sample producer |

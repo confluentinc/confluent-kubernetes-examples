@@ -3,7 +3,7 @@ apiVersion: platform.confluent.io/v1beta1
 kind: Connect
 metadata:
   name: replicator-smt-eu
-  namespace: destination
+  namespace: ${NS}
 spec:
   replicas: 1
   image:

@@ -3,7 +3,7 @@ apiVersion: platform.confluent.io/v1beta1
 kind: Connector
 metadata:
   name: replicator-smt-rbac
-  namespace: destination
+  namespace: ${NS}
 spec:
   connectClusterRef:
     name: replicator-smt-rbac

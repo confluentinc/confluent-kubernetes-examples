@@ -4,7 +4,7 @@ apiVersion: platform.confluent.io/v1beta1
 kind: KafkaTopic
 metadata:
   name: src-orders
-  namespace: destination
+  namespace: ${NS}
 spec:
   name: demo.orders.avro.v1
   replicas: 3
@@ -21,7 +21,7 @@ apiVersion: platform.confluent.io/v1beta1
 kind: KafkaTopic
 metadata:
   name: src-customers
-  namespace: destination
+  namespace: ${NS}
 spec:
   name: demo.customers.avro.v1
   replicas: 3
@@ -38,7 +38,7 @@ apiVersion: platform.confluent.io/v1beta1
 kind: KafkaTopic
 metadata:
   name: src-inventory
-  namespace: destination
+  namespace: ${NS}
 spec:
   name: demo.inventory.avro.v1
   replicas: 3
@@ -56,7 +56,7 @@ apiVersion: platform.confluent.io/v1beta1
 kind: KafkaTopic
 metadata:
   name: dest-presmt-orders
-  namespace: destination
+  namespace: ${NS}
 spec:
   name: demo.orders.avro.v1
   replicas: 3
@@ -73,7 +73,7 @@ apiVersion: platform.confluent.io/v1beta1
 kind: KafkaTopic
 metadata:
   name: dest-presmt-customers
-  namespace: destination
+  namespace: ${NS}
 spec:
   name: demo.customers.avro.v1
   replicas: 3
@@ -90,7 +90,7 @@ apiVersion: platform.confluent.io/v1beta1
 kind: KafkaTopic
 metadata:
   name: dest-presmt-inventory
-  namespace: destination
+  namespace: ${NS}
 spec:
   name: demo.inventory.avro.v1
   replicas: 3
@@ -108,7 +108,7 @@ apiVersion: platform.confluent.io/v1beta1
 kind: KafkaTopic
 metadata:
   name: dest-cloud-orders
-  namespace: destination
+  namespace: ${NS}
 spec:
   name: cloud.demo.orders.avro.v1
   replicas: 3
@@ -125,7 +125,7 @@ apiVersion: platform.confluent.io/v1beta1
 kind: KafkaTopic
 metadata:
   name: dest-cloud-customers
-  namespace: destination
+  namespace: ${NS}
 spec:
   name: cloud.demo.customers.avro.v1
   replicas: 3
@@ -142,7 +142,7 @@ apiVersion: platform.confluent.io/v1beta1
 kind: KafkaTopic
 metadata:
   name: dest-cloud-inventory
-  namespace: destination
+  namespace: ${NS}
 spec:
   name: cloud.demo.inventory.avro.v1
   replicas: 3

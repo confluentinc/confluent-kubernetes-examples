@@ -8,6 +8,7 @@ ENV="${ENV:-env-26m77m}"
 SRC="${SRC_CLUSTER:-lkc-0x90x6p}"
 DST="${DST_CLUSTER:-lkc-57wk738}"
 NS="${NS:-destination}"
+export NS
 
 confluent environment use "$ENV" >/dev/null
 
@@ -72,7 +73,7 @@ WRK_SECRET=$(read_secret "$DIR/worker-apikey.json")
 echo "=== 3) Minimal ACLs ==="
 # ignore already-exists errors
 set +e
-SA_WORKER="$SA_WORKER" SA_SRC="$SA_SRC" SA_DST="$SA_DST" bash "$DIR/acls.sh"
+SA_WORKER="$SA_WORKER" SA_SRC="$SA_SRC" SA_DST="$SA_DST" NS="$NS" bash "$DIR/acls.sh"
 set -e
 
 echo "=== 4) Ensure clean Connect name slot ==="
@@ -108,12 +109,16 @@ kubectl create secret generic merchant-producer-config \
   --from-file=producer-kafka.properties="$DIR/producer-kafka.properties" \
   -n "$NS" --dry-run=client -o yaml | kubectl apply -f -
 
-echo "=== 6) Render connector YAML ==="
+echo "=== 6) Render manifests ==="
+export NS
 export CONNECTOR_SRC_KEY="$SRC_KEY" CONNECTOR_SRC_SECRET="$SRC_SECRET"
 export CONNECTOR_DEST_KEY="$DST_KEY" CONNECTOR_DEST_SECRET="$DST_SECRET"
-# Only substitute credential vars — leave Replicator's ${topic} intact
-envsubst '${CONNECTOR_SRC_KEY} ${CONNECTOR_SRC_SECRET} ${CONNECTOR_DEST_KEY} ${CONNECTOR_DEST_SECRET}' \
+# Only substitute listed vars — leave Replicator's ${topic} intact
+envsubst '${NS} ${CONNECTOR_SRC_KEY} ${CONNECTOR_SRC_SECRET} ${CONNECTOR_DEST_KEY} ${CONNECTOR_DEST_SECRET}' \
   < "$DIR/connector-smt-eu.yaml.template" > "$DIR/connector-smt-eu.yaml"
+envsubst '${NS}' < "$DIR/components-replicator-smt-eu.yaml.template" > "$DIR/components-replicator-smt-eu.yaml"
+envsubst '${NS}' < "$DIR/topics.yaml.template" > "$DIR/topics.yaml"
+envsubst '${NS}' < "$DIR/producer.yaml.template" > "$DIR/producer.yaml"
 
 echo "=== 7) Ensure topics exist, deploy Connect + connector + producer ==="
 kubectl apply -f "$DIR/topics.yaml"

@@ -13,9 +13,9 @@ SR_URL="${SR_URL:-https://psrc-l6o18.us-east-2.aws.confluent.cloud}"
 # Kafka REST for CFK KafkaTopic CRs (derive from bootstrap host if unset)
 KAFKA_REST="${KAFKA_REST:-https://${BOOTSTRAP%%:*}:443}"
 
-export BOOTSTRAP SR_URL KAFKA_REST SRC_CLUSTER="$SRC" DST_CLUSTER="$DST" SR_CLUSTER="$SR"
+export BOOTSTRAP SR_URL KAFKA_REST SRC_CLUSTER="$SRC" DST_CLUSTER="$DST" SR_CLUSTER="$SR" NS
 echo "Endpoints: BOOTSTRAP=$BOOTSTRAP SR_URL=$SR_URL KAFKA_REST=$KAFKA_REST"
-echo "Clusters: SRC=$SRC DST=$DST SR=$SR"
+echo "Clusters: SRC=$SRC DST=$DST SR=$SR NS=$NS"
 
 confluent environment use "$ENV" >/dev/null
 
@@ -111,14 +111,15 @@ echo "=== 5) Render manifests (URLs + connector keys) ==="
 export CONNECTOR_SRC_KEY="$SRC_KEY" CONNECTOR_SRC_SECRET="$SRC_SECRET"
 export CONNECTOR_DEST_KEY="$DST_KEY" CONNECTOR_DEST_SECRET="$DST_SECRET"
 # Only substitute listed vars so Replicator's ${topic} stays literal.
-envsubst '${BOOTSTRAP} ${CONNECTOR_SRC_KEY} ${CONNECTOR_SRC_SECRET} ${CONNECTOR_DEST_KEY} ${CONNECTOR_DEST_SECRET}' \
+envsubst '${NS} ${BOOTSTRAP} ${CONNECTOR_SRC_KEY} ${CONNECTOR_SRC_SECRET} ${CONNECTOR_DEST_KEY} ${CONNECTOR_DEST_SECRET}' \
   < "$DIR/connector.yaml.template" > "$DIR/connector.yaml"
-envsubst '${BOOTSTRAP} ${SR_URL}' \
+envsubst '${NS} ${BOOTSTRAP} ${SR_URL}' \
   < "$DIR/components-connect.yaml.template" > "$DIR/components-connect.yaml"
-envsubst '${KAFKA_REST} ${SRC_CLUSTER} ${DST_CLUSTER}' \
+envsubst '${NS} ${KAFKA_REST} ${SRC_CLUSTER} ${DST_CLUSTER}' \
   < "$DIR/topics.yaml.template" > "$DIR/topics.yaml"
-grep -E 'rename.format|converter|topic.regex|bootstrapEndpoint|schemaRegistry:|endpoint:|kafkaClusterID:' \
-  "$DIR/connector.yaml" "$DIR/components-connect.yaml" "$DIR/topics.yaml" | head -24
+envsubst '${NS}' < "$DIR/producer.yaml.template" > "$DIR/producer.yaml"
+grep -E 'namespace:|rename.format|converter|topic.regex|bootstrapEndpoint|schemaRegistry:|endpoint:|kafkaClusterID:' \
+  "$DIR/connector.yaml" "$DIR/components-connect.yaml" "$DIR/topics.yaml" "$DIR/producer.yaml" | head -30
 
 echo "=== 6) Deploy topics, Connect, connector, producer ==="
 kubectl apply -f "$DIR/topics.yaml"

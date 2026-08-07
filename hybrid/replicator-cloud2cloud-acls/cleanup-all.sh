@@ -53,9 +53,9 @@ delete_topic_rest() {
 for t in \
   "demo.orders.avro.v1" \
   "ccloud-eu.demo.orders.avro.v1" \
-  "destination.replicator-smt-eu-configs" \
-  "destination.replicator-smt-eu-offsets" \
-  "destination.replicator-smt-eu-status"
+  "${NS}.replicator-smt-eu-configs" \
+  "${NS}.replicator-smt-eu-offsets" \
+  "${NS}.replicator-smt-eu-status"
 do
   delete_topic_rest "$DST" "$DST_ADMIN_KEY" "$DST_ADMIN_SECRET" "$t"
 done
@@ -97,6 +97,7 @@ fi
 
 echo "=== 4) Clear local generated files ==="
 rm -f "$DIR"/src-apikey.json "$DIR"/dst-apikey.json "$DIR"/worker-apikey.json \
-  "$DIR"/sa-ids.env "$DIR"/connector-smt-eu.yaml "$DIR"/producer-kafka.properties
+  "$DIR"/sa-ids.env "$DIR"/connector-smt-eu.yaml "$DIR"/producer-kafka.properties \
+  "$DIR"/components-replicator-smt-eu.yaml "$DIR"/topics.yaml "$DIR"/producer.yaml
 
 echo "Cleanup done."

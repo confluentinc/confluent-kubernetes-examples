@@ -54,9 +54,9 @@ DST_TOPICS=(
   "cloud.demo.orders.avro.v1"
   "cloud.demo.customers.avro.v1"
   "cloud.demo.inventory.avro.v1"
-  "destination.replicator-smt-rbac-configs"
-  "destination.replicator-smt-rbac-offsets"
-  "destination.replicator-smt-rbac-status"
+  "${NS}.replicator-smt-rbac-configs"
+  "${NS}.replicator-smt-rbac-offsets"
+  "${NS}.replicator-smt-rbac-status"
 )
 for t in "${DST_TOPICS[@]}"; do del "$DST" "$DST_ADMIN_KEY" "$DST_ADMIN_SECRET" "$t"; done
 for t in "${SRC_TOPICS[@]}"; do del "$SRC" "$SRC_ADMIN_KEY" "$SRC_ADMIN_SECRET" "$t"; done
@@ -113,6 +113,6 @@ fi
 
 rm -f "$DIR"/*-apikey.json "$DIR"/sa-ids.env \
   "$DIR"/connector.yaml "$DIR"/components-connect.yaml "$DIR"/topics.yaml \
-  "$DIR"/producer.properties "$DIR"/producer.env
+  "$DIR"/producer.yaml "$DIR"/producer.properties "$DIR"/producer.env
 
 echo "Cleanup done."

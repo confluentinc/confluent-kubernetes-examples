@@ -43,10 +43,11 @@ Set the tutorial directory:
 export TUTORIAL_HOME=<Tutorial directory>/hybrid/replicator-cloud2cloud-rbac
 ```
 
-Create the namespace:
+Create the namespace (default `destination`; override with `NS=...`):
 
 ```bash
-kubectl create ns destination
+export NS=destination   # optional; this is the default
+kubectl create ns "$NS"
 ```
 
 ### Deploy Confluent for Kubernetes
@@ -54,8 +55,8 @@ kubectl create ns destination
 ```bash
 helm repo add confluentinc https://packages.confluent.io/helm
 helm upgrade --install confluent-operator confluentinc/confluent-for-kubernetes \
-  --namespace destination
-kubectl --namespace destination get pods
+  --namespace "$NS"
+kubectl --namespace "$NS" get pods
 ```
 
 ### Prep Confluent Cloud admin credentials
@@ -79,6 +80,7 @@ You need a logged-in `confluent` CLI user that can create service accounts, API 
 
 ```bash
 export ENV=env-xxxxx
+export NS=destination
 export SRC_CLUSTER=lkc-xxxxx
 export DST_CLUSTER=lkc-xxxxx
 export SR_CLUSTER=lsrc-xxxxx
@@ -87,7 +89,7 @@ export SR_URL=https://psrc-xxxxx.region.aws.confluent.cloud
 export KAFKA_REST=https://pkc-xxxxx.region.aws.confluent.cloud:443
 ```
 
-`setup-fresh.sh` renders templates with these values (`components-connect.yaml.template`, `topics.yaml.template`, `connector.yaml.template`).
+`setup-fresh.sh` renders templates with these values (`components-connect.yaml.template`, `topics.yaml.template`, `connector.yaml.template`, `producer.yaml.template`).
 
 ## Deploy the demo
 
@@ -130,15 +132,15 @@ Passthrough keeps the **source schema ID** in the payload. Consumers resolve Avr
 ## Verify
 
 ```bash
-kubectl get connect,connector -n destination | grep smt-rbac
+kubectl get connect,connector -n "$NS" | grep smt-rbac
 
-kubectl exec -n destination replicator-smt-rbac-0 -c replicator-smt-rbac -- \
+kubectl exec -n "$NS" replicator-smt-rbac-0 -c replicator-smt-rbac -- \
   curl -sS http://localhost:8083/connectors/replicator-smt-rbac/status
 
-kubectl exec -n destination replicator-smt-rbac-0 -c replicator-smt-rbac -- \
+kubectl exec -n "$NS" replicator-smt-rbac-0 -c replicator-smt-rbac -- \
   curl -sS http://localhost:8083/connectors/replicator-smt-rbac/topics
 
-kubectl logs -n destination avro-producer-0 --tail=20
+kubectl logs -n "$NS" avro-producer-0 --tail=20
 ```
 
 ## Tear down
@@ -160,4 +162,4 @@ Removes this demo’s K8s resources, Kafka topics, **hard-deletes** matching Sch
 | `components-connect.yaml.template` | Connect worker |
 | `topics.yaml.template` | Source + pre-SMT + post-SMT topics |
 | `connector.yaml.template` | Replicator connector |
-| `producer.yaml` | Avro sample producer |
+| `producer.yaml.template` | Avro sample producer |

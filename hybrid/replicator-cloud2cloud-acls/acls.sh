@@ -17,6 +17,8 @@ CONNECT_NAME="${CONNECT_NAME:-replicator-smt-eu}"
 CONNECTOR_GROUP="${CONNECTOR_GROUP:-replicator-smt-eu}"
 SRC_TOPIC="${SRC_TOPIC:-demo.orders.avro.v1}"
 DST_TOPIC="${DST_TOPIC:-ccloud-eu.demo.orders.avro.v1}"
+# CFK Connect storage topics / group are prefixed with the K8s namespace
+NS="${NS:-destination}"
 
 confluent environment use "$ENV" >/dev/null
 
@@ -24,8 +26,8 @@ echo "=== DEST: Connect worker ACLs ($SA_WORKER) ==="
 confluent kafka cluster use "$DST" >/dev/null
 confluent kafka acl create --allow --service-account "$SA_WORKER" --operations DESCRIBE --cluster-scope
 confluent kafka acl create --allow --service-account "$SA_WORKER" --operations IDEMPOTENT_WRITE --cluster-scope
-confluent kafka acl create --allow --service-account "$SA_WORKER" --operations CREATE,DESCRIBE,READ,WRITE --topic "destination.${CONNECT_NAME}-" --prefix
-confluent kafka acl create --allow --service-account "$SA_WORKER" --operations DESCRIBE,READ --consumer-group "destination.${CONNECT_NAME}"
+confluent kafka acl create --allow --service-account "$SA_WORKER" --operations CREATE,DESCRIBE,READ,WRITE --topic "${NS}.${CONNECT_NAME}-" --prefix
+confluent kafka acl create --allow --service-account "$SA_WORKER" --operations DESCRIBE,READ --consumer-group "${NS}.${CONNECT_NAME}"
 # Connect worker producer writes the post-SMT dest topic (uses worker creds, not dest.kafka.*)
 confluent kafka acl create --allow --service-account "$SA_WORKER" --operations DESCRIBE,DESCRIBE_CONFIGS,WRITE --topic "$DST_TOPIC"
 # pre-SMT name on dest (admin / metadata with identity rename.format)

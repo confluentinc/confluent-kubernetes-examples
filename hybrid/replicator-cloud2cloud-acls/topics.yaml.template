@@ -4,7 +4,7 @@ apiVersion: platform.confluent.io/v1beta1
 kind: KafkaTopic
 metadata:
   name: demo-orders-source
-  namespace: destination
+  namespace: ${NS}
 spec:
   name: demo.orders.avro.v1
   replicas: 3
@@ -23,7 +23,7 @@ apiVersion: platform.confluent.io/v1beta1
 kind: KafkaTopic
 metadata:
   name: demo-orders-dest-presmt
-  namespace: destination
+  namespace: ${NS}
 spec:
   name: demo.orders.avro.v1
   replicas: 3
@@ -41,7 +41,7 @@ apiVersion: platform.confluent.io/v1beta1
 kind: KafkaTopic
 metadata:
   name: demo-orders-dest-ccloud-eu
-  namespace: destination
+  namespace: ${NS}
 spec:
   name: ccloud-eu.demo.orders.avro.v1
   replicas: 3

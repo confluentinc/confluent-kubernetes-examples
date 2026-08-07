@@ -4,7 +4,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: avro-producer
-  namespace: destination
+  namespace: ${NS}
 spec:
   serviceName: avro-producer
   replicas: 1
@@ -62,7 +62,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: avro-producer
-  namespace: destination
+  namespace: ${NS}
 spec:
   clusterIP: None
   selector:
