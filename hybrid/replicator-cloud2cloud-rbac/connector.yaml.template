@@ -1,0 +1,47 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connector
+metadata:
+  name: replicator-smt-rbac
+  namespace: destination
+spec:
+  connectClusterRef:
+    name: replicator-smt-rbac
+  name: replicator-smt-rbac
+  class: "io.confluent.connect.replicator.ReplicatorSourceConnector"
+  taskMax: 3
+  configs:
+    # Identity rename.format — admin uses source topic names on dest (pre-create them).
+    # RegexRouter SMT owns the cloud.* destination names.
+    topic.rename.format: "${topic}"
+    topic.regex: "demo\\.(orders|customers|inventory)\\.avro\\.v1"
+    topic.auto.create: "false"
+    topic.config.sync: "false"
+    topic.preserve.partitions: "true"
+    offset.topic.commit: "false"
+    offset.timestamps.commit: "false"
+    transforms: "RenameTopic"
+    transforms.RenameTopic.type: "org.apache.kafka.connect.transforms.RegexRouter"
+    transforms.RenameTopic.regex: "^(.*)$"
+    transforms.RenameTopic.replacement: "cloud.$1"
+    confluent.license: ""
+    confluent.topic.replication.factor: "3"
+    confluent.topic.bootstrap.servers: "${BOOTSTRAP}"
+    confluent.topic.sasl.jaas.config: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${CONNECTOR_DEST_KEY}\" password=\"${CONNECTOR_DEST_SECRET}\";"
+    confluent.topic.sasl.mechanism: "PLAIN"
+    confluent.topic.security.protocol: "SASL_SSL"
+    dest.kafka.bootstrap.servers: "${BOOTSTRAP}"
+    dest.kafka.sasl.jaas.config: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${CONNECTOR_DEST_KEY}\" password=\"${CONNECTOR_DEST_SECRET}\";"
+    dest.kafka.sasl.mechanism: "PLAIN"
+    dest.kafka.security.protocol: "SASL_SSL"
+    # Pass through Avro wire format (magic byte + schema id). Do NOT use AvroConverter:
+    # Replicator emits opaque bytes; AvroConverter would register ["null","bytes"] under
+    # the post-SMT subject. Shared Schema Registry: consumers resolve DemoRecord by schema id.
+    key.converter: "io.confluent.connect.replicator.util.ByteArrayConverter"
+    value.converter: "io.confluent.connect.replicator.util.ByteArrayConverter"
+    header.converter: "io.confluent.connect.replicator.util.ByteArrayConverter"
+    src.consumer.group.id: "replicator-smt-rbac"
+    src.kafka.bootstrap.servers: "${BOOTSTRAP}"
+    src.kafka.sasl.jaas.config: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${CONNECTOR_SRC_KEY}\" password=\"${CONNECTOR_SRC_SECRET}\";"
+    src.kafka.sasl.mechanism: "PLAIN"
+    src.kafka.security.protocol: "SASL_SSL"

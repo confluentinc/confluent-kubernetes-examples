@@ -1,0 +1,36 @@
+# Connect worker — destination cluster only (storage topics + produce post-SMT topic)
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: replicator-smt-eu
+  namespace: destination
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-enterprise-replicator:7.9.0
+    init: confluentinc/confluent-init-container:2.11.0
+  podTemplate:
+    envVars:
+      - name: CLASSPATH
+        value: /usr/share/java/kafka-connect-replicator/replicator-rest-extension-7.9.0.jar
+  configOverrides:
+    server:
+      - rest.extension.classes=io.confluent.connect.replicator.monitoring.ReplicatorMonitoringExtension
+      - connector.class=io.confluent.connect.replicator.ReplicatorSourceConnector
+      - connect.protocol=eager
+  dependencies:
+    kafka:
+      bootstrapEndpoint: pkc-921jm.us-east-2.aws.confluent.cloud:9092
+      authentication:
+        type: plain
+        jaasConfig:
+          secretRef: replicator-smt-eu-worker-plain
+      tls:
+        enabled: true
+        ignoreTrustStoreConfig: true
+    schemaRegistry:
+      url: https://psrc-l6o18.us-east-2.aws.confluent.cloud
+      authentication:
+        type: basic
+        basic:
+          secretRef: destination-cloud-sr-access

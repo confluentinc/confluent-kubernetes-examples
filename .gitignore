@@ -9,3 +9,16 @@ flink/oauth/clientCredentials/certs/jks
 flink/sql/certs/ca
 flink/sql/certs/generated
 flink/sql/certs/jks
+
+# replicator-cloud2cloud-acls / rbac generated credentials / rendered manifests
+hybrid/replicator-cloud2cloud-acls/*-apikey.json
+hybrid/replicator-cloud2cloud-acls/sa-ids.env
+hybrid/replicator-cloud2cloud-acls/connector-smt-eu.yaml
+hybrid/replicator-cloud2cloud-acls/producer-kafka.properties
+hybrid/replicator-cloud2cloud-rbac/*-apikey.json
+hybrid/replicator-cloud2cloud-rbac/sa-ids.env
+hybrid/replicator-cloud2cloud-rbac/connector.yaml
+hybrid/replicator-cloud2cloud-rbac/components-connect.yaml
+hybrid/replicator-cloud2cloud-rbac/topics.yaml
+hybrid/replicator-cloud2cloud-rbac/producer.properties
+hybrid/replicator-cloud2cloud-rbac/producer.env

@@ -1,0 +1,69 @@
+---
+# Avro producers — one pod per source topic (kafka-avro-console-producer)
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: avro-producer
+  namespace: destination
+spec:
+  serviceName: avro-producer
+  replicas: 1
+  selector:
+    matchLabels:
+      app: avro-producer
+  template:
+    metadata:
+      labels:
+        app: avro-producer
+    spec:
+      containers:
+      - name: avro-producer
+        image: confluentinc/cp-schema-registry:7.9.0
+        command:
+        - /bin/bash
+        - -c
+        - |
+          set -euo pipefail
+          # shellcheck disable=SC1091
+          source /mnt/producer.env
+          SCHEMA='{"type":"record","name":"DemoRecord","fields":[{"name":"id","type":"string"},{"name":"ts","type":"long"},{"name":"payload","type":"string"}]}'
+          TOPICS=(
+            "demo.orders.avro.v1"
+            "demo.customers.avro.v1"
+            "demo.inventory.avro.v1"
+          )
+          i=0
+          while true; do
+            for topic in "${TOPICS[@]}"; do
+              i=$((i+1))
+              echo "{\"id\":\"${topic}-${i}\",\"ts\":$(date +%s000),\"payload\":\"hello-${i}\"}" | \
+                kafka-avro-console-producer \
+                  --bootstrap-server "${BOOTSTRAP}" \
+                  --topic "${topic}" \
+                  --property schema.registry.url="${SR_URL}" \
+                  --property basic.auth.credentials.source=USER_INFO \
+                  --property basic.auth.user.info="${SR_KEY}:${SR_SECRET}" \
+                  --property value.schema="${SCHEMA}" \
+                  --producer.config /mnt/producer.properties \
+                  >/dev/null
+              echo "produced ${topic} #${i}"
+            done
+            sleep 2
+          done
+        volumeMounts:
+        - name: producer-config
+          mountPath: /mnt
+      volumes:
+      - name: producer-config
+        secret:
+          secretName: avro-producer-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: avro-producer
+  namespace: destination
+spec:
+  clusterIP: None
+  selector:
+    app: avro-producer

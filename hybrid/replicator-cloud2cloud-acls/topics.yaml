@@ -1,0 +1,55 @@
+---
+# Source topic
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: demo-orders-source
+  namespace: destination
+spec:
+  name: demo.orders.avro.v1
+  replicas: 3
+  partitionCount: 3
+  kafkaRest:
+    endpoint: https://pkc-921jm.us-east-2.aws.confluent.cloud:443
+    kafkaClusterID: lkc-0x90x6p
+    authentication:
+      type: basic
+      basic:
+        secretRef: eu-smt-source-rest
+---
+# Pre-SMT name on DEST — required when topic.rename.format=${topic}
+# (Replicator admin path); RegexRouter SMT writes to ccloud-eu.* below.
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: demo-orders-dest-presmt
+  namespace: destination
+spec:
+  name: demo.orders.avro.v1
+  replicas: 3
+  partitionCount: 3
+  kafkaRest:
+    endpoint: https://pkc-921jm.us-east-2.aws.confluent.cloud:443
+    kafkaClusterID: lkc-57wk738
+    authentication:
+      type: basic
+      basic:
+        secretRef: eu-smt-dest-rest
+---
+# Post-SMT destination topic
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: demo-orders-dest-ccloud-eu
+  namespace: destination
+spec:
+  name: ccloud-eu.demo.orders.avro.v1
+  replicas: 3
+  partitionCount: 3
+  kafkaRest:
+    endpoint: https://pkc-921jm.us-east-2.aws.confluent.cloud:443
+    kafkaClusterID: lkc-57wk738
+    authentication:
+      type: basic
+      basic:
+        secretRef: eu-smt-dest-rest
