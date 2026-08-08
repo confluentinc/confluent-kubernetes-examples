@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oracle-config
+  namespace: oracle
+  labels:
+    app: oracle
+data:
+  # Oracle Database 21c Enterprise Edition Configuration
+  ORACLE_SID:          "ORCLCDB"       # The Oracle Database SID that should be used.(Default:ORCLCDB)
+  ORACLE_PDB:          "ORCLPDB1"       # The Oracle Database PDB name that should be used. (Default: ORCLPDB1)
+  ORACLE_PWD:          "CfltOrcl2025"   # The Oracle Database SYS, SYSTEM and PDBADMIN password. (Default: auto-generated)
+  INIT_SGA_SIZE:       "1024"          # The total memory in MB that should be used for all SGA components (Optional)
+  INIT_PGA_SIZE:       "256"          # The target aggregate PGA memory in MB that should be used for all server processes attached to the instance (Optional)
+  ORACLE_EDITION:      "enterprise"    # The Oracle Database Edition [enterprise|standard]. (Default: enterprise)
+  ORACLE_CHARACTERSET: "AL32UTF8"      # The character set that you want used when creating the database. (Default: AL32UTF8)
+  ENABLE_ARCHIVELOG:   "true"          # The ARCHIVELOG mode. By default, set to false. 
+  
+  # XStream Configuration
+  XSTREAM_ADMIN_TBS: "XSTREAM_ADM_TBS"    # XStream administrator tablespace name
+  XSTREAM_TBS: "XSTREAM_TBS"              # XStream tablespace name
+  XSTREAM_ADMIN_USER: "C##CFLTADMIN"      # XStream administrator user
+  XSTREAM_ADMIN_PWD: "password"           # XStream administrator password
+  XSTREAM_CONNECT_USER: "C##CFLTUSER"     # XStream connect user
+  XSTREAM_CONNECT_PWD: "password"         # XStream connect password
+  XSTREAM_OUTBOUND_SERVER: "XOUT"         # XStream outbound server name
+  XSTREAM_SCHEMA: "SAMPLE"                # Schema name for CDC tables
+  XSTREAM_SCHEMA_PWD: "password"          # Schema password for CDC tables
+  XSTREAM_TABLE: "EMPLOYEES"              # Table name for CDC tables
