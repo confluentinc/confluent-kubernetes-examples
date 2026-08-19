@@ -8,6 +8,7 @@
 # Prerequisites:
 #   - kubectl configured with cluster access
 #   - cfssl installed (brew install cfssl / apt install golang-cfssl)
+#   - gettext installed (brew install gettext / apt install gettext-base)
 #   - gcloud authenticated (for GCR image pull)
 #
 # Usage:
@@ -73,6 +74,12 @@ fi
 # Check cfssl
 if ! command -v cfssl &> /dev/null; then
     log_error "cfssl not found. Install with: brew install cfssl (macOS) or apt install golang-cfssl (Linux)"
+    exit 1
+fi
+
+# Check envsubst
+if ! command -v envsubst &> /dev/null; then
+    log_error "envsubst not found.  Install with: brew install gettext (macOS) or apt install gettext-base (Linux)"
     exit 1
 fi
 
