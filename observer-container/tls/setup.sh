@@ -110,6 +110,7 @@ log_success "CA certificate generated"
 
 # Generate KRaft server certificate
 log_info "Generating KRaft server certificate..."
+NAMESPACE="${NAMESPACE:-operator}" envsubst < $TUTORIAL_HOME/certs/server_configs/kraft-server-config.json.template > $TUTORIAL_HOME/certs/server_configs/kraft-server-config.json
 cfssl gencert \
     -ca="$TUTORIAL_HOME/certs/ca/ca.pem" \
     -ca-key="$TUTORIAL_HOME/certs/ca/ca-key.pem" \
@@ -122,6 +123,7 @@ log_success "KRaft certificate generated"
 
 # Generate Kafka server certificate
 log_info "Generating Kafka server certificate..."
+NAMESPACE="${NAMESPACE:-operator}" envsubst < $TUTORIAL_HOME/certs/server_configs/kafka-server-config.json.template > $TUTORIAL_HOME/certs/server_configs/kafka-server-config.json
 cfssl gencert \
     -ca="$TUTORIAL_HOME/certs/ca/ca.pem" \
     -ca-key="$TUTORIAL_HOME/certs/ca/ca-key.pem" \
@@ -165,6 +167,7 @@ log_success "Created secret: tls-kafka"
 kubectl -n "$NAMESPACE" create secret generic credential \
     --from-file=plain-users.json="$TUTORIAL_HOME/creds/creds-kafka-sasl-users.json" \
     --from-file=plain.txt="$TUTORIAL_HOME/creds/creds-client-kafka-sasl-user.txt" \
+    --from-file=kafka-server-plain-interbroker.txt="$TUTORIAL_HOME/creds/creds-client-kafka-sasl-user.txt" \
     --dry-run=client -o yaml | kubectl apply -f -
 log_success "Created secret: credential"
 

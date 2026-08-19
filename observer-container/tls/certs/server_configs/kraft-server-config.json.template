@@ -1,9 +1,9 @@
 {
-  "CN": "kafka",
+  "CN": "kraftcontroller",
   "hosts": [
-    "kafka",
-    "kafka.operator.svc.cluster.local",
-    "*.kafka.operator.svc.cluster.local"
+    "kraftcontroller",
+    "kraftcontroller.${NAMESPACE}.svc.cluster.local",
+    "*.kraftcontroller.${NAMESPACE}.svc.cluster.local"
   ],
   "key": {
     "algo": "rsa",
