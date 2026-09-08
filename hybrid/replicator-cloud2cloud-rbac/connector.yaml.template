@@ -1,0 +1,48 @@
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: Connector
+metadata:
+  name: replicator-smt-rbac
+  namespace: ${NS}
+spec:
+  connectClusterRef:
+    name: replicator-smt-rbac
+  name: replicator-smt-rbac
+  class: "io.confluent.connect.replicator.ReplicatorSourceConnector"
+  taskMax: 3
+  configs:
+    # Identity rename.format — admin uses source topic names on dest (pre-create them).
+    # RegexRouter SMT owns the cloud.* destination names.
+    topic.rename.format: "${topic}"
+    topic.regex: "demo\\.(orders|customers|inventory)\\.avro\\.v1"
+    topic.auto.create: "false"
+    topic.config.sync: "false"
+    topic.preserve.partitions: "true"
+    offset.topic.commit: "false"
+    offset.timestamps.commit: "false"
+    transforms: "RenameTopic"
+    transforms.RenameTopic.type: "org.apache.kafka.connect.transforms.RegexRouter"
+    transforms.RenameTopic.regex: "^(.*)$"
+    transforms.RenameTopic.replacement: "cloud.$1"
+    confluent.license: ""
+    confluent.topic.replication.factor: "3"
+    confluent.topic.bootstrap.servers: "${DST_BOOTSTRAP}"
+    # JAAS resolved at runtime from mountedSecrets (not stored in this CR).
+    confluent.topic.sasl.jaas.config: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${file:/mnt/secrets/replicator-smt-rbac-dest-kafka/plain.txt:username}\" password=\"${file:/mnt/secrets/replicator-smt-rbac-dest-kafka/plain.txt:password}\";"
+    confluent.topic.sasl.mechanism: "PLAIN"
+    confluent.topic.security.protocol: "SASL_SSL"
+    dest.kafka.bootstrap.servers: "${DST_BOOTSTRAP}"
+    dest.kafka.sasl.jaas.config: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${file:/mnt/secrets/replicator-smt-rbac-dest-kafka/plain.txt:username}\" password=\"${file:/mnt/secrets/replicator-smt-rbac-dest-kafka/plain.txt:password}\";"
+    dest.kafka.sasl.mechanism: "PLAIN"
+    dest.kafka.security.protocol: "SASL_SSL"
+    # Pass through Avro wire format (magic byte + schema id). Do NOT use AvroConverter:
+    # Replicator emits opaque bytes; AvroConverter would register ["null","bytes"] under
+    # the post-SMT subject. Shared Schema Registry: consumers resolve DemoRecord by schema id.
+    key.converter: "io.confluent.connect.replicator.util.ByteArrayConverter"
+    value.converter: "io.confluent.connect.replicator.util.ByteArrayConverter"
+    header.converter: "io.confluent.connect.replicator.util.ByteArrayConverter"
+    src.consumer.group.id: "replicator-smt-rbac"
+    src.kafka.bootstrap.servers: "${SRC_BOOTSTRAP}"
+    src.kafka.sasl.jaas.config: "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"${file:/mnt/secrets/replicator-smt-rbac-src-kafka/plain.txt:username}\" password=\"${file:/mnt/secrets/replicator-smt-rbac-src-kafka/plain.txt:password}\";"
+    src.kafka.sasl.mechanism: "PLAIN"
+    src.kafka.security.protocol: "SASL_SSL"
