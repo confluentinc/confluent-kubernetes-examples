@@ -20,7 +20,7 @@ spec:
       - connect.protocol=eager
   dependencies:
     kafka:
-      bootstrapEndpoint: pkc-921jm.us-east-2.aws.confluent.cloud:9092
+      bootstrapEndpoint: ${DST_BOOTSTRAP}
       authentication:
         type: plain
         jaasConfig:
@@ -29,8 +29,12 @@ spec:
         enabled: true
         ignoreTrustStoreConfig: true
     schemaRegistry:
-      url: https://psrc-l6o18.us-east-2.aws.confluent.cloud
+      url: ${SR_URL}
       authentication:
         type: basic
         basic:
           secretRef: destination-cloud-sr-access
+  # FileConfigProvider paths used by the Connector CR (${file:/mnt/secrets/...}).
+  mountedSecrets:
+    - secretRef: replicator-smt-eu-src-kafka
+    - secretRef: replicator-smt-eu-dest-kafka

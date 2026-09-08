@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 # RBAC role bindings for Replicator SMT Avro demo (no Kafka ACLs).
-# Requires: SA_SRC, SA_DST, SA_WORKER
+# Requires: ENV, SRC_CLUSTER, DST_CLUSTER, SR_CLUSTER, SA_SRC, SA_DST, SA_WORKER
 set -euo pipefail
 
-ENV="${ENV:-env-26m77m}"
-SRC="${SRC_CLUSTER:-lkc-0x90x6p}"
-DST="${DST_CLUSTER:-lkc-57wk738}"
-SR="${SR_CLUSTER:-lsrc-81wn160}"
+: "${ENV:?Set ENV (e.g. env-xxxxx)}"
+: "${SRC_CLUSTER:?Set SRC_CLUSTER (e.g. lkc-xxxxx)}"
+: "${DST_CLUSTER:?Set DST_CLUSTER (e.g. lkc-xxxxx)}"
+: "${SR_CLUSTER:?Set SR_CLUSTER (e.g. lsrc-xxxxx)}"
+SRC="$SRC_CLUSTER"
+DST="$DST_CLUSTER"
+SR="$SR_CLUSTER"
 GROUP="${CONNECTOR_GROUP:-replicator-smt-rbac}"
 
 : "${SA_WORKER:?set SA_WORKER}"

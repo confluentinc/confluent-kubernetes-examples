@@ -3,12 +3,16 @@
 set -euo pipefail
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
-ENV="${ENV:-env-26m77m}"
-SRC="${SRC_CLUSTER:-lkc-0x90x6p}"
-DST="${DST_CLUSTER:-lkc-57wk738}"
+: "${ENV:?Set ENV (e.g. env-xxxxx)}"
+: "${SRC_CLUSTER:?Set SRC_CLUSTER (e.g. lkc-xxxxx)}"
+: "${DST_CLUSTER:?Set DST_CLUSTER (e.g. lkc-xxxxx)}"
+: "${SRC_BOOTSTRAP:?Set SRC_BOOTSTRAP (e.g. pkc-xxxxx.region.aws.confluent.cloud:9092)}"
+: "${DST_BOOTSTRAP:?Set DST_BOOTSTRAP (e.g. pkc-yyyyy.region.aws.confluent.cloud:9092)}"
 NS="${NS:-destination}"
-BOOTSTRAP="${BOOTSTRAP:-pkc-921jm.us-east-2.aws.confluent.cloud:9092}"
-REST="${KAFKA_REST:-https://${BOOTSTRAP%%:*}:443}"
+SRC_KAFKA_REST="${SRC_KAFKA_REST:-https://${SRC_BOOTSTRAP%%:*}:443}"
+DST_KAFKA_REST="${DST_KAFKA_REST:-https://${DST_BOOTSTRAP%%:*}:443}"
+SRC="$SRC_CLUSTER"
+DST="$DST_CLUSTER"
 
 confluent environment use "$ENV" >/dev/null
 
@@ -33,6 +37,7 @@ done
 kubectl delete pods -n "$NS" -l app=replicator-smt-eu --force --grace-period=0 --ignore-not-found 2>/dev/null || true
 kubectl delete pods -n "$NS" -l app=merchant-producer --force --grace-period=0 --ignore-not-found 2>/dev/null || true
 kubectl delete secret replicator-smt-eu-worker-plain eu-smt-source-rest eu-smt-dest-rest \
+  replicator-smt-eu-src-kafka replicator-smt-eu-dest-kafka \
   merchant-producer-config -n "$NS" --ignore-not-found || true
 
 echo "=== 2) Delete cloud topics via Kafka REST ==="
@@ -42,11 +47,11 @@ DST_ADMIN_KEY=$(sed -n 's/^username=//p' "$DIR/destination-creds-client-kafka-sa
 DST_ADMIN_SECRET=$(sed -n 's/^password=//p' "$DIR/destination-creds-client-kafka-sasl-user.txt")
 
 delete_topic_rest() {
-  local cluster="$1" key="$2" secret="$3" topic="$4"
+  local rest="$1" cluster="$2" key="$3" secret="$4" topic="$5"
   local enc code
   enc=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$topic")
   code=$(curl -sS -o /tmp/tdel.out -w '%{http_code}' -u "${key}:${secret}" -X DELETE \
-    "${REST}/kafka/v3/clusters/${cluster}/topics/${enc}" || echo err)
+    "${rest}/kafka/v3/clusters/${cluster}/topics/${enc}" || echo err)
   echo "  delete [$cluster] $topic -> HTTP $code"
 }
 
@@ -57,9 +62,9 @@ for t in \
   "${NS}.replicator-smt-eu-offsets" \
   "${NS}.replicator-smt-eu-status"
 do
-  delete_topic_rest "$DST" "$DST_ADMIN_KEY" "$DST_ADMIN_SECRET" "$t"
+  delete_topic_rest "$DST_KAFKA_REST" "$DST" "$DST_ADMIN_KEY" "$DST_ADMIN_SECRET" "$t"
 done
-delete_topic_rest "$SRC" "$SRC_ADMIN_KEY" "$SRC_ADMIN_SECRET" \
+delete_topic_rest "$SRC_KAFKA_REST" "$SRC" "$SRC_ADMIN_KEY" "$SRC_ADMIN_SECRET" \
   "demo.orders.avro.v1"
 
 echo "=== 3) Delete demo service accounts ==="

@@ -3,18 +3,23 @@
 set -euo pipefail
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
-ENV="${ENV:-env-26m77m}"
-SRC="${SRC_CLUSTER:-lkc-0x90x6p}"
-DST="${DST_CLUSTER:-lkc-57wk738}"
-SR="${SR_CLUSTER:-lsrc-81wn160}"
+: "${ENV:?Set ENV (e.g. env-xxxxx)}"
+: "${SRC_CLUSTER:?Set SRC_CLUSTER (e.g. lkc-xxxxx)}"
+: "${DST_CLUSTER:?Set DST_CLUSTER (e.g. lkc-xxxxx)}"
+: "${SR_CLUSTER:?Set SR_CLUSTER (e.g. lsrc-xxxxx)}"
+: "${SRC_BOOTSTRAP:?Set SRC_BOOTSTRAP (e.g. pkc-xxxxx.region.aws.confluent.cloud:9092)}"
+: "${DST_BOOTSTRAP:?Set DST_BOOTSTRAP (e.g. pkc-yyyyy.region.aws.confluent.cloud:9092)}"
+: "${SR_URL:?Set SR_URL (e.g. https://psrc-xxxxx.region.aws.confluent.cloud)}"
 NS="${NS:-destination}"
-BOOTSTRAP="${BOOTSTRAP:-pkc-921jm.us-east-2.aws.confluent.cloud:9092}"
-SR_URL="${SR_URL:-https://psrc-l6o18.us-east-2.aws.confluent.cloud}"
-# Kafka REST for CFK KafkaTopic CRs (derive from bootstrap host if unset)
-KAFKA_REST="${KAFKA_REST:-https://${BOOTSTRAP%%:*}:443}"
+SRC_KAFKA_REST="${SRC_KAFKA_REST:-https://${SRC_BOOTSTRAP%%:*}:443}"
+DST_KAFKA_REST="${DST_KAFKA_REST:-https://${DST_BOOTSTRAP%%:*}:443}"
+SRC="$SRC_CLUSTER"
+DST="$DST_CLUSTER"
+SR="$SR_CLUSTER"
 
-export BOOTSTRAP SR_URL KAFKA_REST SRC_CLUSTER="$SRC" DST_CLUSTER="$DST" SR_CLUSTER="$SR" NS
-echo "Endpoints: BOOTSTRAP=$BOOTSTRAP SR_URL=$SR_URL KAFKA_REST=$KAFKA_REST"
+export ENV SRC_CLUSTER DST_CLUSTER SR_CLUSTER SRC_BOOTSTRAP DST_BOOTSTRAP SRC_KAFKA_REST DST_KAFKA_REST SR_URL NS
+echo "Endpoints: SRC_BOOTSTRAP=$SRC_BOOTSTRAP DST_BOOTSTRAP=$DST_BOOTSTRAP SR_URL=$SR_URL"
+echo "REST: SRC_KAFKA_REST=$SRC_KAFKA_REST DST_KAFKA_REST=$DST_KAFKA_REST"
 echo "Clusters: SRC=$SRC DST=$DST SR=$SR NS=$NS"
 
 confluent environment use "$ENV" >/dev/null
@@ -83,6 +88,14 @@ kubectl create secret generic eu-rbac-dest-rest \
   --from-file=basic.txt=<(printf 'username=%s\npassword=%s\n' "$DST_KEY" "$DST_SECRET") \
   -n "$NS" --dry-run=client -o yaml | kubectl apply -f -
 
+# Connector JAAS — mounted into Connect and referenced via ${file:...} (not inlined in the CR).
+kubectl create secret generic replicator-smt-rbac-src-kafka \
+  --from-file=plain.txt=<(printf 'username=%s\npassword=%s\n' "$SRC_KEY" "$SRC_SECRET") \
+  -n "$NS" --dry-run=client -o yaml | kubectl apply -f -
+kubectl create secret generic replicator-smt-rbac-dest-kafka \
+  --from-file=plain.txt=<(printf 'username=%s\npassword=%s\n' "$DST_KEY" "$DST_SECRET") \
+  -n "$NS" --dry-run=client -o yaml | kubectl apply -f -
+
 # Ensure destination SR secret exists for Connect
 if ! kubectl get secret destination-cloud-sr-access -n "$NS" >/dev/null 2>&1; then
   kubectl create secret generic destination-cloud-sr-access \
@@ -91,13 +104,13 @@ if ! kubectl get secret destination-cloud-sr-access -n "$NS" >/dev/null 2>&1; th
 fi
 
 cat > "$DIR/producer.properties" <<EOF
-bootstrap.servers=${BOOTSTRAP}
+bootstrap.servers=${SRC_BOOTSTRAP}
 security.protocol=SASL_SSL
 sasl.mechanism=PLAIN
 sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="${SRC_KEY}" password="${SRC_SECRET}";
 EOF
 cat > "$DIR/producer.env" <<EOF
-BOOTSTRAP=${BOOTSTRAP}
+BOOTSTRAP=${SRC_BOOTSTRAP}
 SR_URL=${SR_URL}
 SR_KEY=${SRC_SR_KEY}
 SR_SECRET=${SRC_SR_SECRET}
@@ -107,15 +120,13 @@ kubectl create secret generic avro-producer-config \
   --from-file=producer.env="$DIR/producer.env" \
   -n "$NS" --dry-run=client -o yaml | kubectl apply -f -
 
-echo "=== 5) Render manifests (URLs + connector keys) ==="
-export CONNECTOR_SRC_KEY="$SRC_KEY" CONNECTOR_SRC_SECRET="$SRC_SECRET"
-export CONNECTOR_DEST_KEY="$DST_KEY" CONNECTOR_DEST_SECRET="$DST_SECRET"
-# Only substitute listed vars so Replicator's ${topic} stays literal.
-envsubst '${NS} ${BOOTSTRAP} ${CONNECTOR_SRC_KEY} ${CONNECTOR_SRC_SECRET} ${CONNECTOR_DEST_KEY} ${CONNECTOR_DEST_SECRET}' \
+echo "=== 5) Render manifests (URLs) ==="
+# Only substitute listed vars so Replicator's ${topic} and ${file:...} stay literal.
+envsubst '${NS} ${SRC_BOOTSTRAP} ${DST_BOOTSTRAP}' \
   < "$DIR/connector.yaml.template" > "$DIR/connector.yaml"
-envsubst '${NS} ${BOOTSTRAP} ${SR_URL}' \
+envsubst '${NS} ${DST_BOOTSTRAP} ${SR_URL}' \
   < "$DIR/components-connect.yaml.template" > "$DIR/components-connect.yaml"
-envsubst '${NS} ${KAFKA_REST} ${SRC_CLUSTER} ${DST_CLUSTER}' \
+envsubst '${NS} ${SRC_KAFKA_REST} ${DST_KAFKA_REST} ${SRC_CLUSTER} ${DST_CLUSTER}' \
   < "$DIR/topics.yaml.template" > "$DIR/topics.yaml"
 envsubst '${NS}' < "$DIR/producer.yaml.template" > "$DIR/producer.yaml"
 grep -E 'namespace:|rename.format|converter|topic.regex|bootstrapEndpoint|schemaRegistry:|endpoint:|kafkaClusterID:' \

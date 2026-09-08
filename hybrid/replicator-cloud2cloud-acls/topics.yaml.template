@@ -10,8 +10,8 @@ spec:
   replicas: 3
   partitionCount: 3
   kafkaRest:
-    endpoint: https://pkc-921jm.us-east-2.aws.confluent.cloud:443
-    kafkaClusterID: lkc-0x90x6p
+    endpoint: ${SRC_KAFKA_REST}
+    kafkaClusterID: ${SRC_CLUSTER}
     authentication:
       type: basic
       basic:
@@ -29,8 +29,8 @@ spec:
   replicas: 3
   partitionCount: 3
   kafkaRest:
-    endpoint: https://pkc-921jm.us-east-2.aws.confluent.cloud:443
-    kafkaClusterID: lkc-57wk738
+    endpoint: ${DST_KAFKA_REST}
+    kafkaClusterID: ${DST_CLUSTER}
     authentication:
       type: basic
       basic:
@@ -47,8 +47,8 @@ spec:
   replicas: 3
   partitionCount: 3
   kafkaRest:
-    endpoint: https://pkc-921jm.us-east-2.aws.confluent.cloud:443
-    kafkaClusterID: lkc-57wk738
+    endpoint: ${DST_KAFKA_REST}
+    kafkaClusterID: ${DST_CLUSTER}
     authentication:
       type: basic
       basic:

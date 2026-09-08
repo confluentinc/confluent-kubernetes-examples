@@ -10,7 +10,7 @@ spec:
   replicas: 3
   partitionCount: 3
   kafkaRest:
-    endpoint: ${KAFKA_REST}
+    endpoint: ${SRC_KAFKA_REST}
     kafkaClusterID: ${SRC_CLUSTER}
     authentication:
       type: basic
@@ -27,7 +27,7 @@ spec:
   replicas: 3
   partitionCount: 3
   kafkaRest:
-    endpoint: ${KAFKA_REST}
+    endpoint: ${SRC_KAFKA_REST}
     kafkaClusterID: ${SRC_CLUSTER}
     authentication:
       type: basic
@@ -44,7 +44,7 @@ spec:
   replicas: 3
   partitionCount: 3
   kafkaRest:
-    endpoint: ${KAFKA_REST}
+    endpoint: ${SRC_KAFKA_REST}
     kafkaClusterID: ${SRC_CLUSTER}
     authentication:
       type: basic
@@ -62,7 +62,7 @@ spec:
   replicas: 3
   partitionCount: 3
   kafkaRest:
-    endpoint: ${KAFKA_REST}
+    endpoint: ${DST_KAFKA_REST}
     kafkaClusterID: ${DST_CLUSTER}
     authentication:
       type: basic
@@ -79,7 +79,7 @@ spec:
   replicas: 3
   partitionCount: 3
   kafkaRest:
-    endpoint: ${KAFKA_REST}
+    endpoint: ${DST_KAFKA_REST}
     kafkaClusterID: ${DST_CLUSTER}
     authentication:
       type: basic
@@ -96,7 +96,7 @@ spec:
   replicas: 3
   partitionCount: 3
   kafkaRest:
-    endpoint: ${KAFKA_REST}
+    endpoint: ${DST_KAFKA_REST}
     kafkaClusterID: ${DST_CLUSTER}
     authentication:
       type: basic
@@ -114,7 +114,7 @@ spec:
   replicas: 3
   partitionCount: 3
   kafkaRest:
-    endpoint: ${KAFKA_REST}
+    endpoint: ${DST_KAFKA_REST}
     kafkaClusterID: ${DST_CLUSTER}
     authentication:
       type: basic
@@ -131,7 +131,7 @@ spec:
   replicas: 3
   partitionCount: 3
   kafkaRest:
-    endpoint: ${KAFKA_REST}
+    endpoint: ${DST_KAFKA_REST}
     kafkaClusterID: ${DST_CLUSTER}
     authentication:
       type: basic
@@ -148,7 +148,7 @@ spec:
   replicas: 3
   partitionCount: 3
   kafkaRest:
-    endpoint: ${KAFKA_REST}
+    endpoint: ${DST_KAFKA_REST}
     kafkaClusterID: ${DST_CLUSTER}
     authentication:
       type: basic

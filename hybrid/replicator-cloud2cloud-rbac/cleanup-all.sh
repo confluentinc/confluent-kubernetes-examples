@@ -2,12 +2,16 @@
 # Tear down replicator-cloud2cloud-rbac demo (K8s + Confluent Cloud + SR hard-delete).
 set -euo pipefail
 DIR="$(cd "$(dirname "$0")" && pwd)"
-ENV="${ENV:-env-26m77m}"
-SRC="${SRC_CLUSTER:-lkc-0x90x6p}"
-DST="${DST_CLUSTER:-lkc-57wk738}"
+: "${ENV:?Set ENV (e.g. env-xxxxx)}"
+: "${SRC_CLUSTER:?Set SRC_CLUSTER (e.g. lkc-xxxxx)}"
+: "${DST_CLUSTER:?Set DST_CLUSTER (e.g. lkc-xxxxx)}"
+: "${SRC_BOOTSTRAP:?Set SRC_BOOTSTRAP (e.g. pkc-xxxxx.region.aws.confluent.cloud:9092)}"
+: "${DST_BOOTSTRAP:?Set DST_BOOTSTRAP (e.g. pkc-yyyyy.region.aws.confluent.cloud:9092)}"
 NS="${NS:-destination}"
-BOOTSTRAP="${BOOTSTRAP:-pkc-921jm.us-east-2.aws.confluent.cloud:9092}"
-REST="${KAFKA_REST:-https://${BOOTSTRAP%%:*}:443}"
+SRC_KAFKA_REST="${SRC_KAFKA_REST:-https://${SRC_BOOTSTRAP%%:*}:443}"
+DST_KAFKA_REST="${DST_KAFKA_REST:-https://${DST_BOOTSTRAP%%:*}:443}"
+SRC="$SRC_CLUSTER"
+DST="$DST_CLUSTER"
 
 confluent environment use "$ENV" >/dev/null
 
@@ -29,7 +33,8 @@ for r in $(kubectl get connect,connector,kafkatopic -n "$NS" -o name 2>/dev/null
 done
 kubectl delete pods -n "$NS" -l app=replicator-smt-rbac --force --grace-period=0 --ignore-not-found 2>/dev/null || true
 kubectl delete pods -n "$NS" -l app=avro-producer --force --grace-period=0 --ignore-not-found 2>/dev/null || true
-kubectl delete secret smt-rbac-worker-plain eu-rbac-source-rest eu-rbac-dest-rest avro-producer-config \
+kubectl delete secret smt-rbac-worker-plain eu-rbac-source-rest eu-rbac-dest-rest \
+  replicator-smt-rbac-src-kafka replicator-smt-rbac-dest-kafka avro-producer-config \
   -n "$NS" --ignore-not-found
 
 SRC_ADMIN_KEY=$(sed -n 's/^username=//p' "$DIR/source-creds-client-kafka-sasl-user.txt")
@@ -38,10 +43,10 @@ DST_ADMIN_KEY=$(sed -n 's/^username=//p' "$DIR/destination-creds-client-kafka-sa
 DST_ADMIN_SECRET=$(sed -n 's/^password=//p' "$DIR/destination-creds-client-kafka-sasl-user.txt")
 
 del() {
-  local cluster="$1" key="$2" secret="$3" topic="$4"
+  local rest="$1" cluster="$2" key="$3" secret="$4" topic="$5"
   local enc; enc=$(python3 -c "import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=''))" "$topic")
   curl -sS -o /dev/null -w "  del [$cluster] $topic -> %{http_code}\n" -u "${key}:${secret}" -X DELETE \
-    "${REST}/kafka/v3/clusters/${cluster}/topics/${enc}" || true
+    "${rest}/kafka/v3/clusters/${cluster}/topics/${enc}" || true
 }
 
 SRC_TOPICS=(
@@ -58,10 +63,24 @@ DST_TOPICS=(
   "${NS}.replicator-smt-rbac-offsets"
   "${NS}.replicator-smt-rbac-status"
 )
-for t in "${DST_TOPICS[@]}"; do del "$DST" "$DST_ADMIN_KEY" "$DST_ADMIN_SECRET" "$t"; done
-for t in "${SRC_TOPICS[@]}"; do del "$SRC" "$SRC_ADMIN_KEY" "$SRC_ADMIN_SECRET" "$t"; done
+for t in "${DST_TOPICS[@]}"; do del "$DST_KAFKA_REST" "$DST" "$DST_ADMIN_KEY" "$DST_ADMIN_SECRET" "$t"; done
+for t in "${SRC_TOPICS[@]}"; do del "$SRC_KAFKA_REST" "$SRC" "$SRC_ADMIN_KEY" "$SRC_ADMIN_SECRET" "$t"; done
 
-SR_PREFIXES=("demo." "cloud.demo.")
+# Exact demo subjects only (not a prefix scan of demo. / cloud.demo. in the environment).
+SR_SUBJECTS=(
+  "demo.orders.avro.v1-key"
+  "demo.orders.avro.v1-value"
+  "demo.customers.avro.v1-key"
+  "demo.customers.avro.v1-value"
+  "demo.inventory.avro.v1-key"
+  "demo.inventory.avro.v1-value"
+  "cloud.demo.orders.avro.v1-key"
+  "cloud.demo.orders.avro.v1-value"
+  "cloud.demo.customers.avro.v1-key"
+  "cloud.demo.customers.avro.v1-value"
+  "cloud.demo.inventory.avro.v1-key"
+  "cloud.demo.inventory.avro.v1-value"
+)
 
 hard_del_subject() {
   local subject="$1"
@@ -74,25 +93,9 @@ hard_del_subject() {
   echo "    hard: ${hard}"
 }
 
-echo "=== Schema Registry hard delete ==="
-for prefix in "${SR_PREFIXES[@]}"; do
-  confluent schema-registry subject list --prefix "$prefix" --all --environment "$ENV" -o json 2>/dev/null \
-    | python3 -c '
-import json,sys
-try:
-  data=json.load(sys.stdin)
-except Exception:
-  data=[]
-if isinstance(data, dict):
-  data=data.get("data") or data.get("subjects") or []
-for row in data:
-  if isinstance(row, str):
-    print(row)
-  elif isinstance(row, dict):
-    print(row.get("subject") or row.get("name") or "")
-' | while read -r subj; do
-    [[ -n "$subj" ]] && hard_del_subject "$subj"
-  done
+echo "=== Schema Registry hard delete (exact demo subjects) ==="
+for subj in "${SR_SUBJECTS[@]}"; do
+  hard_del_subject "$subj"
 done
 
 if [[ -f "$DIR/sa-ids.env" ]]; then

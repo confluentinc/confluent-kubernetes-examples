@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
-# Minimal ACLs for fresh Replicator SMT EU stack (split source / dest / worker SAs)
-# env-26m77m / moshe-repl
+# Minimal ACLs for the Replicator SMT stack (split source / dest / worker SAs).
+# Requires: ENV, SRC_CLUSTER, DST_CLUSTER, SA_WORKER, SA_SRC, SA_DST
 set -euo pipefail
 
-# Override via env if needed (defaults match the moshe-repl demo)
-ENV="${ENV:-env-26m77m}"
-SRC="${SRC_CLUSTER:-lkc-0x90x6p}"
-DST="${DST_CLUSTER:-lkc-57wk738}"
+: "${ENV:?Set ENV (e.g. env-xxxxx)}"
+: "${SRC_CLUSTER:?Set SRC_CLUSTER (e.g. lkc-xxxxx)}"
+: "${DST_CLUSTER:?Set DST_CLUSTER (e.g. lkc-xxxxx)}"
+SRC="$SRC_CLUSTER"
+DST="$DST_CLUSTER"
 
 # Filled by setup-fresh.sh (or export before running)
 : "${SA_WORKER:?set SA_WORKER}"

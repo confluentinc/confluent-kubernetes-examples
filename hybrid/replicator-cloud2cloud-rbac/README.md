@@ -76,7 +76,9 @@ password=<cloud-api-secret>
 
 You need a logged-in `confluent` CLI user that can create service accounts, API keys, and RBAC role bindings.
 
-### Optional overrides
+### Required cluster identifiers
+
+Set these before `setup-fresh.sh` or `cleanup-all.sh`. There are no lab defaults; the scripts fail if they are unset.
 
 ```bash
 export ENV=env-xxxxx
@@ -84,9 +86,12 @@ export NS=destination
 export SRC_CLUSTER=lkc-xxxxx
 export DST_CLUSTER=lkc-xxxxx
 export SR_CLUSTER=lsrc-xxxxx
-export BOOTSTRAP=pkc-xxxxx.region.aws.confluent.cloud:9092
+export SRC_BOOTSTRAP=pkc-xxxxx.region.aws.confluent.cloud:9092
+export DST_BOOTSTRAP=pkc-yyyyy.region.aws.confluent.cloud:9092
 export SR_URL=https://psrc-xxxxx.region.aws.confluent.cloud
-export KAFKA_REST=https://pkc-xxxxx.region.aws.confluent.cloud:443
+# optional; derived from the bootstrap host if unset
+export SRC_KAFKA_REST=https://pkc-xxxxx.region.aws.confluent.cloud:443
+export DST_KAFKA_REST=https://pkc-yyyyy.region.aws.confluent.cloud:443
 ```
 
 `setup-fresh.sh` renders templates with these values (`components-connect.yaml.template`, `topics.yaml.template`, `connector.yaml.template`, `producer.yaml.template`).
@@ -117,6 +122,7 @@ Connect produces post-SMT records with the **worker** credentials, not `dest.kaf
 
 ## Connector notes
 
+- Connector `src.kafka` / `dest.kafka` / `confluent.topic` JAAS is **not** written into the Connector CR. Setup creates Kubernetes secrets (`replicator-smt-rbac-src-kafka`, `replicator-smt-rbac-dest-kafka`), the Connect CR mounts them (`mountedSecrets`), and the connector config uses CFK’s `${file:/mnt/secrets/...}` FileConfigProvider references. See [CFK mounted secrets](https://docs.confluent.io/operator/current/co-manage-connectors.html#mounted-secrets-for-credentials).
 - `offset.topic.commit=false` and `offset.timestamps.commit=false` avoid provenance topic create issues under tighter auth
 - Use **`ByteArrayConverter`** for key/value/header  
   Do **not** use `AvroConverter` with Replicator + SMT: Replicator emits opaque bytes, and AvroConverter registers `["null","bytes"]` under post-SMT subjects
@@ -150,7 +156,9 @@ cd $TUTORIAL_HOME
 ./cleanup-all.sh
 ```
 
-Removes this demo’s K8s resources, Kafka topics, **hard-deletes** matching Schema Registry subjects, service accounts/API keys, and generated local files.
+Removes this demo’s K8s resources, Kafka topics, service accounts/API keys, and generated local files.
+
+**Destructive:** it also **hard-deletes** a fixed list of Schema Registry subjects used by this demo (`demo.{orders,customers,inventory}.avro.v1-{key,value}` and `cloud.demo.*` equivalents). It does **not** scan the environment by prefix. Confirm `ENV` points at the intended Confluent Cloud environment before running this in a shared account.
 
 ## Layout
 
@@ -161,5 +169,5 @@ Removes this demo’s K8s resources, Kafka topics, **hard-deletes** matching Sch
 | `rbac.sh` | Role bindings |
 | `components-connect.yaml.template` | Connect worker |
 | `topics.yaml.template` | Source + pre-SMT + post-SMT topics |
-| `connector.yaml.template` | Replicator connector |
+| `connector.yaml.template` | Replicator connector (JAAS via mounted secrets) |
 | `producer.yaml.template` | Avro sample producer |

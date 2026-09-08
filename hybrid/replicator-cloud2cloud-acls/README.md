@@ -56,6 +56,7 @@ Edit the placeholder files in `$TUTORIAL_HOME` (used by cleanup / Kafka REST):
 ```
 source-creds-client-kafka-sasl-user.txt
 destination-creds-client-kafka-sasl-user.txt
+destination-creds-schemaRegistry-user.txt
 ```
 
 ```
@@ -65,20 +66,24 @@ password=<source-or-dest-cloud-api-secret>
 
 You also need a logged-in `confluent` CLI user that can create service accounts, API keys, and ACLs.
 
-### Optional cluster overrides
+### Required cluster identifiers
 
-Defaults match a lab environment. Override as needed before setup:
+Set these before `setup-fresh.sh` or `cleanup-all.sh`. There are no lab defaults; the scripts fail if they are unset.
 
 ```bash
 export ENV=env-xxxxx
 export NS=destination
 export SRC_CLUSTER=lkc-xxxxx
 export DST_CLUSTER=lkc-xxxxx
-export BOOTSTRAP=pkc-xxxxx.region.aws.confluent.cloud:9092
-export KAFKA_REST=https://pkc-xxxxx.region.aws.confluent.cloud:443
+export SRC_BOOTSTRAP=pkc-xxxxx.region.aws.confluent.cloud:9092
+export DST_BOOTSTRAP=pkc-yyyyy.region.aws.confluent.cloud:9092
+export SR_URL=https://psrc-xxxxx.region.aws.confluent.cloud
+# optional; derived from the bootstrap host if unset
+export SRC_KAFKA_REST=https://pkc-xxxxx.region.aws.confluent.cloud:443
+export DST_KAFKA_REST=https://pkc-yyyyy.region.aws.confluent.cloud:443
 ```
 
-If you change clusters or endpoints, also update values in the templates under `$TUTORIAL_HOME` (or extend `setup-fresh.sh` the same way as the RBAC demo).
+`setup-fresh.sh` renders templates with these values (`components-replicator-smt-eu.yaml.template`, `topics.yaml.template`, `connector-smt-eu.yaml.template`, `producer.yaml.template`).
 
 ## Deploy the demo
 
@@ -104,6 +109,8 @@ This will:
 | `sa-rep-smt-worker` | destination | Connect storage topics + **produce** of post-SMT records |
 
 Connect produces post-SMT data with the **worker** credentials (not `dest.kafka.*`).
+
+Connector `src.kafka` / `dest.kafka` / `confluent.topic` JAAS is **not** written into the Connector CR. Setup creates Kubernetes secrets (`replicator-smt-eu-src-kafka`, `replicator-smt-eu-dest-kafka`), the Connect CR mounts them (`mountedSecrets`), and the connector config uses CFK’s `${file:/mnt/secrets/...}` FileConfigProvider references. API keys stay in Secrets (not in etcd as plaintext CR fields). See [CFK mounted secrets](https://docs.confluent.io/operator/current/co-manage-connectors.html#mounted-secrets-for-credentials).
 
 See `acls.sh` for the exact ACL set. Notable destination ACLs:
 
@@ -131,7 +138,7 @@ cd $TUTORIAL_HOME
 ./cleanup-all.sh
 ```
 
-Removes this demo’s Connect/connector/producer, topics, secrets, service accounts/API keys, and generated local files.
+Requires the same `ENV` / cluster / bootstrap variables as setup. Removes this demo’s Connect/connector/producer, topics, secrets, service accounts/API keys, and generated local files.
 
 ## Layout
 
@@ -141,6 +148,6 @@ Removes this demo’s Connect/connector/producer, topics, secrets, service accou
 | `cleanup-all.sh` | Tear down |
 | `acls.sh` | Minimal ACLs |
 | `components-replicator-smt-eu.yaml.template` | Connect worker |
-| `connector-smt-eu.yaml.template` | Replicator connector (credentials + namespace substituted at apply time) |
+| `connector-smt-eu.yaml.template` | Replicator connector (namespace + endpoints substituted; JAAS via mounted secrets) |
 | `topics.yaml.template` | Source + pre-SMT dest + post-SMT dest topics |
 | `producer.yaml.template` | Sample producer |

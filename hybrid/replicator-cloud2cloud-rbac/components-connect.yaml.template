@@ -20,7 +20,7 @@ spec:
       - connect.protocol=eager
   dependencies:
     kafka:
-      bootstrapEndpoint: ${BOOTSTRAP}
+      bootstrapEndpoint: ${DST_BOOTSTRAP}
       authentication:
         type: plain
         jaasConfig:
@@ -34,3 +34,7 @@ spec:
         type: basic
         basic:
           secretRef: destination-cloud-sr-access
+  # FileConfigProvider paths used by the Connector CR (${file:/mnt/secrets/...}).
+  mountedSecrets:
+    - secretRef: replicator-smt-rbac-src-kafka
+    - secretRef: replicator-smt-rbac-dest-kafka
