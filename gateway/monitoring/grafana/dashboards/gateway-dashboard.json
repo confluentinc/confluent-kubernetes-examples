@@ -1,0 +1,755 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0.1
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 16,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "8.0.0",
+      "targets": [
+        {
+          "expr": "kroxylicious_client_to_proxy_connections_total",
+          "interval": "",
+          "legendFormat": "Client Connections - {{virtual_cluster}} (Broker#{{node_id}})",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Client Connections",
+      "type": "stat"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "rate(kroxylicious_client_to_proxy_connections_total[5m])",
+          "interval": "",
+          "legendFormat": "Client to Proxy Connection Rate - {{virtual_cluster}} (Broker#{{node_id}})",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(kroxylicious_proxy_to_server_connections_total[5m])",
+          "interval": "",
+          "legendFormat": "Proxy to Server Connection Rate - {{virtual_cluster}} (Broker#{{node_id}})",
+          "refId": "B"
+        }
+      ],
+      "title": "Connection Rates",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 24
+      },
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "rate(kroxylicious_client_to_proxy_request_total[5m])",
+          "interval": "",
+          "legendFormat": "Client to Proxy Request Rate - {{api_key}} v{{api_version}} (Broker#{{node_id}})",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(kroxylicious_proxy_to_client_response_total[5m])",
+          "interval": "",
+          "legendFormat": "Proxy to Client Response Rate - {{api_key}} v{{api_version}} (Broker#{{node_id}})",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(kroxylicious_server_to_proxy_response_total[5m])",
+          "interval": "",
+          "legendFormat": "Server to Proxy Response Rate - {{api_key}} v{{api_version}} (Broker#{{node_id}})",
+          "refId": "C"
+        }
+      ],
+      "title": "Kroxylicious Request/Response Rates",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 16,
+        "y": 32
+      },
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "rate(kroxylicious_client_to_proxy_request_size_bytes_sum[5m]) / rate(kroxylicious_client_to_proxy_request_size_bytes_count[5m])",
+          "interval": "",
+          "legendFormat": "Avg Request Size - {{virtual_cluster}} (Broker#{{node_id}}) - {{api_key}}v{{api_version}}",
+          "refId": "A"
+        },
+        {
+          "expr": "kroxylicious_client_to_proxy_request_size_bytes_max",
+          "interval": "",
+          "legendFormat": "Max Request Size - {{virtual_cluster}} (Broker#{{node_id}}) - {{api_key}}v{{api_version}}",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(kroxylicious_proxy_to_client_response_size_bytes_sum[5m]) / rate(kroxylicious_proxy_to_client_response_size_bytes_count[5m])",
+          "interval": "",
+          "legendFormat": "Avg Response Size - {{virtual_cluster}} (Broker#{{node_id}}) - {{api_key}}v{{api_version}}",
+          "refId": "C"
+        },
+        {
+          "expr": "kroxylicious_proxy_to_client_response_size_bytes_max",
+          "interval": "",
+          "legendFormat": "Max Response Size - {{virtual_cluster}} (Broker#{{node_id}}) - {{api_key}}v{{api_version}}",
+          "refId": "D"
+        }
+      ],
+      "title": "Payload Sizes",
+      "type": "timeseries"
+    },
+    {
+      "title": "AuthSwap Metrics",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 38
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "### AuthSwap Metrics\nThis section contains metrics related to the AuthSwap feature in the Gateway. It includes client and cluster authentication rates, end-to-end latency, and secret store latency.",
+        "showTitle": true
+      }
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 40
+      },
+      "id": 11,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "rate(gateway_authswap_client_auth_total{result=\"success\"}[5m])",
+          "interval": "",
+          "legendFormat": "Client Auth Success Rate - {{route}}",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(gateway_authswap_client_auth_total{result=\"failure\"}[5m])",
+          "interval": "",
+          "legendFormat": "Client Auth Failure Rate - {{route}}",
+          "refId": "B"
+        }
+      ],
+      "title": "Client Authentication Rates",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 40
+      },
+      "id": 12,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "rate(gateway_authswap_cluster_auth_total{result=\"success\"}[5m])",
+          "interval": "",
+          "legendFormat": "Cluster Auth Success Rate - {{route}}",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(gateway_authswap_cluster_auth_total{result=\"failure\"}[5m])",
+          "interval": "",
+          "legendFormat": "Cluster Auth Failure Rate - {{route}}",
+          "refId": "B"
+        }
+      ],
+      "title": "Cluster Authentication Rates",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 48
+      },
+      "id": 13,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "gateway_authswap_latency_seconds{quantile=\"0.5\"}",
+          "interval": "",
+          "legendFormat": "50th percentile - {{route}}",
+          "refId": "A"
+        },
+        {
+          "expr": "gateway_authswap_latency_seconds{quantile=\"0.95\"}",
+          "interval": "",
+          "legendFormat": "95th percentile - {{route}}",
+          "refId": "B"
+        },
+        {
+          "expr": "gateway_authswap_latency_seconds{quantile=\"0.99\"}",
+          "interval": "",
+          "legendFormat": "99th percentile - {{route}}",
+          "refId": "C"
+        }
+      ],
+      "title": "AuthSwap End-to-End Latency",
+      "type": "timeseries"
+    },
+    {
+      "datasource": "Prometheus",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 48
+      },
+      "id": 14,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "gateway_authswap_secret_store_latency_seconds{quantile=\"0.5\"}",
+          "interval": "",
+          "legendFormat": "50th percentile - {{type}} {{route}}",
+          "refId": "A"
+        },
+        {
+          "expr": "gateway_authswap_secret_store_latency_seconds{quantile=\"0.95\"}",
+          "interval": "",
+          "legendFormat": "95th percentile - {{type}} {{route}}",
+          "refId": "B"
+        },
+        {
+          "expr": "gateway_authswap_secret_store_latency_seconds{quantile=\"0.99\"}",
+          "interval": "",
+          "legendFormat": "99th percentile - {{type}} {{route}}",
+          "refId": "C"
+        }
+      ],
+      "title": "Secret Store Latency",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 27,
+  "style": "dark",
+  "tags": [
+    "authswap",
+    "kafka",
+    "gateway"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-5m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Gateway Metrics",
+  "uid": "gateway_metrics",
+  "version": 1
+}
