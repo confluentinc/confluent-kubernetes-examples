@@ -1,6 +1,6 @@
 # Recommended Gateway Metrics to Monitor
 
-Metric names verified against Gateway source and the live `/metrics` endpoint (Kroxylicious 0.24.0). PromQL examples match the dashboards in this directory.
+A recommended set of Gateway, Kroxylicious, and JVM metrics to alert on, grouped by intent.
 
 ## Errors & stuck connections
 
@@ -10,6 +10,7 @@ Metric names verified against Gateway source and the live `/metrics` endpoint (K
 | `kroxylicious_client_to_proxy_connections_total` vs `kroxylicious_proxy_to_server_connections_total` | Growing gap = client connections accepted but upstream (broker) connections failing to establish | Alert on a widening, non-zero gap over 5m |
 | `kroxylicious_client_to_proxy_disconnects_total{cause}` | Client disconnect reasons (`client_closed`, `idle_timeout`, `drain_timeout`, ...) | Spike in `drain_timeout` / non-`client_closed` causes |
 | `kroxylicious_virtual_cluster_state{state}` | Route lifecycle state (`serving`, `failed`, `draining`, `initializing`, `stopped`) | Alert if `state="failed"` is `1` |
+
 ## Request/response completion
 
 | Metric | Description | Alert hint |
@@ -42,4 +43,3 @@ Metric names verified against Gateway source and the live `/metrics` endpoint (K
 ## Notes
 
 - `gateway_jvm_metrics` is not a real metric name — JVM/process health is exposed as the individual `jvm_*`/`process_*`/`system_*` series above.
-- Metric name stability should be reconfirmed against the Kroxylicious version shipped in the target Gateway release (currently 0.24.0).
