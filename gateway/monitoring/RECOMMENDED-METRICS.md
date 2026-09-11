@@ -39,7 +39,3 @@ A recommended set of Gateway, Kroxylicious, and JVM metrics to alert on, grouped
 | `process_files_open_files` / `process_files_max_files` | Open file descriptors vs limit (requires `FileDescriptorMetrics` in `admin.jvmMetrics`) | Alert above ~80% of max |
 | `kroxylicious_client_to_proxy_active_connections` / `kroxylicious_proxy_to_server_active_connections` | Live connection counts | Track against expected client/broker counts |
 | `netty_eventexecutor_tasks_pending` | Pending tasks per Netty event-loop thread | Alert on sustained non-zero — early sign of event-loop saturation |
-
-## Notes
-
-- `gateway_jvm_metrics` is not a real metric name — JVM/process health is exposed as the individual `jvm_*`/`process_*`/`system_*` series above.
