@@ -185,6 +185,41 @@ kubectl port-forward deployment/keycloak 8080:8080 -n confluent
 https://localhost:9021
 ```
 
+### Validate MDS and Kafka REST OAuth access
+
+`confluent-platform.yaml` sets `expectedIssuer` to `http://keycloak:8080/realms/sso_test` (the Keycloak in-cluster service address) for all MDS, Kafka REST, Schema Registry, and Connect OAuth listeners. Keycloak stamps the `iss` claim of every token it issues with the host and port the request was sent to, so a token you request through `localhost:8080` (the port forward you just set up) has `iss: http://localhost:8080/realms/sso_test` and MDS rejects it with `Bearer realm="null",error="invalid_token"`.
+
+To request a token that MDS accepts, keep the port forward to Keycloak running and use curl's `--resolve` flag so the request is sent with a `keycloak:8080` host header while still connecting to your local port forward. This lets you validate OAuth access without changing `expectedIssuer` in `confluent-platform.yaml`.
+
+* Set up port forwarding to the Kafka broker's MDS/Kafka REST port:
+```
+kubectl port-forward kafka-0 8090:8090 -n confluent
+```
+
+* Get an OAuth token from Keycloak, using the `ssologin` client credentials from `oidcClientSecret.txt`:
+```
+curl --resolve keycloak:8080:127.0.0.1 \
+  -X POST \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=client_credentials" \
+  -d "scope=groups" \
+  -d "client_id=ssologin" \
+  -d "client_secret=<client-secret-from-oidcClientSecret.txt>" \
+  "http://keycloak:8080/realms/sso_test/protocol/openid-connect/token"
+```
+
+* Call the Kafka REST API through MDS using the token and the mTLS component certificates:
+```
+export TOKEN=<access_token-from-previous-response>
+
+curl -k \
+  --cert $TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server.pem \
+  --key $TUTORIAL_HOME/../../assets/certs/component-certs/generated/kafka-server-key.pem \
+  --cacert $TUTORIAL_HOME/../../assets/certs/component-certs/generated/cacerts.pem \
+  -H "Authorization: Bearer $TOKEN" \
+  "https://localhost:8090/kafka/v3/clusters"
+```
+
 ## Tear down
 
 ```
