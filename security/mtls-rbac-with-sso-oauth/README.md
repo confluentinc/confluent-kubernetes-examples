@@ -191,6 +191,8 @@ https://localhost:9021
 
 To request a token that MDS accepts, keep the port forward to Keycloak running and use curl's `--resolve` flag so the request is sent with a `keycloak:8080` host header while still connecting to your local port forward. This lets you validate OAuth access without changing `expectedIssuer` in `confluent-platform.yaml`.
 
+This flow requests a service-account token for the `ssologin` client, since `confluent-platform.yaml` authorizes MDS/Kafka REST/Schema Registry/Connect access by matching the token's `client_id` claim against `User:ssologin` in the Kafka cluster's `superUsers` list. `keycloak.yaml` enables `serviceAccountsEnabled` on `ssologin` so this client-credentials flow can issue such a token, alongside the `directAccessGrantsEnabled` flow user1 uses to log in to Control Center via SSO.
+
 * Set up port forwarding to the Kafka broker's MDS/Kafka REST port:
 ```
 kubectl port-forward kafka-0 8090:8090 -n confluent
