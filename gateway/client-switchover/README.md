@@ -315,7 +315,7 @@ kubectl scale gateway confluent-gateway-blue -n confluent --replicas=0
 ```
 kubectl wait --for=delete pod -l app=confluent-gateway-blue -n confluent --timeout=300s
 ```
-- Clients now get connection errors and retry. Producers retry for up to `delivery.timeout.ms` (default 120 seconds), so complete Steps 3 and 4 within that time.
+- Clients now get connection errors and retry. Each record is retried for up to `delivery.timeout.ms` (default 120 seconds). Keep the time from scaling Blue down until clients reach Green, including the loadbalancer picking up Green, within that limit.
 - Optionally, wait a few seconds before Step 3 so records already written to the source cluster finish replicating.
 
 ### Step 3: Promote Mirror Topics
@@ -333,13 +333,16 @@ kafka-mirrors --promote \
 ```
 
 #### 2. Wait for promotion to complete
-- Promotion is complete when the topics are no longer listed as `PENDING_STOPPED`:
+- Describe the promoted topics. Modify below command to include required topic names.
 ```bash
 kafka-mirrors --describe \
-  --pending-stopped-only \
+  --topics gateway-client-switchover-test \
   --bootstrap-server kafka-destination:9193 \
   --command-config destination-cluster.config
 ```
+- Proceed to Step 4 only when every topic shows `State: STOPPED`.
+  - `PENDING_STOPPED`: promotion is still running. Wait and check again.
+  - `ACTIVE`: the promotion was rejected. Run Step 3 again.
 
 ### Step 4: Traffic cutover to Green cluster
 
@@ -386,7 +389,7 @@ kafka-console-producer \
 |---|---|
 | Patch the loadbalancer, then promote, with Blue still running | Connected clients keep writing to the source cluster. Records written after promotion are never mirrored. Clients see no errors. |
 | Stop Blue, patch the loadbalancer, then promote | Clients reconnect to Green while the topics are still read-only mirrors. Writes fail with `InvalidRequestException: Cannot append records to read-only mirror topic`. Producers do not retry this error, so these records are dropped. |
-| Stop Blue, promote, then patch the loadbalancer (Steps 2, 3, 4) | Clients get connection errors until the loadbalancer points to Green, then their retries succeed. No records are lost. |
+| Stop Blue, promote, then patch the loadbalancer (Steps 2, 3, 4) | Clients get connection errors until the loadbalancer points to Green, then their retries succeed. No records are lost if clients reach Green within `delivery.timeout.ms`. |
 
 ### Tuning the NLB cutover window
 
