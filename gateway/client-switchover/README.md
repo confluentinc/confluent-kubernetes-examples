@@ -299,7 +299,49 @@ kafka-mirrors \
 diff /tmp/source-topics.txt /tmp/destination-topics.txt
 ```
 
-### Step 2: Traffic cutover to Green cluster
+**IMPORTANT: Run Steps 2, 3 and 4 in this exact order. Any other order can lose data. See [Data Safety During Cutover](#data-safety-during-cutover).**
+
+### Step 2: Stop writes to the source cluster
+
+Patching the loadbalancer only routes **new** connections to Green. Clients that are already connected stay on Blue and keep writing to the source cluster. Scale the Blue Gateway to 0 to close every client connection to the source cluster.
+
+#### 1. Scale the Blue Gateway to 0 replicas
+```
+kubectl scale gateway confluent-gateway-blue -n confluent --replicas=0
+```
+**NOTE: Scale the `Gateway` resource, not its Deployment. CFK reverts direct changes to the Deployment.**
+
+#### 2. Wait until the Blue pods are gone
+```
+kubectl wait --for=delete pod -l app=confluent-gateway-blue -n confluent --timeout=300s
+```
+- Clients now get connection errors and retry. Producers retry for up to `delivery.timeout.ms` (default 120 seconds), so complete Steps 3 and 4 within that time.
+- Optionally, wait a few seconds before Step 3 so records already written to the source cluster finish replicating.
+
+### Step 3: Promote Mirror Topics
+**NOTE: Please modify the `bootstrap-server` config appropriately for all commands in this section.**
+
+#### 1. Promote mirrors to make them writable
+- Modify below command to include required topic names.
+- Use `--promote`, not `--failover`. `--promote` fails if a mirror topic has lag, and does a final sync of consumer group offsets and topic configs. `--failover` skips these checks and converts the topic immediately.
+- If `--promote` fails because of lag, wait a few seconds and run it again.
+```bash
+kafka-mirrors --promote \
+  --topics gateway-client-switchover-test \
+  --bootstrap-server kafka-destination:9193 \
+  --command-config destination-cluster.config
+```
+
+#### 2. Wait for promotion to complete
+- Promotion is complete when the topics are no longer listed as `PENDING_STOPPED`:
+```bash
+kafka-mirrors --describe \
+  --pending-stopped-only \
+  --bootstrap-server kafka-destination:9193 \
+  --command-config destination-cluster.config
+```
+
+### Step 4: Traffic cutover to Green cluster
 
 #### 1. Patch loadbalancer to point to the Green deployment
 - Patch the loadbalancer to change the label selectors as well as the `targetPort` for the Kafka bootstrap listener.
@@ -309,7 +351,7 @@ kubectl patch service confluent-gateway-switchover-lb -n confluent --type='json'
   {"op": "replace", "path": "/spec/selector/app", "value": "confluent-gateway-green"}]'
 ```
 
-####  2. Test message consumption from new Gateway setup [Loadbalancer pointing to Green deployment]
+#### 2. Test message consumption from new Gateway setup [Loadbalancer pointing to Green deployment]
 - You should be able to consume the test messages that were produced in `gateway-client-switchover-test` as part of the Cluster Linking verification step.
 ```
 kafka-console-consumer \
@@ -319,18 +361,7 @@ kafka-console-consumer \
   --from-beginning
 ```
 
-### Step 3: Promote Mirror Topics
-**NOTE: Please modify the `bootstrap-server` config appropriately for all commands in this section.**
-
-- Promote mirrors to make them writable. Modify below command to include required topic names
-```bash
-kafka-mirrors --promote \
-  --topics gateway-client-switchover-test \
-  --bootstrap-server kafka-destination:9193 \
-  --command-config destination-cluster.config
-```
-
-- Verify promotion by producing messages:
+#### 3. Verify promotion by producing messages
 ```
 kafka-console-producer \
   --bootstrap-server gateway.example.com:9595 \
@@ -338,19 +369,38 @@ kafka-console-producer \
   --topic gateway-client-switchover-test
 ```
 
-### Step 4: Monitor and Validate
+### Step 5: Monitor and Validate
 - Monitor for 15-30 minutes. Watch for:
   - Producer reinitialization (ProducerFencedException should spike then stabilize).
   - Consumer duplicate processing (should spike then decrease).
   - Application error rates.
 
-### Step 5: Scale down Blue deployment
-**NOTE: This step can be carried out before Step 1 if downtime is acceptable. This will ensure promotion without causing duplicate processing.**
+### Step 6: Retain Blue for rollback
+- Blue is already scaled to 0 from Step 2. Keep the Blue Gateway resource for 24-48 hours in case of rollback.
 
-- Scale down Blue deployment to 0 replicas. Goal is to retain for 24-48 hours in case of rollback.
+## Data Safety During Cutover
+
+`kafka-mirrors --promote` fails if a mirror topic has lag, but producers can still write to the source topic after that check succeeds. The order of Steps 2, 3 and 4 closes the two ways data can be lost:
+
+| Order | What happens |
+|---|---|
+| Patch the loadbalancer, then promote, with Blue still running | Connected clients keep writing to the source cluster. Records written after promotion are never mirrored. Clients see no errors. |
+| Stop Blue, patch the loadbalancer, then promote | Clients reconnect to Green while the topics are still read-only mirrors. Writes fail with `InvalidRequestException: Cannot append records to read-only mirror topic`. Producers do not retry this error, so these records are dropped. |
+| Stop Blue, promote, then patch the loadbalancer (Steps 2, 3, 4) | Clients get connection errors until the loadbalancer points to Green, then their retries succeed. No records are lost. |
+
+### Tuning the NLB cutover window
+
+With the AWS Load Balancer Controller, these target group attributes bound how long existing connections to Blue stay open after Blue is deregistered:
+```yaml
+metadata:
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: deregistration_delay.timeout_seconds=120,deregistration_delay.connection_termination.enabled=true
 ```
-kubectl scale deployment confluent-gateway-blue -n confluent --replicas=0
-```
+- `deregistration_delay.timeout_seconds` is how long a deregistered target stays in the `draining` state. The default is 300 seconds. Lower values close connections sooner. AWS recommends at least 120 seconds so in-flight requests complete.
+- `deregistration_delay.connection_termination.enabled=true` closes connections to deregistered targets shortly after the deregistration delay ends. Without it, deregistration only stops new connections, and existing connections to a healthy target can keep sending traffic.
+- Set these attributes through the service annotation, not the AWS CLI or console. On each reconcile, the controller resets every attribute listed in the annotation to the annotation's value.
+
+**NOTE: These settings only bound the time the source cluster stays writable. They do not replace stopping writes before Step 3.**
 
 ## Key Considerations
 
@@ -397,9 +447,9 @@ kubectl delete service confluent-gateway-switchover-lb -n confluent
 
 ### Common Issues and Solutions
 
-1. **Producers Getting TopicAuthorizationException**
-   - Cause: Mirror topics are still read-only
-   - Solution: Ensure mirrors are promoted before switching traffic
+1. **Producers Getting `InvalidRequestException: Cannot append records to read-only mirror topic`**
+   - Cause: Traffic was switched to Green before the mirror topics were promoted
+   - Solution: Promote mirrors before switching traffic (Step 3 before Step 4). Records that failed with this error are not retried and must be resent by the application
 
 2. **High Consumer Duplicate Rate**
    - Cause: Normal behavior due to offset sync lag
