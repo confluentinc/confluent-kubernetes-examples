@@ -301,14 +301,14 @@ diff /tmp/source-topics.txt /tmp/destination-topics.txt
 
 **IMPORTANT: Run Steps 2, 3 and 4 in this exact order. Any other order can lose data. See [Data Safety During Cutover](#data-safety-during-cutover).**
 
-**Before you start Step 2:**
-- Complete Steps 2, 3 and 4 within the producers' `delivery.timeout.ms` (default 120 seconds), counted from scaling Blue down until clients reach Green, including the loadbalancer picking up Green. Records not delivered within that time are dropped. Step 2 alone takes about 30 seconds.
+**Before you start the cutover (Steps 2, 3 and 4):**
+- Finish Steps 3 and 4 within 60 seconds of Step 2 completing. With default settings, some producers start failing records with a timeout error after 60 seconds. Those records are lost unless the application resends them. Check your clients' timeout settings.
 - Prepare the commands for Steps 3 and 4 with your topic names and endpoints, so you can run them without delay.
 - Until Step 3, you can safely abort by scaling the Blue Gateway back up.
 
 ### Step 2: Stop writes to the source cluster
 
-Patching the loadbalancer only routes **new** connections to Green. Clients that are already connected stay on Blue and keep writing to the source cluster. This applies to every Service type, including ClusterIP. Scale the Blue Gateway to 0 to close every client connection to the source cluster.
+Patching the loadbalancer only routes **new** connections to Green. Clients that are already connected stay on Blue and keep writing to the source cluster. This includes ClusterIP Services. Scale the Blue Gateway to 0 to close every client connection to the source cluster.
 
 #### 1. Scale the Blue Gateway to 0 replicas
 **NOTE: Scale the `Gateway` resource, not its Deployment. CFK reverts direct changes to the Deployment.**
@@ -394,9 +394,7 @@ kafka-console-producer \
 |---|---|
 | Patch the loadbalancer, then promote, with Blue still running | Connected clients keep writing to the source cluster. Records written after promotion are never mirrored. Clients see no errors. |
 | Stop Blue, patch the loadbalancer, then promote | Clients reconnect to Green while the topics are still read-only mirrors. Writes fail with `InvalidRequestException: Cannot append records to read-only mirror topic`. Producers do not retry this error, so these records are dropped. |
-| Stop Blue, promote, then patch the loadbalancer (Steps 2, 3, 4) | Clients get connection errors until the loadbalancer points to Green, then their retries succeed. No records are lost if clients reach Green within `delivery.timeout.ms`. |
-
-**NOTE: On AWS NLB, the target group `deregistration_delay` attributes do not need tuning for this procedure. Step 2 closes client connections when the Blue pods stop.**
+| Stop Blue, promote, then patch the loadbalancer (Steps 2, 3, 4) | Clients get connection errors until the loadbalancer points to Green, then their retries succeed. No records are lost if clients reach Green within 60 seconds of Step 2 completing. |
 
 ## Key Considerations
 
