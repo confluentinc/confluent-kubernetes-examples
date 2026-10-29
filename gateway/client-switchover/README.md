@@ -318,7 +318,6 @@ kubectl scale gateway confluent-gateway-blue -n confluent --replicas=0
 
 #### 2. Wait until the Blue pods are gone
 - Blue keeps accepting client connections, existing and new, until its pods are deleted. Do not start Step 3 before this command succeeds.
-- If the command times out, scale the Blue Gateway back to its original replica count and stop the cutover.
 ```
 kubectl wait --for=delete pod -l app=confluent-gateway-blue -n confluent --timeout=60s
 ```
