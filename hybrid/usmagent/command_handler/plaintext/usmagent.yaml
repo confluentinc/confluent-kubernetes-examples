@@ -1,0 +1,29 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: USMAgent
+metadata:
+  name: usm-agent
+  namespace: confluent
+spec:
+  # optional: Uncomment the following lines to enable trace logs for the USM Agent and debug logs for the Command Handler
+#  podTemplate:
+#    envVars:
+#      - name: USM_AGENT_CUSTOM_ARGS
+#        value: -l trace
+#      - name: USM_AGENT_COMMAND_HANDLER_CUSTOM_ARGS
+#        value: -log-level debug
+  replicas: 1
+  image:
+    application: docker.io/confluentinc/cp-usm-agent:1.3.0
+    init: confluentinc/confluent-init-container:3.4.0
+  confluentCloudClient:
+    endpoint: <frontdoor_url>
+    environmentId: <env_id>
+    authentication:
+      type: basic
+      basic:
+        secretRef: usm-ccloud-cred
+  commandHandler:
+    connectClusters:
+      # endpoint and groupId are auto discovered by CFK
+      - connectClusterRef:
+          name: connect

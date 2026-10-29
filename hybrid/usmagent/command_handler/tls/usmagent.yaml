@@ -1,0 +1,28 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: USMAgent
+metadata:
+  name: usm-agent
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: docker.io/confluentinc/cp-usm-agent:1.3.0
+    init: confluentinc/confluent-init-container:3.4.0
+  # TLS secret
+  tls:
+    secretRef: tls-usmagent
+  confluentCloudClient:
+    endpoint: <frontdoor_url>
+    environmentId: <env_id>
+    authentication:
+      type: basic
+      basic:
+        secretRef: usm-ccloud-cred
+  commandHandler:
+    connectClusters:
+      # endpoint and groupId are auto discovered by CFK
+      - connectClusterRef:
+          name: connect
+        connectRest:
+          tls:
+            secretRef: connect-ca
