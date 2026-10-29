@@ -301,25 +301,31 @@ diff /tmp/source-topics.txt /tmp/destination-topics.txt
 
 **IMPORTANT: Run Steps 2, 3 and 4 in this exact order. Any other order can lose data. See [Data Safety During Cutover](#data-safety-during-cutover).**
 
+**Before you start Step 2:**
+- Complete Steps 2, 3 and 4 within the producers' `delivery.timeout.ms` (default 120 seconds), counted from scaling Blue down until clients reach Green, including the loadbalancer picking up Green. Records not delivered within that time are dropped. Step 2 alone takes about 30 seconds.
+- Prepare the commands for Steps 3 and 4 with your topic names and endpoints, so you can run them without delay.
+- Until Step 3, you can safely abort by scaling the Blue Gateway back up.
+
 ### Step 2: Stop writes to the source cluster
 
-Patching the loadbalancer only routes **new** connections to Green. Clients that are already connected stay on Blue and keep writing to the source cluster. Scale the Blue Gateway to 0 to close every client connection to the source cluster.
+Patching the loadbalancer only routes **new** connections to Green. Clients that are already connected stay on Blue and keep writing to the source cluster. This applies to every Service type, including ClusterIP. Scale the Blue Gateway to 0 to close every client connection to the source cluster.
 
 #### 1. Scale the Blue Gateway to 0 replicas
+**NOTE: Scale the `Gateway` resource, not its Deployment. CFK reverts direct changes to the Deployment.**
 ```
 kubectl scale gateway confluent-gateway-blue -n confluent --replicas=0
 ```
-**NOTE: Scale the `Gateway` resource, not its Deployment. CFK reverts direct changes to the Deployment.**
 
 #### 2. Wait until the Blue pods are gone
+- Blue keeps accepting client connections, existing and new, until its pods are deleted. Do not start Step 3 before this command succeeds.
+- If the command times out, scale the Blue Gateway back to its original replica count and stop the cutover.
 ```
-kubectl wait --for=delete pod -l app=confluent-gateway-blue -n confluent --timeout=300s
+kubectl wait --for=delete pod -l app=confluent-gateway-blue -n confluent --timeout=60s
 ```
-- Clients now get connection errors and retry. Each record is retried for up to `delivery.timeout.ms` (default 120 seconds). Keep the time from scaling Blue down until clients reach Green, including the loadbalancer picking up Green, within that limit.
+- Clients now get connection errors and retry until they reach Green.
 - Optionally, wait a few seconds before Step 3 so records already written to the source cluster finish replicating.
 
 ### Step 3: Promote Mirror Topics
-**NOTE: Please modify the `bootstrap-server` config appropriately for all commands in this section.**
 
 #### 1. Promote mirrors to make them writable
 - Modify below command to include required topic names.
@@ -347,8 +353,7 @@ kafka-mirrors --describe \
 ### Step 4: Traffic cutover to Green cluster
 
 #### 1. Patch loadbalancer to point to the Green deployment
-- Patch the loadbalancer to change the label selectors as well as the `targetPort` for the Kafka bootstrap listener.
-- Modify the `targetPort` in the below patch command to point to the port of the Green gateway route endpoint.
+- Patch the loadbalancer to change the label selector to the Green deployment.
 ```
 kubectl patch service confluent-gateway-switchover-lb -n confluent --type='json' -p='[
   {"op": "replace", "path": "/spec/selector/app", "value": "confluent-gateway-green"}]'
@@ -391,19 +396,7 @@ kafka-console-producer \
 | Stop Blue, patch the loadbalancer, then promote | Clients reconnect to Green while the topics are still read-only mirrors. Writes fail with `InvalidRequestException: Cannot append records to read-only mirror topic`. Producers do not retry this error, so these records are dropped. |
 | Stop Blue, promote, then patch the loadbalancer (Steps 2, 3, 4) | Clients get connection errors until the loadbalancer points to Green, then their retries succeed. No records are lost if clients reach Green within `delivery.timeout.ms`. |
 
-### Tuning the NLB cutover window
-
-With the AWS Load Balancer Controller, these target group attributes bound how long existing connections to Blue stay open after Blue is deregistered:
-```yaml
-metadata:
-  annotations:
-    service.beta.kubernetes.io/aws-load-balancer-target-group-attributes: deregistration_delay.timeout_seconds=120,deregistration_delay.connection_termination.enabled=true
-```
-- `deregistration_delay.timeout_seconds` is how long a deregistered target stays in the `draining` state. The default is 300 seconds. Lower values close connections sooner. AWS recommends at least 120 seconds so in-flight requests complete.
-- `deregistration_delay.connection_termination.enabled=true` closes connections to deregistered targets shortly after the deregistration delay ends. Without it, deregistration only stops new connections, and existing connections to a healthy target can keep sending traffic.
-- Set these attributes through the service annotation, not the AWS CLI or console. On each reconcile, the controller resets every attribute listed in the annotation to the annotation's value.
-
-**NOTE: These settings only bound the time the source cluster stays writable. They do not replace stopping writes before Step 3.**
+**NOTE: On AWS NLB, the target group `deregistration_delay` attributes do not need tuning for this procedure. Step 2 closes client connections when the Blue pods stop.**
 
 ## Key Considerations
 
