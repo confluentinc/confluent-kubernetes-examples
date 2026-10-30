@@ -137,6 +137,24 @@ rules:
   - pods/log
   verbs:
   - get
+# Required for CFK 3.4.0+.
+# Operator-managed CRD upgrades: the operator checks the installed
+# platform.confluent.io CRDs against its own version at startup.
+# get/list/watch alone gives you the version-mismatch warning only;
+# create/update/patch (never delete) is also required for the operator to
+# upgrade CRDs automatically. Omit create/update/patch if you set
+# manageCRDs: false and continue to apply CRDs manually.
+- apiGroups:
+  - apiextensions.k8s.io
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
