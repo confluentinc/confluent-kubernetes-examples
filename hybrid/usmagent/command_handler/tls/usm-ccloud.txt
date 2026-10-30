@@ -1,0 +1,2 @@
+username=<api_key>
+password=<api_secret>
