@@ -4,34 +4,30 @@ With a data governance policy enabled, Gateway lets only records that match thei
 
 You define schemas and rule sets in Schema Registry. Gateway doesn't store policies of its own. It reads them from Schema Registry and enforces them on every produce and fetch.
 
-## Licensing
+## Prerequisites
 
-### Gateway
+### Licenses
 
-Every Gateway license includes data governance, covering schema validation, rules and encryption.
+Every Gateway product includes centralized governance. With an on-premises CP or CPC Schema Registry, rules and encryption also need a Schema Registry license to store them.
 
-| Deployment              | Gateway license   |
-|-------------------------|-------------------|
-| Confluent Platform      | CP Gateway add-on |
-| Confluent Private Cloud | Included          |
-| Confluent Cloud         | CC Gateway add-on |
+| Feature                 | Confluent Enterprise License         | Confluent Private Cloud License | Confluent Cloud Gateway License |
+|-------------------------|--------------------------------------|---------------------------------|---------------------------------|
+| **Gateway**             |                                      |                                 |                                 |
+| Centralized governance  | Included                             | Included                        | Included                        |
+| **Schema Registry**     |                                      |                                 |                                 |
+| CEL and other rule sets | Included                             | Included                        | Not applicable¹                 |
+| CSFLE                   | CSFLE or Flexible Encryption license | Included                        | Not applicable¹                 |
+| CSPE                    | Flexible Encryption license          | Included                        | Not applicable¹                 |
+
+¹ Confluent Cloud Gateway runs with the fully managed Confluent Cloud Schema Registry.
+
+Gateway runs all the rules. These licenses let Schema Registry accept and store them.
 
 For how to pass a license to Gateway, see [license-configuration](../license-configuration).
 
-### Schema Registry
+### Schema Registry extensions
 
-Rule sets and encryption also need Schema Registry entitlements. Gateway runs all the rules. These licenses let Schema Registry accept and store them.
-
-| Feature                                          | Confluent Platform                  | Confluent Private Cloud | Confluent Cloud            |
-|--------------------------------------------------|-------------------------------------|-------------------------|----------------------------|
-| Schema ID enforcement and deep schema validation | Nothing extra                       | Nothing extra           | Nothing extra              |
-| CEL and other rule sets                          | Confluent Enterprise license        | Included                | Stream Governance Advanced |
-| CSFLE                                            | CSFLE or Flexible Encryption add-on | Included                | Stream Governance Advanced |
-| CSPE                                             | Flexible Encryption add-on          | Included                | Stream Governance Advanced |
-
-## Schema Registry extensions
-
-Schema Registry also needs extensions to carry the rules.
+Schema Registry needs two extensions to store rules and data keys.
 
 | Feature                                          | Rule-set extension | DEK registry extension |
 |--------------------------------------------------|--------------------|------------------------|
@@ -50,3 +46,5 @@ spec:
     server:
       - resource.extension.class=io.confluent.kafka.schemaregistry.rulehandler.RuleSetResourceExtension,io.confluent.dekregistry.DekRegistryResourceExtension
 ```
+
+Outside CFK, add the same `resource.extension.class` line to `schema-registry.properties`.
