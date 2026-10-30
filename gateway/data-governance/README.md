@@ -1,6 +1,6 @@
-# Confluent Gateway Data Governance Examples
+# Confluent Gateway Centralized Governance Enforcement
 
-With a data governance policy enabled, Gateway lets only records that match their schema reach Kafka. It can also run CSFLE and CSPE rules itself, encrypting fields or the whole payload on produce and decrypting them on fetch.
+With centralized governance enforcement enabled, Gateway lets only records that match their schema reach Kafka. It can also encrypt fields (GW field-level encryption, GWFLE) or the whole payload (GW full payload encryption, GW FPE) on produce and decrypt them on fetch.
 
 You define schemas and rule sets in Schema Registry. Gateway doesn't store policies of its own. It reads them from Schema Registry and enforces them on every produce and fetch.
 
@@ -8,20 +8,12 @@ You define schemas and rule sets in Schema Registry. Gateway doesn't store polic
 
 ### Licenses
 
-Every Gateway product includes centralized governance. With an on-premises CP or CPC Schema Registry, rules and encryption also need a Schema Registry license to store them.
-
-| Feature                 | Confluent Enterprise License         | Confluent Private Cloud License | Confluent Cloud Gateway License |
-|-------------------------|--------------------------------------|---------------------------------|---------------------------------|
-| **Gateway**             |                                      |                                 |                                 |
-| Centralized governance  | Included                             | Included                        | Included                        |
-| **Schema Registry**     |                                      |                                 |                                 |
-| CEL and other rule sets | Included                             | Included                        | Not applicable¹                 |
-| CSFLE                   | CSFLE or Flexible Encryption license | Included                        | Not applicable¹                 |
-| CSPE                    | Flexible Encryption license          | Included                        | Not applicable¹                 |
-
-¹ Confluent Cloud Gateway runs with the fully managed Confluent Cloud Schema Registry.
-
-Gateway runs all the rules. These licenses let Schema Registry accept and store them.
+| Capability                          | CP Gateway Add-On                                                                                       | CPC Gateway                     | CC Gateway Add-On               |
+|-------------------------------------|---------------------------------------------------------------------------------------------------------|---------------------------------|---------------------------------|
+| Schema ID enforcement               | Confluent Platform Enterprise License                                                                   | Confluent Private Cloud License | Confluent Cloud Gateway License |
+| Deep schema validation              | Confluent Platform Enterprise License                                                                   | Confluent Private Cloud License | Confluent Cloud Gateway License |
+| GW field-level encryption (GWFLE)   | Confluent Platform Enterprise License and an encryption license (CSFLE or Flexible Encryption license) | Confluent Private Cloud License | Confluent Cloud Gateway License |
+| GW full payload encryption (GW FPE) | Confluent Platform Enterprise License and an encryption license (CSFLE or Flexible Encryption license) | Confluent Private Cloud License | Confluent Cloud Gateway License |
 
 For how to pass a license to Gateway, see [license-configuration](../license-configuration).
 
@@ -33,8 +25,8 @@ Schema Registry needs two extensions to store rules and data keys.
 |--------------------------------------------------|--------------------|------------------------|
 | Schema ID enforcement and deep schema validation | No                 | No                     |
 | CEL and other rule sets                          | Yes                | No                     |
-| CSFLE                                            | Yes                | Yes                    |
-| CSPE                                             | Yes                | Yes                    |
+| GWFLE                                            | Yes                | Yes                    |
+| GW FPE                                           | Yes                | Yes                    |
 
 Without the rule-set extension, Schema Registry drops the rule set and keeps the schema. The DEK registry stores the data keys.
 
