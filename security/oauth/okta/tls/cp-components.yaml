@@ -1,0 +1,401 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Connect
+metadata:
+  name: connect
+  namespace: confluent
+spec:
+  authorization:
+    type: rbac
+  configOverrides:
+    jvm:
+    - '---Xmx6G'
+    - '---Xms6G'
+    - -XX:+UseContainerSupport
+    - -XX:MaxRAMPercentage=30.0
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: oauth
+        jaasConfig:
+          secretRef: oauth-jass
+        oauthSettings:
+          audience: api://confluent
+          groupsClaimName: groups
+          scope: confluent
+          subClaimName: sub
+          tokenEndpointUri: https://integrator-4487007.okta.com/oauth2/austyga8unDE3r3c0697/v1/token
+      tls:
+        enabled: true
+    mds:
+      authentication:
+        oauth:
+          configuration:
+            audience: api://confluent
+            expectedIssuer: https://integrator-4487007.okta.com/oauth2/austyga8unDE3r3c0697
+            groupsClaimName: groups
+            jwksEndpointUri: https://integrator-4487007.okta.com/oauth2/austyga8unDE3r3c0697/v1/keys
+            scope: confluent
+            subClaimName: email
+            tokenEndpointUri: https://integrator-4487007.okta.com/oauth2/austyga8unDE3r3c0697/v1/token
+          secretRef: oauth-jass
+        type: oauth
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tls:
+        enabled: true
+      tokenKeyPair:
+        secretRef: mds-token
+    schemaRegistry:
+      tls:
+        enabled: true
+      url: https://schemaregistry.confluent.svc.cluster.local:8081
+  image:
+    application: confluentinc/cp-server-connect:8.0.0
+    init: confluentinc/confluent-init-container:3.0.0
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsNonRoot: true
+      runAsUser: 1000
+    resources:
+      limits:
+        cpu: 2
+        memory: 6Gi
+      requests:
+        cpu: 2
+        memory: 6Gi
+    serviceAccountName: confluent-platform
+  replicas: 1
+  tls:
+    secretRef: tls-certs
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ControlCenter
+metadata:
+  name: controlcenter
+  namespace: confluent
+spec:
+  authorization:
+    type: rbac
+  configOverrides:
+    jvm:
+    - '---Xmx8G'
+    - '---Xms8G'
+    - -XX:+UseContainerSupport
+    - -XX:MaxRAMPercentage=25.0
+  dataVolumeCapacity: 50Gi
+  dependencies:
+    alertManagerClient:
+      url: https://controlcenter.confluent.svc.cluster.local:9093
+      tls:
+        enabled: true
+        secretRef: tls-certs
+    prometheusClient:
+      url: https://controlcenter.confluent.svc.cluster.local:9090
+      tls:
+        enabled: true
+        secretRef: tls-certs
+    connect:
+    - name: connect
+      tls:
+        enabled: true
+      url: https://connect.confluent.svc.cluster.local:8083
+    kafka:
+      authentication:
+        jaasConfig:
+          secretRef: oauth-jass
+        oauthSettings:
+          audience: api://confluent
+          groupsClaimName: groups
+          scope: confluent
+          subClaimName: sub
+          tokenEndpointUri: https://integrator-4487007.okta.com/oauth2/austyga8unDE3r3c0697/v1/token
+        type: oauth
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      tls:
+        enabled: true
+    ksqldb:
+    - advertisedUrl: https://mage-confluent-sat-ksqldb.sat.cbp.dhs.gov
+      name: ksqldb
+      tls:
+        enabled: true
+      url: https://ksqldb.confluent.svc.cluster.local:8088
+    mds:
+      authentication:
+        oauth:
+          configuration:
+            audience: api://confluent
+            expectedIssuer: https://integrator-4487007.okta.com/oauth2/austyga8unDE3r3c0697
+            groupsClaimName: groups
+            jwksEndpointUri: https://integrator-4487007.okta.com/oauth2/austyga8unDE3r3c0697/v1/keys
+            scope: confluent
+            subClaimName: email
+            tokenEndpointUri: https://integrator-4487007.okta.com/oauth2/austyga8unDE3r3c0697/v1/token
+          secretRef: oauth-jass
+        type: oauth
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      ssoProtocol: oidc
+      tls:
+        enabled: true
+      tokenKeyPair:
+        secretRef: mds-token
+    schemaRegistry:
+      tls:
+        enabled: true
+      url: https://schemaregistry.confluent.svc.cluster.local:8081
+  image:
+    application: confluentinc/cp-enterprise-control-center-next-gen:2.2.0
+    init: confluentinc/confluent-init-container:3.0.0
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsNonRoot: true
+      runAsUser: 1000
+    probe:
+      liveness:
+        failureThreshold: 1
+        periodSeconds: 200
+        timeoutSeconds: 5
+      readiness:
+        failureThreshold: 5
+        periodSeconds: 200
+        timeoutSeconds: 5
+    resources:
+      limits:
+        cpu: 3
+        memory: 8Gi
+      requests:
+        cpu: 3
+        memory: 8Gi
+    serviceAccountName: confluent-platform
+  replicas: 1
+  services:
+    alertmanager:
+      image: confluentinc/cp-enterprise-alertmanager:2.2.0
+      tls:
+        secretRef: tls-certs
+    prometheus:
+      image: confluentinc/cp-enterprise-prometheus:2.2.0
+      pvc:
+        dataVolumeCapacity: 10Gi
+      tls:
+        secretRef: tls-certs
+  tls:
+    secretRef: tls-certs
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestClass
+metadata:
+  name: default
+  namespace: confluent
+spec:
+  kafkaClusterRef:
+    name: kafka
+    namespace: confluent
+  kafkaRest:
+    authentication:
+      oauth:
+        configuration:
+          audience: api://confluent
+          expectedIssuer: https://integrator-4487007.okta.com/oauth2/austyga8unDE3r3c0697
+          groupsClaimName: groups
+          jwksEndpointUri: https://integrator-4487007.okta.com/oauth2/austyga8unDE3r3c0697/v1/keys
+          scope: confluent
+          subClaimName: sub
+          tokenEndpointUri: https://integrator-4487007.okta.com/oauth2/austyga8unDE3r3c0697/v1/token
+        secretRef: oauth-jass
+      type: oauth
+    endpoint: https://kafka.confluent.svc.cluster.local:8090
+    tls:
+      secretRef: tls-certs
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaRestProxy
+metadata:
+  name: kafkarestproxy
+  namespace: confluent
+spec:
+  authorization:
+    type: rbac
+  configOverrides:
+    jvm:
+    - '---Xmx4G'
+    - '---Xms4G'
+    - -XX:+UseContainerSupport
+    - -XX:MaxRAMPercentage=30.0
+  dependencies:
+    kafka:
+      authentication:
+        type: oauth
+        jaasConfig:
+          secretRef: oauth-jass
+        oauthSettings:
+          audience: api://confluent
+          groupsClaimName: groups
+          scope: confluent
+          subClaimName: sub
+          tokenEndpointUri: https://integrator-4487007.okta.com/oauth2/austyga8unDE3r3c0697/v1/token
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      tls:
+        enabled: true
+    mds:
+      authentication:
+        oauth:
+          configuration:
+            audience: api://confluent
+            expectedIssuer: https://integrator-4487007.okta.com/oauth2/austyga8unDE3r3c0697
+            groupsClaimName: groups
+            jwksEndpointUri: https://integrator-4487007.okta.com/oauth2/austyga8unDE3r3c0697/v1/keys
+            scope: confluent
+            subClaimName: email
+            tokenEndpointUri: https://integrator-4487007.okta.com/oauth2/austyga8unDE3r3c0697/v1/token
+          secretRef: oauth-jass
+        type: oauth
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tls:
+        enabled: true
+      tokenKeyPair:
+        secretRef: mds-token
+    schemaRegistry:
+      tls:
+        enabled: true
+      url: https://schemaregistry.confluent.svc.cluster.local:8081
+  image:
+    application: confluentinc/cp-kafka-rest:8.0.0
+    init: confluentinc/confluent-init-container:3.0.0
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsNonRoot: true
+      runAsUser: 1000
+    resources:
+      limits:
+        cpu: 2
+        memory: 4Gi
+      requests:
+        cpu: 2
+        memory: 4Gi
+    serviceAccountName: confluent-platform
+  replicas: 1
+  tls:
+    secretRef: tls-certs
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KsqlDB
+metadata:
+  name: ksqldb
+  namespace: confluent
+spec:
+  configOverrides:
+    jvm:
+    - '---Xmx6G'
+    - '---Xms6G'
+    - -XX:+UseContainerSupport
+    - -XX:MaxRAMPercentage=30.0
+  dataVolumeCapacity: 50Gi
+  dependencies:
+    kafka:
+      authentication:
+        type: oauth
+        jaasConfig:
+          secretRef: oauth-jass
+        oauthSettings:
+          audience: api://confluent
+          groupsClaimName: groups
+          scope: confluent
+          subClaimName: sub
+          tokenEndpointUri: https://integrator-4487007.okta.com/oauth2/austyga8unDE3r3c0697/v1/token
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      tls:
+        enabled: true
+    schemaRegistry:
+      tls:
+        enabled: true
+      url: https://schemaregistry.confluent.svc.cluster.local:8081
+  image:
+    application: confluentinc/cp-ksqldb-server:8.0.0
+    init: confluentinc/confluent-init-container:3.0.0
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsNonRoot: true
+      runAsUser: 1000
+    resources:
+      limits:
+        cpu: 2
+        memory: 6Gi
+      requests:
+        cpu: 2
+        memory: 6Gi
+    serviceAccountName: confluent-platform
+  replicas: 1
+  tls:
+    secretRef: tls-certs
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+  namespace: confluent
+spec:
+  authorization:
+    type: rbac
+  configOverrides:
+    jvm:
+    - '---Xmx2G'
+    - '---Xms2G'
+    - -XX:+UseContainerSupport
+    - -XX:MaxRAMPercentage=30.0
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071
+      authentication:
+        type: oauth
+        jaasConfig:
+          secretRef: oauth-jass
+        oauthSettings:
+          audience: api://confluent
+          groupsClaimName: groups
+          scope: confluent
+          subClaimName: sub
+          tokenEndpointUri: https://integrator-4487007.okta.com/oauth2/austyga8unDE3r3c0697/v1/token
+      tls:
+        enabled: true
+    mds:
+      authentication:
+        oauth:
+          configuration:
+            audience: api://confluent
+            expectedIssuer: https://integrator-4487007.okta.com/oauth2/austyga8unDE3r3c0697
+            groupsClaimName: groups
+            jwksEndpointUri: https://integrator-4487007.okta.com/oauth2/austyga8unDE3r3c0697/v1/keys
+            scope: confluent
+            subClaimName: email
+            tokenEndpointUri: https://integrator-4487007.okta.com/oauth2/austyga8unDE3r3c0697/v1/token
+          secretRef: oauth-jass
+        type: oauth
+      endpoint: https://kafka.confluent.svc.cluster.local:8090
+      tls:
+        enabled: true
+      tokenKeyPair:
+        secretRef: mds-token
+  image:
+    application: confluentinc/cp-schema-registry:8.0.0
+    init: confluentinc/confluent-init-container:3.0.0
+  podTemplate:
+    podSecurityContext:
+      fsGroup: 1000
+      runAsNonRoot: true
+      runAsUser: 1000
+    resources:
+      limits:
+        cpu: 500m
+        memory: 2Gi
+      requests:
+        cpu: 500m
+        memory: 2Gi
+    serviceAccountName: confluent-platform
+  replicas: 1
+  tls:
+    secretRef: tls-certs
+---
