@@ -792,7 +792,7 @@ data:
           "standardFlowEnabled": true,
           "implicitFlowEnabled": false,
           "directAccessGrantsEnabled": true,
-          "serviceAccountsEnabled": false,
+          "serviceAccountsEnabled": true,
           "authorizationServicesEnabled": true,
           "publicClient": false,
           "frontchannelLogout": true,
