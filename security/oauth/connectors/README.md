@@ -54,7 +54,7 @@ Secrets `src-kafka-credential` and `src-kafka-credential` is used by connector t
   kubectl -n destination create secret generic src-kafka-credential \
   --from-file=plain-users.json=$TUTORIAL_HOME/creds-kafka-sasl-users.json \
   --from-file=plain.txt=$TUTORIAL_HOME/creds-client-kafka-sasl-user.txt 
-  kubectl -n destination create secret generic oauth-jass --from-file=oauth.txt=oauth_jass.txt
+  kubectl -n destination create secret generic oauth-jaas --from-file=oauth.txt=oauth_jaas.txt
   kubectl create secret generic src-tls \
     --from-file=fullchain.pem=$TUTORIAL_HOME/../../assets/certs/generated/server.pem \
     --from-file=cacerts.pem=$TUTORIAL_HOME/../../assets/certs/generated/cacerts.pem \

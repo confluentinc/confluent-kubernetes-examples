@@ -23,10 +23,10 @@ Note that it is assumed that your Kubernetes cluster has a ``confluent`` namespa
 
 ## Deployment
 
-1. Create jass config pass through secret
+1. Create jaas config pass through secret
     ```bash
-    kubectl create -n operator secret generic pass-through-internal --from-file=oauth-jass.conf=oauth_jass_internal.txt
-    kubectl create -n operator secret generic pass-through-repl --from-file=oauth-jass.conf=oauth_jass_repl.txt
+    kubectl create -n operator secret generic pass-through-internal --from-file=oauth-jaas.conf=oauth_jaas_internal.txt
+    kubectl create -n operator secret generic pass-through-repl --from-file=oauth-jaas.conf=oauth_jaas_repl.txt
     ```
 2. apply cp_components.yaml
     ```bash

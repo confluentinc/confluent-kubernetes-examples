@@ -102,7 +102,7 @@ spec:
         oidc:
           enabled: true
           clientCredentials:
-            secretRef: oauth-jass-oidc
+            secretRef: oauth-jaas-oidc
           configurations:
             groupsClaimName: profile_groups
             subClaimName: sub
