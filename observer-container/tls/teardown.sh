@@ -78,9 +78,11 @@ kubectl delete cm -l app=kafka -n "$NAMESPACE" --ignore-not-found=true 2>/dev/nu
 # =============================================================================
 
 if [ "$KEEP_CERTS" = false ]; then
-    log_info "Cleaning up generated certificates..."
+    log_info "Cleaning up generated certificate data..."
     rm -rf "$TUTORIAL_HOME/certs/generated/"*
     rm -rf "$TUTORIAL_HOME/certs/ca/"*
+    rm -rf "$TUTORIAL_HOME/certs/server_configs/kraft-server-config.json"
+    rm -rf "$TUTORIAL_HOME/certs/server_configs/kafka-server-config.json"
     log_success "Certificate files removed"
 else
     log_info "Keeping certificate files (--keep-certs specified)"
