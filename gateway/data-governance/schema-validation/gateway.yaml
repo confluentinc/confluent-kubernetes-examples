@@ -39,7 +39,7 @@ spec:
         authentication:
           type: basic
           basic:
-            secretRef: gateway-sr-credentials
+            secretRef: sr-client-credentials
       key:
         enabled: false
       value:

@@ -30,11 +30,11 @@ flowchart LR
   end
 
   tools -->|"Kafka, plaintext<br/>no auth"| gw
-  tools -->|"HTTP<br/>basic auth: client<br/>(Avro clients)"| sr
+  tools -->|"HTTP<br/>basic auth: sr-client<br/>(Avro clients)"| sr
   gw -->|"Kafka, plaintext<br/>no auth (passthrough)"| kafka
-  gw -->|"HTTP<br/>basic auth: gateway"| sr
+  gw -->|"HTTP<br/>basic auth: sr-client"| sr
   sr -->|"Kafka, plaintext<br/>no auth"| kafka
-  cfk -.->|"registers orders-value<br/>basic auth: client"| sr
+  cfk -.->|"registers orders-value<br/>basic auth: sr-client"| sr
 ```
 
 Clients connect to Gateway at `confluent-gateway.confluent.svc.cluster.local:9092`. Gateway gets the schema of each record value from Schema Registry. The [gateway.yaml](./gateway.yaml) file sets the policy:
@@ -48,7 +48,7 @@ policies:
       authentication:
         type: basic
         basic:
-          secretRef: gateway-sr-credentials
+          secretRef: sr-client-credentials
     key:
       enabled: false
     value:
@@ -92,32 +92,35 @@ kubectl get pods -n confluent
 
 ### Step 2: Create the Schema Registry credentials
 
-- Create the Schema Registry users. Schema Registry reads one `<user>: <password>,<role>` line for each user.
+- Create the Schema Registry user `sr-client`. Schema Registry reads one `<user>: <password>,<role>` line for each user.
 ```
 kubectl create secret generic sr-basic-users -n confluent \
-  --from-literal=basic.txt=$'gateway: gateway-secret,sr-user\nclient: client-secret,sr-user'
+  --from-literal=basic.txt='sr-client: sr-client-secret,sr-user'
 ```
-- Create the credentials that Gateway uses to connect to Schema Registry
+- Create the credentials of the `sr-client` user. Gateway and CFK read `basic.txt`. The tools pod mounts `client.properties` for the Avro console tools.
 ```
-kubectl create secret generic gateway-sr-credentials -n confluent \
-  --from-literal=basic.txt=$'username=gateway\npassword=gateway-secret'
-```
-- Create the credentials of the `client` user. CFK reads `basic.txt` to register the schema. The tools pod mounts `client.properties` for the Avro console tools.
-```
-kubectl create secret generic client-sr-credentials -n confluent \
-  --from-literal=basic.txt=$'username=client\npassword=client-secret' \
-  --from-literal=client.properties=$'basic.auth.credentials.source=USER_INFO\nbasic.auth.user.info=client:client-secret'
+kubectl create secret generic sr-client-credentials -n confluent \
+  --from-literal=basic.txt=$'username=sr-client\npassword=sr-client-secret' \
+  --from-literal=client.properties=$'basic.auth.credentials.source=USER_INFO\nbasic.auth.user.info=sr-client:sr-client-secret'
 ```
 
 ### Step 3: Deploy Kafka and Schema Registry
 
-- Deploy the KRaft controller, Kafka and Schema Registry
+- Deploy the KRaft controller and Kafka
 ```
 kubectl apply -f confluent-platform.yaml
 ```
-- Wait for the components to become RUNNING
+- Wait for Kafka to become RUNNING
 ```
-kubectl wait --for=jsonpath='{.status.phase}'=RUNNING kraftcontroller/kraftcontroller kafka/kafka schemaregistry/schemaregistry --timeout=900s -n confluent
+kubectl wait --for=jsonpath='{.status.phase}'=RUNNING kraftcontroller/kraftcontroller kafka/kafka --timeout=900s -n confluent
+```
+- Deploy Schema Registry. Schema Registry connects to Kafka when it starts, thus deploy it after Kafka is RUNNING.
+```
+kubectl apply -f schema-registry.yaml
+```
+- Wait for Schema Registry to become RUNNING
+```
+kubectl wait --for=jsonpath='{.status.phase}'=RUNNING schemaregistry/schemaregistry --timeout=600s -n confluent
 ```
 
 ### Step 4: Create the topics and the schema
@@ -245,13 +248,17 @@ To remove all resources created by this example:
 
 - Delete the tools pod, Gateway, schema, topics and Confluent Platform
 ```
-kubectl delete -f tools.yaml -f gateway.yaml -f schema.yaml -f schema-config.yaml -f topics.yaml -f confluent-platform.yaml
+kubectl delete -f tools.yaml -f gateway.yaml -f schema.yaml -f schema-config.yaml -f topics.yaml -f schema-registry.yaml -f confluent-platform.yaml
 ```
 - Delete the secrets
 ```
-kubectl delete secret sr-basic-users gateway-sr-credentials client-sr-credentials -n confluent
+kubectl delete secret sr-basic-users sr-client-credentials -n confluent
 ```
 - Uninstall the CFK operator
 ```
 helm uninstall confluent-operator -n confluent
+```
+- Delete the `confluent` namespace
+```
+kubectl delete namespace confluent
 ```
