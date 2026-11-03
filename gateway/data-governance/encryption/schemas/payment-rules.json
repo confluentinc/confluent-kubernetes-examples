@@ -1,0 +1,20 @@
+{
+  "domainRules": [
+    {
+      "name": "encrypt-pii",
+      "kind": "TRANSFORM",
+      "type": "ENCRYPT",
+      "mode": "WRITEREAD",
+      "onFailure": "ERROR,ERROR",
+      "tags": [
+        "PII"
+      ],
+      "params": {
+        "encrypt.kek.name": "payments-kek",
+        "encrypt.kms.type": "local-kms",
+        "encrypt.kms.key.id": "local-kms://payments"
+      }
+    }
+  ],
+  "enableAt": "GATEWAY"
+}
