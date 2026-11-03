@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: order-schema
+  namespace: confluent
+data:
+  schema: |
+    {
+      "type": "record",
+      "name": "Order",
+      "namespace": "io.confluent.examples",
+      "fields": [
+        {"name": "order_id", "type": "string"},
+        {"name": "item", "type": "string"},
+        {"name": "quantity", "type": "int"}
+      ]
+    }

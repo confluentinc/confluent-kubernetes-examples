@@ -1,0 +1,51 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Gateway
+metadata:
+  name: confluent-gateway
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cpc-gateway:1.4.0
+    init: confluentinc/confluent-init-container:3.4.0
+  streamingDomains:
+    - name: kafka
+      type: kafka
+      kafkaCluster:
+        bootstrapServers:
+          - id: plaintext
+            endpoint: PLAINTEXT://kafka.confluent.svc.cluster.local:9071
+        nodeIdRanges:
+          - name: brokers
+            start: 0
+            end: 0
+  routes:
+    - name: governed
+      endpoint: confluent-gateway.confluent.svc.cluster.local:9092
+      brokerIdentificationStrategy:
+        type: port
+      streamingDomain:
+        name: kafka
+        bootstrapServerId: plaintext
+      security:
+        cluster:
+          kafka:
+            auth: passthrough
+  policies:
+    dataGovernance:
+      schemaRegistry:
+        urls:
+          - http://schemaregistry.confluent.svc.cluster.local:8081
+        authentication:
+          type: basic
+          basic:
+            secretRef: sr-client-credentials
+      key:
+        enabled: false
+      value:
+        enabled: true
+        subjectNameStrategy: TOPIC
+      topics:
+        - name: logs
+          value:
+            enabled: false
