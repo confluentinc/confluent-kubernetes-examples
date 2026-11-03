@@ -40,3 +40,9 @@ spec:
 ```
 
 Outside CFK, add the same `resource.extension.class` line to `schema-registry.properties`.
+
+## Examples
+
+| Example                                  | Description                                                                                  |
+|------------------------------------------|----------------------------------------------------------------------------------------------|
+| [schema-validation](./schema-validation) | Schema ID enforcement and deep schema validation on record values, with a per-topic override |
