@@ -1,9 +1,12 @@
 # Schema Validation with Gateway
 
 This example shows Gateway centralized governance enforcement with:
-- **Schema ID enforcement**: Gateway rejects records that do not have a schema ID.
-- **Deep schema validation**: Gateway rejects records with a payload that does not agree with the schema.
-- **Per-topic override**: Gateway does not govern the `logs` topic.
+- **Schema ID enforcement**:
+  Gateway rejects records that do not have a schema ID.
+- **Deep schema validation**:
+  Gateway rejects records with a payload that does not agree with the schema.
+- **Per-topic override**:
+  Gateway does not govern the `logs` topic.
 
 ## Overview
 
@@ -37,7 +40,9 @@ flowchart LR
   cfk -.->|"registers orders-value<br/>basic auth: sr-client"| sr
 ```
 
-Clients connect to Gateway at `confluent-gateway.confluent.svc.cluster.local:9092`. Gateway gets the schema of each record value from Schema Registry. The [gateway.yaml](./gateway.yaml) file sets the policy:
+Clients connect to Gateway at `confluent-gateway.confluent.svc.cluster.local:9092`.
+Gateway gets the schema of each record value from Schema Registry.
+The [gateway.yaml](./gateway.yaml) file sets the policy:
 
 ```yaml
 policies:
@@ -60,13 +65,18 @@ policies:
           enabled: false
 ```
 
-Schema ID enforcement and deep schema validation do not need Schema Registry extensions. For the licenses, see [Licenses](../README.md#licenses).
+Schema ID enforcement and deep schema validation do not need Schema Registry extensions.
+For the licenses, see [Licenses](../README.md#licenses).
 
 ## Prerequisites
 
-- Please ensure that you have set up the [prerequisites](https://github.com/confluentinc/confluent-kubernetes-examples/blob/master/README.md#prerequisites) for using the examples in this repo.
-- CFK 3.4.0 or later. CFK 3.4.0 adds `policies.dataGovernance` to the Gateway CRD.
-- Internet access from the cluster. The tools pod downloads the Confluent Community package.
+- Please ensure that you have set up the
+  [prerequisites](https://github.com/confluentinc/confluent-kubernetes-examples/blob/master/README.md#prerequisites)
+  for using the examples in this repo.
+- CFK 3.4.0 or later.
+  CFK 3.4.0 adds `policies.dataGovernance` to the Gateway CRD.
+- Internet access from the cluster.
+  The tools pod downloads the Confluent Community package.
 
 ## Deploy the Example
 
@@ -92,12 +102,15 @@ kubectl get pods -n confluent
 
 ### Step 2: Create the Schema Registry credentials
 
-- Create the Schema Registry user `sr-client`. Schema Registry reads one `<user>: <password>,<role>` line for each user.
+- Create the Schema Registry user `sr-client`.
+  Schema Registry reads one `<user>: <password>,<role>` line for each user.
 ```
 kubectl create secret generic sr-basic-users -n confluent \
   --from-literal=basic.txt='sr-client: sr-client-secret,sr-user'
 ```
-- Create the credentials of the `sr-client` user. Gateway and CFK read `basic.txt`. The tools pod mounts `client.properties` for the Avro console tools.
+- Create the credentials of the `sr-client` user.
+  Gateway and CFK read `basic.txt`.
+  The tools pod mounts `client.properties` for the Avro console tools.
 ```
 kubectl create secret generic sr-client-credentials -n confluent \
   --from-literal=basic.txt=$'username=sr-client\npassword=sr-client-secret' \
@@ -114,7 +127,8 @@ kubectl apply -f confluent-platform.yaml
 ```
 kubectl wait --for=jsonpath='{.status.phase}'=RUNNING kraftcontroller/kraftcontroller kafka/kafka --timeout=900s -n confluent
 ```
-- Deploy Schema Registry. Schema Registry connects to Kafka when it starts, thus deploy it after Kafka is RUNNING.
+- Deploy Schema Registry.
+  Schema Registry connects to Kafka when it starts, thus deploy it after Kafka is RUNNING.
 ```
 kubectl apply -f schema-registry.yaml
 ```
@@ -155,7 +169,8 @@ kubectl wait --for=jsonpath='{.status.phase}'=RUNNING gateway/confluent-gateway 
 ```
 kubectl apply -f tools.yaml
 ```
-- Wait for the tools pod to become READY. The pod is READY when the console tools are installed.
+- Wait for the tools pod to become READY.
+  The pod is READY when the console tools are installed.
 ```
 kubectl wait --for=condition=Ready pod/tools --timeout=900s -n confluent
 ```
@@ -167,7 +182,9 @@ kubectl wait --for=condition=Ready pod/tools --timeout=900s -n confluent
 kubectl get schema orders-value -n confluent -o jsonpath='{.status.id}'
 ```
 
-2. Open a shell in the tools pod. Run the next steps in this shell. Replace `<schema-id>` with the ID from step 1.
+2. Open a shell in the tools pod.
+   Run the next steps in this shell.
+   Replace `<schema-id>` with the ID from step 1.
 ```
 kubectl exec -it tools -n confluent -- bash
 ```
@@ -175,7 +192,8 @@ kubectl exec -it tools -n confluent -- bash
 ID=<schema-id>
 ```
 
-3. Produce an order with the plain console producer. This producer sends the JSON text with no schema ID.
+3. Produce an order with the plain console producer.
+   This producer sends the JSON text with no schema ID.
 ```
 echo '{"order_id": "o-1", "item": "keyboard", "quantity": 2}' | kafka-console-producer \
   --bootstrap-server confluent-gateway.confluent.svc.cluster.local:9092 \
@@ -186,7 +204,8 @@ Gateway rejects the record:
 org.apache.kafka.common.InvalidRecordException: confluent-gateway governance: origin=RECORD_SCHEMA_VALIDATION | Error deserializing schema ID
 ```
 
-4. Produce the same order with the Avro console producer. This producer serializes the record with the registered schema and adds the schema ID.
+4. Produce the same order with the Avro console producer.
+   This producer serializes the record with the registered schema and adds the schema ID.
 ```
 echo '{"order_id": "o-1", "item": "keyboard", "quantity": 2}' | kafka-avro-console-producer \
   --bootstrap-server confluent-gateway.confluent.svc.cluster.local:9092 \
@@ -198,9 +217,11 @@ echo '{"order_id": "o-1", "item": "keyboard", "quantity": 2}' | kafka-avro-conso
 ```
 Gateway accepts the record.
 
-5. Produce a record that has a valid schema ID and a payload that is not a valid `Order`. The record has the magic byte `0x00`, the 4-byte schema ID, and plain text.
+5. Produce a record that has a valid schema ID and a payload that is not a valid `Order`.
+   The record has the magic byte `0x00`, the 4-byte schema ID, and plain text.
 
-> **Note:** The plain console producer encodes its input as UTF-8. Thus, this step works only when the schema ID is less than 128.
+> **Note:** The plain console producer encodes its input as UTF-8.
+> Thus, this step works only when the schema ID is less than 128.
 
 ```
 { printf "\x00\x00\x00\x00\x$(printf %02x "$ID")"; echo 'not-valid-avro'; } | kafka-console-producer \
@@ -212,7 +233,8 @@ Gateway rejects the record:
 org.apache.kafka.common.InvalidRecordException: confluent-gateway governance: origin=RECORD_SCHEMA_VALIDATION | Error deserializing Avro message for id SchemaId{schemaType='AVRO', id=1, guid='null', messageIndexes=null}
 ```
 
-6. Consume `orders` through Gateway. The consumer shows only the Avro record from step 4.
+6. Consume `orders` through Gateway.
+   The consumer shows only the Avro record from step 4.
 ```
 kafka-avro-console-consumer \
   --bootstrap-server confluent-gateway.confluent.svc.cluster.local:9092 \
@@ -222,14 +244,16 @@ kafka-avro-console-consumer \
   --formatter-config /etc/sr-client/client.properties
 ```
 
-7. Produce a plain record to `logs`. Gateway does not govern `logs`, thus it accepts a record with no schema ID.
+7. Produce a plain record to `logs`.
+   Gateway does not govern `logs`, thus it accepts a record with no schema ID.
 ```
 echo 'app started' | kafka-console-producer \
   --bootstrap-server confluent-gateway.confluent.svc.cluster.local:9092 \
   --topic logs
 ```
 
-8. Consume `logs` through Gateway. The consumer shows the record from step 7.
+8. Consume `logs` through Gateway.
+   The consumer shows the record from step 7.
 ```
 kafka-console-consumer \
   --bootstrap-server confluent-gateway.confluent.svc.cluster.local:9092 \
@@ -237,7 +261,8 @@ kafka-console-consumer \
   --from-beginning
 ```
 
-9. Exit the tools pod. On the host, show the Gateway log lines for the rejected records.
+9. Exit the tools pod.
+   On the host, show the Gateway log lines for the rejected records.
 ```
 kubectl logs deploy/confluent-gateway -n confluent | grep 'rejecting record'
 ```
