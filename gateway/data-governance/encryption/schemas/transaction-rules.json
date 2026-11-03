@@ -1,0 +1,17 @@
+{
+  "encodingRules": [
+    {
+      "name": "encrypt-payload",
+      "kind": "TRANSFORM",
+      "type": "ENCRYPT_PAYLOAD",
+      "mode": "WRITEREAD",
+      "onFailure": "ERROR,ERROR",
+      "params": {
+        "encrypt.kek.name": "transactions-kek",
+        "encrypt.kms.type": "local-kms",
+        "encrypt.kms.key.id": "local-kms://transactions"
+      }
+    }
+  ],
+  "enableAt": "GATEWAY"
+}

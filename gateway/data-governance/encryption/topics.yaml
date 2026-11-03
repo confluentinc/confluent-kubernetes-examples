@@ -1,0 +1,21 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: payments
+  namespace: confluent
+spec:
+  replicas: 1
+  partitionCount: 1
+  kafkaClusterRef:
+    name: kafka
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: transactions
+  namespace: confluent
+spec:
+  replicas: 1
+  partitionCount: 1
+  kafkaClusterRef:
+    name: kafka

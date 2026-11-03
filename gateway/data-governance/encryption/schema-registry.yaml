@@ -1,0 +1,27 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: SchemaRegistry
+metadata:
+  name: schemaregistry
+  namespace: confluent
+spec:
+  replicas: 1
+  image:
+    application: confluentinc/cp-schema-registry:8.4.0
+    init: confluentinc/confluent-init-container:3.4.0
+  license:
+    secretRef: confluent-license
+  authentication:
+    type: basic
+    basic:
+      secretRef: sr-basic-users
+      roles:
+        - sr-user
+  # Enables the rule-set and DEK registry extensions, and reads the CSFLE add-on
+  # license from the license file that CFK mounts.
+  configOverrides:
+    server:
+      - resource.extension.class=io.confluent.kafka.schemaregistry.rulehandler.RuleSetResourceExtension,io.confluent.dekregistry.DekRegistryResourceExtension
+      - confluent.license.addon.csfle=${file:/mnt/secrets/confluent-license/license.txt:license}
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka.confluent.svc.cluster.local:9071

@@ -1,0 +1,22 @@
+{
+  "type": "record",
+  "name": "Payment",
+  "namespace": "io.confluent.examples",
+  "fields": [
+    {
+      "name": "payment_id",
+      "type": "string"
+    },
+    {
+      "name": "card_number",
+      "type": "string",
+      "confluent:tags": [
+        "PII"
+      ]
+    },
+    {
+      "name": "amount",
+      "type": "double"
+    }
+  ]
+}

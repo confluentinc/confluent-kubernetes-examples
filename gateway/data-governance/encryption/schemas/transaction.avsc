@@ -1,0 +1,19 @@
+{
+  "type": "record",
+  "name": "Transaction",
+  "namespace": "io.confluent.examples",
+  "fields": [
+    {
+      "name": "txn_id",
+      "type": "string"
+    },
+    {
+      "name": "account",
+      "type": "string"
+    },
+    {
+      "name": "amount",
+      "type": "double"
+    }
+  ]
+}
