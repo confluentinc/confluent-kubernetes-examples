@@ -1,0 +1,17 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Schema
+metadata:
+  name: orders-value
+  namespace: confluent
+spec:
+  schemaRegistryRest:
+    endpoint: https://schemaregistry.confluent.svc.cluster.local:8081
+    authentication:
+      type: basic
+      basic:
+        secretRef: sr-client-credentials
+    tls:
+      secretRef: ca-cert
+  data:
+    configRef: order-schema
+    format: avro

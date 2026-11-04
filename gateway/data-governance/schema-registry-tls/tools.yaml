@@ -1,0 +1,48 @@
+# Client pod with the plain and Avro console tools from the Confluent Community package.
+# The pod is Ready when the install is complete.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: tools
+  namespace: confluent
+spec:
+  containers:
+    - name: tools
+      image: ubuntu:24.04
+      env:
+        - name: PATH
+          value: /opt/confluent-8.4.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      command:
+        - bash
+        - -c
+        - |
+          set -euo pipefail
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y openjdk-21-jre-headless curl
+          curl -fsSL https://packages.confluent.io/archive/8.4/confluent-community-8.4.0.tar.gz | tar -xz -C /opt
+          touch /tmp/ready
+          exec sleep infinity
+      readinessProbe:
+        exec:
+          command:
+            - test
+            - -f
+            - /tmp/ready
+        periodSeconds: 5
+      volumeMounts:
+        - name: sr-client
+          mountPath: /etc/sr-client
+          readOnly: true
+        - name: ca-cert
+          mountPath: /etc/sr-ca
+          readOnly: true
+  volumes:
+    - name: sr-client
+      secret:
+        secretName: sr-client-credentials
+        items:
+          - key: client.properties
+            path: client.properties
+    - name: ca-cert
+      secret:
+        secretName: ca-cert
