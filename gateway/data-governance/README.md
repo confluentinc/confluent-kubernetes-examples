@@ -9,6 +9,27 @@ You define schemas and rule sets in Schema Registry.
 Gateway doesn't store policies of its own.
 It reads them from Schema Registry and enforces them on every produce and fetch.
 
+## What Gateway enforces
+
+Two settings control what Gateway enforces:
+- `enabled` in the Gateway CR, for the record key or value.
+- `enableAt` in the rule set of the schema, in Schema Registry.
+
+Gateway runs the same checks on produce and on fetch.
+The record key and value are checked separately, each against its own subject, schema and enabled
+setting.
+
+| Gateway `enabled` | Schema `enableAt`           | Schema ID enforcement | Deep schema validation | CEL conditions and transforms | GWFLE            | GW FPE           |
+|-------------------|-----------------------------|-----------------------|------------------------|-------------------------------|------------------|------------------|
+| `false`           | any                         | —                     | —                      | —                             | —                | —                |
+| `true`            | `CLIENT` or `SERVER`        | ✔                     | ✔                      | Client or server              | Client or server | Client or server |
+| `true`            | `GATEWAY`, `ALL` or not set | ✔                     | ✔                      | ✔ †                           | ✔ †              | ✔ †              |
+| `true`            | `NONE`                      | ✔                     | ✔                      | — no one                      | — no one         | — no one         |
+
+- Clients serialize with Confluent's Schema Registry serializers so each record carries a schema ID.
+- `enabled: false` is a full bypass: Gateway doesn't read the schema ID, whatever the schema says.
+- † Only when the schema carries that rule. Otherwise Gateway forwards the record unchanged.
+
 ## Prerequisites
 
 ### Licenses
