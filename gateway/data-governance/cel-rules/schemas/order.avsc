@@ -1,0 +1,19 @@
+{
+  "type": "record",
+  "name": "Order",
+  "namespace": "io.confluent.examples",
+  "fields": [
+    {
+      "name": "order_id",
+      "type": "string"
+    },
+    {
+      "name": "item",
+      "type": "string"
+    },
+    {
+      "name": "quantity",
+      "type": "int"
+    }
+  ]
+}
