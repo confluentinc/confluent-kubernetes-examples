@@ -1,0 +1,47 @@
+# platform-operator manages the PKC and every LKC on it.
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: platform-operator-orgadmin
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: platform-operator
+  role: OrganizationAdmin
+  kafkaRestClassRef:
+    name: default
+---
+# TenantAdmin covers topics, records and consumer groups in one LKC.
+# kind: LogicalKafkaCluster scopes the binding to that LKC's lkc-<id>.
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: payments-admin
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: payments-admin
+  role: TenantAdmin
+  kafkaClusterRef:
+    name: payments
+    kind: LogicalKafkaCluster
+  kafkaRestClassRef:
+    name: default
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: analytics-admin
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: analytics-admin
+  role: TenantAdmin
+  kafkaClusterRef:
+    name: analytics
+    kind: LogicalKafkaCluster
+  kafkaRestClassRef:
+    name: default

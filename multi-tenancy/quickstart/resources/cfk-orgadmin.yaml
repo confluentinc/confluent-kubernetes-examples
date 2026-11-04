@@ -1,0 +1,15 @@
+# MDS only lets an OrganizationAdmin on the PKC create LKCs; super-user status isn't enough.
+# This grants the role to kafka, the user CFK calls MDS as. The scope is the PKC
+# that the KafkaRestClass points to.
+apiVersion: platform.confluent.io/v1beta1
+kind: ConfluentRolebinding
+metadata:
+  name: cfk-orgadmin
+  namespace: confluent
+spec:
+  principal:
+    type: user
+    name: kafka
+  role: OrganizationAdmin
+  kafkaRestClassRef:
+    name: default

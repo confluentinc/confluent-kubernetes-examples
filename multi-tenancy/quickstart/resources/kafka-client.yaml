@@ -1,0 +1,69 @@
+# Client configs for each user and connection path. Every config verifies the broker hostname.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-client-config
+  namespace: confluent
+data:
+  # In-cluster LKC endpoint (port 9076). Clients log in to MDS with their LDAP password
+  # and connect with the token MDS issues.
+  payments-admin.properties: |
+    security.protocol=SASL_SSL
+    sasl.mechanism=OAUTHBEARER
+    sasl.login.callback.handler.class=io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler
+    sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required username="payments-admin" password="payments-admin-secret" metadataServerUrls="https://kafka.confluent.svc.cluster.local:8090";
+    ssl.truststore.type=PEM
+    ssl.truststore.location=/mnt/ca/ca.pem
+  analytics-admin.properties: |
+    security.protocol=SASL_SSL
+    sasl.mechanism=OAUTHBEARER
+    sasl.login.callback.handler.class=io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler
+    sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required username="analytics-admin" password="analytics-admin-secret" metadataServerUrls="https://kafka.confluent.svc.cluster.local:8090";
+    ssl.truststore.type=PEM
+    ssl.truststore.location=/mnt/ca/ca.pem
+  # External LKC endpoint (port 9092), with SASL/PLAIN.
+  payments-admin-external.properties: |
+    security.protocol=SASL_SSL
+    sasl.mechanism=PLAIN
+    sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="payments-admin" password="payments-admin-secret";
+    ssl.truststore.type=PEM
+    ssl.truststore.location=/mnt/ca/ca.pem
+  analytics-admin-external.properties: |
+    security.protocol=SASL_SSL
+    sasl.mechanism=PLAIN
+    sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="analytics-admin" password="analytics-admin-secret";
+    ssl.truststore.type=PEM
+    ssl.truststore.location=/mnt/ca/ca.pem
+  # The PKC's internal listener (port 9071), as the kafka super user.
+  kafka.properties: |
+    security.protocol=SASL_SSL
+    sasl.mechanism=PLAIN
+    sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="kafka" password="kafka-secret";
+    ssl.truststore.type=PEM
+    ssl.truststore.location=/mnt/ca/ca.pem
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kafka-client
+  namespace: confluent
+spec:
+  containers:
+    - name: cli
+      image: confluentinc/cp-server:8.4.0
+      command: ["sleep", "infinity"]
+      volumeMounts:
+        - name: ca
+          mountPath: /mnt/ca
+        - name: config
+          mountPath: /clients
+  volumes:
+    - name: ca
+      secret:
+        secretName: ca-pair-sslcerts
+        items:
+          - key: tls.crt
+            path: ca.pem
+    - name: config
+      configMap:
+        name: kafka-client-config
