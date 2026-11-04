@@ -1,0 +1,26 @@
+# Adds the sample users to the OpenLDAP chart in assets/openldap.
+# Pass this file after ldaps-rbac.yaml; Helm merges the ldifs maps.
+# Keep the numeric prefixes below 20. The image loads the files in sort order
+# and stops at the ConfigMap's own data directory, which sorts as 20xx.
+ldifs:
+  16_platform-operator.ldif: |-
+    dn: cn=platform-operator,{{ LDAP_BASE_DN }}
+    userPassword: platform-operator-secret
+    description: platform operator
+    objectClass: simpleSecurityObject
+    objectClass: organizationalRole
+    cn: platform-operator
+  17_payments-admin.ldif: |-
+    dn: cn=payments-admin,{{ LDAP_BASE_DN }}
+    userPassword: payments-admin-secret
+    description: TenantAdmin of the payments LKC
+    objectClass: simpleSecurityObject
+    objectClass: organizationalRole
+    cn: payments-admin
+  18_analytics-admin.ldif: |-
+    dn: cn=analytics-admin,{{ LDAP_BASE_DN }}
+    userPassword: analytics-admin-secret
+    description: TenantAdmin of the analytics LKC
+    objectClass: simpleSecurityObject
+    objectClass: organizationalRole
+    cn: analytics-admin

@@ -91,6 +91,7 @@ Following index (not exhaustive) provides a list of scenarios available in this 
 | [mtls-without-rbac](security%2Fmtls-without-rbac)                                                 |                                                  |
 | [mtls-without-rbac](security%2Fmtls-without-rbac)                                                 | #mtls                                            |
 | [multi-Region-Clusters (MRC)](hybrid%2Fmulti-region-clusters)                                     | #multiple-k8s-cluster                            |
+| [multi-tenancy](multi-tenancy)                                                                    | #multi-tenancy, #rbac                            |
 | [openshift-security](security%2Fopenshift-security)                                               |                                                  |
 | [plaintext-basic-auth-Connect](security%2Fplaintext-basic-auth-Connect)                           | #basic-auth                                      |
 | [pod-overlay](advanced-configuration%2Fpod-overlay)                                               | #advanced-configuration                          |

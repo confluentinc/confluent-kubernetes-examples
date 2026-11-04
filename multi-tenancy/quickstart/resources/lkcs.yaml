@@ -1,0 +1,33 @@
+# Each LKC can take 10 MiB/s of produce and 30 MiB/s of consume traffic,
+# and hold up to 1,000 partitions. quotas and limits are optional.
+apiVersion: platform.confluent.io/v1beta1
+kind: LogicalKafkaCluster
+metadata:
+  name: payments
+  namespace: confluent
+spec:
+  kafkaClusterRef:
+    name: kafka
+  kafkaRestClassRef:
+    name: default
+  quotas:
+    ingressByteRate: 10485760
+    egressByteRate: 31457280
+  limits:
+    maxPartitions: 1000
+---
+apiVersion: platform.confluent.io/v1beta1
+kind: LogicalKafkaCluster
+metadata:
+  name: analytics
+  namespace: confluent
+spec:
+  kafkaClusterRef:
+    name: kafka
+  kafkaRestClassRef:
+    name: default
+  quotas:
+    ingressByteRate: 10485760
+    egressByteRate: 31457280
+  limits:
+    maxPartitions: 1000

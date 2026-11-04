@@ -1,0 +1,22 @@
+# Replaces the cluster's CoreDNS config, so use it on kind only.
+# The rewrite rules resolve LKC hostnames for any LKC ID and broker number.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns
+  namespace: kube-system
+data:
+  Corefile: |
+    .:53 {
+        errors
+        health
+        ready
+        # In-cluster LKC hostnames -> the PKC's Services
+        rewrite stop name regex ^lkc-[a-z0-9]+-kafka-b([0-9]+)\.confluent\.svc\.cluster\.local\.$ kafka-{1}.kafka.confluent.svc.cluster.local. answer auto
+        rewrite stop name regex ^lkc-[a-z0-9]+-kafka\.confluent\.svc\.cluster\.local\.$ kafka.confluent.svc.cluster.local. answer auto
+        # External LKC hostnames -> the load balancer Services. A real deployment uses DNS records instead.
+        rewrite stop name regex ^lkc-[a-z0-9]+-kafka\.b([0-9]+)\.mt\.example\.com\.$ kafka-{1}-lb.confluent.svc.cluster.local. answer auto
+        rewrite stop name regex ^lkc-[a-z0-9]+-kafka\.kafka\.mt\.example\.com\.$ kafka-bootstrap-lb.confluent.svc.cluster.local. answer auto
+        kubernetes cluster.local in-addr.arpa ip6.arpa
+        forward . /etc/resolv.conf
+    }
