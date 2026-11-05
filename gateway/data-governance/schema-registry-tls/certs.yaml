@@ -1,0 +1,61 @@
+# A self-signed Issuer creates the CA. The CA Issuer signs the Schema Registry server
+# certificate. Each issued Secret has tls.crt, tls.key and ca.crt, which CFK reads directly.
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: selfsigned
+  namespace: confluent
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ca
+  namespace: confluent
+spec:
+  isCA: true
+  commonName: confluent-examples-ca
+  secretName: ca-key-pair
+  privateKey:
+    algorithm: RSA
+    size: 2048
+    encoding: PKCS8
+  issuerRef:
+    name: selfsigned
+    kind: Issuer
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: ca
+  namespace: confluent
+spec:
+  ca:
+    secretName: ca-key-pair
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: schemaregistry-tls
+  namespace: confluent
+spec:
+  secretName: schemaregistry-tls
+  commonName: schemaregistry
+  dnsNames:
+    - schemaregistry
+    - schemaregistry.confluent
+    - schemaregistry.confluent.svc
+    - schemaregistry.confluent.svc.cluster.local
+    - "*.schemaregistry.confluent.svc.cluster.local"
+  usages:
+    - server auth
+    - digital signature
+    - key encipherment
+  privateKey:
+    algorithm: RSA
+    size: 2048
+    encoding: PKCS8
+  issuerRef:
+    name: ca
+    kind: Issuer
