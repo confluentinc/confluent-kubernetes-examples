@@ -160,6 +160,43 @@ roleRef:
   name: confluent-operator
   apiGroup: rbac.authorization.k8s.io
 ---
+# Required for CFK 3.4.0+. CRDs are cluster-scoped resources, so this
+# permission must live in a ClusterRole even though the operator itself is
+# namespaced. get/list/watch alone gives you the version-mismatch warning
+# only; create/update/patch (never delete) is also required for the
+# operator to upgrade CRDs automatically. Omit create/update/patch if you
+# set manageCRDs: false and continue to apply CRDs manually.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: confluent-operator-crd
+rules:
+  - apiGroups:
+      - apiextensions.k8s.io
+    resources:
+      - customresourcedefinitions
+    verbs:
+      - get
+      - list
+      - watch
+      - create
+      - update
+      - patch
+---
+# Required for CFK 3.4.0+. Binds the confluent-operator-crd ClusterRole above.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: confluent-operator-crd
+subjects:
+  - kind: ServiceAccount
+    name: confluent-for-kubernetes # customize as required
+    namespace: confluent # customize as required
+roleRef:
+  kind: ClusterRole
+  name: confluent-operator-crd
+  apiGroup: rbac.authorization.k8s.io
+---
 # required only when webhook is enabled
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
