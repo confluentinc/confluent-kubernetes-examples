@@ -1,0 +1,21 @@
+{
+  "domainRules": [
+    {
+      "name": "quantity-positive",
+      "kind": "CONDITION",
+      "type": "CEL",
+      "mode": "WRITE",
+      "expr": "message.quantity > 0",
+      "onFailure": "ERROR"
+    },
+    {
+      "name": "strings-not-empty",
+      "kind": "CONDITION",
+      "type": "CEL_FIELD",
+      "mode": "WRITE",
+      "expr": "typeName == 'STRING' ; value != ''",
+      "onFailure": "ERROR"
+    }
+  ],
+  "enableAt": "GATEWAY"
+}
