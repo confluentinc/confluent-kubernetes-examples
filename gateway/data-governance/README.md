@@ -2,8 +2,8 @@
 
 With centralized governance enforcement enabled, Gateway lets only records that match their schema
 reach Kafka.
-It can also encrypt fields (GW field-level encryption, GWFLE) or the whole payload (GW full payload
-encryption, GW FPE) on produce and decrypt them on fetch.
+It can also encrypt fields (GW field-level encryption, GWFLE) or the whole payload (GW payload
+encryption, GWPE) on produce and decrypt them on fetch.
 
 You define schemas and rule sets in Schema Registry.
 Gateway doesn't store policies of its own.
@@ -19,7 +19,7 @@ Gateway runs the same checks on produce and on fetch.
 The record key and value are checked separately, each against its own subject, schema and enabled
 setting.
 
-| Gateway `enabled` | Schema `enableAt`           | Schema ID enforcement | Deep schema validation | CEL conditions and transforms | GWFLE            | GW FPE           |
+| Gateway `enabled` | Schema `enableAt`           | Schema ID enforcement | Deep schema validation | CEL conditions and transforms | GWFLE            | GWPE             |
 |-------------------|-----------------------------|-----------------------|------------------------|-------------------------------|------------------|------------------|
 | `false`           | any                         | —                     | —                      | —                             | —                | —                |
 | `true`            | `CLIENT` or `SERVER`        | ✔                     | ✔                      | Client or server              | Client or server | Client or server |
@@ -39,7 +39,7 @@ setting.
 | Schema ID enforcement               | Confluent Platform Enterprise License                                                                   | Confluent Private Cloud License | Confluent Cloud Gateway License |
 | Deep schema validation              | Confluent Platform Enterprise License                                                                   | Confluent Private Cloud License | Confluent Cloud Gateway License |
 | GW field-level encryption (GWFLE)   | Confluent Platform Enterprise License and an encryption license (CSFLE or Flexible Encryption license) | Confluent Private Cloud License | Confluent Cloud Gateway License |
-| GW full payload encryption (GW FPE) | Confluent Platform Enterprise License and an encryption license (CSFLE or Flexible Encryption license) | Confluent Private Cloud License | Confluent Cloud Gateway License |
+| GW payload encryption (GWPE)        | Confluent Platform Enterprise License and an encryption license (CSFLE or Flexible Encryption license) | Confluent Private Cloud License | Confluent Cloud Gateway License |
 
 For how to pass a license to Gateway, see [license-configuration](../license-configuration).
 
@@ -52,7 +52,7 @@ Schema Registry needs two extensions to store rules and data keys.
 | Schema ID enforcement and deep schema validation | No                 | No                     |
 | CEL and other rule sets                          | Yes                | No                     |
 | GWFLE                                            | Yes                | Yes                    |
-| GW FPE                                           | Yes                | Yes                    |
+| GWPE                                             | Yes                | Yes                    |
 
 Without the rule-set extension, Schema Registry drops the rule set and keeps the schema.
 The DEK registry stores the data keys.
@@ -74,6 +74,6 @@ Outside CFK, add the same `resource.extension.class` line to `schema-registry.pr
 | Example                                      | Description                                                                                                               |
 |----------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
 | [schema-validation](./schema-validation)     | Schema ID enforcement and deep schema validation on record values, with a per-topic override                              |
-| [encryption](./encryption)                   | GW field-level encryption (GWFLE) of a tagged field and GW full payload encryption (GW FPE) of the record value           |
+| [encryption](./encryption)                   | GW field-level encryption (GWFLE) of a tagged field and GW payload encryption (GWPE) of the record value                  |
 | [cel-rules](./cel-rules)                     | CEL and CEL_FIELD data quality rules that reject records which fail a condition                                           |
 | [schema-registry-tls](./schema-registry-tls) | The schema-validation example with Schema Registry over TLS and basic authentication, with certificates from cert-manager |
