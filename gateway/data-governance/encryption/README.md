@@ -4,7 +4,7 @@ This example shows Gateway centralized governance enforcement with:
 - **GW field-level encryption (GWFLE)**:
   Gateway encrypts the `card_number` field of each record on `payments`.
   The schema tags the field as `PII`.
-- **GW full payload encryption (GW FPE)**:
+- **GW payload encryption (GWPE)**:
   Gateway encrypts the full value of each record on `transactions`.
 
 Gateway encrypts the records when clients produce, and decrypts them when clients consume.
@@ -20,7 +20,7 @@ The example deploys these components in the `confluent` namespace:
 | KRaft and Kafka | One controller and one broker, PLAINTEXT listeners                                                |
 | Schema Registry | HTTP with basic authentication, rule-set and DEK registry extensions, CSFLE add-on license        |
 | Gateway         | Passthrough route, port-based routing, `policies.dataGovernance` with encryption rule executors |
-| Topics          | `payments` (field encryption) and `transactions` (full payload encryption)                        |
+| Topics          | `payments` (field encryption) and `transactions` (payload encryption)                             |
 | Schemas         | `Payment` on `payments-value` and `Transaction` on `transactions-value`, with encryption rules    |
 | Tools pod       | curl, and plain and Avro console tools                                                            |
 
