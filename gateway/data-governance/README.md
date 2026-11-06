@@ -74,4 +74,6 @@ Outside CFK, add the same `resource.extension.class` line to `schema-registry.pr
 | Example                                      | Description                                                                                                               |
 |----------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
 | [schema-validation](./schema-validation)     | Schema ID enforcement and deep schema validation on record values, with a per-topic override                              |
+| [encryption](./encryption)                   | GW field-level encryption (GWFLE) of a tagged field and GW full payload encryption (GW FPE) of the record value           |
+| [cel-rules](./cel-rules)                     | CEL and CEL_FIELD data quality rules that reject records which fail a condition                                           |
 | [schema-registry-tls](./schema-registry-tls) | The schema-validation example with Schema Registry over TLS and basic authentication, with certificates from cert-manager |
