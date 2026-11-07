@@ -1,0 +1,30 @@
+{
+  "name": "cfk-examples-mcp",
+  "version": "1.0.0",
+  "description": "MCP server and CLI for Confluent for Kubernetes (CFK) examples",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "cfk-examples": "./src/cli.js",
+    "cfk-examples-mcp": "./src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "cli": "node src/cli.js"
+  },
+  "keywords": [
+    "mcp",
+    "confluent",
+    "kubernetes",
+    "cfk",
+    "examples"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "node-fetch": "^3.3.2",
+    "commander": "^12.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
