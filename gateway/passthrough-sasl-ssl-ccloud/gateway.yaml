@@ -1,0 +1,50 @@
+apiVersion: platform.confluent.io/v1beta1
+kind: Gateway
+metadata:
+  labels:
+    app.kubernetes.io/name: confluent-for-kubernetes
+    app.kubernetes.io/managed-by: kustomize
+  name: confluent-gateway
+spec:
+  replicas: 3
+  image:
+    application: confluentinc/cpc-gateway:1.4.0
+    init: confluentinc/confluent-init-container:3.4.0
+  streamingDomains:
+    - name: ccloud-kafka
+      type: kafka
+      kafkaCluster:
+        bootstrapServers:
+          - id: CCLOUD_SASL_SSL
+            # Replace with the bootstrap endpoint of your Confluent Cloud cluster
+            # (Cluster Settings > Endpoints in the Confluent Cloud Console).
+            endpoint: SASL_SSL://pkc-xxxxx.us-west-2.aws.confluent.cloud:9092
+            tls:
+              # Secret that holds the Let's Encrypt root CAs, created in Step 2.
+              secretRef: ccloud-tls
+  routes:
+    - name: passthrough-ccloud-route
+      endpoint: gateway.example.com:9595
+      brokerIdentificationStrategy:
+        type: host
+        pattern: broker$(nodeId).gateway.example.com:9595
+      streamingDomain:
+        name: ccloud-kafka
+        bootstrapServerId: CCLOUD_SASL_SSL
+      security:
+        client:
+          authentication:
+            type: plain
+          tls:
+            # Client-to-Gateway TLS secret, created in Step 2.
+            secretRef: gateway-tls
+        # The key must match the streaming domain name. Clients authenticate
+        # with a Confluent Cloud API key and secret, which the Gateway forwards
+        # to Confluent Cloud unchanged.
+        cluster:
+          ccloud-kafka:
+            auth: passthrough
+  externalAccess:
+    type: loadBalancer
+    loadBalancer:
+      domain: gateway.example.com
