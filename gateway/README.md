@@ -19,6 +19,10 @@
 |----------------------------------------------------| --- | --- | --- | --- | --- | --- | --- |
 | [passthrough-sasl-plain](./passthrough-sasl-plain) | Passthrough | Port | None | None | PLAIN | PLAIN | Simple plaintext setup with basic authentication |
 | [passthrough-sasl-ssl](./passthrough-sasl-ssl)     | Passthrough | Host | TLS | TLS | PLAIN | PLAIN | Host-based routing with TLS encryption and SASL/PLAIN authentication |
+| [passthrough-sasl-ssl-ccloud](./passthrough-sasl-ssl-ccloud) | Passthrough | Host | TLS | TLS | PLAIN | PLAIN | Confluent Cloud with a JKS truststore secret for the Let's Encrypt CA and API key passthrough |
+| [passthrough-sasl-ssl-ccloud-pem](./passthrough-sasl-ssl-ccloud-pem) | Passthrough | Host | TLS | TLS | PLAIN | PLAIN | Confluent Cloud with a PEM secret for the Let's Encrypt CA and API key passthrough |
+| [passthrough-sasl-ssl-ccloud-default-truststore](./passthrough-sasl-ssl-ccloud-default-truststore) | Passthrough | Host | TLS | TLS | PLAIN | PLAIN | Confluent Cloud with the default Java truststore (no CA secret) and API key passthrough |
+| [passthrough-oauth-ssl-ccloud](./passthrough-oauth-ssl-ccloud) | Passthrough | Host | TLS | TLS | OAUTHBEARER | OAUTHBEARER | Confluent Cloud with OAuth passthrough and a logical cluster extension header |
 | [authswap-sasl-plain-sasl-plain](./authswap-sasl-plain-sasl-plain) | Authentication Swap | Port | None | None | PLAIN | PLAIN | Simple authentication swap setup with SASL/PLAIN authentication |
 | [authswap-none-sasl-plain](./authswap-none-sasl-plain) | Authentication Swap | Port | None | None | NONE | PLAIN | Authentication swap from ANONYMOUS clients to SASL/PLAIN |
 | [authswap-sasl-plain-none](./authswap-sasl-plain-none) | Authentication Swap | Port | None | None | PLAIN | NONE | Authentication swap from SASL/PLAIN clients to no authentication |
