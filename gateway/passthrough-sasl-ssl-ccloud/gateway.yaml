@@ -33,8 +33,6 @@ spec:
         bootstrapServerId: CCLOUD_SASL_SSL
       security:
         client:
-          authentication:
-            type: plain
           tls:
             # Client-to-Gateway TLS secret, created in Step 2.
             secretRef: gateway-tls
