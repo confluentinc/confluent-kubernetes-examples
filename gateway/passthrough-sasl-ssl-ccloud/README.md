@@ -145,7 +145,7 @@ kubectl port-forward svc/confluent-gateway-bootstrap-lb 9595:9595 -n confluent
 
 Create a topic named `test-topic` in your Confluent Cloud cluster, for example, in the Confluent Cloud Console or with `confluent kafka topic create test-topic --cluster <cluster-id>`.
 
-**Note:** Confluent Cloud doesn't create topics automatically. If the topic doesn't exist, the producer logs `UNKNOWN_TOPIC_OR_PARTITION` warnings and doesn't send messages.
+**Note:** Confluent Cloud doesn't create topics automatically.
 
 ## Testing the Configuration
 
@@ -202,8 +202,6 @@ kafka-console-consumer \
 | Client reports `Disconnected while requesting ApiVersion` or a similar transport failure, and the Gateway logs show an over-sized frame or an unexpected TLS handshake | The client is connecting without TLS. Make sure the client uses `security.protocol=SASL_SSL`, because the route enables client TLS. |
 | Gateway logs show an SSL handshake or certificate validation error when connecting to Confluent Cloud | The `ccloud-tls` secret is missing, or it does not contain the CA that signed the Confluent Cloud certificate. Confirm the secret contents and the `jksPassword` value. |
 | Authentication fails | The API key or secret is incorrect, or the key does not have access to the cluster or topic. |
-| Producer logs `UNKNOWN_TOPIC_OR_PARTITION` warnings | The topic doesn't exist. Create it as described in [Step 5](#step-5-create-the-test-topic). |
-
 **Note:** The Gateway doesn't hot-reload TLS certificates. If you update the `ccloud-tls` or `gateway-tls` secret, trigger a reconciliation of the Gateway CR, for example by editing its `spec`, so the pods restart and load the new certificates.
 
 ## Production deployment
