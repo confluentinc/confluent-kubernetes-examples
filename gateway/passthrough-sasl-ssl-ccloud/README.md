@@ -139,7 +139,26 @@ kubectl get svc -n confluent
 kubectl get svc -n confluent
 ```
 
-- Create DNS records so that clients can resolve the Gateway bootstrap host and the broker hosts to the load balancer. For example, create a record for `gateway.example.com` and a wildcard record for `*.gateway.example.com`. For testing, you can instead add entries to `/etc/hosts` on the client machine.
+- Create DNS records so that clients can resolve the Gateway bootstrap host and the broker hosts to the load balancer. For example, create a record for `gateway.example.com` and a wildcard record for `*.gateway.example.com`. For more information, see [Route endpoint DNS records](https://docs.confluent.io/operator/current/gateway/co-gateway-deploy.html#route-endpoint-dns-records).
+
+#### Local testing without DNS records
+
+For a local test, you can use a domain under `localhost`. Many systems, including macOS, resolve any `*.localhost` name to `127.0.0.1`.
+
+1. In [gateway.yaml](./gateway.yaml), replace `gateway.example.com` with `gateway.localhost`:
+   ```yaml
+   endpoint: gateway.localhost:9595
+   pattern: broker$(nodeId).gateway.localhost:9595
+   domain: gateway.localhost
+   ```
+2. When you create the Gateway certificate in Step 2, use `gateway.localhost` and `*.gateway.localhost` as the SANs.
+3. Forward the Gateway port to your machine:
+   ```
+   kubectl port-forward svc/confluent-gateway-bootstrap-lb 9595:9595 -n confluent
+   ```
+4. In the client commands, use `--bootstrap-server gateway.localhost:9595`.
+
+If your system doesn't resolve `*.localhost`, use DNS records.
 
 ## Testing the Configuration
 
