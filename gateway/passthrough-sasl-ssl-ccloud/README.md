@@ -30,7 +30,7 @@ Clients connect to the Gateway over TLS using the certificate that you generate 
 
 - Please ensure that you have set up the [prerequisites](https://github.com/confluentinc/confluent-kubernetes-examples/blob/master/README.md#prerequisites) for using the examples in this repo.
 - You will need a Confluent Cloud Kafka cluster that is reachable from your Kubernetes cluster, for example, a cluster with public endpoints.
-- You will need a Confluent Cloud [API key and secret](https://docs.confluent.io/cloud/current/security/authenticate/workload-identities/service-accounts/api-keys/manage-api-keys.html) for the cluster, and a topic to test with.
+- You will need a Confluent Cloud [API key and secret](https://docs.confluent.io/cloud/current/security/authenticate/workload-identities/service-accounts/api-keys/manage-api-keys.html) for the cluster.
 - OpenSSL is required for certificate generation.
 - `keytool` command is required for managing keystore and certificates.
 - `curl` is required to download the Let's Encrypt root certificates.
@@ -60,7 +60,9 @@ kubectl get pods -n confluent
 #### Create Client to Gateway TLS Secret
 
 - Please follow the steps in this [guide](https://github.com/confluentinc/confluent-kubernetes-examples/blob/master/gateway/certificates/README.md) to generate the TLS certificates and create the corresponding Kubernetes secret (`gateway-tls`) required by gateway.
-- The `gateway.example.com` domain and the `*.gateway.example.com` wildcard in the guide match the `endpoint` and `pattern` values in [gateway.yaml](./gateway.yaml). If you use a different domain, update the certificate SANs and `gateway.yaml` to match.
+- In the guide, use `gateway.localhost` for the domain. This matches the `endpoint`, `pattern`, and `domain` values in [gateway.yaml](./gateway.yaml):
+  - In the certificate signing request, set `CN=gateway.localhost`.
+  - In the certificate extensions, set `subjectAltName=DNS:gateway.localhost,DNS:*.gateway.localhost`.
 
 #### Create Gateway to Confluent Cloud TLS Secret
 
@@ -113,7 +115,6 @@ kubectl create secret generic ccloud-tls \
 
 - Modify the `endpoint` value in the `streamingDomains` section of [gateway.yaml](./gateway.yaml) to the bootstrap endpoint of your Confluent Cloud cluster, for example, `SASL_SSL://pkc-xxxxx.us-west-2.aws.confluent.cloud:9092`.
    - You can find the endpoint in the Confluent Cloud Console under **Cluster Settings** > **Endpoints**.
-- If you use a domain other than `gateway.example.com`, update the `endpoint`, `pattern`, and `domain` values accordingly.
 - Now deploy the gateway yaml.
 
 ```
@@ -134,31 +135,17 @@ kubectl get gateway -n confluent
 kubectl get svc -n confluent
 ```
 
-- Get the external IP address or hostname of the Gateway load balancer.
+- Forward the Gateway port to your machine. Keep this command running while you test.
 ```
-kubectl get svc -n confluent
+kubectl port-forward svc/confluent-gateway-bootstrap-lb 9595:9595 -n confluent
 ```
+  Many systems, including macOS, resolve any `*.localhost` name to `127.0.0.1`. So the bootstrap host `gateway.localhost` and all broker hosts, for example `broker100.gateway.localhost`, reach the Gateway through this port-forward. If your system doesn't resolve `*.localhost`, use DNS records as described in [Production deployment](#production-deployment).
 
-- Create DNS records so that clients can resolve the Gateway bootstrap host and the broker hosts to the load balancer. For example, create a record for `gateway.example.com` and a wildcard record for `*.gateway.example.com`. For more information, see [Route endpoint DNS records](https://docs.confluent.io/operator/current/gateway/co-gateway-deploy.html#route-endpoint-dns-records).
+### Step 5: Create the test topic
 
-#### Local testing without DNS records
+Create a topic named `test-topic` in your Confluent Cloud cluster, for example, in the Confluent Cloud Console or with `confluent kafka topic create test-topic --cluster <cluster-id>`.
 
-For a local test, you can use a domain under `localhost`. Many systems, including macOS, resolve any `*.localhost` name to `127.0.0.1`.
-
-1. In [gateway.yaml](./gateway.yaml), replace `gateway.example.com` with `gateway.localhost`:
-   ```yaml
-   endpoint: gateway.localhost:9595
-   pattern: broker$(nodeId).gateway.localhost:9595
-   domain: gateway.localhost
-   ```
-2. When you create the Gateway certificate in Step 2, use `gateway.localhost` and `*.gateway.localhost` as the SANs.
-3. Forward the Gateway port to your machine:
-   ```
-   kubectl port-forward svc/confluent-gateway-bootstrap-lb 9595:9595 -n confluent
-   ```
-4. In the client commands, use `--bootstrap-server gateway.localhost:9595`.
-
-If your system doesn't resolve `*.localhost`, use DNS records.
+**Note:** Confluent Cloud doesn't create topics automatically. If the topic doesn't exist, the producer logs `UNKNOWN_TOPIC_OR_PARTITION` warnings and doesn't send messages.
 
 ## Testing the Configuration
 
@@ -193,16 +180,16 @@ ssl.truststore.password=changeit
 3. Test producing messages:
 ```
 kafka-console-producer \
-  --bootstrap-server gateway.example.com:9595 \
-  --producer.config client.properties \
+  --bootstrap-server gateway.localhost:9595 \
+  --command-config client.properties \
   --topic test-topic
 ```
 
 4. Test consuming messages:
 ```
 kafka-console-consumer \
-  --bootstrap-server gateway.example.com:9595 \
-  --consumer.config client.properties \
+  --bootstrap-server gateway.localhost:9595 \
+  --command-config client.properties \
   --topic test-topic \
   --from-beginning
 ```
@@ -215,8 +202,17 @@ kafka-console-consumer \
 | Client reports `Disconnected while requesting ApiVersion` or a similar transport failure, and the Gateway logs show an over-sized frame or an unexpected TLS handshake | The client is connecting without TLS. Make sure the client uses `security.protocol=SASL_SSL`, because the route enables client TLS. |
 | Gateway logs show an SSL handshake or certificate validation error when connecting to Confluent Cloud | The `ccloud-tls` secret is missing, or it does not contain the CA that signed the Confluent Cloud certificate. Confirm the secret contents and the `jksPassword` value. |
 | Authentication fails | The API key or secret is incorrect, or the key does not have access to the cluster or topic. |
+| Producer logs `UNKNOWN_TOPIC_OR_PARTITION` warnings | The topic doesn't exist. Create it as described in [Step 5](#step-5-create-the-test-topic). |
 
 **Note:** The Gateway doesn't hot-reload TLS certificates. If you update the `ccloud-tls` or `gateway-tls` secret, trigger a reconciliation of the Gateway CR, for example by editing its `spec`, so the pods restart and load the new certificates.
+
+## Production deployment
+
+This example uses `gateway.localhost` and a port-forward for a local test. For a production deployment:
+
+- Use your own domain, for example `gateway.mycompany.com`, in the `endpoint`, `pattern`, and `domain` values in [gateway.yaml](./gateway.yaml).
+- Issue the Gateway certificate for that domain, with the domain and a wildcard (for example `*.gateway.mycompany.com`) as SANs. The wildcard is necessary because the Gateway advertises one hostname for each Confluent Cloud broker, and the broker IDs are not known in advance.
+- Get the external address of the Gateway load balancer with `kubectl get svc -n confluent`, and create a DNS record for the domain and a wildcard record that point to it. For more information, see [Route endpoint DNS records](https://docs.confluent.io/operator/current/gateway/co-gateway-deploy.html#route-endpoint-dns-records).
 
 ## Clean Up
 

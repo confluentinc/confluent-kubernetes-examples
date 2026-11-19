@@ -34,7 +34,6 @@ This example uses `extensionHeaders` to add the Confluent Cloud logical cluster 
 
 - Modify the `endpoint` value in the `streamingDomains` section of [gateway.yaml](./gateway.yaml) to the bootstrap endpoint of your Confluent Cloud cluster.
 - Modify the `logicalCluster` value under `extensionHeaders` to your logical cluster ID.
-- If you use a domain other than `gateway.example.com`, update the `endpoint`, `pattern`, and `domain` values accordingly.
 - Deploy the gateway yaml and wait for the pods to become ready.
 
 ```
@@ -44,7 +43,7 @@ kubectl wait --for=condition=Ready pod -l app=confluent-gateway --timeout=600s -
 
 ### Step 3: Verify the deployment
 
-Follow the [verification steps](../passthrough-sasl-ssl-ccloud/README.md#step-4-verify-deployment) of the main example, including the DNS setup.
+Follow [Step 4](../passthrough-sasl-ssl-ccloud/README.md#step-4-verify-deployment) and [Step 5](../passthrough-sasl-ssl-ccloud/README.md#step-5-create-the-test-topic) of the main example to verify the deployment, forward the Gateway port, and create the test topic.
 
 ## Testing the Configuration
 
@@ -71,13 +70,13 @@ ssl.truststore.password=changeit
 3. Produce and consume messages:
 ```
 kafka-console-producer \
-  --bootstrap-server gateway.example.com:9595 \
-  --producer.config client-oauth.properties \
+  --bootstrap-server gateway.localhost:9595 \
+  --command-config client-oauth.properties \
   --topic test-topic
 
 kafka-console-consumer \
-  --bootstrap-server gateway.example.com:9595 \
-  --consumer.config client-oauth.properties \
+  --bootstrap-server gateway.localhost:9595 \
+  --command-config client-oauth.properties \
   --topic test-topic \
   --from-beginning
 ```

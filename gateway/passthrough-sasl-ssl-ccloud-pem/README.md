@@ -45,7 +45,6 @@ kubectl create secret generic ccloud-tls \
 ### Step 2: Deploy gateway YAML
 
 - Modify the `endpoint` value in the `streamingDomains` section of [gateway.yaml](./gateway.yaml) to the bootstrap endpoint of your Confluent Cloud cluster.
-- If you use a domain other than `gateway.example.com`, update the `endpoint`, `pattern`, and `domain` values accordingly.
 - Deploy the gateway yaml and wait for the pods to become ready.
 
 ```
@@ -55,7 +54,7 @@ kubectl wait --for=condition=Ready pod -l app=confluent-gateway --timeout=600s -
 
 ### Step 3: Verify the deployment and test
 
-Follow the verification and testing steps in the [main example](../passthrough-sasl-ssl-ccloud/README.md#step-4-verify-deployment). The client configuration is identical, because only the Gateway to Confluent Cloud leg is different.
+Follow the verification, test topic, and testing steps in the [main example](../passthrough-sasl-ssl-ccloud/README.md#step-4-verify-deployment), starting at Step 4. The client configuration is identical, because only the Gateway to Confluent Cloud leg is different.
 
 ## Clean Up
 

@@ -24,10 +24,10 @@ spec:
               secretRef: ccloud-tls
   routes:
     - name: passthrough-ccloud-route
-      endpoint: gateway.example.com:9595
+      endpoint: gateway.localhost:9595
       brokerIdentificationStrategy:
         type: host
-        pattern: broker$(nodeId).gateway.example.com:9595
+        pattern: broker$(nodeId).gateway.localhost:9595
       streamingDomain:
         name: ccloud-kafka
         bootstrapServerId: CCLOUD_SASL_SSL
@@ -45,4 +45,4 @@ spec:
   externalAccess:
     type: loadBalancer
     loadBalancer:
-      domain: gateway.example.com
+      domain: gateway.localhost
