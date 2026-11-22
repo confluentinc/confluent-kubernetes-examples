@@ -59,16 +59,21 @@ security.protocol=SASL_SSL
 sasl.mechanism=OAUTHBEARER
 sasl.login.callback.handler.class=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginCallbackHandler
 sasl.oauthbearer.token.endpoint.url=<IDP_TOKEN_ENDPOINT_URL>
+sasl.oauthbearer.client.credentials.client.id=<CLIENT_ID>
+sasl.oauthbearer.client.credentials.client.secret=<CLIENT_SECRET>
 sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
-      clientId="<CLIENT_ID>" \
-      clientSecret="<CLIENT_SECRET>" \
       extension_identityPoolId="<IDENTITY_POOL_ID>";
 
 ssl.truststore.location=./gateway.truststore.jks
 ssl.truststore.password=changeit
 ```
 
-3. Produce and consume messages:
+3. Allow the client to call the token endpoint. Kafka 4.x clients block OAuth URLs that aren't in this JVM system property:
+```
+export KAFKA_OPTS="-Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=<IDP_TOKEN_ENDPOINT_URL>"
+```
+
+4. Produce and consume messages:
 ```
 kafka-console-producer \
   --bootstrap-server gateway.localhost:9595 \
