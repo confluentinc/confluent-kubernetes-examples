@@ -21,6 +21,7 @@ This example uses `extensionHeaders` to add the Confluent Cloud logical cluster 
 ### Prerequisites
 
 - The prerequisites are the same as the [passthrough-sasl-ssl-ccloud](../passthrough-sasl-ssl-ccloud/README.md#prerequisites) example, except that you don't need an API key.
+- Your Confluent Cloud cluster must be a Standard, Enterprise, Dedicated, or Freight cluster. OAuth for Kafka isn't supported on Basic clusters. For more information, see [OAuth limitations](https://docs.confluent.io/cloud/current/security/authenticate/workload-identities/identity-providers/oauth/overview.html#limitations).
 - You will need an OAuth identity provider that is configured in Confluent Cloud, and an [identity pool](https://docs.confluent.io/cloud/current/security/authenticate/workload-identities/identity-providers/oauth/identity-pools.html) that grants access to your cluster.
 - You will need the logical cluster ID (`lkc-...`) of your Confluent Cloud cluster.
 
@@ -56,7 +57,7 @@ Follow [Step 4](../passthrough-sasl-ssl-ccloud/README.md#step-4-verify-deploymen
 ```
 security.protocol=SASL_SSL
 sasl.mechanism=OAUTHBEARER
-sasl.login.callback.handler.class=org.apache.kafka.common.security.oauthbearer.secured.OAuthBearerLoginCallbackHandler
+sasl.login.callback.handler.class=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginCallbackHandler
 sasl.oauthbearer.token.endpoint.url=<IDP_TOKEN_ENDPOINT_URL>
 sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
       clientId="<CLIENT_ID>" \
