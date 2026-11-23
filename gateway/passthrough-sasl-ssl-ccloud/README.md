@@ -181,7 +181,7 @@ ssl.truststore.password=changeit
 ```
 kafka-console-producer \
   --bootstrap-server gateway.localhost:9595 \
-  --command-config client.properties \
+  --producer.config client.properties \
   --topic test-topic
 ```
 
@@ -189,10 +189,12 @@ kafka-console-producer \
 ```
 kafka-console-consumer \
   --bootstrap-server gateway.localhost:9595 \
-  --command-config client.properties \
+  --consumer.config client.properties \
   --topic test-topic \
   --from-beginning
 ```
+
+**Note:** On Kafka 4.2 and later, `--producer.config` and `--consumer.config` are deprecated. You can use `--command-config` instead.
 
 ## Troubleshooting
 

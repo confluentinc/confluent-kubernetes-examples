@@ -59,14 +59,16 @@ security.protocol=SASL_SSL
 sasl.mechanism=OAUTHBEARER
 sasl.login.callback.handler.class=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginCallbackHandler
 sasl.oauthbearer.token.endpoint.url=<IDP_TOKEN_ENDPOINT_URL>
-sasl.oauthbearer.client.credentials.client.id=<CLIENT_ID>
-sasl.oauthbearer.client.credentials.client.secret=<CLIENT_SECRET>
 sasl.jaas.config=org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required \
+      clientId="<CLIENT_ID>" \
+      clientSecret="<CLIENT_SECRET>" \
       extension_identityPoolId="<IDENTITY_POOL_ID>";
 
 ssl.truststore.location=./gateway.truststore.jks
 ssl.truststore.password=changeit
 ```
+
+**Note:** On Kafka 4.1 and later clients, `clientId` and `clientSecret` in `sasl.jaas.config` are deprecated. You can set `sasl.oauthbearer.client.credentials.client.id` and `sasl.oauthbearer.client.credentials.client.secret` instead.
 
 3. Allow the client to call the token endpoint. Kafka 4.x clients block OAuth URLs that aren't in this JVM system property:
 ```
@@ -77,15 +79,17 @@ export KAFKA_OPTS="-Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=<IDP_TOKEN_E
 ```
 kafka-console-producer \
   --bootstrap-server gateway.localhost:9595 \
-  --command-config client-oauth.properties \
+  --producer.config client-oauth.properties \
   --topic test-topic
 
 kafka-console-consumer \
   --bootstrap-server gateway.localhost:9595 \
-  --command-config client-oauth.properties \
+  --consumer.config client-oauth.properties \
   --topic test-topic \
   --from-beginning
 ```
+
+**Note:** On Kafka 4.2 and later, `--producer.config` and `--consumer.config` are deprecated. You can use `--command-config` instead.
 
 ## Clean Up
 
