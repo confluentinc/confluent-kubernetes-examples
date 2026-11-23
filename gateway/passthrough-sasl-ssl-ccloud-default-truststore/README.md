@@ -14,7 +14,7 @@ This example is a variant of [passthrough-sasl-ssl-ccloud](../passthrough-sasl-s
 
 When the bootstrap server has `tls: {}`, CFK doesn't mount a truststore for the connection to Confluent Cloud. It renders the Gateway configuration with `ssl.ignoreTrust: false` and no `truststore`, so the Gateway still validates the Confluent Cloud broker certificate, using the default truststore of its Java runtime.
 
-Use this variant when the default Java truststore trusts the CA that signs your Confluent Cloud certificates. If the connection fails with a certificate validation error, use [passthrough-sasl-ssl-ccloud](../passthrough-sasl-ssl-ccloud) or [passthrough-sasl-ssl-ccloud-pem](../passthrough-sasl-ssl-ccloud-pem) to provide the CA explicitly.
+Use this variant when the default Java truststore trusts the CA that signs your Confluent Cloud certificates. If the connection fails with a certificate validation error, use [passthrough-sasl-ssl-ccloud](../passthrough-sasl-ssl-ccloud) to provide the CA explicitly, as a JKS truststore or a PEM file.
 
 **Note:** Don't use `tls.ignoreTrustStoreConfig: true` to work around certificate errors. That setting skips certificate validation on the Gateway to Confluent Cloud connection, and isn't recommended for production.
 

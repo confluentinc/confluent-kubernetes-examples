@@ -21,8 +21,7 @@ Clients connect to the Gateway over TLS using the certificate that you generate 
 
 | Example | Gateway to Confluent Cloud TLS | Client authentication |
 | --- | --- | --- |
-| This example | JKS truststore secret with the Let's Encrypt root CAs | API key and secret (SASL/PLAIN) |
-| [passthrough-sasl-ssl-ccloud-pem](../passthrough-sasl-ssl-ccloud-pem) | PEM secret (`cacerts.pem`) with the Let's Encrypt root CAs | API key and secret (SASL/PLAIN) |
+| This example | JKS truststore or PEM secret with the Let's Encrypt root CAs | API key and secret (SASL/PLAIN) |
 | [passthrough-sasl-ssl-ccloud-default-truststore](../passthrough-sasl-ssl-ccloud-default-truststore) | No secret (empty `tls` block, default Java truststore) | API key and secret (SASL/PLAIN) |
 | [passthrough-oauth-ssl-ccloud](../passthrough-oauth-ssl-ccloud) | JKS or PEM secret | OAuth (SASL/OAUTHBEARER) |
 
@@ -34,7 +33,7 @@ Clients connect to the Gateway over TLS using the certificate that you generate 
 - You will need a Confluent Cloud Kafka cluster that is reachable from your Kubernetes cluster, for example, a cluster with public endpoints.
 - You will need a Confluent Cloud [API key and secret](https://docs.confluent.io/cloud/current/security/authenticate/workload-identities/service-accounts/api-keys/manage-api-keys.html) for the cluster.
 - OpenSSL is required for certificate generation.
-- `keytool` command is required for managing keystore and certificates.
+- `keytool` is required for the JKS truststore (option A) and for the client truststore.
 - `curl` is required to download the Let's Encrypt root certificates.
 
 ### Step 1: Deploy the Confluent for Kubernetes Operator
@@ -68,7 +67,12 @@ kubectl get pods -n confluent
 
 #### Create Gateway to Confluent Cloud TLS Secret
 
-Confluent Cloud brokers present certificates signed by Let's Encrypt. Create a truststore that contains the Let's Encrypt root CAs, and store it in a Kubernetes secret (`ccloud-tls`).
+Confluent Cloud brokers present certificates signed by Let's Encrypt. Store the Let's Encrypt root CAs in a Kubernetes secret (`ccloud-tls`). You can store them as a JKS truststore or as a PEM file. `gateway.yaml` is the same for both, because CFK detects the format from the keys in the secret.
+
+| | Option A: JKS truststore | Option B: PEM file |
+| --- | --- | --- |
+| Keys in the secret | `truststore.jks`, `jksPassword.txt` | `cacerts.pem` |
+| Tools | `keytool` | None. CFK converts the PEM file into a truststore. |
 
 1. Download the Let's Encrypt root certificates, ISRG Root X1 and ISRG Root X2. For the latest list of root certificates, see the [Let's Encrypt certificate list](https://letsencrypt.org/certificates/).
 ```
@@ -76,8 +80,11 @@ curl -fsSO https://letsencrypt.org/certs/isrgrootx1.pem
 curl -fsSO https://letsencrypt.org/certs/isrg-root-x2.pem
 ```
 
-2. Create a JKS truststore that contains both certificates.
-- Modify the `-storepass` value if required.
+2. Create the secret with one of the options.
+
+**Option A: JKS truststore**
+
+- Create a truststore that contains both certificates. Modify the `-storepass` value if required.
 ```
 keytool -import -noprompt -trustcacerts \
   -alias isrgrootx1 \
@@ -91,23 +98,32 @@ keytool -import -noprompt -trustcacerts \
   -keystore truststore.jks \
   -storepass changeit
 ```
-
-3. Verify the truststore. The output should list two `trustedCertEntry` entries.
+- Verify the truststore. The output should list two `trustedCertEntry` entries.
 ```
 keytool -list -keystore truststore.jks -storepass changeit
 ```
-
-4. Create the JKS password file. The password must match the `-storepass` value that you used above, and use the following format: `jksPassword=<password_for_jks>`.
-   - More details available [here](https://docs.confluent.io/operator/current/co-network-encryption.html#provide-tls-keys-and-certificates-in-java-keystore-format)
+- Create the password file. The password must match the `-storepass` value, in the format `jksPassword=<password>`. For more information, see [Provide TLS keys and certificates in Java KeyStore format](https://docs.confluent.io/operator/current/co-network-encryption.html#provide-tls-keys-and-certificates-in-java-keystore-format).
 ```
 echo "jksPassword=changeit" > jksPassword.txt
 ```
-
-5. Create the Kubernetes secret.
+- Create the secret.
 ```
 kubectl create secret generic ccloud-tls \
   --from-file=truststore.jks=truststore.jks \
   --from-file=jksPassword.txt=jksPassword.txt \
+  -n confluent
+```
+
+**Option B: PEM file**
+
+- Concatenate the certificates into a single PEM file.
+```
+cat isrgrootx1.pem isrg-root-x2.pem > ccloud-cacerts.pem
+```
+- Create the secret. The key name in the secret must be `cacerts.pem`.
+```
+kubectl create secret generic ccloud-tls \
+  --from-file=cacerts.pem=ccloud-cacerts.pem \
   -n confluent
 ```
 
