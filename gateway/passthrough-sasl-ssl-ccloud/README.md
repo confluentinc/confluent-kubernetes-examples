@@ -11,7 +11,9 @@ This example demonstrates a Gateway configuration, deployed with Confluent for K
 
 ## Overview
 
-The other examples in this repository connect the Gateway to a Confluent Platform cluster whose certificates you generate and control. Confluent Cloud is different: the Kafka cluster presents a certificate signed by the [Let's Encrypt](https://letsencrypt.org/certificates/) certificate authority. The Gateway must trust that CA when it connects to Confluent Cloud, so you need to create a Kubernetes secret that contains the Let's Encrypt root certificates and reference it in the `tls.secretRef` field of the Confluent Cloud bootstrap server in the Gateway custom resource (CR).
+The other examples in this repository connect the Gateway to a Confluent Platform cluster whose certificates you generate and control. Confluent Cloud is different: the Kafka cluster presents a certificate signed by the [Let's Encrypt](https://letsencrypt.org/certificates/) certificate authority. The Gateway must trust that CA when it connects to Confluent Cloud. This example creates a Kubernetes secret that contains the Let's Encrypt root certificates and references it in the `tls.secretRef` field of the Confluent Cloud bootstrap server in the Gateway custom resource (CR).
+
+The secret is optional if the default truststore of the Gateway's Java runtime already trusts the Let's Encrypt root certificates, as it did in `cpc-gateway:1.4.0`. To use the default truststore, see [passthrough-sasl-ssl-ccloud-default-truststore](../passthrough-sasl-ssl-ccloud-default-truststore).
 
 Clients connect to the Gateway over TLS using the certificate that you generate in [Step 2](#step-2-create-kubernetes-secrets-required-for-enabling-tls), and authenticate with a Confluent Cloud API key and secret. The Gateway forwards those credentials to Confluent Cloud.
 
