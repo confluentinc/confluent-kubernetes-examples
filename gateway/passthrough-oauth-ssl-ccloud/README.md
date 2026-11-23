@@ -2,7 +2,7 @@
 
 This example is a variant of [passthrough-sasl-ssl-ccloud](../passthrough-sasl-ssl-ccloud) for clients that authenticate to Confluent Cloud with **OAuth** (SASL/OAUTHBEARER) instead of an API key.
 
-- **Authentication Mode**: Passthrough (the OAuth token request from the client is forwarded to Confluent Cloud)
+- **Authentication Mode**: Passthrough (the client's OAuth token is forwarded to Confluent Cloud)
 - **Routing Strategy**: Host-based routing (SNI routing)
 - **Client TLS**: TLS enabled (one-way TLS)
 - **Cluster TLS**: TLS enabled (one-way TLS), trusting the Let's Encrypt root CAs
