@@ -28,7 +28,7 @@ This example uses `extensionHeaders` to add the Confluent Cloud logical cluster 
 ### Step 1: Deploy the operator and create the Kubernetes secrets
 
 - Deploy the CFK operator by following [Step 1](../passthrough-sasl-ssl-ccloud/README.md#step-1-deploy-the-confluent-for-kubernetes-operator) of the main example.
-- Create the client to Gateway TLS secret (`gateway-tls`) by following the [certificates guide](https://github.com/confluentinc/confluent-kubernetes-examples/blob/master/gateway/certificates/README.md).
+- Create the client to Gateway TLS secret (`gateway-tls`) by following [Create Client to Gateway TLS Secret](../passthrough-sasl-ssl-ccloud/README.md#create-client-to-gateway-tls-secret) in the main example. It uses the `gateway.localhost` domain that this example's [gateway.yaml](./gateway.yaml) expects.
 - Create the Gateway to Confluent Cloud TLS secret (`ccloud-tls`) by following the [steps in the main example](../passthrough-sasl-ssl-ccloud/README.md#create-gateway-to-confluent-cloud-tls-secret). You can also use the [PEM secret](../passthrough-sasl-ssl-ccloud-pem/README.md) instead.
 
 ### Step 2: Deploy gateway YAML

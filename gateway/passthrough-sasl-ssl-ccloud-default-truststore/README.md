@@ -27,7 +27,7 @@ The prerequisites are the same as the [passthrough-sasl-ssl-ccloud](../passthrou
 ### Step 1: Deploy the operator and create the client TLS secret
 
 - Deploy the CFK operator by following [Step 1](../passthrough-sasl-ssl-ccloud/README.md#step-1-deploy-the-confluent-for-kubernetes-operator) of the main example.
-- Create the client to Gateway TLS secret (`gateway-tls`) by following the [certificates guide](https://github.com/confluentinc/confluent-kubernetes-examples/blob/master/gateway/certificates/README.md).
+- Create the client to Gateway TLS secret (`gateway-tls`) by following [Create Client to Gateway TLS Secret](../passthrough-sasl-ssl-ccloud/README.md#create-client-to-gateway-tls-secret) in the main example. It uses the `gateway.localhost` domain that this example's [gateway.yaml](./gateway.yaml) expects.
 
 ### Step 2: Deploy gateway YAML
 
