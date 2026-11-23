@@ -204,7 +204,8 @@ kafka-console-consumer \
 | Client reports `Disconnected while requesting ApiVersion` or a similar transport failure, and the Gateway logs show an over-sized frame or an unexpected TLS handshake | The client is connecting without TLS. Make sure the client uses `security.protocol=SASL_SSL`, because the route enables client TLS. |
 | Gateway logs show an SSL handshake or certificate validation error when connecting to Confluent Cloud | The `ccloud-tls` secret is missing, or it does not contain the CA that signed the Confluent Cloud certificate. Confirm the secret contents and the `jksPassword` value. |
 | Authentication fails | The API key or secret is incorrect, or the key does not have access to the cluster or topic. |
-**Note:** The Gateway doesn't hot-reload TLS certificates. If you update the `ccloud-tls` or `gateway-tls` secret, trigger a reconciliation of the Gateway CR, for example by editing its `spec`, so the pods restart and load the new certificates.
+
+**Note:** The Gateway doesn't hot-reload TLS certificates. If you update the `ccloud-tls` or `gateway-tls` secret, trigger a reconciliation of the Gateway CR, for example by editing its `spec`, so the pods restart and load the new certificates. For more information, see [Configure Security for Confluent Gateway](https://docs.confluent.io/operator/current/gateway/co-gateway-security.html).
 
 ## Production deployment
 
