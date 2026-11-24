@@ -48,6 +48,12 @@ Note that it is assumed that your Kubernetes cluster has a ``confluent`` namespa
 
      helm upgrade --install operator confluentinc/confluent-for-kubernetes --namespace confluent
   
+  In case you choose to use KRaft brokers instead of zookeeper install the operator using:
+
+   ::
+
+     helm upgrade --install operator confluentinc/confluent-for-kubernetes -n confluent --set kRaftEnabled=true
+
 #. Check that the Confluent For Kubernetes pod comes up and is running:
 
    ::
@@ -137,7 +143,8 @@ Provide authentication credentials
 
    This secret object contains file based properties. These files are in the
    format that each respective Confluent component requires for authentication
-   credentials.
+   credentials. If a KRaft broker is desired instead of zookeeper the credential
+   files for zookeeper can still be used regardless.
 
    ::
    
@@ -252,6 +259,12 @@ Deploy Confluent Platform
    ::
 
      kubectl apply -f $TUTORIAL_HOME/confluent-platform-production.yaml --namespace confluent
+
+  If you choose a KRaft broker setup instead of zookeeper simply deploy:
+
+   ::
+
+     kubectl apply -f $TUTORIAL_HOME/confluent-platform-production-kraft.yaml --namespace confluent
 
 #. Check that all Confluent Platform resources are deployed:
 
