@@ -63,7 +63,7 @@ kubectl -n destination create secret tls ca-pair-sslcerts \
 ### create required secrets
     kubectl -n source create secret generic rest-credential --from-file=basic.txt=$TUTORIAL_HOME/rest-credential.txt
     kubectl -n source create secret generic password-encoder-secret --from-file=password-encoder.txt=$TUTORIAL_HOME/password-encoder-secret.txt
-    kubectl -n source create secret generic oauth-jass --from-file=oauth.txt=oauth_jass.txt
+    kubectl -n source create secret generic oauth-jaas --from-file=oauth.txt=oauth_jaas.txt
     kubectl -n source create secret generic credential \
     --from-file=plain-users.json=$TUTORIAL_HOME/creds-kafka-sasl-users.json \
     --from-file=plain.txt=$TUTORIAL_HOME/creds-client-kafka-sasl-user.txt \
@@ -77,7 +77,7 @@ kubectl -n destination create secret tls ca-pair-sslcerts \
 ### create required secrets
     kubectl -n destination create secret generic rest-credential --from-file=basic.txt=$TUTORIAL_HOME/rest-credential.txt
     kubectl -n destination create secret generic password-encoder-secret --from-file=password-encoder.txt=$TUTORIAL_HOME/password-encoder-secret.txt
-    kubectl -n destination create secret generic oauth-jass --from-file=oauth.txt=oauth_jass.txt
+    kubectl -n destination create secret generic oauth-jaas --from-file=oauth.txt=oauth_jaas.txt
     kubectl -n destination create secret generic credential \
     --from-file=plain-users.json=$TUTORIAL_HOME/creds-kafka-sasl-users.json \
     --from-file=plain.txt=$TUTORIAL_HOME/creds-client-kafka-sasl-user.txt \
